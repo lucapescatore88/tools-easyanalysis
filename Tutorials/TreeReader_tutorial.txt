@@ -1,11 +1,11 @@
-= Tutorial to use the TreeReader class
+# Tutorial to use the TreeReader class
 ----------------------------------------------------------------------------
 
 Remember the ugly times in which trees were not just accessible by variables names?
 They are finished thanks to TreeReader.
 A full doxygen can be found at http://test-lhcbbham.web.cern.ch/test-lhcbbham/dc/dde/classTreeReader.html
 
-== Constructors
+## Constructors
 
 ```
 TreeReader ( TTree * tree )      // using an existing TTree
@@ -28,18 +28,18 @@ cout << reader->GetValue("some_variable") << endl;
 
 N.B.: A variable must be selected using reader->GetEntry().
 
-== Entrylist
+## Entrylist
 
 You want to skip entries? Not a problem get a TEntrylist of your entries and you
 can set it in the TreeReader by reader->SetEntryList(entryList).
 
-== Copying and Cloning
+## Copying and Cloning
 
 One other possible thing you'll what to do it to copy the tree or create an empty tree with
 all branches setup as your previous tree.
 
 
-== Cloning :
+## Cloning :
 
 ```
 TTree * newEmptyTree = reader->CloneTree ( newname );
