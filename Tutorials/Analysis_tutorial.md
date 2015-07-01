@@ -20,12 +20,12 @@ Analysis (TString _name, TString _title, TreeReader *reader, TCut *_cuts, RooRea
 ```
 
 Where:
--- "_name"  it's the name for the object and must be unique.
--- "_title" it's just a title.
--- "reader" it's a TreeReader object which contains a TChain and holds pointers to all its branches.
--- "_cuts"  are cuts that you want to be applied no matter what
--- "_var"   it's the observable to be fitted, it's not compulsory to have one if you just want to apply cuts.
--- "_w"     it's the name of a branch of the TChain to be interpreted as weight
+- "_name"  it's the name for the object and must be unique.
+- "_title" it's just a title.
+- "reader" it's a TreeReader object which contains a TChain and holds pointers to all its branches.
+- "_cuts"  are cuts that you want to be applied no matter what
+- "_var"   it's the observable to be fitted, it's not compulsory to have one if you just want to apply cuts.
+- "_w"     it's the name of a branch of the TChain to be interpreted as weight
 
 In case your tree is in a single file you can also use the simplified constructor
 
@@ -33,8 +33,8 @@ In case your tree is in a single file you can also use the simplified constructo
 Analysis (TString _name, TString _title, string treename, string filename, RooRealVar *_var=NULL, TCut *_cuts=NULL, string _w="")
 ```
 
--- "treename" it's the name of a tree in a file
--- "filename" it's the file containing that tree
+- "treename" it's the name of a tree in a file
+- "filename" it's the file containing that tree
 
 Other two constructors for particular situations are available (see the doxygen)
 
@@ -45,7 +45,7 @@ You need to initialise it by using ```Analysis::Initialize()```.
 e.g. This is necessary before applyCuts() or before Fit().
 
 Options: 
-    By default "-exp-namepar"
+    By default -exp-namepar
     
     -exp     : adds automatically and exponential bkg component
     -namepar : appends the object name to the model name
@@ -239,8 +239,8 @@ void addFunc(TreeReader *reader, TTree *tree, bool reset)
 
 ```
 TTree * CheckMultiple(FUNC_PTR choose=NULL)
-``
-`
+```
+
 This goes through the dataset and checks if there are multiple candidates in a single event 
 (looking at the Event and Run numbers). It produces an histogram of #cand per event 
 and returns a tree with a variable "isSingle" added.
