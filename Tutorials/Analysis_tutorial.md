@@ -64,38 +64,43 @@ You can add a model using the SetSignal() and addBkgComponent() method.
 ana->SetSignal (T *_sig, double _nsig=0, string opt="-namepar", Str2VarMap myvars=Str2VarMap(), string weight="")
 ```
 
-- The first argument, "T*_sig", its the source of the signal
-      T can be a string, a TTree, a TH1, or a RooAbsPdf
+Arguments:
+- The first argument, "T*_sig", is the source of the signal shape.
+      "T" can be any of these types: string, a TTree, a TH1, or a RooAbsPdf
       
-      ---> string :  This is a string that describes a model.
-           Available models are Gauss, DGauss, CB, DCB, DCB_OST, DCB_Sn, Poly, Cheb, Argus, CBGauss, Exp
-           To any model a gaussian can be addes e.g. CBAndGauss adds returns the sum of a gaussian and a CB
+   * string :  This is a string that describes a model.
+           Available models are:
+
+		**Gauss, DGauss, CB, DCB, DCB_OST, DCB_Sn, Poly, Cheb, Argus, CBGauss, Exp**
+           
+           To any model a gaussian can be added by adding "AndGauss" to its name e.g. CBAndGauss returns the sum of a gaussian and a CB
            N.B.: CBAndGauss and CBGauss are different because the latter had the "m" parameter in common between Gauss and CB
-           DCB_OST means DCB with Opposite Side Tails, and DCB_Sn means Same "n" (the tail slope if the 2 CB is kept in common)
-           You can also convolute any model with a gaussian adding ConvGauss
+           DCB\_OST means DCB with Opposite Side Tails, and DCB_Sn means Same "n" (the tail slope if the 2 CB is kept in common)
+           You can also convolute any model with a gaussian adding ConvGauss to its name.
            
            Then you can (it's not compulsory) specify parameters in the following way:
            
-           "model-Xparam1[val,min,max]-param2[val,min,max]"
+           *"model-Xparam1[val,min,max]-param2[val,min,max]"*
            
-           Notice that an X in front of the name fixes the parameters.
+           Notice that an X in front of the name fixes the parameter.
            The min and max are not compulsory (there are defaults which may be good or not for you)
            
            e.g. "DCB_Sn-Xm[5382,5000,5500]-s[10,5,20]-s2[20,10,50]-n[1,0,10]"
            
            If you want to check which models are available and their parameters names they are listed in the last 3 functions in ModelBuilder.cpp
 
-     --->  TTree : In this case the Analysis object used the RooKeysPdf class to extract a smooth shape from the TTree
-           N.B.: The observable MUST be in the tree with the same name.
+  *  TTree : In this case the Analysis object used the RooKeysPdf class to extract a smooth shape from the TTree
+           N.B.: The observable you used in the constructor MUST be in the tree with the same name.
+           For more fancy things see "opt".
            
-     --->  TH1   : In this case the RooHistPdf class is used instead
-     --->  RooAbsPdf : If nothing above satisfies you you can buil a model of your own and give it to the fitter
+  *  TH1   : In this case the RooHistPdf class is used instead
+  *  RooAbsPdf : If nothing above satisfies you you can buil a model of your own and give it to the fitter
     
      
 - _nsig  This is the yield connected to the signal. You can give it a double or a RooRealVar.
 			If you give it a double it will build a RooRealVar following this rules
-			_nsig > 0 -> is a  RooRealVar with initial value "_nsig"
-			_nsig < 0 -> is a RooRealVar with value "_nsig" and fixed in the fit (the signal yield will not float)
+			\_nsig > 0 -> is a  RooRealVar with initial value "_nsig"
+			\_nsig < 0 -> is a RooRealVar with value "\_nsig" and fixed in the fit (the signal yield will not float)
 			
 - opt  : This can be used for extra options:
   			Using a TTree as source you can specify in the options
@@ -107,8 +112,8 @@ ana->SetSignal (T *_sig, double _nsig=0, string opt="-namepar", Str2VarMap myvar
                This can be used to use parameters of previous fits with all their properties.
                N.B.: It will override any parameter set in the name description
 			 
-			   e.g. Let's imagine you need to fit your rare signal but the statistics is not enough to constrain a fully-free DCB
-			   Then you want to fit J/psi and use its parameters for the rare fit.
+		e.g. Let's imagine you need to fit your rare signal but the statistics is not enough to constrain a fully-free DCB
+		Then you want to fit J/psi and use its parameters for the rare fit.
 			   
 			   ```
 			   Analysis * anaJpsi = new Analysis(...)
@@ -184,6 +189,7 @@ myfancyfitter(ana->getModel(),ana->GetDataSet())
 
 ##   Just one example 
 
+```
 RooRealVar * MM = new RooRealVar("MM","MM",5300,5000,6000);
 Analysis * anaRare = new Analysis("my_ana","B0","myB0tree","myfile",MM)
 TCut cuts = "somecuts";
@@ -194,7 +200,7 @@ anaRare->Initialize("");  // Never forget this!
 anaRare->applyCuts(cuts);  // Apply the cuts "cuts" (cuts is a (TCut *))
 anaRare->Fit(5300,5800,50,true,"-minos-quiet") // Fit unbinned in the given interval using minos
 // The output will be fancy nice plots with legends and parameter boxes
-
+```
 
 
 ---------------------------------------------
