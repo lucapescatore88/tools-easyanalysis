@@ -1,7 +1,7 @@
 /***
 * class TreeReader
 *
-* author: Luca Pescatore
+* author: Luca Pescatore, Michal Kreps
 * email : luca.pescatore@cern.ch
 * 
 * date  : 01/07/2015
