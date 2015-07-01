@@ -45,11 +45,11 @@ You need to initialise it by using ```Analysis::Initialize()```.
 e.g. This is necessary before applyCuts() or before Fit().
 
 Options: 
-    By default -exp-namepar
+    By default "-exp-namepar" (Always divided by dashes!)
     
-    -exp     : adds automatically and exponential bkg component
-    -namepar : appends the object name to the model name
-    -nobkg   : ignores the bkg information and runs as signal only 
+- "-exp"     : adds automatically and exponential bkg component
+- "-namepar" : appends the object name to the model name
+- "-nobkg"   : ignores the bkg information and runs as signal only 
 
 
 ---------------------------------------------
@@ -64,7 +64,7 @@ You can add a model using the SetSignal() and addBkgComponent() method.
 ana->SetSignal (T *_sig, double _nsig=0, string opt="-namepar", Str2VarMap myvars=Str2VarMap(), string weight="")
 ```
 
-   -- The first argument, "T*_sig", its the source of the signal
+- The first argument, "T*_sig", its the source of the signal
       T can be a string, a TTree, a TH1, or a RooAbsPdf
       
       ---> string :  This is a string that describes a model.
@@ -92,18 +92,18 @@ ana->SetSignal (T *_sig, double _nsig=0, string opt="-namepar", Str2VarMap myvar
      --->  RooAbsPdf : If nothing above satisfies you you can buil a model of your own and give it to the fitter
     
      
-  -- _nsig  This is the yield connected to the signal. You can give it a double or a RooRealVar.
+- _nsig  This is the yield connected to the signal. You can give it a double or a RooRealVar.
 			If you give it a double it will build a RooRealVar following this rules
 			_nsig > 0 -> is a  RooRealVar with initial value "_nsig"
 			_nsig < 0 -> is a RooRealVar with value "_nsig" and fixed in the fit (the signal yield will not float)
 			
-  -- opt  : This can be used for extra options:
+- opt  : This can be used for extra options:
   			Using a TTree as source you can specify in the options
   			"-s1" or "-s2" to change the resolution of the smoothing
   			-v[var1,var2,...]-c[cuts] to apply a cut to the tree before extracting the distribution
   			N.B.: In this case you must speficy in -v[] all variables needed for the cut
   
-  -- myvars  : This is a Str2VarMap object (a map connecting RooRealVar's and their names)
+- myvars  : This is a Str2VarMap object (a map connecting RooRealVar's and their names)
                This can be used to use parameters of previous fits with all their properties.
                N.B.: It will override any parameter set in the name description
 			 
@@ -162,14 +162,14 @@ nbins:	n of bins to use (if unbinned this is only for display)
 unbinned:	true for unbinned fit
 print:	Options (includes also all options of ModelBuilder::Print() and GetFrame()) 
 Here I report just the ones particular to Fit and a few others.
-  "-quiet" -> shell output minimized 
-  "-sumW2err" -> if weighted data errors shown reflect statistics of initial sample 
-  "-log" -> logarithmic plot 
-  "-pulls" or 
-  "-ANDpulls" -> if data is inserted these add a pull histogram -pulls in other plot -ANDpulls under fit plot 
-  "-range" -> plots only the fitted range, otherwise all available is plot 
-  "-noPlot" -> doesn't print and only returns the frame 
-  "-minos" -> Enables MINOS for asymmetric errors
+-  "-quiet" -> shell output minimized 
+-  "-sumW2err" -> if weighted data errors shown reflect statistics of initial sample 
+-  "-log" -> logarithmic plot 
+-  "-pulls" or 
+-  "-ANDpulls" -> if data is inserted these add a pull histogram -pulls in other plot -ANDpulls under fit plot 
+-  "-range" -> plots only the fitted range, otherwise all available is plot 
+-  "-noPlot" -> doesn't print and only returns the frame 
+-  "-minos" -> Enables MINOS for asymmetric errors
 cuts:	cuts to make just before fitting
 
 After the fit a RooFitResult object is stored inside the analysis object and can be retrieved using GetFitRsult().
@@ -211,9 +211,9 @@ Applies the logical and between the cuts added in the constructor and the ones p
 It returns a reduced TTree and by default it stores it in the object too.
 N.B.: The initial dataset will not be modified so you can reapply different cuts.
 
--- substtree :  The reduced tree is returned and if substtree=true if also stored in the object (for a future fit for example)
--- frac      :  must be 0 < frac <= 1. It selects only the first frac*100% of the events in the initial dataset.
--- addFunc(TreeReader *, TTree *, bool)
+- substtree :  The reduced tree is returned and if substtree=true if also stored in the object (for a future fit for example)
+- frac      :  must be 0 < frac <= 1. It selects only the first frac*100% of the events in the initial dataset.
+- addFunc(TreeReader *, TTree *, bool)
 
 You may define a function to add variables to the tree too. This has to follow the template below.
 The addFunc is called ones at the beginning of the event loop with 3rd argument = true.
@@ -349,15 +349,15 @@ Not even need to be intialized in this case: all is automatic!
 
 
 Using Generate() you can use a couple of useful options:
-   - seed(n)  -> were n will be used as seed (by default TRndom3(0) is used but this makes things not reproducible)
-   - smear(r) -> "r" is a double interpreted as resolution. The generator will perform a gaussian smearing.
+- seed(n)  -> were n will be used as seed (by default TRndom3(0) is used but this makes things not reproducible)
+- smear(r) -> "r" is a double interpreted as resolution. The generator will perform a gaussian smearing.
    Namely for each number generated following the given PDF this will not be directly stored.
    But a second random number will be generated normally distributed with sigma = r and mean at the first value.
      
 
 
 ###   Just one example 
-
+```
 TreeReader * reader = new TreeReader("mytree");
 reader->AddFile("file1.root");
 reader->AddFile("file2.root"); 
@@ -373,22 +373,22 @@ ana->SetSignal("Combinatorial","Exp-b[-0.005,-0.03,0.01]");
 ana->Initialize("");
 ana->applyCuts(cuts);
 ana->Fit(5300,5800,50,true,"-minos-quiet")
-
+```
 ----------------------------------------------------------
 
 ## PART 3 - After fitting: other useful methods
 
 After fitting you can extract information!!
 
-	- GetNSig()            -> sig yield in a given interval
-	- GetNBkgVal()         -> bkg yield in a given interval
-	- PrintComposition()   -> Prints the fraction N_i/N_tot of each component in any given intervals
-	- GetSOverB()          -> returns S/B in a given interval
-	- GetSigFraction()          -> returns S/(S+B) in a given interval
-	- GetReducedSWeight(x) -> returns S(x)/(S(x) + B(x)) at a point
-	- GetParams()          -> Returns a Str2VarMap containing all parmeters of the model including yield
-	- GetSigparams()       -> Returns a Str2VarMap containing all parmeters of the signal PDF (excluding yield)
-	- PrintChi2()          -> Prints chi2 you can use GetChi2() to have chi2/NDF and GetNDF to have NDF
-	- CalcSWeight()        -> Will return a tree same as the stored tree with 2 variables added sW and sWR
+- GetNSig()            -> sig yield in a given interval
+- GetNBkgVal()         -> bkg yield in a given interval
+- PrintComposition()   -> Prints the fraction N_i/N_tot of each component in any given intervals
+- GetSOverB()          -> returns S/B in a given interval
+- GetSigFraction()          -> returns S/(S+B) in a given interval
+- GetReducedSWeight(x) -> returns S(x)/(S(x) + B(x)) at a point
+- GetParams()          -> Returns a Str2VarMap containing all parmeters of the model including yield
+- GetSigparams()       -> Returns a Str2VarMap containing all parmeters of the signal PDF (excluding yield)
+- PrintChi2()          -> Prints chi2 you can use GetChi2() to have chi2/NDF and GetNDF to have NDF
+- CalcSWeight()        -> Will return a tree same as the stored tree with 2 variables added sW and sWR
 	                          sW is the proper sWeight and sWR is the reduced SWeight (simpy S(x) / (S(x) + B(x)))
-    - and much else (see doxygen)	
+- and much else (see doxygen)	
