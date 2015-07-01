@@ -2,7 +2,9 @@
 ----------------------------------------------------------------------------
 
 Remember the ugly times in which trees were not just accessible by variables names?
+
 They are finished thanks to TreeReader.
+
 A full doxygen can be found at http://test-lhcbbham.web.cern.ch/test-lhcbbham/dc/dde/classTreeReader.html
 
 ## Constructors
@@ -11,7 +13,7 @@ A full doxygen can be found at http://test-lhcbbham.web.cern.ch/test-lhcbbham/dc
 TreeReader ( TTree * tree )      // using an existing TTree
 TreeReader ( TChain * chain )     // using an existing TChain
 TreeReader ( string nametree )   // a name of a tree
-'''
+```
 In the latter case you'll have to add the filenames using AddFile(filename).
 
 After constructing you can Initialize() the tree (Necessary only in the latter case).
@@ -24,7 +26,7 @@ This is done by using GetValue().
 ```
 reader->GetEntry(i);
 cout << reader->GetValue("some_variable") << endl;
-'''
+```
 
 N.B.: A variable must be selected using reader->GetEntry().
 
@@ -43,7 +45,7 @@ all branches setup as your previous tree.
 
 ```
 TTree * newEmptyTree = reader->CloneTree ( newname );
-'''
+```
 
 notice that all branches are linked to the other tree.
 So for example you can now do 
@@ -51,7 +53,7 @@ So for example you can now do
 ```
 reader->GetEntry(i)
 newEmptyTree->Fill()
-'''
+```
 
 and the current entry will be filled (no need to set any address!!). 
 If you create new banches on the new tree you can use this "copy the old tree adding branches".
@@ -61,7 +63,7 @@ This is the quickest way to copy the entire tree or just a subsample of it.
 
 ```
 reader->CopyTree (TCut cuts="", double frac=-1., string name="") 
-'''
+```
 
 "cuts" are cuts to be applyed. Only entries which pass will be saved in the new tree.
 "frac" is to select only a fraction of the tree only. e.g. I use frac = 1000 for testing (so it doesn't take long)
