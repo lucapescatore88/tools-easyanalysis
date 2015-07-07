@@ -382,7 +382,106 @@ ana->Fit(5300,5800,50,true,"-minos-quiet")
 ```
 ----------------------------------------------------------
 
-## PART 3 - After fitting: other useful methods
+## PART 3 - Simultaneous fits
+
+The MultiAnalysis class is available to make simultaneous fits.
+Almost all you need to know you learnt in the previous parts.
+In fact to use the MultiAnalysis you need to create you Analysis
+objects first and then give them to the MultiAnalysis object
+using the AddCategory() function. Finally, you can use the
+SimultaousFit() function to fit.
+
+e.g.
+
+```
+Analysis * ana1 = new Analysis(...);
+ana1->SetSignal(...);
+...
+Analysis * ana2 = new Analysis(...);
+ana2->SetSignal(...);
+...
+
+MultiAnalysis * multiana = new MultiAnalysis("somename");
+multiana->AddCategory(ana1,"name_for_ana1");
+multiana->AddCategory(ana2,"name_for_ana2");
+multiana->SimultaneousFit();
+```
+
+Notice that:
+1) The two analysis object do not have to have the same variable
+2) The two analysis objects do not need to have the same sample
+
+For example you can take 2 variables from the same sample to make
+a multudimensional fit or 2 separate samples to fit
+different tipes of events at the same time.
+While you specify the models you can assign shared parameters.
+Custom functions such ad SetUniqueSignal() are available
+which create automatically the Analysis object for the special
+cases in which for example all samples are supposed to have the same
+signal function.
+
+
+#### Examples with shared parameters
+
+In this specific example the same variable is fit from 2
+independent samples and the same function is fit on both with
+all same shape parameters but separate yields.
+
+```
+RooRealVar * MM = new RooRealVar("MM","mass",min,max)
+Analysis * ana1 = new Analysis("MyCoolAnalyser1","B0","mytree","myfile");
+ana1->SetSignal("DCB");
+ana1->addBkgComponent("Combinatorial","Exp");
+ana1->Initialize("");
+
+// Str2VarMap is a c++ map object that maps a function parameters to their names
+// You can use it for examples as pars["m"]->getVal() or ((RooRealVar *)pars["m"])->setConstant().
+//Notice that the elements of the map are RooAbsReal namely RooRealVar or RooFormulaVar.
+//Therefore for some purposes you need to cast.
+Str2VarMap pars = ana1->GetSigParams();
+
+Analysis * ana2 = new Analysis("MyCoolAnalyser2","B0","mytree2","myfile2");
+ana2->SetSignal("DCB",0,"",pars); // Here is the key point for sharing. 
+                                  // This function get as arguments: model, numer of events to begin
+								  // with (0 is default), options and parameters to use. In this case
+								  // all the shape parameters of the first Analsys object.
+
+MultiAnalysis * multiana = new MultiAnalysis("somename");
+multiana->AddCategory(ana1,"name_for_ana1");
+multiana->AddCategory(ana2,"name_for_ana2");
+multiana->SimultaneousFit();
+```
+
+In this second example the shape parameters are independent but the yields of the two samples are linked.
+Say that you what to fit 2 samples of Downstream and Long candidates. But the decay is the same so
+its branching ratio should be common.
+
+```
+RooRealVar * BR = new RooRealVar("BR","BR(B^0#rightarrow\mu\mu)",min,max)
+RooAbsReal * NLong = new RooFormulaVar("NLong",Form("BR * %f",my_long_efficiency),RooArgSet( * BR));
+RooAbsReal * NDown = new RooFormulaVar("NDown",Form("BR * %f",my_down_efficiency),RooArgSet( * BR));
+// Two yields are defined as a function of a common BR
+
+RooRealVar * MM = new RooRealVar("MM","mass",min,max)
+Analysis * ana1 = new Analysis("Down","B0","mytree","myfile");
+ana1->SetSignal("DCB",NDown); // I explicitely tell the object to you my RooFormulaVar for the yield
+ana1->addBkgComponent("Combinatorial","Exp");
+
+Analysis * ana2 = new Analysis("Long","B0","mytree2","myfile2");
+ana2->SetSignal("DCB",NLong); // Long is connected to Down though the BR!
+ana2->addBkgComponent("Combinatorial","Exp");
+
+MultiAnalysis * multiana = new MultiAnalysis("somename");
+multiana->AddCategory(ana1,"name_for_ana1");
+multiana->AddCategory(ana2,"name_for_ana2");
+multiana->SimultaneousFit();
+```
+
+
+
+----------------------------------------------------------
+
+## PART 4 - After fitting: other useful methods
 
 After fitting you can extract information!!
 
