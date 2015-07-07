@@ -3,7 +3,7 @@ Easy analysis
 
 To make the tools on lxplus you can use
 
-```
+```bash
 SetupLHCb v37r1 //(you can try the latest but is a gamble)
 make
 ```
@@ -18,7 +18,7 @@ this tools directory. The makefile with make the tools automatically
 and all the `.cpp` executables in the src folder.
 
 
-```Makefile
+```makefile
 ROOTCFLAGS = $(shell root-config --cflags --glibs)
 
 TOOLSDIR   = $(TOOLDIR) 
