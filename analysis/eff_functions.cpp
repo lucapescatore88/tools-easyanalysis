@@ -1,12 +1,3 @@
-/***
-* eff_functions
-*
-* author: Luca Pescatore
-* email : luca.pescatore@cern.ch
-* 
-* date  : 01/07/2015
-***/
-
 #include "eff_functions.hpp"
 
 using namespace std;

@@ -1,13 +1,3 @@
-/***
-* class Analysis 
-*
-* author: Luca Pescatore
-* email : luca.pescatore@cern.ch
-* 
-* date  : 01/07/2015
-***/
-
-
 #ifndef ANALYSIS_HPP
 #define ANALYSIS_HPP
 

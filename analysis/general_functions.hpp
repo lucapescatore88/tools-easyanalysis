@@ -1,12 +1,3 @@
-/***
-* general_functions 
-*
-* author: Luca Pescatore
-* email : luca.pescatore@cern.ch
-* 
-* date  : 01/07/2015
-***/
-
 #ifndef GENERAL_FUNCTIONS_HPP
 #define GENERAL_FUNCTIONS_HPP
 

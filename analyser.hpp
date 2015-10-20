@@ -5,6 +5,7 @@
 #ifndef ANALYSER_HPP
 #define ANALYSER_HPP
 
+#include "RooWorkspace.h"
 #include "RooRealVar.h"
 #include "RooStats/SPlot.h"
 #include "RooDataSet.h"
@@ -82,10 +83,10 @@ class Analysis : public ModelBuilder {
 	static string pmode;
 	RooAbsReal * weight;
 	RooDataSet * data;
-	vector<RooRealVar *> vars;
 	RooFitResult * m_fitRes;
 	double fitmin;
 	double fitmax;
+        RooArgSet * constr;
 
 /** \brief Converts the information in the Analysis object in a RooDataSet which can be fitted
  **/ 
@@ -107,7 +108,7 @@ class Analysis : public ModelBuilder {
 		dataReader(NULL), dataHist(NULL), scale(1)
 	{
 		SetVariable(_var);
-		vars.push_back(_var);
+		constr = new RooArgSet("constraints_"+name);
 
 		if(pdf)
 		{
@@ -123,8 +124,12 @@ class Analysis : public ModelBuilder {
 		weight(NULL), data(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
 		dataReader(reader), dataHist(NULL), scale(1)
 	{
-		if(!var) SetVariable(new RooRealVar("x","",0)); 
-		vars.push_back(var);
+		if(!var) 
+        {
+            SetVariable(new RooRealVar("x","",0)); 
+		    vars.push_back(var);
+        }
+        constr = new RooArgSet("constraints_"+name);
 		if(_w != "") SetWeight( (TString)_w );
 
 		if(!reader->isValid()) reader->Initialize();
@@ -136,9 +141,13 @@ class Analysis : public ModelBuilder {
 		weight(NULL), data(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
 		dataHist(NULL), scale(1)
 	{
-		if(!var) SetVariable(new RooRealVar("x","",0));
-		vars.push_back(var);
-		if(_w != "") SetWeight( (TString)_w );
+		if(!var) 
+        {
+            SetVariable(new RooRealVar("x","",0));
+		    vars.push_back(var);
+        }
+        constr = new RooArgSet("constraints_"+name);
+        if(_w != "") SetWeight( (TString)_w );
 
 		TreeReader * reader = new TreeReader(treename.c_str());
 		reader->AddFile(filename.c_str());
@@ -154,13 +163,23 @@ class Analysis : public ModelBuilder {
 		weight(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
 		dataReader(NULL), reducedTree(NULL), dataHist(NULL), scale(1)
 	{
-		if(!var) SetVariable(new RooRealVar("x","",0));
-		vars.push_back(var);
+		if(!var) 
+        {
+            SetVariable(new RooRealVar("x","",0));
+		    vars.push_back(var);
+        }
+        constr = new RooArgSet("constraints_"+name);
 		if(_w != "") SetWeight( (TString)_w );		
 
 		string tdata = typeid(D).name();
 		if(tdata.find("RooDataSet")!=string::npos) data = (RooDataSet *)dd;
-		else if(tdata.find("TTree")!=string::npos) { reducedTree = (TTree *)dd; CreateDataSet(); }
+		else if(tdata.find("TTree")!=string::npos) 
+        { 
+            dataReader = new TreeReader((TTree *)dd);
+            dataReader->Initialize();
+            reducedTree = (TTree *)dd; 
+            CreateDataSet(); 
+        }
 		else if(tdata.find("TH1")!=string::npos) { dataHist = (TH1 *)dd; CreateDataSet(); }
 		else cout << "Type '" << tdata << "' not supported!" << endl;
 
@@ -175,6 +194,14 @@ class Analysis : public ModelBuilder {
 		delete dataHist;
 	};
 
+
+        RooFitResult * GetFitRes() {
+	        return m_fitRes;
+	}
+
+        void SetFitRes(RooFitResult *fitRes = NULL) {
+	        m_fitRes = fitRes;
+	}
 
 	static void SetPrintLevel(string mode) { pmode = mode; ModelBuilder::SetPrintLevel(mode); TreeReader::SetPrintLevel(mode);  }
 	static string GetPrintLevel() { return pmode; }
@@ -201,8 +228,12 @@ class Analysis : public ModelBuilder {
 	/** \brief Adds a variable to the internal DataSet
 	 * An Analysis object can also be used to create RooDataSet objects to use then somewhere else. Therefore it comes usefull to have in the RooDataSet more than one variable. This can me added simpy by name (if it exists in the input tree).
 	 * */
-	void AddVariable(RooRealVar * v) { vars.push_back(v); }
-	void AddVariable(TString vname) { RooRealVar * v = new RooRealVar(vname,vname,0.); vars.push_back(v); }
+	void AddVariable(RooRealVar * v) 
+    { 
+        if( ((string)v->GetTitle()).find("__var__")==string::npos )
+                v->SetTitle((TString)v->GetTitle()+"__var__"); 
+        vars.push_back(v); }
+	void AddVariable(TString vname) { RooRealVar * v = new RooRealVar(vname,vname+"__var__",0.); vars.push_back(v); }
 	bool isValid() { return init; }
 
 	/** Function to unitialize the Analysis object before fitting
@@ -222,13 +253,24 @@ class Analysis : public ModelBuilder {
 	void SetCuts( TCut _cuts ) { cuts = &_cuts; }
 	void SetCuts( TCut * _cuts ) { cuts = _cuts; }
 	void SetCuts( TString _cuts ) { TCut tmpcut = (TCut)_cuts; cuts = &tmpcut; }
-	RooDataSet * GetDataSet( string opt = "" )
+	
+    RooWorkspace * SaveToRooWorkspace();
+    void ImportModel(RooWorkspace * ws);
+    void ImportData(RooWorkspace * ws);
+
+   
+    RooDataSet * GetDataSet( string opt = "" )
 	{
 		if(opt.find("-recalc")!=string::npos || !data) return CreateDataSet(opt);
 		else return data;
 	}
 	TH1 * GetHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", TH1 * htemplate = NULL)
 	{ return CreateHisto(min,max,nbin,_cuts,_weight); }
+
+    void AddConstraint(RooAbsReal * pdfconst) { constr->add(*pdfconst); }
+    void AddGaussConstraint(TString name, double mean, double sigma);
+    void AddGaussConstraint(RooRealVar * par, double mean = -1e9, double sigma = -1e9);
+    RooArgSet * GetConstraints() { return constr; }
 
 /** \brief Adds a blinded region.
  If you have to add more than one region you must add them in order from low to high and the must not overlap. If you set one or more regions parameters will be hidden and model and data will not be plotted in those regions.
@@ -316,10 +358,11 @@ class Analysis : public ModelBuilder {
   @param Xtitle: X axis label
   @param title: title
  **/
-	RooPlot* Print(bool domodel,  RooAbsData * data,  string opt = "-range-keepname", unsigned bins = 0, double * range = NULL, TString Xtitle = "", TString title = "");
-	RooPlot* Print(string opt = "-range-keepname", unsigned bins = 0, double * range = NULL, TString Xtitle = "", TString title = "");
-	RooPlot* PrintAndCalcChi2(int nbins, double * range, string print, RooAbsData * mydata = NULL );
-	void PrintComposition(float min, float max)
+	RooPlot * Print(bool domodel,  RooAbsData * data,  string opt = "-range-keepname", unsigned bins = 50, double * range = NULL, TString Xtitle = "", TString title = "", RooRealVar * myvar = NULL);
+	RooPlot * Print(string opt = "-range-keepname", unsigned bins = 50, double * range = NULL, TString Xtitle = "", TString title = "", RooRealVar * myvar = NULL);
+	RooPlot * PrintAndCalcChi2(int nbins, double * range, string print, RooAbsData * mydata = NULL );
+	RooPlot * PrintVar(RooRealVar * myvar, int nbins = 50, string option = ""); 
+    void PrintComposition(float min, float max)
 	{
 		if(m_fitRes) ModelBuilder::PrintComposition(min,max,m_fitRes);
 		else cout << "Fit didn't happen yet, composition unkown" << endl;

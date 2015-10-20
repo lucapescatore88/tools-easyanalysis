@@ -1,12 +1,3 @@
-/***
-* general_functions
-*
-* author: Luca Pescatore
-* email : luca.pescatore@cern.ch
-* 
-* date  : 01/07/2015
-***/
-
 #include "general_functions.hpp"
 
 
@@ -29,7 +20,7 @@ bool genRndm(RooRealVar * var, RooCurve * curve, float * xval, double ymax, TRan
 	if(smear>0) (*xval) = rdm->Gaus(*xval,smear);
 
 	double yval = rdm->Rndm()*ymax;
-	double yf = curve->Eval( *xval );
+	double yf   = curve->Eval( *xval );
 
 	return (bool)(yval <= yf);
 }
@@ -54,7 +45,7 @@ TTree * generate(RooArgSet * set, RooAbsPdf * pdf, int nevt, string opt)
 	vector < RooCurve * >  curve;
 	vector < double > ymax;
 	float xval[100];
-	TIterator *it = set->createIterator();
+	TIterator  * it = set->createIterator();
 	RooRealVar * arg;
 	unsigned vv = 0;
 	while( (arg=(RooRealVar*)it->Next()) && vv < 100 )
@@ -65,16 +56,17 @@ TTree * generate(RooArgSet * set, RooAbsPdf * pdf, int nevt, string opt)
 		curve.push_back(frame->getCurve("pdf_"+(TString)arg->GetName()));
 		ymax.push_back(curve.back()->getYAxisMax());
 		vv++;
+        //delete frame;
 	}
-
+    
 	while( newTree->GetEntries() < nevt )
 	{
 		if(opt.find("-perc")!=string::npos) showPercentage(newTree->GetEntries(),nevt);
 
 		bool passed = true;
 		unsigned vv = 0;
-		TIterator *it2 = set->createIterator();
-		RooRealVar* arg2;
+		TIterator * it2 = set->createIterator();
+		RooRealVar * arg2;
 		while( (arg2=(RooRealVar*)it2->Next()) && vv < 100 )
 		{	
 			passed *= genRndm(arg2, curve[vv], &(xval[vv]), ymax[vv], &rdm, smear); 
@@ -82,6 +74,8 @@ TTree * generate(RooArgSet * set, RooAbsPdf * pdf, int nevt, string opt)
 		}
 		if(passed) newTree->Fill();
 	}
+
+    //for (size_t t = 0; t < curve.size(); t++) delete curve[t];
 
 	return newTree;
 }
@@ -94,7 +88,7 @@ TTree * generate(RooArgSet * set, RooAbsPdf * pdfSig, int nsig, RooAbsPdf * pdfB
 	TTree * t_Bkg = generate(set, pdfBkg, nbkg, opt);
 
 	TList * list = new TList;
-	list->Add(t_Sig);
+    list->Add(t_Sig);
 	list->Add(t_Bkg);
 
 	return TTree::MergeTrees(list);
@@ -405,9 +399,10 @@ double optimizeCut(string analysis, TString part, TTree *treeSig, TTree *treeBkg
 		TLine *l1 = new TLine(optimalW, 0, optimalW, maxSig * 1.1);
 		l1->SetLineColor(kRed);
 		l1->Draw("same");
-		TLatex lFoM(0.1, maxSig * 0.1, Form("Significance = %f", maxSig));
-		lFoM.Draw();
+		//TLatex lFoM(0.1, maxSig * 0.1, Form("Significance = %f", maxSig));
+		//lFoM.Draw();
 		c->Print((analysis + "_FoM.pdf").c_str());
+        c->Print((analysis + "_FoM.C").c_str());
 
 		gPurity->GetXaxis()->SetTitle("MVA Cut");
 		gPurity->GetYaxis()->SetTitle("S/(S+B)");
@@ -420,6 +415,7 @@ double optimizeCut(string analysis, TString part, TTree *treeSig, TTree *treeBkg
 		TLatex lPur(0.1, maxP * 0.1, Form("Purity = %f", maxP));
 		lPur.Draw();
 		c->Print((analysis + "_Purity.pdf").c_str());
+        c->Print((analysis + "_Purity.C").c_str());
 
 		c->SetLogy();
 		c->Clear();
@@ -440,6 +436,7 @@ double optimizeCut(string analysis, TString part, TTree *treeSig, TTree *treeBkg
 		l3->SetLineColor(kRed);
 		l3->Draw("same");
 		c->Print((analysis + "_Candidates.pdf").c_str());
+        c->Print((analysis + "_Candidates.C").c_str());
 
 		c->SetLogy(0);
 		gROC->SetMarkerSize(0.8);
@@ -448,6 +445,7 @@ double optimizeCut(string analysis, TString part, TTree *treeSig, TTree *treeBkg
 		gROC->GetXaxis()->SetTitle("#varepsilon_{Sig}");
 		gROC->Draw("AP");
 		c->Print((analysis + "_ROC.pdf").c_str());
+        c->Print((analysis + "_ROC.C").c_str());
 
 		delete c;
 	}

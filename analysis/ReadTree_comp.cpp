@@ -1,12 +1,3 @@
-/***
-* class TreeReader
-*
-* author: Luca Pescatore, Michal Kreps
-* email : luca.pescatore@cern.ch
-* 
-* date  : 01/07/2015
-***/
-
 #include "ReadTree_comp.hpp"
 
 using namespace std;
@@ -21,7 +12,7 @@ void TreeReader::AddFile(const char *filename, Long64_t maxentries)
 {
 	if( fChain )
 	{
-	        if (!TFile::Open(filename)) return;
+	    if (!TFile::Open(filename)) return;
 
 		if( maxentries >0 )
 		{
@@ -40,8 +31,8 @@ void TreeReader::AddList(const char *filename)
 {
 	if( fChain )
 	{
-	        if(!ifstream(filename).good())
-	        {
+	    if(!ifstream(filename).good())
+	    {
 		    if(pmode=="v") cout << filename << " : No such file or directory" << endl;
 		    return;
 		}
@@ -66,13 +57,29 @@ void TreeReader::AddList(const char *filename)
 
 bool TreeReader::Initialize(vector <string> br, string opt)
 {
-	if(!fChain){ cout << "No tree to read, please add one using AddFile(namefile)" << endl; return false; }
+	if(!init)
+	{
+	    if( !fChain )
+		{
+		        cout << endl;
+			cout << "No tree to initialize" << endl;
+			cout << endl;
+			return false;
+		}
+
+		TObjArray *fileElements = fChain->GetListOfFiles();
+		if( !fileElements || ( fileElements->GetEntries() == 0 ))
+		{
+		        cout << endl;
+			cout << "No file(s) to initialize" << endl;
+			cout << endl;
+			return false;
+		}
+	}
+
 	varList.clear();
 
-	//cout << "HERE" << endl;
-	//fChain->Print();
 	TObjArray* branches = fChain->GetListOfBranches();
-	//cout << fChain << endl;
 	int nBranches = branches->GetEntries();
 
 	for (int i = 0; i < nBranches; ++i)
@@ -88,9 +95,10 @@ bool TreeReader::Initialize(vector <string> br, string opt)
 		}
 
 		string curtype = leaf->GetTypeName();
-		int id = TypeDB::getType(curtype.c_str());
+        int id = TypeDB::getType(curtype.c_str());
 		int arreysize = 1;
 		string title = leaf->GetTitle();
+        //cout << curtype << "   " << title << endl;
 
 		// Find out whether we have array by inspecting leaf title
 		if ( title.find("[")!=std::string::npos )
@@ -116,7 +124,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
 					{
 						if((string(brname)).find(br[b])!=string::npos) { addVar = true; break;}
 					}
-					else if(opt.find("except")==string::npos) cout << "Option " << opt << " not found!" << endl;
+					else if(opt.find("except")==string::npos) cout << "Option " << opt << " not found" << endl;
 				}
 
 				if(opt.find("except")!=string::npos) addVar = !addVar;
@@ -193,6 +201,12 @@ void TreeReader::FillNewTree(TTree* tree, TCut cuts, double frac, void (*addFunc
 
 TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
 {
+	if(!init)
+	{
+	        cout << "*** WARNING: tree " << fChain->GetName() << " not initialized" << endl;
+		return NULL;
+	}
+
 	if (cut == "1") cut = "";
 
 	if (pmode == "v") cout << endl << "CopyTree" << endl;
@@ -208,12 +222,13 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
 			cout << "TCut " << endl;
 			cut.Print();
 		}
-
+		/*
 		Long64_t nPas = fChain->GetEntries(cut);
 		
 		if (pmode == "v") cout << "N Pas = " << nPas << " (" << (double) nPas / (double) nTot * 100 << "%)" << endl;
 
 		if (nTot == nPas) cut = "";
+		*/
 	}
 
 	if (frac == -1)
@@ -225,6 +240,8 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
 		        return (TTree*) fChain;
 	       }
 	}
+
+	Long64_t nTot_ = nTot;
 	if (frac == 0)
 	{
 		cut == "";
@@ -238,8 +255,7 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
 		if (frac != 0)
 		{
 		       cout << "Frac  = " << frac << endl;
-		       if (frac >= 0)
-			 cout << "Copying entries..." << endl;
+		       if (frac >= 0) cout << "Copying entries..." << endl;
 		}
 		else cout << "Cloning tree structure..." << endl;
 	}
@@ -250,8 +266,12 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
 
 	if (name != "") tTree->SetName(name.c_str());
 
-	if (nTot != 0) if (pmode == "v") cout << "Copied " << tTree->GetEntries() << " entries" << endl;
-	cout << endl;
+	if (nTot != 0) if (pmode == "v")
+			 {
+			       Long64_t nPas = tTree->GetEntries();
+			       cout << "N Pas = " << nPas << " (" << (double) nPas / (double) nTot_ * 100 << "%)" << endl;
+			       cout << endl;
+			 }
 
 	return tTree;
 
@@ -261,6 +281,11 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
 
 void TreeReader::PrintListOfFiles()
 {
+	if(!init)
+	{
+	        cout << "*** WARNING: tree " << fChain->GetName() << " not initialized" << endl;
+		return;
+	}
 
 	TObjArray *fileElements = fChain->GetListOfFiles();
 	TIter next(fileElements);
@@ -275,24 +300,9 @@ void TreeReader::PrintListOfFiles()
 	cout << endl;
 
 	return;
-
 }
 
 
-
-float TreeReader::GetValue(const char * name, int iValue)
-{
-	if(!init) { cout << "***** ATTENTION: Tree " << fChain->GetName() << " not initialized! Please initialize before getting values. *****" << endl; return 0.; }
-	if(!selected) { cout << "***** ATTENTION: No entry selected. *****" << endl; return 0.; }
-
-	++nGets;
-	if( continueSorting && (nGets % 1000 == 0) ) continueSorting = partialSort();
-
-	variable * myVar = GetVariable(name);
-	++(myVar->nGets);
-
-	return myVar->GetValue(iValue);
-}
 
 /**
  * Keep statistics of which variables are accessed often
@@ -326,11 +336,3 @@ bool TreeReader::partialSort()
 
 	return didSwap;
 }
-
-
-
-
-
-
-
-

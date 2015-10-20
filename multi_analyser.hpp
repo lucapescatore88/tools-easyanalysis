@@ -1,13 +1,3 @@
-/***
-* class MultiAnalysis 
-*
-* author: Luca Pescatore
-* email : luca.pescatore@cern.ch
-* 
-* date  : 01/07/2015
-***/
-
-
 #ifndef __CINT__
 #include "RooGlobalFunc.h"
 #endif
@@ -71,7 +61,8 @@ class MultiAnalysis {
 	RooSimultaneous * combModel;
 	bool init;
 	RooFitResult * fitResult;
-	
+    RooArgSet * constr;
+
 	public:
 	
 	MultiAnalysis( TString _name ):
@@ -79,6 +70,7 @@ class MultiAnalysis {
 	{
 		samples = new RooCategory("samples","samples");
 		vars = new RooArgSet("vars");
+		constr = new RooArgSet("constraints");
 	};
 
 	~MultiAnalysis()
@@ -100,11 +92,30 @@ class MultiAnalysis {
 		if(combModel && combData) return combModel->createNLL(*combData);
 		else return NULL;
 	}
+        void DrawLogL(RooRealVar * PoI) {
+	       TCanvas * c = new TCanvas();
+	       RooAbsReal * nll =  CreateLogL();
+	       double nll_val = nll->getVal();
+	       RooPlot * nllPlot = PoI->frame();
+	       nll->plotOn(nllPlot,Name("LogL"));
+	       nllPlot->SetTitle("");
+	       nllPlot->SetMinimum(nll_val*0.95);
+	       nllPlot->Draw();
+	       c->Print(name+"_LogL_vs_"+(TString)PoI->GetName()+".pdf");
+	}
+        const RooAbsReal * ProjectLogL(RooRealVar * PoI) {
+	       RooArgSet * projectedVars = combModel->getParameters(RooDataSet("v","",*PoI));
+	       return combModel->createPlotProjection(*PoI, *projectedVars);
+	}
 
 	///\brief Builds the combined PDF and data set
 	bool Initialize(string opt = "");
 
-	/** \brief Fits the internal model to the internal dataset
+
+    RooWorkspace * SaveToRooWorkspace();
+
+    
+    /** \brief Fits the internal model to the internal dataset
 	 * @param min,max: Limits the fit range to [min,max] (N.B.: works only if the fitted varible is only one)
 	 * @param nbins  : Sets the number of bins just for display if the fit is unbinned
 	 * @param print: Options -> same as Analysis::Fit()
@@ -121,7 +132,7 @@ class MultiAnalysis {
 	///\brief Lists the available categories
 	void PrintCategories() { for(unsigned i = 0; i < categories.size(); i++) cout << categories[i] << endl; }
 	/// \brief Prints the sum of all datasets and models properly normalised 
-	RooPlot * PrintSum(string option = "", RooRealVar * dovar = NULL);
+        RooPlot * PrintSum(string option = "", TString dovar = "", string name = "", int nbins = 50);
 
 	/** \brief Allows to Set an unique signal for all categories
 	 *  See Analysis::SetSignal()
@@ -147,8 +158,8 @@ class MultiAnalysis {
 	}
 
 	/** \brief Allows to Set an unique signal for all categories
-	 *  See Analysis::addBkgComponent()
-	 *  @param opt: same options as Analysis::addBkgComponent()
+	 *  See Analysis::AddBkgComponent()
+	 *  @param opt: same options as Analysis::AddBkgComponent()
 	 *  <br> "-i" : The models are set the same but with indipendent parametrs.
 	 *  By default instead all parameters are taken in common.
 	 * */
@@ -156,16 +167,16 @@ class MultiAnalysis {
 	{
 		if(myvars.size()!=0)
 		{
-			for(unsigned i = 0; i < categories.size(); i++) ana[i]->addBkgComponent(_name, _comp, _frac, opt+"-namepar", myvars);
+			for(unsigned i = 0; i < categories.size(); i++) ana[i]->AddBkgComponent(_name, _comp, _frac, opt+"-namepar", myvars);
 		}
 		else if(opt.find("-i")!=string::npos)
 		{
-			for(unsigned i = 0; i < categories.size(); i++) ana[i]->addBkgComponent(_name, _comp, _frac, opt+"-namepar", Str2VarMap());
+			for(unsigned i = 0; i < categories.size(); i++) ana[i]->AddBkgComponent(_name, _comp, _frac, opt+"-namepar", Str2VarMap());
 		}
 		else
 		{
-			ana[0]->addBkgComponent(_name, _comp, _frac, myvars, opt+"-namepar");
-			for(unsigned i = 1; i < categories.size(); i++) ana[i]->addBkgComponent(_name, _comp, _frac, opt+"-namepar", myvars);
+			ana[0]->AddBkgComponent(_name, _comp, _frac, myvars, opt+"-namepar");
+			for(unsigned i = 1; i < categories.size(); i++) ana[i]->AddBkgComponent(_name, _comp, _frac, opt+"-namepar", myvars);
 		}
 	}
 };

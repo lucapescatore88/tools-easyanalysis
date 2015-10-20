@@ -1,12 +1,3 @@
-/***
-* class Analysis 
-*
-* author: Luca Pescatore
-* email : luca.pescatore@cern.ch
-* 
-* date  : 01/07/2015
-***/
-
 #include "analyser.hpp"
 #include <algorithm>
 
@@ -78,12 +69,7 @@ void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
 	if (!dataReader->isValid())
 		dataReader->Initialize();
 
-	//cout << "####################################################" << endl;
-	//doCuts.Print();
-	//cout << option << "     " << (option.find("-docuts") != string::npos) << endl;
-	//cout << "####################################################" << endl;
-
-	if ((doCuts != "") && (option.find("-docuts") != string::npos))
+    if ((doCuts != "") && (option.find("-docuts") != string::npos))
 		reducedTree = (TTree*) dataReader->CopyTree(doCuts, frac, (string) ("reduced_" + name));
 	else if (!reducedTree)
 		reducedTree = (TTree*) dataReader->GetChain()->Clone("reduced_" + name);
@@ -115,20 +101,21 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
 	{
 		if(mycuts!="" || option.find("-docuts")!=string::npos) CreateReducedTree("-docuts",-1,mycuts);
 
-		RooArgList *varList = new RooArgList("varList_" + name);
+		RooArgList varList("varList_" + name);
 		for (unsigned i = 0; i < vars.size(); ++i)
-			varList->add(*(vars[i]));
+			varList.add(*(vars[i]));
 
 		if (pmode == "v") cout << "Candidates: " << reducedTree->GetEntries() << endl;
 		if (dataReader && !dataReader->HasVar(var->GetName()))
 			cout << "ATTENTION: the tree does not contain the requested variable!" << endl;
 
+        if(data) data->reset();
 		if (weight)
 		{
-			varList->add(*weight);
-			data = new RooDataSet("data" + name, "data" + name, *varList, Import(*reducedTree), WeightVar(weight->GetName()));
+			varList.add(*weight);
+			data = new RooDataSet("data_" + name, "data" + name, varList, Import(*reducedTree), WeightVar(weight->GetName()));
 		}
-		else data = new RooDataSet("data" + name, "data" + name, reducedTree, *varList);
+		else data = new RooDataSet("data_" + name, "data" + name, reducedTree, varList);
 
 		CreateHisto("-usedataset");
 
@@ -193,6 +180,28 @@ TH1 * Analysis::CreateHisto(double min, double max, int nbin, TCut _cuts, string
 }
 
 
+void Analysis::AddGaussConstraint(TString name, double mean, double sigma)
+{
+    AddGaussConstraint(GetParam(model, (string)name), mean, sigma);
+}
+
+void Analysis::AddGaussConstraint(RooRealVar * par, double mean, double sigma)
+{
+    if(mean == -1e9) mean = par->getVal();
+    if(sigma == -1e9) sigma = par->getError();
+    TString name = par->GetName(); 
+
+    RooRealVar  *cm = new RooRealVar("cm_"+name, "mean_"+name, mean);
+    RooRealVar  *cs = new RooRealVar("cs_"+name, "error_"+name, sigma);
+    RooGaussian *constr = new RooGaussian("constr_"+name, "constr_"+name, *par, *cm, *cs);
+    cout << "Constraining... " << endl;
+    par->Print();
+    constr->Print();
+    cout << Form("Constraint : "+name+"%s -> gauss(%f,%f)",mean,sigma) << endl;
+
+    AddConstraint(constr);
+}
+
 
 /*
   Functions to set the units.
@@ -246,7 +255,7 @@ void Analysis::SetUnits(string outUnit, double scalefactor)
 
 RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, string option, TCut extracuts)
 {
-	string low_opt = option;
+    string low_opt = option;
 	transform(low_opt.begin(), low_opt.end(), low_opt.begin(), ::tolower);
 	if (!ModelBuilder::isValid())
 	{
@@ -254,7 +263,7 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
 		return NULL;
 	}
 
-	RooCmdArg fitRange(RooCmdArg::none());
+    RooCmdArg fitRange(RooCmdArg::none());
 	double minr = var->getMin();
 	double maxr = var->getMax();
 	if ((min < max) && (min > minr) && (max < maxr))
@@ -293,13 +302,13 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
 
 	if (mydata)
 	{
-		RooCmdArg constraints = RooCmdArg::none();
-		if (low_opt.find("-constrainall") != string::npos)
+		RooCmdArg constraints = ExternalConstraints(*constr);
+        if (low_opt.find("-constrainall") != string::npos)
 			constraints = ExternalConstraints(*gaussianConstraints(model,RooArgSet(*var)));
-		
-		RooCmdArg isExtended = Extended(kFALSE);
-		if (extended)
-			isExtended = Extended(kTRUE);
+
+		RooCmdArg isExtended = Extended(kTRUE);
+		if ( (low_opt.find("-noextended") != string::npos) || (bkg_components.size() < 1) )
+			isExtended = Extended(kFALSE);
 
 		RooCmdArg isQuiet = PrintLevel(2);
 		if (low_opt.find("-quiet") != string::npos)
@@ -311,10 +320,8 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
 
 		var->setRange("FitRange", minr, maxr);
 
-		//if (low_opt.find("-quiet!") != string::npos) freopen ("tmp.txt","w",stdout);
 		m_fitRes = model->fitTo(*mydata, fitRange, isExtended,
 			SumW2Error(true), isQuiet, Warnings(false), useMinos, Save(true), constraints);
-		//if (low_opt.find("-quiet!") != string::npos) freopen ("/dev/tty", "a", stdout);
 	}
 	else
 	{
@@ -328,18 +335,78 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
 	    option += "-nocost";
 	}
 
+    if(option.find("-hidesig") != string::npos) ((RooRealVar*) nsig)->setConstant(0);
+
 	var->setVal(tmpvar->getVal());
 	double range[2] = {minr, maxr};
 	RooPlot *plot = (RooPlot*) PrintAndCalcChi2(nbins, range, option, mydata);
 
-	if(option.find("-hidesig") != string::npos)
-	{
-	  //if(((string) typeid(nsig).name()).find("RooRealVar") != string::npos)
-	  ((RooRealVar*) nsig)->setConstant(0);
-	}
-
+	if(vars.size()>1)
+    {
+        for(size_t v = 1; v < vars.size(); v++)
+            PrintVar(vars[v],nbins,option+"-vname");
+    }
+    
 	return plot;
 }
+
+
+RooWorkspace * Analysis::SaveToRooWorkspace()
+{
+   RooWorkspace * ws = new RooWorkspace("ws_"+name);
+
+   if(model) ws->import(*model); 
+   if(data) ws->import(*data);
+
+   return ws;
+}
+
+void Analysis::ImportModel(RooWorkspace * ws)
+{
+    TIterator * it = ws->componentIterator();
+    TObject * arg;
+    while( (arg=(TObject *)it->Next()) )
+    {
+       string name = arg->GetName();
+       if(name.find("model")!=string::npos)
+           model = (RooAbsPdf*)arg;
+       else if (name.find("totsig")!=string::npos)
+           sig = (RooAbsPdf*)arg;
+       else if (name.find("nsig")!=string::npos)
+           nsig = (RooAbsReal*)arg;
+       else if (name.find("nbkg")!=string::npos)
+       {
+           bkg_fractions.push_back((RooAbsReal*)arg);
+           TIterator * it2 = ws->componentIterator();
+           TObject * arg2;
+           while( (arg2=(TObject *)it2->Next()) )
+           {
+               string compname = (string)((TString)name).ReplaceAll("nbkg","bkg");
+               if( ((string)(arg2->GetName())).find(compname)!=string::npos )
+                   bkg_components.push_back( (RooAbsPdf*)arg2 );
+       
+           }
+       }
+       else if (name.find("var")!=string::npos)
+           var = (RooRealVar*)arg;
+    }
+
+    init = true;
+    ForceValid();
+}
+
+void Analysis::ImportData(RooWorkspace * ws)
+{
+    TIterator * it = ws->componentIterator();
+    TObject * arg;
+    while( (arg=(TObject *)it->Next()) )
+    {
+       string name = arg->GetName();
+       if(name.find("data_")!=string::npos)
+           data = (RooDataSet*)arg;
+    }
+}
+
 
 
 
@@ -499,16 +566,17 @@ double Analysis::GetProb()
   @param title: title
  */
 
-RooPlot* Analysis::Print(string option, unsigned bins, double * range, TString Xtitle, TString title)
+RooPlot* Analysis::Print(string option, unsigned bins, double * range, TString Xtitle, TString title, RooRealVar * myvar)
 {
 	bool domodel = true;
 	RooDataSet * mydata = NULL;
-	if(option.find("-nomodel")!=string::npos) domodel = false;
+	if(!myvar) myvar = var;
+    if(option.find("-nomodel")!=string::npos) domodel = false;
 	if(option.find("-nodata")==string::npos) mydata = GetDataSet(option);
-	return Print(domodel, mydata, option, bins, range, Xtitle, title);
+	return Print(domodel, mydata, option, bins, range, Xtitle, title, myvar);
 }
 
-RooPlot* Analysis::Print(bool domodel, RooAbsData * data, string option, unsigned bins, double * range, TString Xtitle, TString title)
+RooPlot* Analysis::Print(bool domodel, RooAbsData * data, string option, unsigned bins, double * range, TString Xtitle, TString title, RooRealVar * myvar)
 {
 	if(!data) { cout << "ATTENTION!: No data available." << endl; domodel = true; }
 
@@ -516,11 +584,13 @@ RooPlot* Analysis::Print(bool domodel, RooAbsData * data, string option, unsigne
 	if( posX > 1e4 ) posX = option.find("-x");
 	else if(unit!="") Xtitle = option.substr(posX+3,option.find("-",posX+3) - posX - 3) + " ["+ unit +"]";
 	if( posX < 1e4 && Xtitle == "") Xtitle = option.substr(posX+2,option.find("-",posX+2) - posX - 2);
+    Xtitle = (string)((TString)Xtitle).ReplaceAll("__var__","");
+    if(!myvar) myvar = var;
 
 	TString Ytitle = "";
 	double width = 0, intpart = 0;
 	if(range) width = (range[1]-range[0])/bins;
-	else width = (var->getMax()-var->getMin())/bins;
+	else width = (myvar->getMax()-myvar->getMin())/bins;
 	if(modf(width,&intpart) == 0.) Ytitle = Form("Candidtates per %i",(int)width);
 	else if( modf(width/0.1,&intpart) == 0. ) Ytitle = Form("Candidates per %.1f",width);
 	else Ytitle = Form("Candidates per %.2f",width);
@@ -530,7 +600,7 @@ RooPlot* Analysis::Print(bool domodel, RooAbsData * data, string option, unsigne
 
 	if(option.find("-empty")!=string::npos) 
 	{
-		RooPlot * ple = new RooPlot(*var,var->getMin(),var->getMax(),bins);
+		RooPlot * ple = new RooPlot(*myvar,myvar->getMin(),myvar->getMax(),bins);
 		ple->SetXTitle(Xtitle);
 		ple->SetYTitle(Ytitle);
 		return ple;
@@ -545,33 +615,33 @@ RooPlot* Analysis::Print(bool domodel, RooAbsData * data, string option, unsigne
 				string optLin = option;
 				optLin.replace(optLin.find("log"), 3, "");
 				optLin.replace(optLin.find("-andpulls"), 9, "");
-				ModelBuilder::Print(title, Xtitle, optLin, data, bins, regStr, range, m_fitRes,Ytitle);
+				ModelBuilder::Print(title, Xtitle, optLin, data, bins, regStr, range, m_fitRes, Ytitle, myvar);
 				string optLog = option;
 				optLog.replace(optLog.find("lin"), 3, "");
 				optLog.replace(optLog.find("-andpulls"), 9, "");
-				ModelBuilder::Print(title, Xtitle, optLog, data, bins, regStr, range, m_fitRes,Ytitle);
+				ModelBuilder::Print(title, Xtitle, optLog, data, bins, regStr, range, m_fitRes,Ytitle, myvar);
 			}
 			string optLin = option;
 			optLin.replace(optLin.find("log"), 3, "");
-			ModelBuilder::Print(title, Xtitle, optLin, data, bins, regStr, range, m_fitRes,Ytitle);
+			ModelBuilder::Print(title, Xtitle, optLin, data, bins, regStr, range, m_fitRes, Ytitle, myvar);
 			string optLog = option;
 			optLog.replace(optLog.find("lin"), 3, "");
-			return ModelBuilder::Print(title, Xtitle, optLog, data, bins, regStr, range, m_fitRes,Ytitle);
+			return ModelBuilder::Print(title, Xtitle, optLog, data, bins, regStr, range, m_fitRes, Ytitle, myvar);
 		}
-		else return ModelBuilder::Print(title, Xtitle, option, data, bins, regStr, range, m_fitRes,Ytitle);
+		else return ModelBuilder::Print(title, Xtitle, option, data, bins, regStr, range, m_fitRes, Ytitle, myvar);
 	}
 	else
 	{
 		TCanvas * myc = new TCanvas();	
 		if(option.find("-log")!=string::npos)  myc->SetLogy();
-		RooPlot * frame = GetFrame(var, data, NULL, option, bins, range, regStr, Xtitle, Ytitle);
+		RooPlot * frame = GetFrame(myvar, data, NULL, option, bins, range, regStr, Xtitle, Ytitle, NULL, vector<Color_t>());
 		if(option.find("-bw")!=string::npos) myc->SetGrayscale();
 		frame->Draw();
 		if(title=="") myc->Print("data_"+name+".pdf");
 		else myc->Print(title);
 		if(option.find("-linlog")!=string::npos)
 		{
-			GetFrame(var, data, NULL, option, bins, range, regStr, Xtitle, Ytitle)->Draw();
+			GetFrame(myvar, data, NULL, option, bins, range, regStr, Xtitle, Ytitle, NULL, vector<Color_t>())->Draw();
 			if(title=="") myc->Print("data_"+name+".pdf");
 			else myc->Print(title);
 		}
@@ -603,6 +673,15 @@ RooPlot * Analysis::PrintAndCalcChi2(int nbins, double * range, string option, R
 }
 
 
+RooPlot * Analysis::PrintVar(RooRealVar * myvar, int nbins, string option) 
+{
+	string low_opt = option;
+	transform(low_opt.begin(), low_opt.end(), low_opt.begin(), ::tolower);
+
+	if(!myvar) myvar = var;
+	return Print(option, nbins, (double *)NULL, "", "", myvar); 
+}
+
 
 /*
   Adds a blinded region.
@@ -631,12 +710,12 @@ TTree * Analysis::Generate(int nevt, string option)
 
 	if(model)
 	{
-		RooArgSet * varList = new RooArgSet("varList_"+name);
-		for(unsigned i = 0; i < vars.size(); i++) varList->add(*(vars[i]));
-		TTree * newTree = generate(varList,model,nevt,option);
+		RooArgSet varList("varList_"+name);
+		for(unsigned i = 0; i < vars.size(); i++) varList.add(*(vars[i]));
+		TTree * newTree = generate(&varList,model,nevt,option);
 		newTree->SetName("gen_"+name);
 		reducedTree = newTree;
-		GetDataSet();
+		if(option.find("-nodataset")==string::npos) GetDataSet("-recalc");
 		return reducedTree;
 	}
 	else return NULL;
@@ -649,12 +728,12 @@ TTree * Analysis::Generate(int nsigevt, int nbkgevt, string option)
 
 	if(sig && !bkg_components.empty())
 	{
-		RooArgSet * varList = new RooArgSet("varList_"+name);
-		for(unsigned i = 0; i < vars.size(); i++) varList->add(*(vars[i]));
-		TTree * newTree = generate(varList,sig,nsigevt,bkg,nbkgevt,option);
+		RooArgSet varList("varList_"+name);
+		for(unsigned i = 0; i < vars.size(); i++) varList.add(*(vars[i]));
+		TTree * newTree = generate(&varList,sig,nsigevt,bkg,nbkgevt,option);
 		newTree->SetName("gen_"+name);
 		reducedTree = newTree;
-		GetDataSet();
+		if(option.find("-nodataset")==string::npos) GetDataSet("-recalc");
 		return reducedTree;
 	}
 	else return NULL;
@@ -692,6 +771,8 @@ RooDataSet *Analysis::CalcReducedSWeight(double min, double max, unsigned nbins,
 	sTree->Branch("sW", &sW, "sW/F");
 
 	RooMsgService::instance().setGlobalKillBelow(RooFit::ERROR);
+
+	GetTotNBkg();
 
 	Long64_t nEntries = reducedReader->GetEntries();
 	for(Long64_t i = 0 ; i < nEntries ; ++i)
@@ -805,6 +886,8 @@ RooDataSet * Analysis::CalcSWeight(double min, double max, unsigned nbins, bool 
 	double invVss = Vbb/det;
 	double invVbs = - Vbs/det;
 	//double invVbb = Vss/det;
+
+	GetTotNBkg();
 
 	double sum_sW = 0;
 	for(Long64_t i = 0 ; i < nEntries ; ++i)

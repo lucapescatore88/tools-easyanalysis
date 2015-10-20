@@ -1,13 +1,3 @@
-/***
-* eff_functions 
-*
-* author: Luca Pescatore
-* email : luca.pescatore@cern.ch
-* 
-* date  : 01/07/2015
-***/
-
-
 #ifndef EFF_FUNCTIONS_HPP
 #define EFF_FUNCTIONS_HPP
 

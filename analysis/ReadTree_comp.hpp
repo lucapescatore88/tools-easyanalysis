@@ -1,12 +1,3 @@
-/***
-* class TreeReader
-*
-* author: Luca Pescatore, Michal Kreps
-* email : luca.pescatore@cern.ch
-* 
-* date  : 01/07/2015
-***/
-
 #ifndef TREEREADER_HPP
 #define TREEREADER_HPP
 
@@ -90,6 +81,12 @@ class TypeDB {
 		init = true;
 	}
 
+    static inline string getTypeName( unsigned int id )
+    {
+        if(id < names.size()) return names[id];
+        else return (string)"";
+    }
+
 	static inline int getType(const char * name)
 	{
 		if(!init) { getInstance(); }
@@ -125,11 +122,11 @@ class variable {
 	{
 		switch(type)
 		{
-			case BOOL:    { value.myBool = new bool[arraySize]; break; }
-			case INT:     { value.myInt = new int[arraySize];  break; }
+			case BOOL:    { value.myBool = new Bool_t[arraySize]; break; }
+			case INT:     { value.myInt = new Int_t[arraySize];  break; }
 			case UINT:    { value.myUint = new unsigned int[arraySize];  break; }
-			case FLOAT:   { value.myFloat = new float[arraySize];  break; }
-			case DOUBLE:  { value.myDouble = new double[arraySize]; break; }
+			case FLOAT:   { value.myFloat = new Float_t[arraySize];  break; }
+			case DOUBLE:  { value.myDouble = new Double_t[arraySize]; break; }
 			case LONG64:  { value.myLong = new Long64_t[arraySize];  break; }
 			case ULONG64: { value.myULong = new ULong64_t[arraySize];  break; }
 			case CHAR:    { value.myChar = new Char_t[arraySize];  break; }
@@ -151,18 +148,18 @@ class variable {
 	int nGets;     ///Counter to keep track of how may times the variable is accessed 
 
 	union {
-		void * address;
-		bool * myBool;
-		int * myInt;
+		Bool_t * myBool;
+		Int_t * myInt;
 		unsigned * myUint;
-		float * myFloat;
-		double * myDouble;
+		Float_t * myFloat;
+		Double_t * myDouble;
 		Long64_t * myLong;
 		ULong64_t * myULong;
 		Char_t * myChar;
 		UChar_t * myUChar;
 		Short_t * myShort;
 		UShort_t * myUShort;
+        void * address;
 	} value;
 
 
@@ -183,9 +180,10 @@ class variable {
 	void SetType(unsigned _type) { type = _type; }
 	unsigned GetArraySize() { return arraySize; }
 	unsigned GetType() { return type; }
-	inline float GetValue(int iValue)
+    string GetTypeName() { return TypeDB::getTypeName(type); }
+	template <typename T = double> T GetValue(int iValue)
 	{
-		switch (type)
+        switch (type)
 		{
 			case BOOL:    { return value.myBool[iValue];   break; }
 			case INT:     { return value.myInt[iValue];    break; }
@@ -260,7 +258,7 @@ class TreeReader {
 	/// \brief Constructor with an existing TTree
 	
 	TreeReader(TTree * tree):
-		nGets(0), continueSorting(true), init(false), selected(false)
+		nGets(0), continueSorting(true), init(true), selected(false)
 	{
 		fChain = (TChain*) tree;
 		Initialize();
@@ -270,7 +268,7 @@ class TreeReader {
 	/// \brief Constructor with an existing TChain
 	
 	TreeReader(TChain * chain):
-		nGets(0), continueSorting(true), init(false), selected(false)
+		nGets(0), continueSorting(true), init(true), selected(false)
 	{
 		fChain = chain;
 		Initialize();
@@ -391,7 +389,19 @@ class TreeReader {
 	* It requires that an entry is selected first using "GetEntry()"
 	* */
 	
-	float GetValue(const char * name, int iValue = 0);
+	template <typename T = double> T GetValue(const char * name, int iValue = 0)
+    {
+        if(!init) { cout << "*** WARNING: tree " << fChain->GetName() << " not initialized" << endl; return 0; }
+	    if(!selected) { cout << "*** WARNING: no entry selected" << endl; return 0; }
+
+	    ++nGets;
+	    if( continueSorting && (nGets % 1000 == 0) ) continueSorting = partialSort();
+
+	    variable * myVar = GetVariable(name);
+	    ++(myVar->nGets);
+
+	    return (T)myVar->GetValue<T>(iValue);
+    }
 	
 	/** \brief Sets the value of the zero component of the variable "name" to "value".
 	* It requires that an entry is selected first using "GetEntry()"
@@ -424,6 +434,11 @@ class TreeReader {
 		}
 		else return *it;
 	}
+
+    inline string GetVariableType(const char * name)
+    {
+        return GetVariable(name)->GetTypeName();
+    }
 
 	void ShowNGets() { for (unsigned i = 0; i < varList.size(); ++i) cout << varList[i]->nGets/(double)nGets << endl; }
 	

@@ -1,14 +1,3 @@
-/***
-* class FileReader
-*
-* author: Luca Pescatore
-* email : luca.pescatore@cern.ch
-* 
-* date  : 01/07/2015
-***/
-
-
-
 #include "Filereader.hpp"
 
 using namespace std;

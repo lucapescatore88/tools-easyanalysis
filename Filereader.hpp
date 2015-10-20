@@ -1,13 +1,3 @@
-/***
-* class FileReader
-*
-* author: Luca Pescatore
-* email : luca.pescatore@cern.ch
-* 
-* date  : 01/07/2015
-***/
-
-
 #ifndef FILEREADER_HPP
 #define FILEREADER_HPP
 
