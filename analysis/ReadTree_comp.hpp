@@ -295,7 +295,7 @@ class TreeReader {
 
 	~TreeReader()
 	{
-		delete fChain;
+		if(fChain) delete fChain;
 		varList.clear();
 	}
 
@@ -413,6 +413,7 @@ class TreeReader {
 	{
 		T * ptr = GetVariable(name)->GetPtr<T>();
 		if(ptr) ptr[0] = value;
+        else cout << "No pointer available for variable " << name << endl;
 	}
 
 	/// \brief Checks is the variable "namevar" is stored in the reader

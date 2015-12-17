@@ -84,7 +84,12 @@ class MultiAnalysis {
 	
 	RooAbsPdf * GetCombModel() { return combModel; }
 	RooDataSet * GetCombData() { return combData; }
-	TString GetName() { return name; }
+    void SetCombData(RooDataSet * data) { combData = data; };
+    void SetCombData(RooSimultaneous * model) { combModel = model; };
+
+    void ImportModel(RooWorkspace * ws);
+
+    TString GetName() { return name; }
 	void SetName(TString _name) { name = _name; }
 	RooFitResult * GetFitResult() { return fitResult; }
 	RooAbsReal * CreateLogL()
@@ -114,6 +119,19 @@ class MultiAnalysis {
 
     RooWorkspace * SaveToRooWorkspace();
 
+    RooRealVar * GetPar(string name) { return GetParam(combModel,name); }
+    double GetParVal(string name) 
+    { 
+        RooRealVar * par = GetPar(name);
+        if(par) return par->getVal();
+        else { cout << "Parameter " << name << " not found" << endl; return -999999; }
+    }
+    double GetParErr(string name) 
+    { 
+        RooRealVar * par = GetPar(name);
+        if(par) return par->getError();
+        else { cout << "Parameter " << name << " not found" << endl; return -999999; }   
+    }
     
     /** \brief Fits the internal model to the internal dataset
 	 * @param min,max: Limits the fit range to [min,max] (N.B.: works only if the fitted varible is only one)

@@ -22,17 +22,22 @@ vector <Color_t> GetDefaultColors()
 }
 
 // Gets the list of parameters of a RooAbsPdf in Str2VarMap form
-// opt=="-origNames" keeps the names as they are otherwise keeps only the part before the underscore "(alwayskept)_(optional)"
+// opt=="-cut" cuts the names and keeps the part before the underscore "(alwayskept)_(optional)"
 
-RooRealVar * GetParam(RooAbsPdf * pdf, string name)
+RooRealVar * GetParam(RooAbsPdf * pdf, string name, string opt)
 {
     RooArgSet * params = pdf->getParameters(RooDataSet());
     TIterator * it = params->createIterator();
     RooRealVar * arg;
     while( (arg=(RooRealVar*)it->Next()) )
     {
-        int _pos = ((string)arg->GetName()).find("_");
-        string varname = ((string)arg->GetName()).substr(0,_pos);
+        string varname = (string)arg->GetName();
+        if(opt == "-cut")
+        {
+            int _pos = ((string)arg->GetName()).find("_");
+            varname = ((string)arg->GetName()).substr(0,_pos);
+        }
+
         if( varname == name ) return arg;
     }
 
@@ -74,6 +79,58 @@ Str2VarMap GetParamList(RooAbsPdf * pdf, RooArgSet obs, string opt)
 }
 
 
+void GetParam(RooFitResult *fRes, string name, double &par, double &parE, string type) 
+{
+    RooArgList cPars = fRes->constPars();
+    RooArgList fPars = fRes->floatParsFinal();
+
+    TIterator *it = NULL;
+    if (type == "c") it = cPars.createIterator();
+    else it = fPars.createIterator();
+
+    if(!it)
+    {
+        cout << "\nEmpty Pars\n" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    par  = 0;
+    parE = 0;
+
+    RooRealVar *arg;
+    while((arg = (RooRealVar*) it->Next())) {
+        if (arg->GetName() == name) {
+            par  = arg->getVal();
+            parE = arg->getError();
+            break;
+        }
+    }
+
+    if ((par == 0) && (parE == 0)) {
+        cout << "\nPar " << name << " not available\n" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    return;
+}
+
+double GetParVal(RooFitResult *fRes, string name, string type) {
+
+    double par, parE;
+    GetParam(fRes, name, par, parE, type);
+
+    return par;
+}
+
+double GetParErr(RooFitResult *fRes, string name, string type) {
+
+    double par, parE;
+    GetParam(fRes , name, par, parE, type);
+    return parE;
+}
+
+
+
 
 //Returns the complete name of the parameter "par" is in the "myvars" object
 //Return an empty string if it doesn't find it
@@ -104,7 +161,7 @@ Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar
         string parMapName = isParInMap( names[i], *pars );
         RooRealVar * par = (RooRealVar*)((*pars)[parMapName]);
         if(!par) { cout << "Parameter " << names[i] << " not found!" << endl; continue; }
-        TString fname = (TString)par->GetName();
+        TString fname = (TString)par->GetName()+"__"+c[i]->GetName();
         string fkey = parMapName;
         if(opt.find("-n")!=string::npos)
         {
@@ -158,11 +215,10 @@ void PrintPars(Str2VarMap pars, string opt)
             catch(string err) {}
             cout << "$\t\t \\\\" << endl;
         }
-        //else iter->second->Print();
-	else {
-	  cout << "Search name: " << iter->first << endl;
-	  iter->second->Print();
-	}
+        else {
+            //cout << "Search name: " << iter->first << endl;
+            iter->second->Print();
+        }
     }	
 }
 
@@ -484,6 +540,7 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
         double * range, vector<string> regStr, TString Xtitle, TString Ytitle, TLegend * leg, vector <Color_t> custom_colors)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
+ 	if (bins < 1) bins = 50;
     double tmp_range[] = {var->getMin(), var->getMax()};
     if(!range) range = &tmp_range[0];	
     var->setRange("PlotRange",range[0],range[1]);
@@ -504,17 +561,19 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
 
     if(regStr.size()==0) regStr.push_back("PlotRange");
     bool noblind = (regStr.size()==1);
-    //model->setNormRange("PlotRange");
     RooCmdArg range_data(RooCmdArg::none()); 
-    RooCmdArg range_model(NormRange("PlotRange"));
+    RooCmdArg range_model(RooCmdArg::none()); 
+    RooCmdArg norm_range(RooCmdArg::none()); 
     RooCmdArg totMcolor = LineColor(4);
     RooCmdArg blindTotModel(RooCmdArg::none());
     TString dataname = "data", modelname = "model";
     double min = 1;
 
+    RooLinkedList cmdList;
+
     for (unsigned i = 0; i < regStr.size(); ++i) 
     {
-        string bandname = regStr[i];	
+        string bandname = regStr[i];
         if(bandname.find("band")!=string::npos)
         {		
             totMcolor =  LineColor(4);
@@ -543,14 +602,14 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
             if(opt.find("-sumw2err")!=string::npos) data->plotOn(frame, range_data, Name(dataname), DataError(RooAbsData::SumW2));
             else data->plotOn(frame, range_data, Name(dataname));
 
-	    min = 1e9;
-	    RooHist *hist = frame->getHist(dataname);
-	    Double_t *cont = hist->GetY();
-	    for(int i = 0; i < hist->GetN(); i++)
-	    {
-	        if(cont[i]!=0) min = TMath::Min(min, cont[i]);
-	    }
-	    if (min==1e9) min = 1;
+            min = 1e9;
+            RooHist *hist = frame->getHist(dataname);
+            Double_t *cont = hist->GetY();
+            for(int i = 0; i < hist->GetN(); i++)
+            {
+                if(cont[i]!=0) min = TMath::Min(min, cont[i]);
+            }
+            if (min==1e9) min = 1;
         }
 
         vector <Color_t> colors;
@@ -573,14 +632,12 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
         {
             //Plot total model
 
-            model->plotOn(frame, totMcolor, Name(modelname), blindTotModel
-			  , range_model
-			  );
+            model->plotOn(frame, totMcolor, Name(modelname), blindTotModel, range_model, norm_range);
 
             //Plot signal and background components
 
             int counter = 0;
-	    if(opt.find("-stackbkg")==string::npos) counter++;
+            if(opt.find("-stackbkg")==string::npos) counter++;
             RooArgSet * comps = model->getComponents();
             TIterator * it = comps->createIterator();
             RooAbsArg * arg;
@@ -595,18 +652,16 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
                     if(name.find("wrtsig")!=string::npos) continue;
                     if( noblind && name.find("totsig")!=string::npos && opt.find("-nototsigplot")==string::npos)
                     {
-                        model->plotOn(frame, Components(*arg), drawOptSig, LineColor(1), Name(arg->GetName())
-				      , range_model
-				      );
+                        model->plotOn(frame, Components(*arg), drawOptSig, LineColor(1), Name(arg->GetName()), range_model, norm_range);
                         isplot = true;
                     }
                     else if( noblind && name.find("sig")!=string::npos && opt.find("-plotsigcomp")!=string::npos )
                     {
-                        model->plotOn(frame, Components(*arg), drawOptSig, LineColor(colors[counter]), LineStyle(styles[counter]), Name(arg->GetName())
-				      , range_model
-				      );
+                        model->plotOn(frame, Components(*arg), drawOptSig, 
+                                LineColor(colors[counter]), LineStyle(styles[counter]), 
+                                Name(arg->GetName()), range_model, norm_range);
                         counter++;
-			isplot = true;
+                        isplot = true;
                     }
                     else if(name.find("bkg")!=string::npos && name.find("nbkg")==string::npos) 
                     {
@@ -618,9 +673,9 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
                         }
                         if(!stackedBkgs)
                         {
-                            model->plotOn(frame, Components(*arg), drawOptBkg, LineColor(colors[counter]), LineStyle(style), FillColor(colors[counter]), Name(arg->GetName()), moveBack
-					  , range_model
-					  );	
+                            model->plotOn(frame, Components(*arg), drawOptBkg, 
+                                    LineColor(colors[counter]), LineStyle(style), FillColor(colors[counter]), 
+                                    Name(arg->GetName()), moveBack, range_model, norm_range);	
                             counter++;
                             isplot = true;
                         }
@@ -632,9 +687,9 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
                 }
                 if(name.find("_print")!=string::npos && !isplot)
                 {
-		  model->plotOn(frame, Components(*arg), drawOptSig, LineColor(colors[counter]), LineStyle(styles[counter]), FillColor(colors[counter]), Name(arg->GetName()), moveBack
-				, range_model
-				);
+                    model->plotOn(frame, Components(*arg), drawOptSig, 
+                            LineColor(colors[counter]), LineStyle(styles[counter]), FillColor(colors[counter]), 
+                            Name(arg->GetName()), moveBack, range_model, norm_range);
                     counter++;
                     isplot = true;
                 }
@@ -646,7 +701,7 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
             if(stackedBkgs)
             {
                 int nbkgs = stackedBkgs->getSize();
-                
+
                 for(int bb = 0; bb < nbkgs; bb++)
                 {
                     RooArgList curBkg;
@@ -665,23 +720,48 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
 
                     if(opt.find("-fillbkg")!=string::npos)
                         model->plotOn(frame, Components(curBkg), DrawOption("F"),
-				      FillColor(colors[counter]),
-				      FillStyle(1001),
-				      LineWidth(0.),
-				      LineStyle(0),
-				      LineColor(colors[counter]),
-				      Name(myBkgName),
-				      MoveToBack()
-				      , range_model
-				      );
+                                FillColor(colors[counter]),
+                                FillStyle(1001),
+                                LineWidth(0.),
+                                LineStyle(0),
+                                LineColor(colors[counter]),
+                                Name(myBkgName),
+                                MoveToBack(), range_model //, norm_range
+                                );
                     else
                         model->plotOn(frame, Components(curBkg), DrawOption("L"),
-				      LineColor(colors[counter]),
-				      LineStyle(styles[counter]),
-				      Name(myBkgName),
-				      MoveToBack()
-				      , range_model
-				      );
+                                LineColor(colors[counter]),
+                                LineStyle(styles[counter]),
+                                Name(myBkgName),
+                                MoveToBack(), range_model, norm_range
+                                );
+
+		    /*
+                    if(opt.find("-fillbkg")!=string::npos) {
+		      cmdList.Add((RooCmdArg*) Components(curBkg).Clone());
+		      cmdList.Add((RooCmdArg*) DrawOption("F").Clone());
+		      cmdList.Add((RooCmdArg*) FillColor(colors[counter]).Clone());
+		      cmdList.Add((RooCmdArg*) FillStyle(1001).Clone());
+		      cmdList.Add((RooCmdArg*) LineColor(colors[counter]).Clone());
+		      cmdList.Add((RooCmdArg*) LineStyle(0).Clone());
+		      cmdList.Add((RooCmdArg*) LineWidth(0).Clone());
+		      cmdList.Add((RooCmdArg*) MoveToBack().Clone());
+		      cmdList.Add((RooCmdArg*) Name(myBkgName).Clone());
+		      cmdList.Add((RooCmdArg*) range_model.Clone());
+		      cmdList.Add((RooCmdArg*) norm_range.Clone());
+		    }
+                    else {
+		      cmdList.Add((RooCmdArg*) Components(curBkg).Clone());
+		      cmdList.Add((RooCmdArg*) DrawOption("L").Clone());
+		      cmdList.Add((RooCmdArg*) LineColor(colors[counter]).Clone());
+		      cmdList.Add((RooCmdArg*) LineStyle(styles[counter]).Clone());
+		      cmdList.Add((RooCmdArg*) MoveToBack().Clone());
+		      cmdList.Add((RooCmdArg*) Name(myBkgName).Clone());
+		      cmdList.Add((RooCmdArg*) range_model.Clone());
+		      cmdList.Add((RooCmdArg*) norm_range.Clone());
+		    }
+		    model->plotOn(frame, cmdList);
+		    */
 
                     counter++;
 
@@ -818,8 +898,6 @@ TString getPrintParName(string typepdf_, TString namepdf_)
 
 Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMap myvars, string opt)
 {
-    cout << "####################### Getting patameters for " << namepdf_ << endl;
-
     Str2VarMap parout;
     if(typepdf_.find("Poly")!=string::npos || typepdf_.find("Cheb")!=string::npos) return parout;
 

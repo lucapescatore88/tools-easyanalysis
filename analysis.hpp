@@ -5,6 +5,7 @@
 #include "ModelBuilder.hpp"
 #include "general_functions.hpp"
 #include "pkmumu_functions.hpp"
-
+#include "optimiser.hpp"
+#include "CutFlow.hpp"
 
 #endif

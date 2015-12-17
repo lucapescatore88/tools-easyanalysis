@@ -5,6 +5,7 @@
 #ifndef ANALYSER_HPP
 #define ANALYSER_HPP
 
+#include "RooRandom.h"
 #include "RooWorkspace.h"
 #include "RooRealVar.h"
 #include "RooStats/SPlot.h"
@@ -64,6 +65,10 @@ using namespace RooStats;
 
 Long64_t randomKill(TreeReader * reader, vector< Long64_t > entry);
 
+Long64_t bestPID(TreeReader * reader, vector< Long64_t > entry);
+
+typedef  Long64_t (*FUNC_PTR)(TreeReader *, vector< Long64_t >);
+
 /** \class Analysis
  *  \brief Allows to handle data starting from TTree or TH1
  *  allows to make cuts and check for multiple candidates.
@@ -105,7 +110,7 @@ class Analysis : public ModelBuilder {
 	Analysis( TString _name, RooRealVar * _var, RooAbsPdf * pdf = NULL, int ngen = 1000, string opt = "-subtree"):
 		ModelBuilder(_name,_var), title(""), cuts(NULL), init(false), unit(""),
 		weight(NULL), data(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
-		dataReader(NULL), dataHist(NULL), scale(1)
+		dataReader(NULL), reducedTree(NULL), dataHist(NULL), scale(1)
 	{
 		SetVariable(_var);
 		constr = new RooArgSet("constraints_"+name);
@@ -122,7 +127,7 @@ class Analysis : public ModelBuilder {
 	Analysis( TString _name, TString _title, TreeReader * reader, TCut * _cuts, RooRealVar * _var = NULL, string _w = ""):
 		ModelBuilder(_name,_var), title(_title), cuts(_cuts), init(false), unit(""),
 		weight(NULL), data(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
-		dataReader(reader), dataHist(NULL), scale(1)
+		dataReader(reader), reducedTree(NULL), dataHist(NULL), scale(1)
 	{
 		if(!var) 
         {
@@ -131,7 +136,8 @@ class Analysis : public ModelBuilder {
         }
         constr = new RooArgSet("constraints_"+name);
 		if(_w != "") SetWeight( (TString)_w );
-
+        
+        if(!reader) cout << "Attention!! Your TreeReader is NULL, this is noing to break..." << endl;
 		if(!reader->isValid()) reader->Initialize();
 		reducedTree = (TTree *)reader->GetChain()->Clone("reduced_"+name);
 	};
@@ -139,7 +145,7 @@ class Analysis : public ModelBuilder {
 	Analysis( TString _name, TString _title, string treename, string filename, RooRealVar * _var = NULL, TCut * _cuts = NULL, string _w = ""):
 		ModelBuilder(_name,_var), title(_title), cuts(_cuts), init(false), unit(""),
 		weight(NULL), data(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
-		dataHist(NULL), scale(1)
+	    reducedTree(NULL), dataHist(NULL), scale(1)
 	{
 		if(!var) 
         {
@@ -188,10 +194,10 @@ class Analysis : public ModelBuilder {
 
 	~Analysis()
 	{
-		delete dataReader;
-		delete cuts;
-		delete reducedTree;
-		delete dataHist;
+		if(dataReader) delete dataReader;
+		if(cuts) delete cuts;
+		if(reducedTree) delete reducedTree;
+		if(dataHist) delete dataHist;
 	};
 
 
@@ -232,7 +238,8 @@ class Analysis : public ModelBuilder {
     { 
         if( ((string)v->GetTitle()).find("__var__")==string::npos )
                 v->SetTitle((TString)v->GetTitle()+"__var__"); 
-        vars.push_back(v); }
+        vars.push_back(v); 
+    }
 	void AddVariable(TString vname) { RooRealVar * v = new RooRealVar(vname,vname+"__var__",0.); vars.push_back(v); }
 	bool isValid() { return init; }
 
@@ -305,8 +312,6 @@ class Analysis : public ModelBuilder {
 	TTree * applyFunc(void (*addFunc)(TreeReader *, TTree *, bool), double frac = 1);
 
 
-	typedef  Long64_t (*FUNC_PTR)(TreeReader *, vector< Long64_t >);
-	
 	/** \brief Checks for multiple candidate in the same event
 	 * */
 	/** Also creates a plot of number of candidates and a new tree with a variable "isSingle" added. This will be 1 for the best candidate and 0 for the others.
@@ -322,9 +327,18 @@ class Analysis : public ModelBuilder {
 	return chosen_entry;
   }	
 **/
-	TTree * GetSingleTree(FUNC_PTR choose = NULL);
-	
+	TTree * GetSingleTree(FUNC_PTR choose = NULL, TString namevar = "", bool reset = false);
 
+     TTree * GetSingles(vector<FUNC_PTR> choose, vector <TString> namevars)
+     {
+        if(choose.size()!=namevars.size()) {
+            cout << "ATTENTION: The vector of choose functions and their names must have the same size" << endl; return NULL; }
+        for(size_t cf = 0; cf < choose.size(); cf++)
+            GetSingleTree(choose[cf],namevars[cf],true);
+        return reducedTree;
+     }
+
+    
 /** \brief Fits the "reducedTree" with the "model"
  * Data and model must be previourly set and initialized.
   <br>One can set the fit range and number of bins for chi2. If not set the variable range is used.
@@ -341,8 +355,8 @@ class Analysis : public ModelBuilder {
   <br>"-minos"      -> Enables MINOS for asymmetric errors
   @param cuts: cuts to make before fitting
  **/
-	RooPlot* Fit(double min = 0, double max = 0., unsigned nbins = 50, bool unbinned = false, string print = "-range-log", TCut mycuts = "");
-
+	RooPlot * Fit(double min = 0, double max = 0., unsigned nbins = 50, bool unbinned = false, string print = "-range-log", TCut mycuts = "");
+    RooPlot * Fit(string option, TCut extracuts);
 
 /** \brief Makes nice plots of data and models including blinded plots
   @param model: if true plots model on data
@@ -398,6 +412,22 @@ class Analysis : public ModelBuilder {
 	{
 		return ModelBuilder::GetSigFraction(min, max, valerr, m_fitRes);
 	}
+
+    RooRealVar * GetPar(string name) { return GetParam(model,name); }
+    double GetParVal(string name) 
+    { 
+        RooRealVar * par = GetPar(name);
+        if(par) return par->getVal();
+        else { cout << "Parameter " << name << " not found" << endl; return -999999; }
+    }
+    double GetParErr(string name) 
+    { 
+        RooRealVar * par = GetPar(name);
+        if(par) return par->getError();
+        else { cout << "Parameter " << name << " not found" << endl; return -999999; }   
+    }
+ 
+
 
 	///\brief Returns chi2/NDF
 	double GetChi2();

@@ -81,7 +81,7 @@ vector< vector< double > > getEvtsAfterCuts(TString name, TString plot, TTree * 
  **/
 double getEff(TString name, TString plot, TTree * tree, TCut cuts, TTree * downTree, TCut downCuts, TString weight, double *efferr, TTree * relTree, TCut relCuts, TTree * relDownTree, TCut relDownCuts, TString relWeight)
 {
-	double nNom = getEvtN(name+"nom", plot, tree, cuts, weight);
+    double nNom = getEvtN(name+"nom", plot, tree, cuts, weight);
 	if(!downTree) downTree = tree;
 	double entries, relentries;
 	double nDenom = getEvtN(name+"denom", plot, downTree, downCuts, weight, &entries);

@@ -125,7 +125,13 @@ string isParInMap( string par, Str2VarMap myvars, string option = "");
  * Returns null if it doesn't find any.
  * */
 
-RooRealVar * GetParam(RooAbsPdf * pdf, string name);
+RooRealVar * GetParam(RooAbsPdf * pdf, string name, string opt = "");
+
+void GetParam(RooFitResult *fRes, string name, double &par, double &parE, string type = "f");
+double GetParVal(RooFitResult *fRes, string name, string type = "f");
+double GetParErr(RooFitResult *fRes, string name, string type = "f");
+
+
 
 /** \brief Gets the list of parameters of a RooAbsPdf in Str2VarMap form
  * If any name is specified in pnames these names are used to make a selection of parameters. If "pnames" is empty all parameters are returned.

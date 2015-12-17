@@ -65,8 +65,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
         }
     }
     else model = sig; 
-        //extended = false; }
-
+    
     if(pmode=="v")
     {
         cout << "\n" << name << ": Initialized Correctly! The model is:" << endl;
@@ -205,21 +204,21 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
             resPad->cd();
             residuals->Draw();
 
-	    TLine *lc = new TLine(xAxis->GetXmin(),  0, xAxis->GetXmax(),  0);
-	    TLine *lu = new TLine(xAxis->GetXmin(),  3, xAxis->GetXmax(),  3);
-	    TLine *ld = new TLine(xAxis->GetXmin(), -3, xAxis->GetXmax(), -3);
+            TLine *lc = new TLine(xAxis->GetXmin(),  0, xAxis->GetXmax(),  0);
+            TLine *lu = new TLine(xAxis->GetXmin(),  3, xAxis->GetXmax(),  3);
+            TLine *ld = new TLine(xAxis->GetXmin(), -3, xAxis->GetXmax(), -3);
 
-	    lc->SetLineColor(kGray+2);
-	    lu->SetLineColor(kGray+1);
-	    ld->SetLineColor(kGray+1);
+            lc->SetLineColor(kGray+2);
+            lu->SetLineColor(kGray+1);
+            ld->SetLineColor(kGray+1);
 
-	    lc->SetLineStyle(2);
-	    lu->SetLineStyle(2);
-	    ld->SetLineStyle(2);
+            lc->SetLineStyle(2);
+            lu->SetLineStyle(2);
+            ld->SetLineStyle(2);
 
-	    lc->Draw("same");
-	    lu->Draw("same");
-	    ld->Draw("same");
+            lc->Draw("same");
+            lu->Draw("same");
+            ld->Draw("same");
 
             residuals->Draw("same");
 
@@ -238,77 +237,78 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
 
         // If set draw legend, box for fit failed warning, LHCb
 
-        if(opt.find("-log")!=string::npos) { gPad->SetLogy(); }//frame->SetMinimum(0.5); }
-        if(opt.find("-noleg")==string::npos)
-        { 
-            leg->SetFillStyle(0);
-            if(opt.find("-legf")!=string::npos) {
-                leg->SetFillStyle(1001);
-                leg->SetFillColor(kWhite);
-            }
-            frame->addObject(leg);
-            leg->Draw("same");
+    if(opt.find("-log")!=string::npos) gPad->SetLogy(); //frame->SetMinimum(0.5); }
+    
+    if(opt.find("-noleg")==string::npos)
+    { 
+        leg->SetFillStyle(0);
+        if(opt.find("-legf")!=string::npos) {
+            leg->SetFillStyle(1001);
+            leg->SetFillColor(kWhite);
         }
-        if(opt.find("-LHCb")!=string::npos)
-        {
-            TPaveText * tbox = new TPaveText(gStyle->GetPadLeftMargin() + 0.05,
+        frame->addObject(leg);
+        leg->Draw("same");
+    }
+    if(opt.find("-LHCb")!=string::npos)
+    {
+        TPaveText * tbox = new TPaveText(gStyle->GetPadLeftMargin() + 0.05,
+                0.80 - gStyle->GetPadTopMargin(),
+                gStyle->GetPadLeftMargin() + 0.25,
+                0.97 - gStyle->GetPadTopMargin(),
+                "BRNDC");
+        if(opt.find("-LHCbDX")!=string::npos)
+        { 
+            tbox = new TPaveText(gStyle->GetPadRightMargin() + 0.63,
                     0.80 - gStyle->GetPadTopMargin(),
-                    gStyle->GetPadLeftMargin() + 0.25,
+                    gStyle->GetPadRightMargin() + 0.83,
                     0.97 - gStyle->GetPadTopMargin(),
                     "BRNDC");
-            if(opt.find("-LHCbDX")!=string::npos)
-            { 
-                tbox = new TPaveText(gStyle->GetPadRightMargin() + 0.63,
-                        0.80 - gStyle->GetPadTopMargin(),
-                        gStyle->GetPadRightMargin() + 0.83,
-                        0.97 - gStyle->GetPadTopMargin(),
-                        "BRNDC");
-            }
-            tbox->AddText("LHCb");
-            tbox->SetFillStyle(0);
-            tbox->SetTextAlign(12);
-            tbox->SetBorderSize(0);
-            frame->addObject(tbox);
         }
-        if(data && fitRes && opt.find("-quality")!=string::npos )
-        {
-            TPaveText * tbox = new TPaveText(0.4, 0.5, 0.9, 0.6, "BRNDC");
-            tbox->SetFillStyle(0);
-            tbox->AddText(Form("edm = %e, covQual = %i)",fitRes->edm(),fitRes->covQual()));
-            tbox->SetBorderSize(0);
-            frame->addObject(tbox);
-        }
-
-        frame->Draw();
-
-
-        // Print
-
-        if(opt.find("-none")==string::npos)
-        {
-            TString pname = name;
-            if(!data) pname = "model_"+name;
-            if(title!="") pname = title;
-            pname = pname.ReplaceAll(" ","").ReplaceAll("#rightarrow","2").ReplaceAll("#","").ReplaceAll("__","_");
-            if(opt.find("-vname")!=string::npos) pname+=("_"+(TString)myvar->GetName());
-
-            if(opt.find("-eps")!=string::npos) c->Print(pname+logstr+".eps");
-            else if(opt.find("-allformats")!=string::npos)
-            {
-                c->Print(pname+logstr+".eps");
-                c->Print(pname+logstr+".pdf");
-                c->Print(pname+logstr+".C");
-                c->Print(pname+logstr+".png");
-            }
-            else c->Print(pname+logstr+".pdf");
-        }
-
-        if(residuals) delete residuals;
-        delete c;
+        tbox->AddText("LHCb");
+        tbox->SetFillStyle(0);
+        tbox->SetTextAlign(12);
+        tbox->SetBorderSize(0);
+        frame->addObject(tbox);
     }
-    else cout << "**** ATTENTION: Model is not valid, probably not initialised. *****" << endl;
+    if(data && fitRes && opt.find("-quality")!=string::npos )
+    {
+        TPaveText * tbox = new TPaveText(0.4, 0.5, 0.9, 0.6, "BRNDC");
+        tbox->SetFillStyle(0);
+        tbox->AddText(Form("edm = %e, covQual = %i)",fitRes->edm(),fitRes->covQual()));
+        tbox->SetBorderSize(0);
+        frame->addObject(tbox);
+    }
 
-    return frame;
+    frame->Draw();
+
+
+    // Print
+
+    if(opt.find("-none")==string::npos)
+    {
+        TString pname = name;
+        if(!data) pname = "model_"+name;
+        if(title!="") pname = title;
+        pname = pname.ReplaceAll(" ","").ReplaceAll("#rightarrow","2").ReplaceAll("#","").ReplaceAll("__","_");
+        if(opt.find("-vname")!=string::npos) pname+=("_"+(TString)myvar->GetName());
+
+        if(opt.find("-eps")!=string::npos) c->Print(pname+logstr+".eps");
+        else if(opt.find("-allformats")!=string::npos)
+        {
+            c->Print(pname+logstr+".eps");
+            c->Print(pname+logstr+".pdf");
+            c->Print(pname+logstr+".C");
+            c->Print(pname+logstr+".png");
+        }
+        else c->Print(pname+logstr+".pdf");
+    }
+
+    if(residuals) delete residuals;
+    delete c;
+}
+else cout << "**** ATTENTION: Model is not valid, probably not initialised. *****" << endl;
+
+return frame;
 }
 
 

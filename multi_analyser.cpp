@@ -17,7 +17,11 @@ void MultiAnalysis::AddCategory(Analysis * _ana, TString nameCat)
 
 bool MultiAnalysis::Initialize(string opt)
 {
-	combModel = new RooSimultaneous("combModel","",*samples);
+    bool nomodel = false, nodata = false;
+    if(opt.find("-noInitModel")!=string::npos) nomodel = true;
+    if(opt.find("-noInitData")!=string::npos) nodata = true;
+    
+    if( !nomodel ) combModel = new RooSimultaneous("combModel","",*samples);
 	map<string,RooDataSet*> mymap;
 	
 	for(unsigned i = 0; i < categories.size(); i++)
@@ -25,14 +29,23 @@ bool MultiAnalysis::Initialize(string opt)
 		if(opt.find("-I")!=string::npos) ana[i]->Initialize(opt);
 		if( !ana[i]->isValid() ) { cout << "ATTENTION!: Analysis " << ana[i]->GetName() << " is not initialized!" << endl; return false; }
 		mymap[(string)categories[i]] = (RooDataSet*)(ana[i]->GetDataSet(opt));
-		combModel->addPdf(*(ana[i]->GetModel()),categories[i]);
+		if( !nomodel ) combModel->addPdf(*(ana[i]->GetModel()),categories[i]);
 	}
 
-	combData = new RooDataSet("combData","combined datas",*vars,Index(*samples),Import(mymap));
+	if( !nodata ) combData = new RooDataSet("combData","combined datas",*vars,Index(*samples),Import(mymap));
 
 	if((string)ana[0]->GetPrintLevel() == "v") combData->Print();
 	if((string)ana[0]->GetPrintLevel() == "v") combModel->Print();
-	if((string)ana[0]->GetPrintLevel() == "v") printParams(combModel, *vars);
+	if((string)ana[0]->GetPrintLevel() == "v")
+	{
+	     cout << "***" << endl;
+	     printParams(combModel, *vars);
+	     cout << "***" << endl;
+	     printParams(combModel);
+	     cout << "***" << endl;
+	}
+
+	cout << "Object MultiAna " << name << " initialized correctly." << endl;
 
 	init = true;
 	return init;
@@ -50,6 +63,8 @@ map < string, RooPlot * > MultiAnalysis::SimultaneousFit(double min, double max,
 	RooCmdArg useMinos = Minos(kFALSE);
 	if(opt.find("-minos")!=string::npos) useMinos = Minos(kTRUE);
 
+    if(!combModel || !combData) { cout << "Model or data not set" << endl; return map < string, RooPlot * >(); }
+
 	if(min==max) fitResult = combModel->fitTo(*combData,Save(),isExtended,isQuiet,useMinos,ExternalConstraints(*constr));
 	else
 	{
@@ -57,16 +72,34 @@ map < string, RooPlot * > MultiAnalysis::SimultaneousFit(double min, double max,
 			ana[i]->GetVariable()->setRange("FitRange",min,max);
 
 		fitResult = combModel->fitTo(*combData,Save(),isExtended,
-                //Range("FitRange"),
                 isQuiet,useMinos,ExternalConstraints(*constr));
 	}
+	
+	if (opt.find("-quiet") == string::npos)
+		cout << name << " :  CovQual = " << fitResult->covQual() << ",   Status = " << fitResult->status() << ",   EDM = " << fitResult->edm() << endl;        
 		
 	map < string, RooPlot * > plots;
-	if(opt.find("-noPlot")==string::npos)
-		for(unsigned i = 0; i < categories.size(); i++)
+	if( opt.find("-noPlot")==string::npos )
+        for(unsigned i = 0; i < categories.size(); i++)
 		{
-			double range[2] = {ana[i]->GetVariable()->getMin(),ana[i]->GetVariable()->getMax()};
-			plots[(string)categories[i]] = ana[i]->Print(opt+"-nochi2", nbins, range);//+"-t"+(string)categories[i]);
+            RooRealVar * var = ana[i]->GetVariable();
+            if(opt.find("-noInitModel")==string::npos && opt.find("-noInitData")==string::npos)
+            {
+		        double range[2] = {var->getMin(),var->getMax()};
+		        plots[(string)categories[i]] = ana[i]->Print(opt+"-nochi2", nbins, range);//+"-t"+(string)categories[i]);
+            }
+            else
+            {
+                TCanvas * c = new TCanvas();
+                RooPlot * pl = new RooPlot(*var,var->getMin(),var->getMax(),nbins);
+                combData->plotOn(pl,Cut("samples==samples::"+categories[i]));
+                combModel->getPdf(categories[i])->plotOn(pl,Normalization(ana[i]->GetDataSet("")->numEntries(),RooAbsReal::NumEvent));
+                pl->SetTitle("");
+                pl->SetXTitle(((TString)var->GetName()).ReplaceAll("__var__",""));
+                pl->Draw();
+                c->Print(name+"_"+categories[i]+".pdf");
+            
+		}
         }
     for(unsigned i = 0; i < categories.size(); i++) ana[i]->SetFitRes(fitResult);
 
@@ -99,8 +132,31 @@ RooWorkspace * MultiAnalysis::SaveToRooWorkspace()
        TObject * arg;
        while( (arg=(TObject *)it->Next()) ) ws->import(*arg);
    }
+   ws->import(*combModel);
+   ws->import(*combData);
 
    return ws;
+}
+
+void MultiAnalysis::ImportModel(RooWorkspace * ws)
+{
+    cout << endl;
+    cout << "ImportModel" << endl;
+    cout << endl;
+    TIterator * it = ws->componentIterator();
+    TObject * arg;
+    while( (arg=(TObject *)it->Next()) )
+    {
+        string name = arg->GetName();
+	cout << name << endl;
+        if(name.find("combModel")!=string::npos) {
+            combModel = (RooSimultaneous*)arg;
+	    cout << "*** IMPORTED " << name << endl;
+	    printParams(combModel);
+	    cout << "***" << endl;
+	}
+    }
+    cout << endl;
 }
 
 
@@ -222,7 +278,7 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
     if(ana[k]->GetColors().size() > 0) colors = ana[k]->GetColors();
     int styles[] = {3,4,5,6,7,8,9,10,3,4,5,6,7,8,9,10};
 	int counter = 0;
-	if(option.find("-stackbkg")==string::npos) counter++;
+	//if(option.find("-stackbkg")==string::npos) counter++;
 	if(option.find("-plottotbkg")!=string::npos)
 	{
 		sumtotbkgPdf->plotOn(pl,LineStyle(styles[counter]),LineColor(colors[counter]),Normalization( sumNtotbkg , RooAbsReal::NumEvent));
