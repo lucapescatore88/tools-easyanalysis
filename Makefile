@@ -1,7 +1,9 @@
 ROOTCFLAGS  = $(shell root-config --cflags --glibs)
 
-#TOOLSDIR    = $(LHCBBHAM)/tools-easyanalysis
-TOOLSDIR    = $(PWD)
+TOOLSDIR    = $(TOOLSSYS)
+ifeq ($(TOOLSSYS),)
+	TOOLSDIR    = $(PWD)
+endif
 
 CXX         = g++
 CXXFLAGS    = -g -fPIC -Wall -O2 $(ROOTCFLAGS) -lTMVA -lRooFit -lRooStats -I$(TOOLSDIR) -I$(TOOLSDIR)/analysis -L$(TOOLSDIR)/lib
