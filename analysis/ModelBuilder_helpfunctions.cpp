@@ -830,6 +830,31 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
 }
 
 
+TLegend * getTLegend(string options)
+{
+    TLegend * leg = new TLegend(0.65,0.7,0.76,0.9);
+    if(option.find("-leg")!=string::npos)
+    {
+        size_t pos = option.find("-leg")+5;
+        string ss = option.substr(pos,string::npos);
+        double x1 = (TString(ss)).Atof();
+        pos = ss.find(",")+1;
+        ss = ss.substr(pos,string::npos);
+        double y1 = (TString(ss)).Atof();
+        pos = ss.find(",")+1;
+        ss = ss.substr(pos,string::npos);
+        double x2 = (TString(ss)).Atof();
+        pos = ss.find(",")+1;
+        ss = ss.substr(pos,string::npos);
+        double y2 = (TString(ss)).Atof();
+
+        leg = new TLegend(x1,y1,x2,y2);
+    }
+    return leg;
+}
+
+
+
 RooPlot * printFrame(RooPlot * frame, string opt, TLegend * leg)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);

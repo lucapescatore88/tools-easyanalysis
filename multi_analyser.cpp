@@ -163,32 +163,14 @@ void MultiAnalysis::ImportModel(RooWorkspace * ws)
 
 RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname, int nbins)
 {
-    TCanvas * c = new TCanvas();
     size_t posb = option.find("-nbins");
     if (posb != string::npos)
         nbins = ((TString) option.substr(posb+6, string::npos)).Atof();
 
     if(!init && option.find("-noInit")==string::npos) Initialize();
 
-    TLegend * leg = new TLegend(0.65,0.7,0.76,0.9);
-    if(option.find("-leg")!=string::npos)
-    {
-        size_t pos = option.find("-leg")+5;
-        string ss = option.substr(pos,string::npos);
-        double x1 = (TString(ss)).Atof();
-        pos = ss.find(",")+1;
-        ss = ss.substr(pos,string::npos);
-        double y1 = (TString(ss)).Atof();
-        pos = ss.find(",")+1;
-        ss = ss.substr(pos,string::npos);
-        double x2 = (TString(ss)).Atof();
-        pos = ss.find(",")+1;
-        ss = ss.substr(pos,string::npos);
-        double y2 = (TString(ss)).Atof();
-
-        leg = new TLegend(x1,y1,x2,y2);
-    }
-
+    TLegend * leg = getTLegend(option);
+       
     RooArgSet pdfs("pdfs");
     RooArgSet fracs("fracs");
     RooArgSet totpdfs("totpdfs");
@@ -343,6 +325,9 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
 
     sumPdf->plotOn(pl,Normalization(sumAll, RooAbsReal::NumEvent));
 
+    return printFrame(pl,option,leg);
+
+    /*
     if(option.find("-LHCb")!=string::npos)
     {
         TPaveText * tbox = new TPaveText(gStyle->GetPadLeftMargin() + 0.05,
@@ -372,7 +357,7 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
     c->Print("fit_"+(TString)printname+".pdf");
     c->SetLogy();
     c->Print("fit_"+(TString)printname+"_log.pdf");
-
+*/
     return pl;
 }
 

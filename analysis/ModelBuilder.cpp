@@ -125,32 +125,13 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
         vector<string> regStr, double * range, RooFitResult * fitRes, TString Ytitle, RooRealVar * myvar)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
-    RooPlot* frame = NULL;
-    TLegend * leg = new TLegend(0.65,0.7,0.76,0.9);
-    if(opt.find("-leg")!=string::npos)
-    {
-        size_t pos = opt.find("-leg")+5;
-        string ss = opt.substr(pos,string::npos);
-        double x1 = (TString(ss)).Atof();
-        pos = ss.find(",")+1;
-        ss = ss.substr(pos,string::npos);
-        double y1 = (TString(ss)).Atof();
-        pos = ss.find(",")+1;
-        ss = ss.substr(pos,string::npos);
-        double x2 = (TString(ss)).Atof();
-        pos = ss.find(",")+1;
-        ss = ss.substr(pos,string::npos);
-        double y2 = (TString(ss)).Atof();
 
-        leg = new TLegend(x1,y1,x2,y2);
-    }
-
+    TLegend * leg = getTLegend(opt);
     if(!myvar) myvar = var;
 
+    RooPlot* frame = NULL;
     if(isValid())
     {
-        // Create main frame
-
         frame = GetFrame(myvar, data, model, opt, bins, range, regStr, Xtitle, Ytitle, leg, mycolors);
         if(opt.find("-noplot")!=string::npos) return frame;
         

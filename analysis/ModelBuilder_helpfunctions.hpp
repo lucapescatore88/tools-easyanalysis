@@ -145,6 +145,9 @@ Str2VarMap GetParamList(RooAbsPdf * pdf, RooArgSet obs = RooArgSet(), string opt
 bool checkModel(RooAbsPdf * model);
 
 
+TLegend * getTLegend(string options = "");
+RooPlot * printFrame(RooPlot * frame, string opt = "", TLegend * leg = NULL);
+
 /** \brief Allows to make nice plots of data and models including blinded plots
   @param var: variable to plot
   @param data: data to plot -> If no data use NULL
