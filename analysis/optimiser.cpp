@@ -1,3 +1,11 @@
+/*
+ * Author : Luca Pescatore
+ * Email  : luca.pescatore@cern.ch
+ * Date   : 17/12/2015
+ */
+
+
+
 #include "general_functions.hpp"
 #include "TGaxis.h"
 
@@ -10,7 +18,7 @@ using namespace RooFit;
 /**
   \class CutOptimiser.
   
-  Allows to opptimise any cut in an n-dimensional space is required.
+  Allows to optimise any cut in an n-dimensional space is required.
 
   */
 

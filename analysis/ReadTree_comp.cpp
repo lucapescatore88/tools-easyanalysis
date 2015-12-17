@@ -1,3 +1,11 @@
+/*
+ * Author : Luca Pescatore, Michal Kreps, Simone Bifani
+ * Email  : luca.pescatore@cern.ch
+ * Date   : 17/12/2015
+ */
+
+
+
 #include "ReadTree_comp.hpp"
 
 using namespace std;

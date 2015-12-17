@@ -1,3 +1,11 @@
+/*
+ * Author : Luca Pescatore
+ * Email  : luca.pescatore@cern.ch
+ * Date   : 17/12/2015
+ */
+
+
+
 #include "analyser.hpp"
 #include <algorithm>
 

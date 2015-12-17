@@ -1,3 +1,11 @@
+/*
+ * Author : Luca Pescatore, Michal Kreps, Simone Bifani
+ * Email  : luca.pescatore@cern.ch
+ * Date   : 17/12/2015
+ */
+
+
+
 #ifndef TREEREADER_HPP
 #define TREEREADER_HPP
 

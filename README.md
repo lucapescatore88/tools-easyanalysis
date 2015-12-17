@@ -1,31 +1,41 @@
 Easy analysis
 =============
 
-To make the tools on lxplus you can use
-
 Setup on lxplus :
 ```bash
 SetupLHCb v37r1 //(you can try the latest but is a gamble)
 make
 ```
 
-All here, simple. Then to use the tools you can
-add the headers (mainly analyser.hpp) to your cpp files.
+All here, and then got into the tools folder and type "make". 
+To use the tools you can add the headers (mainly analyser.hpp) 
+to your cpp files.
 
-Here below is attached the `Makefile` I use for my analysis.
-This is in a folder with a `src` subfolder containing `cpp` and `hpp` files.
-You also need to set a `TOOLDIR` ambient variables pointing to
-this tools directory. The makefile with make the tools automatically
-and all the `.cpp` executables in the src folder.
+Here below is attached a `Makefile` I use for my analysis.
+The tools can be anywhere, just define a TOOLSSYS variable
+with the full path to the tools folder.
 
+Structure:
+myanalysis
+-- src
 
+The `src` subfolder contains `cpp` files, independent 
+and each with a main. Each cpp file will be an executable.
+If you defined the TOOLSSYS variable the makefile will
+find the tools and make them automatically.
+If you don't define it, the Makefile it will assume
+that the tools are in the same folder.
 
 ```makefile
 ROOTCFLAGS = $(shell root-config --cflags --glibs)
 
-TOOLSDIR   = $(TOOLDIR) 
+TOOLSDIR   = $(PWD)
+ifneq ($(TOOLSSYS),)
+    TOOLSDIR   = $(TOOLSSYS) 
+endif
+
 ## This is the folder where you have the tools
-## You need to set the ambient variable by yourself
+## If not set it will assume they are in the same folder.
 
 #NBDIR      = $(NEUROBAYES)
 #NBLIBS     = $(NBDIR)/lib
