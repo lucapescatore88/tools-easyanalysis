@@ -830,7 +830,7 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
 }
 
 
-TLegend * getTLegend(string options)
+TLegend * getTLegend(string option)
 {
     TLegend * leg = new TLegend(0.65,0.7,0.76,0.9);
     if(option.find("-leg")!=string::npos)
@@ -855,7 +855,7 @@ TLegend * getTLegend(string options)
 
 
 
-RooPlot * printFrame(RooPlot * frame, string opt, TLegend * leg)
+RooPlot * printFrame(RooPlot * frame, string opt, TString name, RooRealVar * var, TString title, TString Xtitle, TLegend * leg, RooFitResult * fitRes)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
 
@@ -866,7 +866,7 @@ RooPlot * printFrame(RooPlot * frame, string opt, TLegend * leg)
     TH1 * residuals = NULL;
     string pullopt = "p";
     if(opt.find("resid")!=string::npos) pullopt = "r";
-    if(data && (opt.find("pulls")!=string::npos || opt.find("resid")!=string::npos)) residuals = GetPulls(frame,NULL,pullopt);
+    if(opt.find("pulls")!=string::npos || opt.find("resid")!=string::npos) residuals = GetPulls(frame,NULL,pullopt);
 
     // If "-H" option draw pulls distribution too
 
@@ -976,7 +976,7 @@ RooPlot * printFrame(RooPlot * frame, string opt, TLegend * leg)
         tbox->SetBorderSize(0);
         frame->addObject(tbox);
     }
-    if(data && fitRes && opt.find("-quality")!=string::npos )
+    if(fitRes && opt.find("-quality")!=string::npos )
     {
         TPaveText * tbox = new TPaveText(0.4, 0.5, 0.9, 0.6, "BRNDC");
         tbox->SetFillStyle(0);
@@ -993,10 +993,10 @@ RooPlot * printFrame(RooPlot * frame, string opt, TLegend * leg)
     if(opt.find("-none")==string::npos)
     {
         TString pname = name;
-        if(!data) pname = "model_"+name;
+        //if(!data) pname = "model_"+name;
         if(title!="") pname = title;
         pname = pname.ReplaceAll(" ","").ReplaceAll("#rightarrow","2").ReplaceAll("#","").ReplaceAll("__","_");
-        if(opt.find("-vname")!=string::npos) pname+=("_"+(TString)myvar->GetName());
+        if(opt.find("-vname")!=string::npos) pname+=("_"+(TString)var->GetName());
 
         if(opt.find("-eps")!=string::npos) c->Print(pname+logstr+".eps");
         else if(opt.find("-allformats")!=string::npos)

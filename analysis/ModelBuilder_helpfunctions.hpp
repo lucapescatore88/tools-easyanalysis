@@ -146,7 +146,7 @@ bool checkModel(RooAbsPdf * model);
 
 
 TLegend * getTLegend(string options = "");
-RooPlot * printFrame(RooPlot * frame, string opt = "", TLegend * leg = NULL);
+RooPlot * printFrame(RooPlot * frame, string opt = "", TString name = "", RooRealVar * var = NULL, TString title = "", TString Xtitle = "", TLegend * leg = NULL, RooFitResult * fitRes = NULL);
 
 /** \brief Allows to make nice plots of data and models including blinded plots
   @param var: variable to plot

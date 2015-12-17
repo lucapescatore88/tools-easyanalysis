@@ -325,7 +325,7 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
 
     sumPdf->plotOn(pl,Normalization(sumAll, RooAbsReal::NumEvent));
 
-    return printFrame(pl,option,leg);
+    return printFrame(pl,option,name,ana[k]->GetVariable(),"","",leg,fitResult);
 
     /*
     if(option.find("-LHCb")!=string::npos)

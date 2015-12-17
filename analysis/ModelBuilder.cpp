@@ -135,7 +135,7 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
         frame = GetFrame(myvar, data, model, opt, bins, range, regStr, Xtitle, Ytitle, leg, mycolors);
         if(opt.find("-noplot")!=string::npos) return frame;
         
-        return printFrame(frame,opt,leg);
+        return printFrame(frame,opt,name,var,title,Xtitle,leg,fitRes);
     }
 
     return NULL;
