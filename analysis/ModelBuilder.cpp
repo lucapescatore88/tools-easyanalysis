@@ -153,7 +153,13 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
 
         frame = GetFrame(myvar, data, model, opt, bins, range, regStr, Xtitle, Ytitle, leg, mycolors);
         if(opt.find("-noplot")!=string::npos) return frame;
+        
+        return printFrame(frame,opt,leg);
+    }
 
+    return NULL;
+}
+        /*
         TString logstr = "";
         if(opt.find("-log")!=string::npos) logstr = "_log";
         TCanvas * c = new TCanvas();
@@ -310,7 +316,7 @@ else cout << "**** ATTENTION: Model is not valid, probably not initialised. ****
 
 return frame;
 }
-
+*/
 
 
 

@@ -540,7 +540,7 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
         double * range, vector<string> regStr, TString Xtitle, TString Ytitle, TLegend * leg, vector <Color_t> custom_colors)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
- 	if (bins < 1) bins = 50;
+    if (bins < 1) bins = 50;
     double tmp_range[] = {var->getMin(), var->getMax()};
     if(!range) range = &tmp_range[0];	
     var->setRange("PlotRange",range[0],range[1]);
@@ -736,32 +736,32 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
                                 MoveToBack(), range_model, norm_range
                                 );
 
-		    /*
-                    if(opt.find("-fillbkg")!=string::npos) {
-		      cmdList.Add((RooCmdArg*) Components(curBkg).Clone());
-		      cmdList.Add((RooCmdArg*) DrawOption("F").Clone());
-		      cmdList.Add((RooCmdArg*) FillColor(colors[counter]).Clone());
-		      cmdList.Add((RooCmdArg*) FillStyle(1001).Clone());
-		      cmdList.Add((RooCmdArg*) LineColor(colors[counter]).Clone());
-		      cmdList.Add((RooCmdArg*) LineStyle(0).Clone());
-		      cmdList.Add((RooCmdArg*) LineWidth(0).Clone());
-		      cmdList.Add((RooCmdArg*) MoveToBack().Clone());
-		      cmdList.Add((RooCmdArg*) Name(myBkgName).Clone());
-		      cmdList.Add((RooCmdArg*) range_model.Clone());
-		      cmdList.Add((RooCmdArg*) norm_range.Clone());
-		    }
-                    else {
-		      cmdList.Add((RooCmdArg*) Components(curBkg).Clone());
-		      cmdList.Add((RooCmdArg*) DrawOption("L").Clone());
-		      cmdList.Add((RooCmdArg*) LineColor(colors[counter]).Clone());
-		      cmdList.Add((RooCmdArg*) LineStyle(styles[counter]).Clone());
-		      cmdList.Add((RooCmdArg*) MoveToBack().Clone());
-		      cmdList.Add((RooCmdArg*) Name(myBkgName).Clone());
-		      cmdList.Add((RooCmdArg*) range_model.Clone());
-		      cmdList.Add((RooCmdArg*) norm_range.Clone());
-		    }
-		    model->plotOn(frame, cmdList);
-		    */
+                    /*
+                       if(opt.find("-fillbkg")!=string::npos) {
+                       cmdList.Add((RooCmdArg*) Components(curBkg).Clone());
+                       cmdList.Add((RooCmdArg*) DrawOption("F").Clone());
+                       cmdList.Add((RooCmdArg*) FillColor(colors[counter]).Clone());
+                       cmdList.Add((RooCmdArg*) FillStyle(1001).Clone());
+                       cmdList.Add((RooCmdArg*) LineColor(colors[counter]).Clone());
+                       cmdList.Add((RooCmdArg*) LineStyle(0).Clone());
+                       cmdList.Add((RooCmdArg*) LineWidth(0).Clone());
+                       cmdList.Add((RooCmdArg*) MoveToBack().Clone());
+                       cmdList.Add((RooCmdArg*) Name(myBkgName).Clone());
+                       cmdList.Add((RooCmdArg*) range_model.Clone());
+                       cmdList.Add((RooCmdArg*) norm_range.Clone());
+                       }
+                       else {
+                       cmdList.Add((RooCmdArg*) Components(curBkg).Clone());
+                       cmdList.Add((RooCmdArg*) DrawOption("L").Clone());
+                       cmdList.Add((RooCmdArg*) LineColor(colors[counter]).Clone());
+                       cmdList.Add((RooCmdArg*) LineStyle(styles[counter]).Clone());
+                       cmdList.Add((RooCmdArg*) MoveToBack().Clone());
+                       cmdList.Add((RooCmdArg*) Name(myBkgName).Clone());
+                       cmdList.Add((RooCmdArg*) range_model.Clone());
+                       cmdList.Add((RooCmdArg*) norm_range.Clone());
+                       }
+                       model->plotOn(frame, cmdList);
+                       */
 
                     counter++;
 
@@ -828,6 +828,170 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
 {
     return GetFrame(var, data, model, opt, bins, NULL, vector<string>(1,"PlotRange"), Xtitle, Ytitle, leg, custom_colors);
 }
+
+
+RooPlot * printFrame(RooPlot * frame, string opt, TLegend * leg)
+{
+    transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
+
+    TString logstr = "";
+    if(opt.find("-log")!=string::npos) logstr = "_log";
+    TCanvas * c = new TCanvas();
+    if(opt.find("-bw")!=string::npos) c->SetGrayscale();
+    TH1 * residuals = NULL;
+    string pullopt = "p";
+    if(opt.find("resid")!=string::npos) pullopt = "r";
+    if(data && (opt.find("pulls")!=string::npos || opt.find("resid")!=string::npos)) residuals = GetPulls(frame,NULL,pullopt);
+
+    // If "-H" option draw pulls distribution too
+
+    if(opt.find("-H")!=string::npos)
+    {
+        TH1D * resH = NULL;
+        if(pullopt=="p") resH = new TH1D( "rH"+name, "Pulls distribution", 15, -5, 5 );
+        else resH = new TH1D( "rH", "", 15, -3, 3 );
+        for(int i = 0; i < residuals->GetNbinsX(); i++) resH->Fill(residuals->GetBinContent(i));
+        gStyle->SetOptStat(0);
+        gStyle->SetOptFit(1011);
+        resH->GetXaxis()->SetTitle("Pulls");
+        resH->GetYaxis()->SetTitle("Bins");
+        resH->Draw();
+        resH->Fit("gaus");
+        c->Print(name+"_pullsHist.pdf");
+    }
+
+    // "-andpulls" option draws pulls on the same canvas as the main frame otherwise 2 different pdfs are created
+
+    if(residuals && opt.find("-andpulls")!=string::npos)
+    {
+        TPad * plotPad = new TPad("plotPad", "", .005, .25, .995, .995);
+        TPad * resPad = new TPad("resPad", "", .005, .015, .995, .248);
+        plotPad->Draw();
+        resPad->Draw();
+
+        resPad->cd();
+
+        TAxis* yAxis = residuals->GetYaxis();
+        TAxis* xAxis = residuals->GetXaxis();
+        yAxis->SetNdivisions(504);
+        double old_size = yAxis->GetLabelSize();
+        yAxis->SetLabelSize( old_size / 0.33 );
+        yAxis->SetTitleSize( old_size * 3.6  );
+        yAxis->SetTitleOffset(0.3);
+        yAxis->SetTitle("Pulls");
+        xAxis->SetLabelSize( xAxis->GetLabelSize() / 0.33 );
+
+        resPad->cd();
+        residuals->Draw();
+
+        TLine *lc = new TLine(xAxis->GetXmin(),  0, xAxis->GetXmax(),  0);
+        TLine *lu = new TLine(xAxis->GetXmin(),  3, xAxis->GetXmax(),  3);
+        TLine *ld = new TLine(xAxis->GetXmin(), -3, xAxis->GetXmax(), -3);
+
+        lc->SetLineColor(kGray+2);
+        lu->SetLineColor(kGray+1);
+        ld->SetLineColor(kGray+1);
+
+        lc->SetLineStyle(2);
+        lu->SetLineStyle(2);
+        ld->SetLineStyle(2);
+
+        lc->Draw("same");
+        lu->Draw("same");
+        ld->Draw("same");
+
+        residuals->Draw("same");
+
+        plotPad->cd();
+        logstr+="_fitAndRes";
+    }
+    else if(residuals)
+    {
+        if(Xtitle!="") residuals->GetXaxis()->SetTitle(Xtitle);
+        else residuals->GetXaxis()->SetTitle(var->GetName());
+        residuals->GetYaxis()->SetTitle("pulls");
+        residuals->Draw();
+        if(opt.find("-eps")!=string::npos) c->Print(name+logstr+"_residuals.eps");
+        else c->Print(name+logstr+"_residuals.pdf");
+    }
+
+    // If set draw legend, box for fit failed warning, LHCb
+
+    if(opt.find("-log")!=string::npos) gPad->SetLogy();
+
+    if(leg && opt.find("-noleg")==string::npos)
+    { 
+        leg->SetFillStyle(0);
+        if(opt.find("-legf")!=string::npos)
+        {
+            leg->SetFillStyle(1001);
+            leg->SetFillColor(kWhite);
+        }
+        frame->addObject(leg);
+        leg->Draw("same");
+    }
+    if(opt.find("-LHCb")!=string::npos)
+    {
+        TPaveText * tbox = new TPaveText(gStyle->GetPadLeftMargin() + 0.05,
+            0.80 - gStyle->GetPadTopMargin(),
+            gStyle->GetPadLeftMargin() + 0.25,
+            0.97 - gStyle->GetPadTopMargin(),
+            "BRNDC");
+        if(opt.find("-LHCbDX")!=string::npos)
+        { 
+            tbox = new TPaveText(gStyle->GetPadRightMargin() + 0.63,
+                0.80 - gStyle->GetPadTopMargin(),
+                gStyle->GetPadRightMargin() + 0.83,
+                0.97 - gStyle->GetPadTopMargin(),
+                "BRNDC");
+        }
+        tbox->AddText("LHCb");
+        tbox->SetFillStyle(0);
+        tbox->SetTextAlign(12);
+        tbox->SetBorderSize(0);
+        frame->addObject(tbox);
+    }
+    if(data && fitRes && opt.find("-quality")!=string::npos )
+    {
+        TPaveText * tbox = new TPaveText(0.4, 0.5, 0.9, 0.6, "BRNDC");
+        tbox->SetFillStyle(0);
+        tbox->AddText(Form("edm = %e, covQual = %i)",fitRes->edm(),fitRes->covQual()));
+        tbox->SetBorderSize(0);
+        frame->addObject(tbox);
+    }
+
+    frame->Draw();
+
+
+    // Print
+
+    if(opt.find("-none")==string::npos)
+    {
+        TString pname = name;
+        if(!data) pname = "model_"+name;
+        if(title!="") pname = title;
+        pname = pname.ReplaceAll(" ","").ReplaceAll("#rightarrow","2").ReplaceAll("#","").ReplaceAll("__","_");
+        if(opt.find("-vname")!=string::npos) pname+=("_"+(TString)myvar->GetName());
+
+        if(opt.find("-eps")!=string::npos) c->Print(pname+logstr+".eps");
+        else if(opt.find("-allformats")!=string::npos)
+        {
+            c->Print(pname+logstr+".eps");
+            c->Print(pname+logstr+".pdf");
+            c->Print(pname+logstr+".C");
+            c->Print(pname+logstr+".png");
+        }
+        else c->Print(pname+logstr+".pdf");
+    }
+
+    if(residuals) delete residuals;
+    delete c;
+
+    return frame;
+}
+
+
+
 
 
 
