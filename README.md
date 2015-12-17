@@ -3,6 +3,7 @@ Easy analysis
 
 To make the tools on lxplus you can use
 
+Setup on lxplus :
 ```bash
 SetupLHCb v37r1 //(you can try the latest but is a gamble)
 make
