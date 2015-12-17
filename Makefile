@@ -1,6 +1,7 @@
 ROOTCFLAGS  = $(shell root-config --cflags --glibs)
 
-TOOLSDIR    = $(LHCBBHAM)/Tools
+#TOOLSDIR    = $(LHCBBHAM)/tools-easyanalysis
+TOOLSDIR    = $(PWD)
 
 CXX         = g++
 CXXFLAGS    = -g -fPIC -Wall -O2 $(ROOTCFLAGS) -lTMVA -lRooFit -lRooStats -I$(TOOLSDIR) -I$(TOOLSDIR)/analysis -L$(TOOLSDIR)/lib
@@ -39,7 +40,7 @@ clean:
 	@echo "Cleaning ..."
 	@rm -f $(TOOLSDIR)/lib/*.a
 
-veryclean:
+cleanall:
 	@echo "Cleaning ..."
 	@rm -f $(TOOLSDIR)/analysis/lib/*.o
 	@rm -f $(TOOLSDIR)/lib/*.a
