@@ -1,11 +1,3 @@
-/*
- * Author : Luca Pescatore
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
-
 #include "analyser.hpp"
 #include <algorithm>
 
@@ -18,6 +10,23 @@ double Scaler::_scale = 1.;
 
 string Analysis::pmode = "v";
 
+void Analysis::AddAllVariables()
+{
+	vector<variable * > myvars;
+	if(dataReader) myvars = dataReader->GetVarList();
+	else if(reducedTree)
+	{
+		TreeReader * reader = new TreeReader(reducedTree);
+		reader->Initialize();
+		myvars = reader->GetVarList();
+	}
+
+	for(auto v : myvars)
+	{
+		if(v->GetArraySize() > 1) continue;
+		if(v->name!=var->GetName()) AddVariable(v->name);
+	}
+}
 
 /*
    Function to unitialize the Analysis object before fitting
@@ -376,11 +385,13 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
     double range[2] = {minr, maxr};
     RooPlot *plot = (RooPlot*) PrintAndCalcChi2(nbins, range, option, mydata);
 
+    /*
     if(vars.size()>1)
     {
         for(size_t v = 1; v < vars.size(); v++)
             PrintVar(vars[v],nbins,option+"-vname");
     }
+	*/
 
     if(option.find("-hidesig") != string::npos) ((RooRealVar*) nsig)->setConstant(0);
 
@@ -388,20 +399,53 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
 }
 
 
-RooWorkspace * Analysis::SaveToRooWorkspace()
+RooWorkspace * Analysis::SaveToRooWorkspace(string option)
 {
     RooWorkspace * ws = new RooWorkspace("ws_"+name);
-    if (pmode == "v") cout << endl << name << ": SaveToRooWorkspace " << data << endl;    
+    if(option != "") ws->SetName("ws_"+name+"_"+option);
+    if (pmode == "v") cout << endl << name << ": SaveToRooWorkspace" << endl;
 
-    if(model) ws->import(*model);
-    if(data) ws->import(*data);
-    
+
+    if(option == "")
+    if(model)
+    {
+	ws->import(*model);
+	if (pmode == "v") cout << "model: " << model->GetName() << endl;
+    }
+
+    if(option == "sig")
+    if(sig)
+    {
+        ws->import(*sig);
+	if (pmode == "v") cout << "signal: " << sig->GetName() << endl;
+    }
+
+    if(option == "bkg")
+    if(bkg)
+    {
+        ws->import(*bkg);
+	if (pmode == "v") cout << "background: " << bkg->GetName() << endl;
+    }
+
+    if(data)
+    {
+        ws->import(*data);
+	if (pmode == "v") cout << "data: " << data->GetName() << endl;
+    }
+    /*
+    if (pmode == "v")
+    {
+        cout << endl;
+        ws->Print();
+        cout << endl;
+    }
+    */    
     return ws;
 }
 
 void Analysis::ImportModel(RooWorkspace * ws)
 {
-    if (pmode == "v") cout << endl << name << ": ImportModel" << endl;
+  if (pmode == "v") cout << endl << name << ": ImportModel" << endl << endl;
 
     bkg_fractions.clear();
     bkg_components.clear();
@@ -411,17 +455,15 @@ void Analysis::ImportModel(RooWorkspace * ws)
     while( (arg=(TObject *)it->Next()) )
     {
         string name = arg->GetName();
-	if (pmode == "v") cout << name << endl;
+	//if (pmode == "v") cout << name << endl;
         if(name.find("model")!=string::npos)
-	{
             model = (RooAbsPdf*)arg;
-	    if (pmode == "v") cout << "*** IMPORTED " << name << endl;
-	    printParams(model);
-	    if (pmode == "v") cout << "***" << endl;
-	}
+	
         else if (name.find("totsig")!=string::npos)
             sig = (RooAbsPdf*)arg;
-        else if (name.find("nsig")!=string::npos)
+        else if (name.find("totbkg")!=string::npos)
+            bkg = (RooAbsPdf*)arg;
+	    else if (name.find("nsig")!=string::npos)
             nsig = (RooAbsReal*)arg;
         else if (name.find("nbkg")!=string::npos)
         {
@@ -444,8 +486,39 @@ void Analysis::ImportModel(RooWorkspace * ws)
     if (pmode == "v")
     {
         cout << endl << name << ": PrintParams" << endl << endl;
-	ModelBuilder::PrintParams();
+	    ModelBuilder::PrintParams();
     }
+}
+
+void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
+{
+    if (pmode == "v") cout << endl << name << ": ImportModel" << endl;
+
+    TIterator * itSig = wsSig->componentIterator();
+    TObject * argSig;
+    while( (argSig=(TObject *)itSig->Next()) )
+    {
+        string name = argSig->GetName();
+	//if (pmode == "v") cout << name << endl;
+	if (name.find("totsig")!=string::npos)
+	    sig = (RooAbsPdf*)argSig;
+    }
+
+    TIterator * itBkg = wsBkg->componentIterator();
+    TObject * argBkg;
+    while( (argBkg=(TObject *)itBkg->Next()) )
+    {
+        string name = argBkg->GetName();
+	//if (pmode == "v") cout << "Importing... " << name << endl;
+        if (name.find("totbkg")!=string::npos)
+	{
+            bkg = (RooAbsPdf*)argBkg;
+	//	cout << "Found " << endl;
+	}
+    } 
+
+    init = true;
+    ForceValid();
 }
 
 void Analysis::ImportData(RooWorkspace * ws)
@@ -456,12 +529,9 @@ void Analysis::ImportData(RooWorkspace * ws)
     for (std::list<RooAbsData *>::iterator it=mylist.begin(); it != mylist.end(); ++it)
     {
         string name = (*it)->GetName();
-	if (pmode == "v") cout << name << endl;
+	//if (pmode == "v") cout << name << endl;
         if(name.find("data_")!=string::npos)
-	{
             data = (RooDataSet*)(*it);
-	    if (pmode == "v") cout << "*** IMPORTED " << name << endl;
-	}
     }
 
     if(!data) cout << "Data not found in work space" << endl;
@@ -799,7 +869,7 @@ void Analysis::SetBlindRegion(double min, double max)
 TTree * Analysis::Generate(int nevt, string option)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if(pmode=="v") cout << endl << name << ": Generating " << nevt << " events" << endl;
+    if(pmode=="v") cout << endl << name << ": Generating " << nevt << " events (" << option << ")" << endl;
 
     if(model)
     {
@@ -832,20 +902,47 @@ TTree * Analysis::Generate(int nevt, string option)
     else return NULL;
 }
 
-TTree * Analysis::Generate(int nsigevt, int nbkgevt, string option)
+TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if(pmode=="v") cout << endl << name << ": Generating " << nsigevt << " signal events and " << nbkgevt << " bkg events" << endl;
-
-    if(sig && !bkg_components.empty())
+    cout << fixed << setprecision(3);
+    if(pmode=="v") cout << endl << name << ": Generating " << nsigevt << " signal events and " << nbkgevt << " bkg events (" << option << ")" << endl;
+    
+    if(sig && bkg)
     {
         RooArgSet varList("varList_"+name);
         for(unsigned i = 0; i < vars.size(); i++) varList.add(*(vars[i]));
-        TTree * newTree = generate(&varList,sig,nsigevt,bkg,nbkgevt,option);
-        newTree->SetName("gen_"+name);
-        reducedTree = newTree;
-        if(option.find("-nodataset")==string::npos) GetDataSet("-recalc");
-        return reducedTree;
+
+        if(option.find("-useroofit")==string::npos) {
+
+            TTree * newTree = generate(&varList,sig,nsigevt,bkg,nbkgevt,option);
+            newTree->SetName("gen_"+name);
+            reducedTree = newTree;
+            if(option.find("-nodataset")==string::npos) GetDataSet("-recalc");
+            return reducedTree;
+        }
+        else
+        {
+            cout << "Generating toys with roofit function" << endl;
+            size_t posseed = option.find("-seed");
+            if(posseed!=string::npos)
+            {
+                int seed = ((TString)(option.substr(posseed+5))).Atof();
+                RooRandom::randomGenerator()->SetSeed(seed);
+            }
+            RooCmdArg ext = RooCmdArg::none();
+            if(option.find("-genextended")!=string::npos) ext = Extended(); 
+            TString dataname = "data_"+name;
+            if (data) dataname = data->GetName();
+
+	    double ntot = nsigevt+nbkgevt;
+	    double frac = nsigevt/ntot;
+	    RooRealVar * f_sig = new RooRealVar("f_sig","f_sig",frac);  
+            RooAbsPdf * tot = new RooAddPdf("total_pdf","total_pdf",RooArgSet(*sig, *bkg), RooArgSet(*f_sig));
+	    cout << "Generating nsig/ntot = " << f_sig->getVal() << endl;
+	    data = tot->generate(varList,ntot,ext);	
+            return NULL; 
+        }
     }
     else return NULL;
 }
@@ -857,81 +954,6 @@ TTree * Analysis::Generate(int nsigevt, int nbkgevt, string option)
    */
 
 
-RooDataSet *Analysis::CalcReducedSWeight(double min, double max, unsigned nbins, bool unbinned, string option)
-{
-    transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if (pmode == "v") cout << endl << name << ": CalcReducedSWeight " << option << endl;
-
-    if(option.find("-nofit")==string::npos) Fit(min, max, nbins, unbinned, option);
-
-    cout << endl;
-    PrintChi2();
-    cout << endl << endl;
-    cout << "Sig yield = " << nsig->getVal() << endl;
-    cout << "Bkg yield = " << nbkg->getVal() << endl;
-    cout << endl;
-
-    // Create new TTree with sWeights
-    TreeReader * reducedReader = new TreeReader(reducedTree);
-    TTree * sTree = (TTree*) reducedReader->CloneTree("sWeight");
-
-    float sW;
-    sTree->Branch("sW", &sW, "sW/F");
-
-    RooMsgService::instance().setGlobalKillBelow(RooFit::ERROR);
-
-    GetTotNBkg();
-
-    Long64_t nEntries = reducedReader->GetEntries();
-    for(Long64_t i = 0 ; i < nEntries ; ++i)
-    {
-        showPercentage(i, nEntries);
-
-        reducedReader->GetEntry(i);
-
-        float value = reducedReader->GetValue(var->GetName());
-        if (value < min || value > max) continue;
-
-        sW = GetReducedSWeight(value);
-        sTree->Fill();
-    }
-
-    cout << "sWeighted " << sTree->GetEntries() << " entries" << endl;
-
-    reducedTree = sTree;
-    CreateDataSet();
-
-    SetWeight("sW");
-
-    TCanvas *c = new TCanvas();
-    gStyle->SetOptStat(0);
-    sTree->Draw("sW");
-    c->Print((TString) name + "_sWeights.pdf");
-    sTree->Draw(var->GetName()+(TString)">>hhsW","sW");
-    TH1F * hhsW = (TH1F*)gPad->GetPrimitive("hhsW");
-    sTree->Draw(var->GetName()+(TString)">>hh_no_sW");
-    TH1F * hh = (TH1F*)gPad->GetPrimitive("hh_no_sW");
-    hh->SetLineColor(4);
-    hhsW->SetLineColor(1);
-    hh->Draw();
-    hhsW->Draw("same");
-    TLegend * leg = new TLegend(0.7,0.7,0.9,0.9);
-    leg->AddEntry(hh,"Original","l");
-    leg->AddEntry(hhsW,"sWeighted","l");
-    leg->Draw();
-    c->Print((TString) name + "_sWeighted.pdf");
-    delete leg;
-    delete hh;
-    delete hhsW;
-
-    reducedTree = sTree;
-    if(option.find("-recalc")!=string::npos) 
-        data = GetDataSet("-recalc");
-    delete c;
-
-    return data;
-}
-
 
 
 RooDataSet * Analysis::CalcSWeight(double min, double max, unsigned nbins, bool unbinned, string option)
@@ -939,17 +961,22 @@ RooDataSet * Analysis::CalcSWeight(double min, double max, unsigned nbins, bool 
     transform(option.begin(), option.end(), option.begin(), ::tolower);
     if (pmode == "v") cout << endl << name << ": CalcSWeight " << option << endl;
 
+    TString oldname = name;
+    if(option.find("-nofit")==string::npos)
+    {
+        name+=(TString)"_sW";
+	Fit(min, max, nbins, unbinned, option);
+    }
+    name = oldname;
 
-    if(option.find("-nofit")==string::npos) Fit(min, max, nbins, unbinned, option);
-
-    cout << endl;
-    PrintChi2();
     cout << endl << endl;
+    if(min == max) { min = var->getMin(); max = var->getMax(); }
     cout << "Sig yield = " << nsig->getVal() << endl;
     cout << "Bkg yield = " << nbkg->getVal() << endl;
     cout << endl;
 
     // Create new TTree with sWeights 
+    if(!reducedTree && data) reducedTree = (TTree *)data->tree();
     TreeReader * reducedReader = new TreeReader(reducedTree);
     TTree * sTree = (TTree*) reducedReader->CloneTree("sWeight");
 
@@ -963,6 +990,7 @@ RooDataSet * Analysis::CalcSWeight(double min, double max, unsigned nbins, bool 
     Long64_t nEntries = reducedReader->GetEntries();
 
     GetTotNBkg();
+    CalcTotBkg();
 
     double Vss = 0;
     double Vbs = 0;
@@ -1004,12 +1032,13 @@ RooDataSet * Analysis::CalcSWeight(double min, double max, unsigned nbins, bool 
         if (value < min || value > max) continue;
         var->setVal(value);
 
-        sWR = GetReducedSWeight(value);
-
         double b_pdf = bkg->getVal(*var);
         double s_pdf = sig->getVal(*var);
         double denom = syield*s_pdf + byield*b_pdf;
         sW = (invVss * s_pdf + invVbs * b_pdf) / denom;
+
+        sWR = GetReducedSWeight(value);
+
         sTree->Fill();
 
         //double sW_b = (invVbb * b_pdf + invVbs * s_pdf) / denom;
@@ -1023,39 +1052,112 @@ RooDataSet * Analysis::CalcSWeight(double min, double max, unsigned nbins, bool 
     cout << endl;
 
     reducedTree = sTree;
-    CreateDataSet();
-
-    SetWeight("sW");
-    //((RooRealVar*)weight)->setRange(-1,2);
-
+    
     TCanvas *c = new TCanvas();
     gStyle->SetOptStat(0);
+
     sTree->Draw("sW");
+
     c->Print((TString) name + "_sWeights.pdf");
-    sTree->Draw(var->GetName()+(TString)">>hhsW","sW");
-    TH1F * hhsW = (TH1F*)gPad->GetPrimitive("hhsW");
-    sTree->Draw(var->GetName()+(TString)">>hh_no_sW");
-    TH1F * hh = (TH1F*)gPad->GetPrimitive("hh_no_sW");
-    hh->SetLineColor(4);
-    hhsW->SetLineColor(1);
-    hh->Draw();
-    hhsW->Draw("same");
-    TLegend * leg = new TLegend(0.7,0.7,0.9,0.9);
-    leg->AddEntry(hh,"Original","l");
-    leg->AddEntry(hhsW,"sWeighted","l");
-    leg->Draw();
+
+    sTree->Draw(var->GetName()+(TString)">>hSWHisto","sW");
+    TH1D * hSWHisto = (TH1D*)gPad->GetPrimitive("hSWHisto");
+    sTree->Draw(var->GetName()+(TString)">>hHisto");
+    TH1D * hHisto = (TH1D*)gPad->GetPrimitive("hHisto");
+
+    hSWHisto->SetLineColor(1);
+    hHisto->SetLineColor(4);
+    hHisto->Draw("hist");
+    hSWHisto->Draw("hist same");
+
     c->Print((TString) name + "_sWeighted.pdf");
-    delete leg;
-    delete hh;
-    delete hhsW;
-
-    reducedTree = sTree;
-    if(option.find("-recalc")!=string::npos) 
-        data = GetDataSet("-recalc");
-    delete c;
-
+    
     return data;
 }
 
+RooDataSet * Analysis::CalcSWeightRooFit(double min, double max, unsigned nbins, bool unbinned, string option)
+{
+  transform(option.begin(), option.end(), option.begin(), ::tolower);
+  if (pmode == "v") cout << endl << name << ": CalcSWeightRooFit " << option << endl;
 
+  RooDataSet::setDefaultStorageType(RooAbsData::Tree);
 
+  if(option.find("-freeyields")!=string::npos)
+    cout << endl;
+
+  bool doInit = false;
+  vector<string> comps = { nsig->GetName() };
+  RooArgSet * yields = new RooArgSet(*nsig);
+  for(size_t bb = 0; bb < bkg_fractions.size(); bb++)
+  {
+    if(option.find("-freeyields")!=string::npos)
+    {
+	if(((string)typeid(*bkg_fractions[bb]).name()).find("RooFormulaVar")!=string::npos)
+	{
+	  cout << "Free Formula: " << bkg_fractions[bb]->GetName() << endl;
+	  bkg_fractions[bb] = new RooRealVar(bkg_fractions[bb]->GetName(), bkg_fractions[bb]->GetName(), ((RooRealVar*)bkg_fractions[bb])->getVal(), ((RooRealVar*)bkg_fractions[bb])->getVal() / 2., ((RooRealVar*)bkg_fractions[bb])->getVal() * 2.);
+	  doInit = true;
+	}
+        else
+	{
+	  cout << "Free Var:     " << bkg_fractions[bb]->GetName() << endl;
+	  ((RooRealVar*)bkg_fractions[bb])->setConstant(0);
+	}
+    }
+    yields->add(*bkg_fractions[bb]);
+    comps.push_back(bkg_fractions[bb]->GetName());
+  }
+
+  setConstant(model,var,comps,"except-contains");
+
+  if(doInit)
+    ModelBuilder::Initialize("");
+
+  TString oldname = name;
+  if(option.find("-nofit")==string::npos)
+  {
+    name+=(TString)"_sWRF";
+    Fit(min,max,nbins,unbinned,option);
+  }
+  name = oldname;
+
+  cout << endl;
+  cout << "Calculating sWeights: " << model->GetName() << endl;
+  cout << endl;
+
+  yields->Print();
+
+  SPlot *sPlot = new SPlot("splot","splot",*data,model,*yields);
+
+  reducedTree = (TTree*) data->store()->tree();
+
+  RooArgList sweights = (RooArgList) sPlot->GetSWeightVars();
+
+  TCanvas *c = new TCanvas();
+  gStyle->SetOptStat(0);
+
+  reducedTree->Draw(sweights[0].GetName()+(TString)">>hSWeights_"+sweights[0].GetName());
+  //TH1D *hSWeights = (TH1D*)gPad->GetPrimitive((TString)"hSWeights_"+sweights[0].GetName());
+
+  c->Print((TString) name + "_sWeights.pdf");
+
+  reducedTree->Draw(var->GetName()+(TString)">>hSWHisto_"+sweights[0].GetName(),sweights[0].GetName());
+  TH1D *hSWHisto = (TH1D*)gPad->GetPrimitive((TString)"hSWHisto_"+sweights[0].GetName());
+
+  reducedTree->Draw(var->GetName()+(TString)">>hHisto_"+sweights[0].GetName());
+  TH1D *hHisto = (TH1D*)gPad->GetPrimitive((TString)"hHisto_"+sweights[0].GetName());
+
+  hSWHisto->SetLineColor(1);
+  hHisto->SetLineColor(4);
+  hHisto->Draw("hist");
+  hSWHisto->Draw("hist same");
+
+  c->Print((TString) name + "_sWeighted.pdf");
+
+  cout << endl;
+  cout << "sWeighted " << reducedTree->GetEntries() << " entries" << endl;
+  cout << "Sum of weights = " << hSWHisto->Integral() << endl;
+  cout << endl;
+
+  return data;
+}

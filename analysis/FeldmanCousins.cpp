@@ -1,11 +1,3 @@
-/*
- * Author : Luca Pescatore
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
-
 #include "FeldmanCousins.hpp"
 #include "RooFitResult.h"
 #include "RooNLLVar.h"

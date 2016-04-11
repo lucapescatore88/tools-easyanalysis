@@ -1,11 +1,3 @@
-/*
- * Author : Luca Pescatore
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
-
 #ifndef __CINT__
 #include "RooGlobalFunc.h"
 #endif
@@ -69,7 +61,7 @@ class MultiAnalysis {
 	RooSimultaneous * combModel;
 	bool init;
 	RooFitResult * fitResult;
-    RooArgSet * constr;
+	RooArgSet * constr;
 
 	public:
 	
@@ -96,6 +88,8 @@ class MultiAnalysis {
     void SetCombData(RooSimultaneous * model) { combModel = model; };
 
     void ImportModel(RooWorkspace * ws);
+
+	void EnlargeYieldRanges(double factor);
 
     TString GetName() { return name; }
 	void SetName(TString _name) { name = _name; }
@@ -159,6 +153,9 @@ class MultiAnalysis {
 	void PrintCategories() { for(unsigned i = 0; i < categories.size(); i++) cout << categories[i] << endl; }
 	/// \brief Prints the sum of all datasets and models properly normalised 
         RooPlot * PrintSum(string option = "", TString dovar = "", string name = "", int nbins = 50);
+
+	void RandomizeInitialParams(string option = "");
+	void SetConstants(vector<RooDataSet *> input, int index = 0);
 
 	/** \brief Allows to Set an unique signal for all categories
 	 *  See Analysis::SetSignal()

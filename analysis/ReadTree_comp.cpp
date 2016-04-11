@@ -1,11 +1,3 @@
-/*
- * Author : Luca Pescatore, Michal Kreps, Simone Bifani
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
-
 #include "ReadTree_comp.hpp"
 
 using namespace std;
@@ -15,44 +7,83 @@ vector<string> TypeDB::branchIDs = vector<string>();
 bool TypeDB::init = false;
 
 string TreeReader::pmode = "v";
+string TreeReader::pfile = "v";
 
-void TreeReader::AddFile(const char *filename, Long64_t maxentries)
+
+
+void TreeReader::AddChain(TChain *chain)
 {
-    if( fChain )
+    if (fChain)
     {
-        if (!TFile::Open(filename)) return;
+        if (pmode=="v") cout << endl << "Adding chain" << endl << endl;
 
-        if( maxentries >0 )
-        {
-            fChain->Add(filename,maxentries);
-            cout << "Max chain entries set to " << maxentries << " per file" << endl;
-        }
-        else fChain->Add(filename);
+	TObjArray *fileElements = chain->GetListOfFiles();
+	TIter next(fileElements);
+	TChainElement *chEl = 0;
+	string fileName;
+	while ((chEl = (TChainElement*) next()))
+	{
+	    AddFile(chEl->GetTitle());
+	}
+
+	Initialize();
     }
-    if(pmode=="v") cout << "Number of trees in chain: " << fChain->GetNtrees() << endl;
 }
 
 
 
-
-void TreeReader::AddList(const char *filename)
+void TreeReader::AddFile(const char *fileName, const char* treeName, Long64_t maxEntries)
 {
-    if( fChain )
+    if (fChain)
     {
-        if(!ifstream(filename).good())
+        if (!TFile::Open(fileName)) return;
+	/*
+        if ( maxEntries > 0 )
         {
-            if(pmode=="v") cout << filename << " : No such file or directory" << endl;
+	    fChain->AddFile(fileName,maxEntries,treeName);
+            cout << "Max chain entries set to " << maxEntries << " per file" << endl;
+        }
+        else 
+	*/
+	fChain->AddFile(fileName,maxEntries,treeName);
+	if (pmode=="v") cout << "Adding file: " << fileName << endl;
+    }
+}
+
+
+
+void TreeReader::AddFriend(const char *fileName, const char* treeName)
+{
+    if (fChain)
+    {
+        if (!TFile::Open(fileName)) return;
+
+	if (pmode=="v") cout << endl << "Adding friend: " << treeName << endl << endl;
+
+	fChain->AddFriend(treeName, fileName);
+    }
+}
+
+
+
+void TreeReader::AddList(const char *fileName)
+{
+    if (fChain)
+    {
+        if (!ifstream(fileName).good())
+        {
+            if (pmode=="v") cout << fileName << " : No such file or directory" << endl;
             return;
         }
 
         ifstream listfile;
-        listfile.open(filename, ifstream::in);
+        listfile.open(fileName, ifstream::in);
 
         while(listfile.good())
         {
             char file[256];
             listfile.getline(file, 256);
-            if((TString) file == "")
+            if ((TString) file == "")
                 break;
             AddFile(file);
         }
@@ -65,9 +96,9 @@ void TreeReader::AddList(const char *filename)
 
 bool TreeReader::Initialize(vector <string> br, string opt)
 {
-    if(!init)
+    if (!init)
     {
-        if( !fChain )
+        if ( !fChain )
         {
             cout << endl;
             cout << "No tree to initialize" << endl;
@@ -76,7 +107,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
         }
 
         TObjArray *fileElements = fChain->GetListOfFiles();
-        if( !fileElements || ( fileElements->GetEntries() == 0 ))
+        if ( !fileElements || ( fileElements->GetEntries() == 0 ))
         {
             cout << endl;
             cout << "No file(s) to initialize" << endl;
@@ -111,33 +142,33 @@ bool TreeReader::Initialize(vector <string> br, string opt)
         if ( title.find("[")!=std::string::npos )
         {
             TLeaf * nelem = leaf->GetLeafCounter(arreysize);
-            if(arreysize == 1 && nelem != NULL) arreysize = nelem->GetMaximum() + 1; //search for maximum value of the lenght
+            if (arreysize == 1 && nelem != NULL) arreysize = nelem->GetMaximum() + 1; //search for maximum value of the lenght
         }
 
 
-        if(id >= 0)
+        if (id >= 0)
         {
             bool addVar = true;
-            if(br.size()>0)
+            if (br.size()>0)
             {
                 addVar = false;
                 for(unsigned b = 0; b < br.size(); b++)
                 {
-                    if(opt == "names" || opt == "except")
+                    if (opt == "names" || opt == "except")
                     {
-                        if(br[b] == brname) { addVar = true; break;}
+                        if (br[b] == brname) { addVar = true; break;}
                     }
-                    else if(opt.find("contains")!=string::npos)
+                    else if (opt.find("contains")!=string::npos)
                     {
-                        if((string(brname)).find(br[b])!=string::npos) { addVar = true; break;}
+                        if ((string(brname)).find(br[b])!=string::npos) { addVar = true; break;}
                     }
-                    else if(opt.find("except")==string::npos) cout << "Option " << opt << " not found" << endl;
+                    else if (opt.find("except")==string::npos) cout << "Option " << opt << " not found" << endl;
                 }
 
-                if(opt.find("except")!=string::npos) addVar = !addVar;
+                if (opt.find("except")!=string::npos) addVar = !addVar;
             }
 
-            if(addVar)
+            if (addVar)
             {
                 variable * tmpVar = new variable(id,arreysize);
 
@@ -159,7 +190,13 @@ bool TreeReader::Initialize(vector <string> br, string opt)
 
     init = true;
     continueSorting = true;
-    if(pmode=="v") cout << endl << "Set up " << varList.size() << " / " << nBranches << " branches" << endl;
+
+    if ((init) && (pmode=="v"))
+    {
+        cout << endl << "Number of trees in chain: " << fChain->GetNtrees() << endl;
+	cout << endl << "Set up " << varList.size() << " / " << nBranches << " branches" << endl;
+	cout << endl << "Read in " << fChain->GetEntries() << " events" << endl << endl;
+    }
 
     return true;
 }
@@ -181,21 +218,21 @@ void TreeReader::FillNewTree(TTree* tree, TCut cuts, double frac, void (*addFunc
 {
     fChain->Draw(">>skim", cuts, "entrylist");
     TEntryList *skim = (TEntryList*)gDirectory->Get("skim");
-    if(skim == NULL) return;
+    if (skim == NULL) return;
     int nEntries = skim->GetN();
     SetEntryList(skim);
 
     BranchNewTree(tree);
-    if(addFunc) addFunc(this,tree,true);
+    if (addFunc) addFunc(this,tree,true);
 
-    if(pmode=="v") cout << "N candidates = " << nEntries << endl;
-    if(frac > 0 && frac < 1) { nEntries *= frac; if(pmode=="v") cout << "Using only " << 100*frac << "% of the entries" << endl; }
-    else if (frac > 1) { nEntries = frac; if(pmode=="v") cout << "Using only " << frac << " entries" << endl; }
+    if (pmode=="v") cout << "N candidates = " << nEntries << endl;
+    if (frac > 0 && frac < 1) { nEntries *= frac; if (pmode=="v") cout << "Using only " << 100*frac << "% of the entries" << endl; }
+    else if (frac > 1) { nEntries = frac; if (pmode=="v") cout << "Using only " << frac << " entries" << endl; }
 
     for(Long64_t i = 0 ; i < nEntries ; i++)
     {
         GetEntry(i,skim);
-        if(addFunc) addFunc(this,tree,false);
+        if (addFunc) addFunc(this,tree,false);
         tree->Fill();
     }
 
@@ -208,7 +245,7 @@ void TreeReader::FillNewTree(TTree* tree, TCut cuts, double frac, void (*addFunc
 
 TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
 {
-    if(!init)
+    if (!init)
     {
         cout << "*** WARNING: tree " << fChain->GetName() << " not initialized" << endl;
         return NULL;
@@ -232,10 +269,10 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
         /*
            Long64_t nPas = fChain->GetEntries(cut);
 
-           if (pmode == "v") cout << "N Pas = " << nPas << " (" << (double) nPas / (double) nTot * 100 << "%)" << endl;
+           if (pmode == "v") cout << "N Pas = " << fixed << setprecision(0) << nPas << " (" << fixed << setprecision(6) << (double) nPas / (double) nTot * 100 << "%)" << endl;
 
            if (nTot == nPas) cut = "";
-           */
+	*/
     }
 
     if (frac == -1)
@@ -276,7 +313,7 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
     if (nTot != 0) if (pmode == "v")
     {
         Long64_t nPas = tTree->GetEntries();
-        cout << "N Pas = " << nPas << " (" << (double) nPas / (double) nTot_ * 100 << "%)" << endl;
+        cout << "N Pas = " << fixed << setprecision(0) << nPas << " (" << fixed << setprecision(6) << (double) nPas / (double) nTot_ * 100 << "%)" << endl;
         cout << endl;
     }
 
@@ -288,23 +325,31 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
 
 void TreeReader::PrintListOfFiles()
 {
-    if(!init)
+    if (pfile == "") return;
+
+    if (!init)
     {
         cout << "*** WARNING: tree " << fChain->GetName() << " not initialized" << endl;
         return;
     }
 
-    TObjArray *fileElements = fChain->GetListOfFiles();
-    TIter next(fileElements);
-    TChainElement *chEl = 0;
-
-    cout << endl;
-    cout << "List of files" << endl;
-    while ((chEl = (TChainElement*) next()))
+    if (pmode=="v")
     {
-        cout << chEl->GetTitle() << endl;
+        TObjArray *fileElements = fChain->GetListOfFiles();
+
+	if (fileElements) {
+            TIter next(fileElements);
+	    TChainElement *chEl = 0;
+
+	    cout << endl;
+	    cout << "List of files" << endl;
+	    while ((chEl = (TChainElement*) next()))
+	    {
+		cout << chEl->GetTitle() << endl;
+	    }
+	    cout << endl;
+	}
     }
-    cout << endl;
 
     return;
 }
@@ -330,7 +375,7 @@ bool TreeReader::partialSort()
         {
             for (unsigned j = 0; j < i; ++j)  // Makes sense to swap only to earlier place
             {
-                if( varGets > varList[j]->nGets )
+                if ( varGets > varList[j]->nGets )
                 {
                     variable* tmp = varList[i];
                     varList[i] = varList[j];

@@ -1,12 +1,5 @@
-/*
- * Author : Luca Pescatore
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
-
 #include "general_functions.hpp"
+#include "RooAddPdf.h"
 #include "TGaxis.h"
 
 using namespace std;
@@ -96,16 +89,27 @@ TTree * generate(RooArgSet * set, RooAbsPdf * pdf, int nevt, string opt)
 
 
 
-TTree * generate(RooArgSet * set, RooAbsPdf * pdfSig, int nsig, RooAbsPdf * pdfBkg, int nbkg, string opt)
+TTree * generate(RooArgSet * set, RooAbsPdf * pdfSig, float nsig, RooAbsPdf * pdfBkg, float nbkg, string opt)
 {
-    TTree * t_Sig = generate(set, pdfSig, nsig, opt);
+    /*
+	TTree * t_Sig = generate(set, pdfSig, nsig, opt);
     TTree * t_Bkg = generate(set, pdfBkg, nbkg, opt);
+
+    cout << "Generated: " << t_Sig->GetEntries() << " signal and " << t_Bkg->GetEntries() << " background" << endl;
 
     TList * list = new TList;
     list->Add(t_Sig);
     list->Add(t_Bkg);
 
     return TTree::MergeTrees(list);
+	*/
+	
+	double ntot = nsig+nbkg;
+	double frac = nsig / ntot;
+	RooRealVar * f_sig = new RooRealVar("f_sig","f_sig",frac);
+	RooAbsPdf * tot = new RooAddPdf("total_pdf","total_pdf",RooArgSet(*pdfSig, *pdfBkg), RooArgSet(*f_sig));
+	cout << "Generating nsig/ntot = " << f_sig->getVal() << endl;	
+	return generate(set, tot, ntot, opt);
 }
 
 

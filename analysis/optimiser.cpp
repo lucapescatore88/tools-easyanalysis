@@ -1,11 +1,3 @@
-/*
- * Author : Luca Pescatore
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
-
 #include "general_functions.hpp"
 #include "TGaxis.h"
 
@@ -18,7 +10,7 @@ using namespace RooFit;
 /**
   \class CutOptimiser.
   
-  Allows to optimise any cut in an n-dimensional space is required.
+  Allows to opptimise any cut in an n-dimensional space is required.
 
   */
 
@@ -211,22 +203,22 @@ TGraph * reorderTGraph(TGraph * gr)
  * and then given to the optimizer using SetBkgFunctions(&f) or SetSigFunctions(&f).
  */
 
-double get_signal(TTree * tree, TString plot, TString cut, TString weight, double norm, TH1F ** hhout)
+double get_signal(TTree * tree, TString plot, TString cut, TString weight, double norm)
 {
     static int iS = 0;
     if (weight != "") tree->Draw(plot + ">>" + Form("hS_%d", iS), weight + " * (" + cut + ")", "e");
     else tree->Draw(plot + ">>" + Form("hS_%d", iS), cut, "e");
     TH1F * hh = (TH1F*) gPad->GetPrimitive(Form("hS_%d", iS));
-    if(hhout) (*hhout) = hh; iS++;
-    return norm * (*hhout)->Integral();
+    iS++;
+    return norm * hh->Integral();
 }
 
-double get_background(TTree * tree, TString plot, TString cut, TString weight, double norm, TH1F ** hhout)
+double get_background(TTree * tree, TString plot, TString cut, TString weight, double norm)
 {
     static int iB = 0;
     tree->Draw(plot + ">>" + Form("hB_%d", iB), cut , "e");
     TH1F *hh = (TH1F*) gPad->GetPrimitive(Form("hB_%d", iB));
-    if(hhout) (*hhout) = hh; iB++;
+    iB++;
     return norm * hh->Integral(); 
 }
 /**
@@ -320,14 +312,12 @@ CutOptimizer::CutOptimizer(TString _analysis, TTree *_treeSig, TTree *_treeBkg,
     TBranch* branch = (TBranch*)branches->At(0);
     vplot = branch->GetName();
 
-    totS = get_sig(treeSig,vplot,(TString) (baseSigCut),MCweight,sigNorm,NULL);
-    totB = get_bkg(treeBkg,vplot,(TString) (baseBkgCut),"",bkgNorm,NULL);
+    totS = get_sig(treeSig,vplot,(TString) (baseSigCut),MCweight,sigNorm);
+    totB = get_bkg(treeBkg,vplot,(TString) (baseBkgCut),"",bkgNorm);
 
     cout << "S Tot = " << totS << endl;
     cout << "B Tot = " << totB << endl;
     cout << endl;
-
-    ofile->mkdir("distributions");
 }
 
 
@@ -360,25 +350,8 @@ void CutOptimizer::scan_points(string option)
         if(option.find("-noperc")==string::npos) showPercentage(i, n_pts, 0, n_pts);
         TString select = subStrings(cut_to_optimize,varnames,pts_to_scan[i]);
 
-        TH1F * hS = NULL, * hB = NULL;
-        double S = get_sig(treeSig,vplot,(TString) (baseSigCut + (TCut) select),MCweight,sigNorm,&hS);
-        double B = get_bkg(treeBkg,vplot,(TString) (baseBkgCut + (TCut) select),"",bkgNorm,&hB);
-
-        TString selname = select;
-        selname = selname.ReplaceAll("&&","_AND_").ReplaceAll(" ","").ReplaceAll("(","").ReplaceAll(")","").ReplaceAll("TMath::","").ReplaceAll("*","_x_");
-        ofile->cd("distributions");
-        if(hS)
-        {
-            cout << "Saving signal" << endl;
-            hS->SetTitle(select);
-            hS->Write("selection_"+selname+"_sig");
-        }
-        if(hB)
-        {
-            hB->SetTitle(select);
-            hB->Write("selection_"+selname+"_bkg");
-        }
-        ofile->cd();
+        double S = get_sig(treeSig,vplot,(TString) (baseSigCut + (TCut) select),MCweight,sigNorm);
+        double B = get_bkg(treeBkg,vplot,(TString) (baseBkgCut + (TCut) select),"",bkgNorm);
 
         double eff    = S / totS;
         double P      = S / (S + B);

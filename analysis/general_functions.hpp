@@ -1,11 +1,3 @@
-/*
- * Author : Luca Pescatore
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
-
 #ifndef GENERAL_FUNCTIONS_HPP
 #define GENERAL_FUNCTIONS_HPP
 
@@ -59,7 +51,7 @@ using namespace RooFit;
 bool genRndm(RooRealVar * var, RooCurve * curve, double * xval, double ymax, TRandom3 * rdm_x = new TRandom3(0), double smear = -1);
 
 TTree * generate(RooArgSet * set, RooAbsPdf * pdf, int nevt, string opt = "");
-TTree * generate(RooArgSet * set, RooAbsPdf * pdfSig, int nsig, RooAbsPdf * pdfBkg, int nbkg, string opt = "");
+TTree * generate(RooArgSet * set, RooAbsPdf * pdfSig, float nsig, RooAbsPdf * pdfBkg, float nbkg, string opt = "");
 RooDataSet * generateDataSet(TString name, RooArgSet * set, RooAbsPdf * pdfSig, int nsig, RooAbsPdf * pdfBkg, int nbkg, string opt = "");
 RooDataSet * generateDataSet(TString name, RooArgSet * set, RooAbsPdf * pdf, int nevt, string opt = "");
 

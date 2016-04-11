@@ -1,10 +1,3 @@
-/*
- * Author : Luca Pescatore
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
 #ifndef __CINT__
 #include "RooGlobalFunc.h"
 #endif
@@ -248,6 +241,7 @@ class Analysis : public ModelBuilder {
         vars.push_back(v); 
     }
 	void AddVariable(TString vname) { RooRealVar * v = new RooRealVar(vname,vname+"__var__",0.); vars.push_back(v); }
+	void AddAllVariables();
 	bool isValid() { return init; }
 
 	/** Function to unitialize the Analysis object before fitting
@@ -268,18 +262,19 @@ class Analysis : public ModelBuilder {
 	void SetCuts( TCut * _cuts ) { cuts = _cuts; }
 	void SetCuts( TString _cuts ) { TCut tmpcut = (TCut)_cuts; cuts = &tmpcut; }
 	
-    RooWorkspace * SaveToRooWorkspace();
+    RooWorkspace * SaveToRooWorkspace(string option = "");
     void ImportModel(RooWorkspace * ws);
+    void ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg);
     void ImportData(RooWorkspace * ws);
 
    
     RooDataSet * GetDataSet( string opt = "" )
-	{
-		if(opt.find("-recalc")!=string::npos || !data) return CreateDataSet(opt);
-		else return data;
-	}
-	TH1 * GetHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", TH1 * htemplate = NULL)
-	{ return CreateHisto(min,max,nbin,_cuts,_weight); }
+    {
+	if(opt.find("-recalc")!=string::npos || !data) return CreateDataSet(opt);
+	else return data;
+    }
+    TH1 * GetHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", TH1 * htemplate = NULL)
+    { return CreateHisto(min,max,nbin,_cuts,_weight); }
 
     void AddConstraint(RooAbsReal * pdfconst) { constr->add(*pdfconst); }
     void AddGaussConstraint(TString name, double mean, double sigma);
@@ -307,7 +302,7 @@ class Analysis : public ModelBuilder {
 	 * <br> "-seed(n)":  To set a specific seed
 	 * <br> "-smear(r)": "r" is a double interpreted as resolution. The generated events will be gaussian smeared by this resolution.
 	 **/
-	TTree * Generate(int nsigevt, int nbkgevt, string opt = "-subtree");
+	TTree * Generate(double nsigevt, double nbkgevt, string opt = "-subtree");
 
 /** \brief Allows to apply cuts on "dataReader" and returnes a tree containing only events which pass the cut.
   @param substtree: if you want to set the three obtained as "reducedTree" (default = true)
@@ -444,6 +439,11 @@ class Analysis : public ModelBuilder {
 	//Returns chi2 probability
 	double GetProb();
 
+	RooDataSet * GetParamsVariations(int nvariations = 10000)
+	{
+		return ModelBuilder::GetParamsVariations(nvariations,m_fitRes);
+	}
+
 	/** \brief Calculates S-weight for the data and model set
   		The function will perform a fit but it could help to Fit first anyway.
 	 	@param min,max: Calculates S-weight only in [min,max]
@@ -453,7 +453,7 @@ class Analysis : public ModelBuilder {
 		"-nofit" doesn't perform the fit
 	 **/
 	RooDataSet * CalcSWeight(double min = 0, double max = 0., unsigned nbins = 50, bool unbinned = false, string option = "");
-	RooDataSet * CalcReducedSWeight(double min = 0, double max = 0., unsigned nbins = 50, bool unbinned = false, string option = "");
+	RooDataSet * CalcSWeightRooFit(double min = 0, double max = 0., unsigned nbins = 50, bool unbinned = false, string option = "");
 };
 
 

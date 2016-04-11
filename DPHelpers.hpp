@@ -2,8 +2,7 @@
 #define DPHELPERS_HH
 
 #include "TLorentzVector.h"
-//#include "pkmumu_functions.hpp"
-
+#include "pkmumu_functions.hpp"
 namespace DPHelpers
 {
   double daughterMomentum(double mR, double m1, double m2);

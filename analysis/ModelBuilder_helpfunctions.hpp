@@ -1,11 +1,3 @@
-/*
- * Author : Luca Pescatore
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
-
 #ifndef MODEL_BUILDER_FUNCTIONS_HPP
 #define MODEL_BUILDER_FUNCTIONS_HPP
 
@@ -152,9 +144,6 @@ Str2VarMap GetParamList(RooAbsPdf * pdf, RooArgSet obs = RooArgSet(), string opt
 
 bool checkModel(RooAbsPdf * model);
 
-
-TLegend * getTLegend(string options = "");
-RooPlot * printFrame(RooPlot * frame, string opt = "", TString name = "", RooRealVar * var = NULL, TString title = "", TString Xtitle = "", TLegend * leg = NULL, RooFitResult * fitRes = NULL);
 
 /** \brief Allows to make nice plots of data and models including blinded plots
   @param var: variable to plot

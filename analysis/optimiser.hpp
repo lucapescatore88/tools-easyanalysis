@@ -1,11 +1,3 @@
-/*
- * Author : Luca Pescatore
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
-
 #ifndef OPTIMISER_HPP
 #define OPTIMISER_HPP
 
@@ -69,11 +61,11 @@ void buildComb(const vector< double > &elms, vector<vector<double> > &result, st
 void buildComb(int min, int max, int k, vector<vector<double> > &result, string opt = "");
 
 
-double get_signal(TTree * tree, TString plot, TString cut, TString weight, double norm, TH1F ** hhout = NULL);
-double get_background(TTree * tree, TString plot, TString cut, TString weight, double norm, TH1F ** hhout = NULL);
+double get_signal(TTree * tree, TString plot, TString cut, TString weight, double norm);
+double get_background(TTree * tree, TString plot, TString cut, TString weight, double norm);
 
 
-typedef  double (*FUNC_GETN_PTR)(TTree *, TString, TString, TString, double, TH1F **);
+typedef  double (*FUNC_GETN_PTR)(TTree *, TString, TString, TString, double);
 
 
 class CutOptimizer {
@@ -130,13 +122,13 @@ class CutOptimizer {
     void SetBkgFunction(FUNC_GETN_PTR my_get_bkg)
     {
         get_bkg = my_get_bkg;
-        totB = get_bkg(treeBkg,vplot,(TString) (baseBkgCut),"",bkgNorm,NULL);
+        totB = get_bkg(treeBkg,vplot,(TString) (baseBkgCut),"",bkgNorm);
     }
 
     void SetSigFunction(FUNC_GETN_PTR my_get_sig)
     {
         get_sig = my_get_sig;
-        totS = get_sig(treeSig,vplot,(TString) (baseSigCut),MCweight,sigNorm,NULL);
+        totS = get_sig(treeSig,vplot,(TString) (baseSigCut),MCweight,sigNorm);
     }
 
     void ResetSteps(unsigned nsteps);

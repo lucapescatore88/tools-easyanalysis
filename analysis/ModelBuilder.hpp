@@ -1,11 +1,3 @@
-/*
- * Author : Luca Pescatore, Simone Bifani
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
-
 #ifndef MODEL_BUILDER_HPP
 #define MODEL_BUILDER_HPP
 
@@ -469,6 +461,9 @@ class ModelBuilder {
     void ClearBkgList() { bkg_components.clear(); bkg_fractions.clear(); }
     void ResetVariable() { var->setVal(tmpvar->getVal()); var->setRange(tmpvar->getMin(),tmpvar->getMax()); };
 
+    RooAbsPdf * GetParamsGaussian(RooFitResult * fitRes);
+    RooDataSet * GetParamsVariations(int nvariations = 10000, RooFitResult * fitRes = NULL);
+
     ////\brief Return true if the model was correctly built and initialized
     bool isValid() { return isvalid; }
     //bool isExtended() { return extended; }
@@ -507,6 +502,7 @@ class ModelBuilder {
      * Returns a RooAbsReal variable which is a RooFormulaVar built as the sum of all bkg yields.
      */
     RooAbsReal * GetTotNBkg();
+    RooAbsPdf * CalcTotBkg();
     RooAbsReal * GetNSigPtr() { return nsig; }
     ///\brief Returns a Str2VarMap object containing all paramters only of the signal PDF 
     Str2VarMap GetSigParams(string opt = "");

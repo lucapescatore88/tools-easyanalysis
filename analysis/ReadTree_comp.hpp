@@ -1,11 +1,3 @@
-/*
- * Author : Luca Pescatore, Michal Kreps, Simone Bifani
- * Email  : luca.pescatore@cern.ch
- * Date   : 17/12/2015
- */
-
-
-
 #ifndef TREEREADER_HPP
 #define TREEREADER_HPP
 
@@ -19,6 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <cstring>
+#include <iomanip>
+#include <sstream>
 
 #include "TROOT.h"
 #include "TBranch.h"
@@ -95,7 +90,7 @@ class TypeDB {
         else return (string)"";
     }
 
-	static inline int getType(const char * name)
+	static inline int getType(const char *name)
 	{
 		if(!init) { getInstance(); }
 		for (unsigned i = 0; i < names.size(); ++i)
@@ -156,22 +151,22 @@ class variable {
 	int nGets;     ///Counter to keep track of how may times the variable is accessed 
 
 	union {
-		Bool_t * myBool;
-		Int_t * myInt;
-		unsigned * myUint;
-		Float_t * myFloat;
-		Double_t * myDouble;
-		Long64_t * myLong;
-		ULong64_t * myULong;
-		Char_t * myChar;
-		UChar_t * myUChar;
-		Short_t * myShort;
-		UShort_t * myUShort;
-        void * address;
+		Bool_t    *myBool;
+		Int_t     *myInt;
+		unsigned  *myUint;
+		Float_t   *myFloat;
+		Double_t  *myDouble;
+		Long64_t  *myLong;
+		ULong64_t *myULong;
+		Char_t    *myChar;
+		UChar_t   *myUChar;
+		Short_t   *myShort;
+		UShort_t  *myUShort;
+	        void      *address;
 	} value;
 
 
-	variable( const char * _type, int _arraysize = 1):
+	variable(const char *_type, int _arraysize = 1):
 		arraySize(_arraysize), nGets(0)
 	{
 		type = TypeDB::getType(_type);
@@ -188,7 +183,7 @@ class variable {
 	void SetType(unsigned _type) { type = _type; }
 	unsigned GetArraySize() { return arraySize; }
 	unsigned GetType() { return type; }
-    string GetTypeName() { return TypeDB::getTypeName(type); }
+        string GetTypeName() { return TypeDB::getTypeName(type); }
 	template <typename T = double> T GetValue(int iValue)
 	{
         switch (type)
@@ -208,7 +203,7 @@ class variable {
 		}
 	}
 
-	template < typename T > T * GetPtr()
+	template < typename T > T *GetPtr()
 	{
 		switch (type)
 		{
@@ -234,8 +229,8 @@ class varEq : public std::unary_function<variable*, bool>
 {
 	string s;
 	public:
-	explicit varEq(const char * &ss): s(ss) {}
-	inline bool operator() (const variable* c) const
+	explicit varEq(const char *&ss): s(ss) {}
+	inline bool operator() (const variable *c) const
 	{ return s.compare(c->name) ?  false : true; }
 };
 
@@ -246,7 +241,7 @@ class varEq : public std::unary_function<variable*, bool>
 
 class TreeReader {
 
-	TChain* fChain;                   
+	TChain *fChain;                   
 	///List of variables in the tree with address pointers (filled by Initialize())
 	vector < variable * > varList;
 
@@ -259,33 +254,45 @@ class TreeReader {
 	bool selected;
 
 	static string pmode;
+	static string pfile;
 
 	public:
 
 
+	/// \brief Empty onstructor
+	
+	TreeReader():
+		nGets(0), continueSorting(true), init(true), selected(false)
+	{
+	        fChain = new TChain();
+		return;
+	}
+
 	/// \brief Constructor with an existing TTree
 	
-	TreeReader(TTree * tree):
+	TreeReader(TTree *tree):
 		nGets(0), continueSorting(true), init(true), selected(false)
 	{
 		fChain = (TChain*) tree;
+		SetPrintFileLevel("");
 		Initialize();
 		return;
 	}
 
 	/// \brief Constructor with an existing TChain
 	
-	TreeReader(TChain * chain):
+	TreeReader(TChain *chain):
 		nGets(0), continueSorting(true), init(true), selected(false)
 	{
 		fChain = chain;
+		SetPrintFileLevel("");
 		Initialize();
 		return;
 	}
 
 	/// \brief Constructor with the name of a tree (then you can add many filesusing AddFile(namefile) )
 
-	TreeReader(const char *  treeName = NULL):
+	TreeReader(const char *treeName = NULL):
 		fChain(new TChain()), nGets(0), continueSorting(true), init(false), selected(false)
 	{
 		if(treeName) fChain->SetName(treeName);
@@ -293,7 +300,7 @@ class TreeReader {
 
 	/// \brief Constructor with the name of a TTree "treeName" contained in one single file "fileName"
 	
-	TreeReader(const char *  treeName, const char *  fileName):
+	TreeReader(const char *treeName, const char *fileName):
 		fChain(new TChain()), nGets(0), continueSorting(true), init(false), selected(false)
 	{
 		fChain->SetName(treeName);
@@ -311,22 +318,33 @@ class TreeReader {
 
 	static void SetPrintLevel( string pm ) { pmode = pm; }
 	static string GetPrintLevel( ) { return pmode; }
+	static void SetPrintFileLevel( string pm ) { pfile = pm; }
+	static string GetPrintFileLevel( ) { return pfile; }
 
 	/** \brief Function to add files to the internal TChain
 	 *
 	 * Remember to initialize after adding new Files!
 	 *
-	 * @param maxentries: Reads only entries up to "maxentries". Reads all if maxentries = -1 (default)
 	 *	*/
 
-	void AddFile(const char *filename, Long64_t maxentries =-1);	
+        void AddChain(TChain *chain);
+
+	/** \brief Function to add a chain to the internal TChain
+	 *	*/
+
+        void AddFile(const char *fileName, const char *treeName = "", Long64_t maxEntries = -1);
+
+	/** \brief Function to add a friend to the internal TChain
+	 *	*/
+
+        void AddFriend(const char *fileName, const char *treeName = "");
 
 	/** \brief Function to add a list of files to the internal TChain
 	 *
 	 * Remember to initialize after adding new Files!
 	 *	*/
 
-	void AddList(const char *filename);	
+	void AddList(const char *fileName);	
 
 	Long64_t GetEntries() { return fChain->GetEntries(); }
 	inline int GetEntry(Long64_t ientry) { if(!selected) selected = true; return fChain->GetEntry(ientry); }
@@ -335,7 +353,7 @@ class TreeReader {
 	 * If "list" is passed the ith entry is intended in the list not in te full tree
 	 */
 	
-	inline int GetEntry(Long64_t ientry, TEntryList * list)
+	inline int GetEntry(Long64_t ientry, TEntryList *list)
 	{
 		int treenum, iEntry, chainEntry;
 		treenum = iEntry = chainEntry = -1;
@@ -362,14 +380,14 @@ class TreeReader {
 	 *  Same as "CloneTree()" which is preferred. This is kept for backward compatibility.
 	 *  */
 
-	void BranchNewTree(TTree* tree);
+	void BranchNewTree(TTree *tree);
 
 	/** \brief Fills a new tree
 	 * @param cuts:    Fills only entries with pass "cuts"
 	 * @param frac:    Keeps only a fraction "frac" of the total events
 	 * @param addFunc: This function can be defined outside and given to the loop to add new variables.
 	 * */
-	void FillNewTree(TTree* tree, TCut cuts = "", double frac = -1, void (*addFunc)(TreeReader *, TTree *, bool) = NULL);
+	void FillNewTree(TTree *tree, TCut cuts = "", double frac = -1, void (*addFunc)(TreeReader *, TTree *, bool) = NULL);
 	
 	/**  \brief Creates and fills a new tree
 	 *  @param cuts:    Fills only entries with pass "cuts"
@@ -377,11 +395,11 @@ class TreeReader {
 	 *  @param name:    Name given to the new tree
 	 *  */
 	
-	TTree * CopyTree(TCut cuts = "", double frac = -1., string name = "");
+	TTree *CopyTree(TCut cuts = "", double frac = -1., string name = "");
 	
 	/** \brief Adds to "tree" all branches of the stored tree (and sets addresses) */
 	
-	TTree * CloneTree(string name = "") { return CopyTree("", 0., name); }
+	TTree *CloneTree(string name = "") { return CopyTree("", 0., name); }
 
 	/// \brief Print the list of files linked by the internal TChain object
 	
@@ -389,7 +407,7 @@ class TreeReader {
 
 	/// \brief Returns the internal TChain object
 
-	TChain* GetChain() { return fChain; }
+	TChain *GetChain() { return fChain; }
 	vector < variable * >  GetVarList() { return varList; }
 	float GetNVars() { return varList.size(); }
 
@@ -397,7 +415,7 @@ class TreeReader {
 	* It requires that an entry is selected first using "GetEntry()"
 	* */
 	
-	template <typename T = double> T GetValue(const char * name, int iValue = 0)
+	template <typename T = double> T GetValue(const char *name, int iValue = 0)
     {
         if(!init) { cout << "*** WARNING: tree " << fChain->GetName() << " not initialized" << endl; return 0; }
 	    if(!selected) { cout << "*** WARNING: no entry selected" << endl; return 0; }
@@ -405,7 +423,8 @@ class TreeReader {
 	    ++nGets;
 	    if( continueSorting && (nGets % 1000 == 0) ) continueSorting = partialSort();
 
-	    variable * myVar = GetVariable(name);
+	    variable *myVar = GetVariable(name);
+	    if(!myVar) return -999;
 	    ++(myVar->nGets);
 
 	    return (T)myVar->GetValue<T>(iValue);
@@ -417,23 +436,23 @@ class TreeReader {
 	* e.g. If "var" is stored as a float and you give a double instead it will break.
 	* */
 	
-	template < typename T > void SetValue(const char * name, T value)
+	template < typename T > void SetValue(const char *name, T value)
 	{
-		T * ptr = GetVariable(name)->GetPtr<T>();
+		T *ptr = GetVariable(name)->GetPtr<T>();
 		if(ptr) ptr[0] = value;
         else cout << "No pointer available for variable " << name << endl;
 	}
 
 	/// \brief Checks is the variable "namevar" is stored in the reader
 	
-	inline bool HasVar(const char * namevar) { return (bool)GetVariable(namevar); }
+	inline bool HasVar(const char *namevar) { return (bool)GetVariable(namevar); }
 	inline bool isValid() { return init; }
 	
 	/* \brief Returns the pointer to the variable object with name "name" for the current entry
 	* Using the varable class interface you can read/write the name, type and value. 
 	*/
 
-	inline variable * GetVariable(const char * name)
+	inline variable *GetVariable(const char *name)
 	{
 		vector<variable *>::iterator it = find_if(varList.begin(), varList.end(), varEq(name));
 		if ( it == varList.end() )
@@ -444,7 +463,7 @@ class TreeReader {
 		else return *it;
 	}
 
-    inline string GetVariableType(const char * name)
+    inline string GetVariableType(const char *name)
     {
         return GetVariable(name)->GetTypeName();
     }
@@ -453,7 +472,7 @@ class TreeReader {
 	
 	/// \brief Allows to set an entry list so that the reader will loop only on a subset of entries
 
-	void SetEntryList(TEntryList * list) { fChain->SetEntryList(list); }
+	void SetEntryList(TEntryList *list) { fChain->SetEntryList(list); }
 	void GetNfiles() { fChain->GetNtrees(); }
 };
 
