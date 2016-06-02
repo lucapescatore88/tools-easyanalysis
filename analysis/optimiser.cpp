@@ -623,11 +623,10 @@ void CutOptimizer::ClosePrintAndSave(string option)
 
         gROC->Draw("al");
         c0->Print(analysis + "_ROC_"+vname+".pdf");
-        //c0->Print(analysis + "_ROC_"+vname+".C");
+        c0->Print(analysis + "_ROC_"+vname+".C");
 
         gFOM->Draw("al");
         c0->Print(analysis + "_FoM_"+vname+".pdf");
-        //c0->Print(analysis + "_FoM_"+vname+".C");
 
         delete c0;
 
@@ -709,7 +708,7 @@ void CutOptimizer::ClosePrintAndSave(string option)
         legend->Draw();
 
         c0->Print(analysis + "_Optimize_"+vname+".pdf");
-        //c0->Print(analysis + "_Optimize_"+vname+".C");
+        c0->Print(analysis + "_Optimize_"+vname+".C");
 
         delete gROC;
         delete gEff;

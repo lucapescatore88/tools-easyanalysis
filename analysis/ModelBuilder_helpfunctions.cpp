@@ -1,5 +1,4 @@
 #include "ModelBuilder_helpfunctions.hpp"
-#include <algorithm>
 
 using namespace RooFit;
 
@@ -812,7 +811,7 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
         TString strMin = opt.substr(pos+4,string::npos);
         frame->SetMaximum(strMin.Atof());
     }
-    if(Xtitle!="") frame->SetXTitle(Xtitle);
+    if(Xtitle!="") frame->SetXTitle(((TString)Xtitle).ReplaceAll("__var__",""));
     if(Ytitle!="") frame->SetYTitle(Ytitle);
 
     return frame;
@@ -947,41 +946,50 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     stval_list["f2"]  = new RooRealVar("f2_"+namepdf_, "f_{2}"+pstrname,    0.3,0.,1.);
     stval_list["fg"]  = new RooRealVar("fg_"+namepdf_, "f_{gauss}"+pstrname,0.5,0.,1.);
     stval_list["fcb"] = new RooRealVar("fcb_"+namepdf_,"f_{cb}"+pstrname,   0.5,0.,1.);
- 
-    std::map <string, string *> par_list;
-    string ArgusPar[] = {"m0", "p", "c", ""};
-    string BreitWignerPar[] = {"m", "s", "g", ""};
-    string CBPar[]       = {"m", "s", "a", "n", ""};
-    string CBGaussPar[]  = {"m", "s", "a", "n", "sg", "fg", ""};
-    string DCBPar[]      = {"m", "s", "s2", "f", "a", "a2",   "n", "n2", ""};
-    string DCBPar_Sn[]   = {"m", "s", "s2", "f", "a", "a2",   "n", ""};
-    string DCBPar_OST[]  = {"m", "s", "s2", "f", "a", "a2os", "n", "n2", ""};
-    string DCBGaussPar[] = {"m", "s", "s2", "s3", "f", "f2", "a", "a2os", "n", "n2", ""};
-    string TCBPar[]      = {"m", "s", "s2", "s3", "f", "f2", "a", "a2", "a3", "n", "n2", "n3", ""};
-    string ExpPar[]       = {"b", ""};
-    string ExpCGaussPar[] = {"s", "b", ""};
-    string GammaPar[] = {"g", "b", "m", ""};
-    string GausPar[]  = {"m", "s", ""};
-    string DGausPar[] = {"m", "s", "s2", "f", ""};
-    string TGausPar[] = {"m", "s", "s2", "s3", "f", "f2", ""};
-    string VoigtPar[] = {"m", "s", "g", ""};
 
-    par_list["Argus"] = ArgusPar;
+    stval_list["l"] = new RooRealVar("l_"+namepdf_,"l"+pstrname, -5,-10.,-1.);
+    stval_list["z"] = new RooRealVar("z_"+namepdf_,"z"+pstrname, 0.005,0.,0.01);
+
+    std::map <string, string *> par_list;
+    string ApolloniosPar[]  = {"m", "s", "b", "a", "n", ""};
+    string ArgusPar[]       = {"m0", "p", "c", ""};
+    string BreitWignerPar[] = {"m", "s", "g", ""};
+    string CBPar[]          = {"m", "s", "a", "n", ""};
+    string CBGaussPar[]     = {"m", "s", "a", "n", "sg", "fg", ""};
+    string DCBPar[]         = {"m", "s", "s2", "f", "a", "a2",   "n", "n2", ""};
+    string DCBPar_Sn[]      = {"m", "s", "s2", "f", "a", "a2",   "n", ""};
+    string DCBPar_OST[]     = {"m", "s", "s2", "f", "a", "a2os", "n", "n2", ""};
+    string DCBGaussPar[]    = {"m", "s", "s2", "s3", "f", "f2", "a", "a2os", "n", "n2", ""};
+    string TCBPar[]         = {"m", "s", "s2", "s3", "f", "f2", "a", "a2", "a3", "n", "n2", "n3", ""};
+    string ExpPar[]         = {"b", ""};
+    string ExpCGaussPar[]   = {"s", "b", ""};
+    string GammaPar[]       = {"g", "b", "m", ""};
+    string GausPar[]        = {"m", "s", ""};
+    string DGausPar[]       = {"m", "s", "s2", "f", ""};
+    string TGausPar[]       = {"m", "s", "s2", "s3", "f", "f2", ""};
+    string IpatiaPar[]      = {"m", "s", "b", "l", "z", "a", "n", ""};
+    string Ipatia2Par[]     = {"m", "s", "b", "l", "z", "a", "n", "a2", "n2", ""};
+    string VoigtPar[]       = {"m", "s", "g", ""};
+
+    par_list["Apollonios"]  = ApolloniosPar;
+    par_list["Argus"]       = ArgusPar;
     par_list["BreitWigner"] = BreitWignerPar;
-    par_list["CB"]       = CBPar;
-    par_list["CBGauss"]  = CBGaussPar;
-    par_list["DCB"]      = DCBPar;
-    par_list["DCB_Sn"]   = DCBPar_Sn;
-    par_list["DCB_OST"]  = DCBPar_OST;
-    par_list["DCBGauss"] = DCBGaussPar;
-    par_list["TCB"]     = TCBPar;
-    par_list["Exp"]       = ExpPar;
-    par_list["ExpCGauss"] = ExpCGaussPar;
-    par_list["Gamma"] = GammaPar;
-    par_list["Gauss"]    = GausPar;
-    par_list["DGauss"]   = DGausPar;
-    par_list["TGauss"]   = TGausPar;
-    par_list["Voigt"] = VoigtPar;
+    par_list["CB"]          = CBPar;
+    par_list["CBGauss"]     = CBGaussPar;
+    par_list["DCB"]         = DCBPar;
+    par_list["DCB_Sn"]      = DCBPar_Sn;
+    par_list["DCB_OST"]     = DCBPar_OST;
+    par_list["DCBGauss"]    = DCBGaussPar;
+    par_list["TCB"]         = TCBPar;
+    par_list["Exp"]         = ExpPar;
+    par_list["ExpCGauss"]   = ExpCGaussPar;
+    par_list["Gamma"]       = GammaPar;
+    par_list["Gauss"]       = GausPar;
+    par_list["DGauss"]      = DGausPar;
+    par_list["TGauss"]      = TGausPar;
+    par_list["Ipatia"]      = IpatiaPar;
+    par_list["Ipatia2"]     = Ipatia2Par;
+    par_list["Voigt"]       = VoigtPar;
 
     size_t plusgaus = typepdf_.find("AndGauss");
     size_t pluscb   = typepdf_.find("AndCB");
@@ -1056,7 +1064,6 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
 
         pdf = new RooAddPdf(namepdf,namepdf,RooArgList(*gauss1,*gauss2,*gauss3),RooArgList(*p["f"],*p["f2"]));
     }
-
     else if(typepdf_.find("DCBGauss")!=string::npos)
     {
         RooCBShape * CB1 = new RooCBShape("CB1_"+namepdf_,"CB",*var,*p["m"],*p["s"], *p["a"], *p["n"]);
@@ -1066,7 +1073,6 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
 
         pdf = new RooAddPdf(namepdf,namepdf,RooArgList(*CB1,*CB2,*gauss1),RooArgList(*p["f"],*p["f2"]));
     }
-
     else if(typepdf_.find("DCB")!=string::npos)
     {
         RooCBShape * CB1 = new RooCBShape("CB1_"+namepdf_,"CB",*var,*p["m"],*p["s"],*p["a"],*p["n"]);
@@ -1163,6 +1169,18 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
     else if(typepdf_.find("Gamma")!=string::npos)
     {
         pdf = new RooGamma(namepdf,namepdf,*var,*p["g"],*p["b"],*p["m"]);
+    }
+    else if(typepdf_.find("Apollonios")!=string::npos)
+    {
+        pdf = new RooApollonios(namepdf,namepdf,*var,*p["m"],*p["s"],*p["b"],*p["a"],*p["n"]);
+    }
+    else if(typepdf_.find("Ipatia2")!=string::npos)
+    {
+        pdf = new RooIpatia2(namepdf,namepdf,*var,*p["l"],*p["z"],*p["b"],*p["s"],*p["m"],*p["a"],*p["n"],*p["a2"],*p["n2"]);
+    }
+    else if(typepdf_.find("Ipatia")!=string::npos)
+    {
+        pdf = new RooIpatia(namepdf,namepdf,*var,*p["l"],*p["z"],*p["b"],*p["s"],*p["m"],*p["a"],*p["n"]);
     }
 
     if(typepdf_.find("AndGauss")!=string::npos)

@@ -754,7 +754,7 @@ RooPlot* Analysis::Print(bool domodel, RooAbsData * data, string option, unsigne
     double width = 0, intpart = 0;
     if(range) width = (range[1]-range[0])/bins;
     else width = (myvar->getMax()-myvar->getMin())/bins;
-    if(modf(width,&intpart) == 0.) Ytitle = Form("Candidtates per %i",(int)width);
+    if(modf(width,&intpart) == 0.) Ytitle = Form("Candidates per %i",(int)width);
     else if( modf(width/0.1,&intpart) == 0. ) Ytitle = Form("Candidates per %.1f",width);
     else Ytitle = Form("Candidates per %.2f",width);
     if(unit != "") Ytitle += ( " " + unit );
@@ -1132,6 +1132,10 @@ RooDataSet * Analysis::CalcSWeightRooFit(double min, double max, unsigned nbins,
   reducedTree = (TTree*) data->store()->tree();
 
   RooArgList sweights = (RooArgList) sPlot->GetSWeightVars();
+
+  data->Print();
+  sweights.Print();
+  reducedTree->Print();
 
   TCanvas *c = new TCanvas();
   gStyle->SetOptStat(0);

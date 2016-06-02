@@ -64,8 +64,9 @@
 #include <iomanip>
 #include <algorithm>
 
-#include "ReadTree_comp.hpp"
 #include "general_functions.hpp"
+#include "ReadTree_comp.hpp"
+#include "roofit.hpp"
 
 using namespace std;
 
