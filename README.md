@@ -1,28 +1,31 @@
 Easy analysis
 =============
 
-Setup on lxplus :
+To setup on lxplus you can go into the main forlder and do
+
 ```bash
-SetupLHCb v37r1 //(you can try the latest but is a gamble)
+source setup.sh
 make
 ```
 
-All here, and then got into the tools folder and type "make". 
+The setup.sh script launches a ``SetupProject root" 
+and defines the TOOLSSYS environment variable pointing to the
+folder containing the tools.
+
 To use the tools you can add the headers (mainly analyser.hpp) 
 to your cpp files.
 
-Here below is attached a `Makefile` I use for my analysis.
-The tools can be anywhere, just define a TOOLSSYS variable
-with the full path to the tools folder.
+Below is attached a `Makefile` I use for my analysis.
+To use it, the tools can be anywhere, but the TOOLSSYS 
+variable needs to be defined with the full path to the tools folder.
 
 Structure:
 myanalysis
 -- src
 
-The `src` subfolder contains `cpp` files, independent 
-and each with a main. Each cpp file will be an executable.
-If you defined the TOOLSSYS variable the makefile will
-find the tools and make them automatically.
+The `src` subfolder contains independent `cpp` files for each executable;
+each with a main. If you defined the TOOLSSYS variable the makefile 
+will find the tools and make them automatically.
 If you don't define it, the Makefile it will assume
 that the tools are in the same folder.
 
