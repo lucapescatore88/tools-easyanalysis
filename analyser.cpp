@@ -445,7 +445,7 @@ RooWorkspace * Analysis::SaveToRooWorkspace(string option)
 
 void Analysis::ImportModel(RooWorkspace * ws)
 {
-  if (pmode == "v") cout << endl << name << ": ImportModel" << endl << endl;
+    if (pmode == "v") cout << endl << name << ": ImportModel" << endl << endl;
 
     bkg_fractions.clear();
     bkg_components.clear();
@@ -485,14 +485,14 @@ void Analysis::ImportModel(RooWorkspace * ws)
     ForceValid();
     if (pmode == "v")
     {
-        cout << endl << name << ": PrintParams" << endl << endl;
-	    ModelBuilder::PrintParams();
+        cout << name << ": PrintParams" << endl << endl;
+	ModelBuilder::PrintParams();
     }
 }
 
 void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
 {
-    if (pmode == "v") cout << endl << name << ": ImportModel" << endl;
+    if (pmode == "v") cout << endl << name << ": ImportModel" << endl << endl;
 
     TIterator * itSig = wsSig->componentIterator();
     TObject * argSig;
@@ -519,6 +519,13 @@ void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
 
     init = true;
     ForceValid();
+    /*
+    if (pmode == "v")
+    {
+        cout << name << ": PrintParams" << endl << endl;
+	ModelBuilder::PrintParams();
+    }
+    */
 }
 
 void Analysis::ImportData(RooWorkspace * ws)
@@ -896,6 +903,7 @@ TTree * Analysis::Generate(int nevt, string option)
             RooCmdArg ext = RooCmdArg::none();
             if(option.find("-genextended")!=string::npos) ext = Extended(); 
             data = model->generate(varList,nevt,ext);
+            cout << name << ": " << " Generated events = " << data->numEntries() << endl;
             return NULL;
         }
     }
@@ -940,7 +948,12 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
 	    RooRealVar * f_sig = new RooRealVar("f_sig","f_sig",frac);  
             RooAbsPdf * tot = new RooAddPdf("total_pdf","total_pdf",RooArgSet(*sig, *bkg), RooArgSet(*f_sig));
 	    cout << "Generating nsig/ntot = " << f_sig->getVal() << endl;
-	    data = tot->generate(varList,ntot,ext);	
+	    data = tot->generate(varList,ntot,ext);
+	    
+            //model->Print();
+            //data = model->generate(varList,ntot,ext);
+            cout << name << ": " << " Generated events = " << data->numEntries() << endl;
+            
             return NULL; 
         }
     }

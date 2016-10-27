@@ -60,13 +60,14 @@ class MultiAnalysis {
 	RooCategory * samples;
 	RooSimultaneous * combModel;
 	bool init;
+	bool isToy;
 	RooFitResult * fitResult;
 	RooArgSet * constr;
 
 	public:
 	
 	MultiAnalysis( TString _name ):
-	name(_name), init(false), fitResult(NULL)
+	  name(_name), init(false), isToy(false), fitResult(NULL)
 	{
 		samples = new RooCategory("samples","samples");
 		vars = new RooArgSet("vars");
@@ -84,14 +85,17 @@ class MultiAnalysis {
 	
 	RooAbsPdf * GetCombModel() { return combModel; }
 	RooDataSet * GetCombData() { return combData; }
-    void SetCombData(RooDataSet * data) { combData = data; };
-    void SetCombData(RooSimultaneous * model) { combModel = model; };
+        void SetCombData(RooDataSet * data) { combData = data; };
+        void SetCombData(RooSimultaneous * model) { combModel = model; };
 
-    void ImportModel(RooWorkspace * ws);
+        void ImportModel(RooWorkspace * ws);
+        void ImportData(RooWorkspace * ws);
+
+        RooDataSet * Generate(int nevts, string option);
 
 	void EnlargeYieldRanges(double factor);
 
-    TString GetName() { return name; }
+        TString GetName() { return name; }
 	void SetName(TString _name) { name = _name; }
 	RooFitResult * GetFitResult() { return fitResult; }
 	RooAbsReal * CreateLogL()
@@ -149,13 +153,19 @@ class MultiAnalysis {
 	
 	///\brief Adds one category you must give an Analysis object containing data and model and a name 
 	void AddCategory(Analysis * _ana, TString nameCat);
-	///\brief Lists the available categories
+	void AddCategory(TString nameCat, RooRealVar * var, string opt = "setana");
+
+	void PlotCategories();
+
+        ///\brief Lists the available categories
 	void PrintCategories() { for(unsigned i = 0; i < categories.size(); i++) cout << categories[i] << endl; }
 	/// \brief Prints the sum of all datasets and models properly normalised 
         RooPlot * PrintSum(string option = "", TString dovar = "", string name = "", int nbins = 50);
 
 	void RandomizeInitialParams(string option = "");
 	void SetConstants(vector<RooDataSet *> input, int index = 0);
+
+	void PrintParams() { printParams(combModel); };
 
 	/** \brief Allows to Set an unique signal for all categories
 	 *  See Analysis::SetSignal()

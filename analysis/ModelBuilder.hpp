@@ -18,6 +18,7 @@ using namespace std;
 class ModelBuilder {
 
     bool isvalid;
+    bool doNegSig, doNegBkg;
 
     protected:
 
@@ -177,16 +178,16 @@ class ModelBuilder {
     //Constructors
 
     ModelBuilder():
-        isvalid(false), var(NULL), sig(NULL), bkg(NULL), totBkgMode(false), mycolors(vector<Color_t>())
+        isvalid(false), doNegSig(false), doNegBkg(false), var(NULL), sig(NULL), bkg(NULL), totBkgMode(false), mycolors(vector<Color_t>())
     {
-        nsig = new RooRealVar("nsig","nsig",0.,0.,1.e10);
-        nbkg = new RooRealVar("nbkg","nbkg",0.,0.,1.e10);
+        nsig = new RooRealVar("nsig","nsig",0.,0.,1.e8);
+        nbkg = new RooRealVar("nbkg","nbkg",0.,0.,1.e8);
         name = "model";
         title = name;
     }
 
     ModelBuilder(TString _name, RooRealVar * _var):
-        isvalid(false), name(_name), var(_var), sig(NULL), bkg(NULL), totBkgMode(false), mycolors(vector<Color_t>())
+        isvalid(false), doNegSig(false), doNegBkg(false), name(_name), var(_var), sig(NULL), bkg(NULL), totBkgMode(false), mycolors(vector<Color_t>())
     {
         if(var)
         {
@@ -194,8 +195,8 @@ class ModelBuilder {
                 var->SetTitle( (TString)var->GetTitle()+"__var__" );
             tmpvar = new RooRealVar(*var); vars.push_back(var); 
         }
-        nsig = new RooRealVar("nsig"+name,"nsig",0.,0.,1.e10);
-        nbkg = new RooRealVar("nbkg"+name,"nbkg",0.,0.,1.e10);
+        nsig = new RooRealVar("nsig_"+name,"nsig",0.,0.,1.e8);
+        nbkg = new RooRealVar("nbkg_"+name,"nbkg",0.,0.,1.e8);
         title = name;
     }
 
@@ -244,6 +245,8 @@ class ModelBuilder {
      *  */
     template <class T> RooAbsPdf * AddBkgComponent(const char * _name, T * _comp, RooAbsReal * _frac, string opt = "", Str2VarMap myvars = Str2VarMap(), string weight = "")
     {
+        if(!sig) { cout << "ATTENTION: Signal not set! Set the signal before any background!" << endl; return NULL; }
+
         TString nstr = "bkg_"+(TString)_name;
         string lowopt = opt;
         transform(lowopt.begin(), lowopt.end(), lowopt.begin(), ::tolower);
@@ -284,11 +287,15 @@ class ModelBuilder {
 
     template <class T> RooAbsPdf * AddBkgComponent(const char * _name, T * _comp, double _frac = 0, string opt = "", Str2VarMap myvars = Str2VarMap(), string weight = "")
     {
+
+        if(!sig) { cout << "ATTENTION: Signal not set! Set the signal before any background!" << endl; return NULL; }
+
         TString nstr = "bkg_"+(TString)_name;
         RooAbsReal * frac = NULL;
         double val = TMath::Abs(_frac);
         if(val == 0) val = 1e3;
         double min = 0;
+	if(doNegBkg) min = -3 * TMath::Sqrt(val);
         double max = 1.e7;
 
         if(_frac < 0) { min = val; max = val; }
@@ -356,7 +363,7 @@ class ModelBuilder {
     }
 
 
-    /** \brief Adds a blacgound component
+    /** \brief Adds the signal component
      * The behaviour it's similar to AddBkgComponent().
      * The only difference is the nsig, is set as signal yield. If given as a double it can be only > 1 (starting value)
      * or < -1 (starting value fixed in the fit).
@@ -387,6 +394,7 @@ class ModelBuilder {
         double val = TMath::Abs(_nsig);
         if(val == 0) val = 1e3;
         double min = 0;
+        if(doNegSig) min = -3 * TMath::Sqrt(val);
         double max = 1.e7;
         if(_nsig < 0) { min = val; max = val; }
 
@@ -430,7 +438,23 @@ class ModelBuilder {
     {
         return SetExtraSignalDimension(_sig, extravar, opt, myvars, weight);
     }
- 
+
+    void AllowNegativeYield(string option = "", bool cond = true) {
+      cout << endl << name << ": AllowNegativeYield";
+      if (option.find("sig") != string::npos)
+	{
+	  doNegSig = cond;
+	  if (doNegSig) cout << " - Signal";
+	}
+      if (option.find("bkg") != string::npos)
+	{
+	  doNegBkg = cond;
+	  if (doNegBkg) cout << " - Backgrounds";
+	}
+      cout << endl << endl;
+      return;
+    }
+
     void SetLastBkgColor(Color_t color) 
     {
         if(mycolors.size() == bkg_components.size()) mycolors[mycolors.size()-1] = color;

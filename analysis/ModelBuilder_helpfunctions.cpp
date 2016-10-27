@@ -603,11 +603,28 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
 
         //Plot data and total model
 
+
+	TString category = "";
+        RooCmdArg cut(RooCmdArg::none());
+        //RooCmdArg slice(RooCmdArg::none());
+        //RooCmdArg projData(RooCmdArg::none());
+	if(opt.find("-category[")!=string::npos)
+	{
+	    size_t pos = opt.find("-category[");
+            size_t posend = opt.find("]",pos);
+            category = opt.substr(pos+10, posend - (pos+10) -1 );
+            cout << "*************** category is" << category << endl;
+            cut = Cut("samples==samples::"+category);
+	
+	    //slice = Slice(samples,category);
+            //projData = ProjWData(*data)	
+	}
+
         if(data && ( bandname.find("band")!=string::npos || noblind ) )
         {
             frame->SetMarkerSize(1);
-            if(opt.find("-sumw2err")!=string::npos) data->plotOn(frame, range_data, Name(dataname), DataError(RooAbsData::SumW2));
-            else data->plotOn(frame, range_data, Name(dataname));
+            if(opt.find("-sumw2err")!=string::npos) data->plotOn(frame, range_data, Name(dataname), DataError(RooAbsData::SumW2), cut);
+            else data->plotOn(frame, range_data, Name(dataname), cut);
 
             min = 1e9;
             RooHist *hist = frame->getHist(dataname);
@@ -962,6 +979,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     string DCBGaussPar[]    = {"m", "s", "s2", "s3", "f", "f2", "a", "a2os", "n", "n2", ""};
     string TCBPar[]         = {"m", "s", "s2", "s3", "f", "f2", "a", "a2", "a3", "n", "n2", "n3", ""};
     string ExpPar[]         = {"b", ""};
+    string ExpAGaussPar[]   = {"m", "s", "b", ""};
     string ExpCGaussPar[]   = {"s", "b", ""};
     string GammaPar[]       = {"g", "b", "m", ""};
     string GausPar[]        = {"m", "s", ""};
@@ -982,6 +1000,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     par_list["DCBGauss"]    = DCBGaussPar;
     par_list["TCB"]         = TCBPar;
     par_list["Exp"]         = ExpPar;
+    par_list["ExpAGauss"]   = ExpAGaussPar;
     par_list["ExpCGauss"]   = ExpCGaussPar;
     par_list["Gamma"]       = GammaPar;
     par_list["Gauss"]       = GausPar;
@@ -1154,6 +1173,10 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
         if(typepdf_.find("Poly")!=string::npos) pdf = new RooPolynomial(namepdf,namepdf, *var, *parList);
         else pdf = new RooChebychev(namepdf,namepdf, *var, *parList);
     }
+//    else if(typepdf_.find("ExpAGauss")!=string::npos)
+//    {
+//        pdf = new RooExpAndGauss(namepdf,namepdf,*var,*p["m"],*p["s"],*p["b"]);
+//    }
     else if(typepdf_.find("ExpCGauss")!=string::npos)
     {
         pdf = new RooGExpModel(namepdf,namepdf,*var,*p["s"],*p["b"]);
