@@ -22,59 +22,57 @@ void ModelBuilder::SetModel(RooAbsPdf * _model)
 
 RooAbsPdf * ModelBuilder::GetParamsGaussian(RooFitResult * fitRes)
 {
-      RooArgSet * params = model->getParameters(RooDataSet("v","",RooArgSet(*var)));
-      
-      return (RooAbsPdf *)(new RooMultiVarGaussian(
-		name+"_multivar_gauss",name+"_multivar_gauss",
-		*params,fitRes->covarianceMatrix()));
+    RooArgSet * params = model->getParameters(RooDataSet("v","",RooArgSet(*var)));
+
+    return (RooAbsPdf *)(new RooMultiVarGaussian(
+                name+"_multivar_gauss",name+"_multivar_gauss",
+                *params,fitRes->covarianceMatrix()));
 }
 
 
 RooDataSet * ModelBuilder::GetParamsVariations(int nvariations, RooFitResult * fitRes)
 {
-      RooArgSet * params = model->getParameters(RooDataSet("v","",RooArgSet(*var)));
-      
-	cout << "Making variations of " << endl;	
-	params->Print();
-	cout << "Matrix - fit quality"<< fitRes->covQual() << endl;
-	fitRes->covarianceMatrix().Print();
-	cout << "End matrix" << endl;
-	
-      RooMultiVarGaussian * gauss = new RooMultiVarGaussian(
-		name+"_multivar_gauss",name+"_multivar_gauss",
-		*params,fitRes->covarianceMatrix());
-      gauss->Print();
-	cout << "After" << endl;
-      RooDataSet * variations = gauss->generate(*params,nvariations);
-	cout << "Generated" << endl;
-      return variations;
+    RooArgSet * params = model->getParameters(RooDataSet("v","",RooArgSet(*var)));
 
-/*
-    TRandom3  rndm(0);
-    
-    while ( out->numEntries() < nvariations )
-    {
-      RooArgSet * set = new RooArgSet("row");	
+    cout << "Making variations of " << endl;	
+    params->Print();
+    cout << "Matrix - fit quality"<< fitRes->covQual() << endl;
+    fitRes->covarianceMatrix().Print();
+    cout << "End matrix" << endl;
 
-      RooArgSet * params = model->getParameters(RooDataSet("v","",RooArgSet(*var)));
-      TIterator *it = params->createIterator();
-      RooRealVar * arg;
-      while( (arg=(RooRealVar*)it->Next()) )
-      {
-        if(arg->getAttribute("Constant")) continue;
-        
-	set->add(RooRealVar(arg->GetName(),
-			    arg->GetTitle(),
-			    rndm.Gaus(arg->getVal(),arg->getError()),
-			    arg->getMin(),
-	   		    arg->getMax()));
-	}
-	if(out) out->addFast(*set);
-	else out = new RooDataSet(name+"_param_variations",name+"_param_variations",*set);
-    }
+    RooMultiVarGaussian * gauss = new RooMultiVarGaussian(
+            name+"_multivar_gauss",name+"_multivar_gauss",
+            *params,fitRes->covarianceMatrix());
+    gauss->Print();
+    RooDataSet * variations = gauss->generate(*params,nvariations);
+    return variations;
 
-    return out;
-	*/
+    /*
+       TRandom3  rndm(0);
+
+       while ( out->numEntries() < nvariations )
+       {
+       RooArgSet * set = new RooArgSet("row");	
+
+       RooArgSet * params = model->getParameters(RooDataSet("v","",RooArgSet(*var)));
+       TIterator *it = params->createIterator();
+       RooRealVar * arg;
+       while( (arg=(RooRealVar*)it->Next()) )
+       {
+       if(arg->getAttribute("Constant")) continue;
+
+       set->add(RooRealVar(arg->GetName(),
+       arg->GetTitle(),
+       rndm.Gaus(arg->getVal(),arg->getError()),
+       arg->getMin(),
+       arg->getMax()));
+       }
+       if(out) out->addFast(*set);
+       else out = new RooDataSet(name+"_param_variations",name+"_param_variations",*set);
+       }
+
+       return out;
+       */
 }
 
 /*
@@ -111,12 +109,12 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
     }
     else if(bkg_components.size()==1)
     {
-	//bkg = (RooAbsPdf*)(bkg_components[0]->Clone("totbkg"+myname));
-	    bkg = bkg_components[0];
+        //bkg = (RooAbsPdf*)(bkg_components[0]->Clone("totbkg"+myname));
+        bkg = bkg_components[0];
         bkg->SetName("totbkg"+myname);
-	//bkg = new RooAddPdf("totbkg"+myname,"totbkg"+myname,*bkg_components[0]);
+        //bkg = new RooAddPdf("totbkg"+myname,"totbkg"+myname,*bkg_components[0]);
     }
-    
+
     GetTotNBkg();
 
     if(!sig) { cout << "WARNING: Signal not set!!" << endl; return NULL; }
@@ -133,7 +131,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
         }
     }
     else model = sig; 
-    
+
     if(pmode=="v")
     {
         cout << "\n" << name << ": Initialized Correctly! The model is:" << endl;
@@ -178,13 +176,12 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
    }
    */
 
-
 void ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsData * data, int bins, 
         RooFitResult * fitRes, TString Ytitle, vector< RooRealVar *> myvars)
 {
-    for(size_t v = 0; v < myvars.size(); v++)
+    for(auto v : myvars)
     {
-        Print(title, Xtitle, opt, data, bins, vector<string>(), (double *)NULL, fitRes, Ytitle, myvars[v]);
+        Print(title, Xtitle, opt, data, bins, vector<string>(), (double *)NULL, fitRes, Ytitle, v);
     }
 }
 
@@ -213,106 +210,109 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
         leg = new TLegend(x1,y1,x2,y2);
     }
 
-    Xtitle = Xtitle.ReplaceAll("__var__","");
+    //Xtitle = Xtitle.ReplaceAll("__var__","");
 
     if(!myvar) myvar = var;
 
-    if(isValid())
+    if(!isValid()) {
+        cout << "**** WARNING: Model is not valid, probably not initialised. *****" << endl;
+        return NULL;
+    }
+
+    // Create main frame
+
+    frame = GetFrame(myvar, data, model, opt, bins, range, regStr, Xtitle, Ytitle, leg, mycolors);
+    if(opt.find("-noplot")!=string::npos) return frame;
+
+    TString logstr = "";
+    if(opt.find("-log")!=string::npos) logstr = "_log";
+    TCanvas * c = new TCanvas();
+    if(opt.find("-bw")!=string::npos) c->SetGrayscale();
+    TH1 * residuals = NULL;
+    string pullopt = "p";
+    if(opt.find("resid")!=string::npos) pullopt = "r";
+    if(data && (opt.find("pulls")!=string::npos || opt.find("resid")!=string::npos)) residuals = GetPulls(frame,NULL,pullopt);
+
+    // If "-H" option draw pulls distribution too
+
+    if(opt.find("-H")!=string::npos)
     {
-        // Create main frame
+        TH1D * resH = NULL;
+        if(pullopt=="p") resH = new TH1D( "rH"+name, "Pulls distribution", 15, -5, 5 );
+        else resH = new TH1D( "rH", "", 15, -3, 3 );
+        for(int i = 0; i < residuals->GetNbinsX(); i++) resH->Fill(residuals->GetBinContent(i));
+        gStyle->SetOptStat(0);
+        gStyle->SetOptFit(1011);
+        resH->GetXaxis()->SetTitle("Pulls");
+        resH->GetYaxis()->SetTitle("Bins");
+        resH->Draw();
+        resH->Fit("gaus");
+        c->Print(name+"_pullsHist.pdf");
+    }
 
-        frame = GetFrame(myvar, data, model, opt, bins, range, regStr, Xtitle, Ytitle, leg, mycolors);
-        if(opt.find("-noplot")!=string::npos) return frame;
+    // "-andpulls" option draws pulls on the same canvas as the main frame otherwise 2 different pdfs are created
 
-        TString logstr = "";
-        if(opt.find("-log")!=string::npos) logstr = "_log";
-        TCanvas * c = new TCanvas();
-        if(opt.find("-bw")!=string::npos) c->SetGrayscale();
-        TH1 * residuals = NULL;
-        string pullopt = "p";
-        if(opt.find("resid")!=string::npos) pullopt = "r";
-        if(data && (opt.find("pulls")!=string::npos || opt.find("resid")!=string::npos)) residuals = GetPulls(frame,NULL,pullopt);
+    if(residuals && opt.find("-andpulls")!=string::npos)
+    {
+        TPad * plotPad = new TPad("plotPad", "", .005, .25, .995, .995);
+        TPad * resPad = new TPad("resPad", "", .005, .015, .995, .248);
+        plotPad->Draw();
+        resPad->Draw();
 
-        // If "-H" option draw pulls distribution too
+        resPad->cd();
 
-        if(opt.find("-H")!=string::npos)
-        {
-            TH1D * resH = NULL;
-            if(pullopt=="p") resH = new TH1D( "rH"+name, "Pulls distribution", 15, -5, 5 );
-            else resH = new TH1D( "rH", "", 15, -3, 3 );
-            for(int i = 0; i < residuals->GetNbinsX(); i++) resH->Fill(residuals->GetBinContent(i));
-            gStyle->SetOptStat(0);
-            gStyle->SetOptFit(1011);
-            resH->GetXaxis()->SetTitle("Pulls");
-            resH->GetYaxis()->SetTitle("Bins");
-            resH->Draw();
-            resH->Fit("gaus");
-            c->Print(name+"_pullsHist.pdf");
-        }
+        TAxis* yAxis = residuals->GetYaxis();
+        TAxis* xAxis = residuals->GetXaxis();
+        yAxis->SetNdivisions(504);
+        double old_size = yAxis->GetLabelSize();
+        yAxis->SetLabelSize( old_size / 0.33 );
+        yAxis->SetTitleSize( old_size * 3.6  );
+        yAxis->SetTitleOffset(0.3);
+        yAxis->SetTitle("Pulls");
+        xAxis->SetLabelSize( xAxis->GetLabelSize() / 0.33 );
 
-        // "-andpulls" option draws pulls on the same canvas as the main frame otherwise 2 different pdfs are created
+        resPad->cd();
+        residuals->Draw();
 
-        if(residuals && opt.find("-andpulls")!=string::npos)
-        {
-            TPad * plotPad = new TPad("plotPad", "", .005, .25, .995, .995);
-            TPad * resPad = new TPad("resPad", "", .005, .015, .995, .248);
-            plotPad->Draw();
-            resPad->Draw();
+        TLine *lc = new TLine(xAxis->GetXmin(),  0, xAxis->GetXmax(),  0);
+        TLine *lu = new TLine(xAxis->GetXmin(),  3, xAxis->GetXmax(),  3);
+        TLine *ld = new TLine(xAxis->GetXmin(), -3, xAxis->GetXmax(), -3);
 
-            resPad->cd();
+        lc->SetLineColor(kGray+2);
+        lu->SetLineColor(kGray+1);
+        ld->SetLineColor(kGray+1);
 
-            TAxis* yAxis = residuals->GetYaxis();
-            TAxis* xAxis = residuals->GetXaxis();
-            yAxis->SetNdivisions(504);
-            double old_size = yAxis->GetLabelSize();
-            yAxis->SetLabelSize( old_size / 0.33 );
-            yAxis->SetTitleSize( old_size * 3.6  );
-            yAxis->SetTitleOffset(0.3);
-            yAxis->SetTitle("Pulls");
-            xAxis->SetLabelSize( xAxis->GetLabelSize() / 0.33 );
+        lc->SetLineStyle(2);
+        lu->SetLineStyle(2);
+        ld->SetLineStyle(2);
 
-            resPad->cd();
-            residuals->Draw();
+        lc->Draw("same");
+        lu->Draw("same");
+        ld->Draw("same");
 
-            TLine *lc = new TLine(xAxis->GetXmin(),  0, xAxis->GetXmax(),  0);
-            TLine *lu = new TLine(xAxis->GetXmin(),  3, xAxis->GetXmax(),  3);
-            TLine *ld = new TLine(xAxis->GetXmin(), -3, xAxis->GetXmax(), -3);
+        residuals->Draw("same");
 
-            lc->SetLineColor(kGray+2);
-            lu->SetLineColor(kGray+1);
-            ld->SetLineColor(kGray+1);
+        plotPad->cd();
+        logstr+="_fitAndRes";
+    }
+    else if(residuals)
+    {
+        if(Xtitle!="") residuals->GetXaxis()->SetTitle(Xtitle);
+        else residuals->GetXaxis()->SetTitle(var->GetName());
+        residuals->GetYaxis()->SetTitle("pulls");
+        residuals->Draw();
+        if(opt.find("-eps")!=string::npos) c->Print(name+logstr+"_residuals.eps");
+        else c->Print(name+logstr+"_residuals.pdf");
+    }
 
-            lc->SetLineStyle(2);
-            lu->SetLineStyle(2);
-            ld->SetLineStyle(2);
+    // If set draw legend, box for fit failed warning, LHCb
 
-            lc->Draw("same");
-            lu->Draw("same");
-            ld->Draw("same");
+    if(opt.find("-log")!=string::npos) gPad->SetLogy();
 
-            residuals->Draw("same");
-
-            plotPad->cd();
-            logstr+="_fitAndRes";
-        }
-        else if(residuals)
-        {
-            if(Xtitle!="") residuals->GetXaxis()->SetTitle(Xtitle);
-            else residuals->GetXaxis()->SetTitle(var->GetName());
-            residuals->GetYaxis()->SetTitle("pulls");
-            residuals->Draw();
-            if(opt.find("-eps")!=string::npos) c->Print(name+logstr+"_residuals.eps");
-            else c->Print(name+logstr+"_residuals.pdf");
-        }
-
-        // If set draw legend, box for fit failed warning, LHCb
-
-    if(opt.find("-log")!=string::npos) gPad->SetLogy(); //frame->SetMinimum(0.5); }
-    
     if(opt.find("-noleg")==string::npos)
     {
         if( opt.find("-noborder")!=string::npos ) 
-	    leg->SetBorderSize(0); 
+            leg->SetBorderSize(0); 
         leg->SetFillStyle(0);
         if(opt.find("-legf")!=string::npos) {
             leg->SetFillStyle(1001);
@@ -323,22 +323,22 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
     }
     if(opt.find("-lhcb")!=string::npos)
     {
-	double x1 = 0.05, x2 = 0.25, y1 = 0.80, y2 = 0.97;
+        double x1 = 0.05, x2 = 0.25, y1 = 0.80, y2 = 0.97;
         size_t pos = opt.find("-lhcb[")+6;
-       	if( pos != string::npos )
-	{
-		string ss = opt.substr(pos,string::npos);
-        	x1 = (TString(ss)).Atof();
-       		pos = ss.find(",")+1;
-       		ss = ss.substr(pos,string::npos);
-        	y1 = (TString(ss)).Atof();
-        	pos = ss.find(",")+1;
-        	ss = ss.substr(pos,string::npos);
-        	x2 = (TString(ss)).Atof();
-        	pos = ss.find(",")+1;
-        	ss = ss.substr(pos,string::npos);
-        	y2 = (TString(ss)).Atof();
-	}
+        if( pos != string::npos )
+        {
+            string ss = opt.substr(pos,string::npos);
+            x1 = (TString(ss)).Atof();
+            pos = ss.find(",")+1;
+            ss = ss.substr(pos,string::npos);
+            y1 = (TString(ss)).Atof();
+            pos = ss.find(",")+1;
+            ss = ss.substr(pos,string::npos);
+            x2 = (TString(ss)).Atof();
+            pos = ss.find(",")+1;
+            ss = ss.substr(pos,string::npos);
+            y2 = (TString(ss)).Atof();
+        }
 
         TPaveText * tbox = new TPaveText(gStyle->GetPadLeftMargin() + x1,
                 y1 - gStyle->GetPadTopMargin(),
@@ -379,7 +379,9 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
         TString pname = name;
         if(!data) pname = "model_"+name;
         if(title!="") pname = title;
-        pname = pname.ReplaceAll(" ","").ReplaceAll("#rightarrow","2").ReplaceAll("#","").ReplaceAll("__","_");
+        pname = pname.ReplaceAll(" ","").ReplaceAll("#rightarrow","2");
+        pname = pname.ReplaceAll("#","").ReplaceAll("__","_");
+        pname = pname.ReplaceAll("{","").ReplaceAll("}","").ReplaceAll("(","_");
         if(opt.find("-vname")!=string::npos) pname+=("_"+(TString)myvar->GetName());
 
         if(opt.find("-eps")!=string::npos) c->Print(pname+logstr+".eps");
@@ -395,10 +397,7 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
 
     if(residuals) delete residuals;
     delete c;
-}
-else cout << "**** WARNING: Model is not valid, probably not initialised. *****" << endl;
-
-return frame;
+    return frame;
 }
 
 
@@ -450,7 +449,7 @@ double ModelBuilder::GetNSigVal(double min, double max, double * valerr, RooFitR
     RooAbsReal * integ = sig->createIntegral(*var,NormSet(*var),Range("myrange"));
     double res = sigval*integ->getVal();
     RooAbsReal * fit_integ = NULL;
-    
+
     RooFormulaVar * nsigval = new RooFormulaVar("nsigval",
             "nsigval",(TString)nsig->GetName() + " * " + (TString)integ->GetName(),
             RooArgSet(*nsig,*integ));
@@ -506,25 +505,25 @@ RooAbsReal * ModelBuilder::GetTotNBkg()
 
 RooAbsPdf * ModelBuilder::CalcTotBkg()
 {
-	if(totBkgMode || bkg_fractions.size()<=1) return bkg;
+    if(totBkgMode || bkg_fractions.size()<=1) return bkg;
 
-	RooAbsReal * nbkg = GetTotNBkg();
-	RooArgSet * pdfs = new RooArgSet("BkgPdfs");
-	RooArgSet * fracs = new RooArgSet("BkgFracs");
-	for(unsigned i = 0; i < bkg_fractions.size(); i++)
-	{
-		pdfs->add(*bkg_components[i]);
-		if(i!=bkg_fractions.size()-1)
-		{
-			TString fname = bkg_fractions[i]->GetName()+(TString)"_frac";
-			double fracv = bkg_fractions[i]->getVal() / ((double) nbkg->getVal());
-			RooRealVar * frac = new RooRealVar(fname,fname,fracv,0.,1.);
-			fracs->add(*frac);
-		}
-	}
+    RooAbsReal * nbkg = GetTotNBkg();
+    RooArgSet * pdfs = new RooArgSet("BkgPdfs");
+    RooArgSet * fracs = new RooArgSet("BkgFracs");
+    for(unsigned i = 0; i < bkg_fractions.size(); i++)
+    {
+        pdfs->add(*bkg_components[i]);
+        if(i!=bkg_fractions.size()-1)
+        {
+            TString fname = bkg_fractions[i]->GetName()+(TString)"_frac";
+            double fracv = bkg_fractions[i]->getVal() / ((double) nbkg->getVal());
+            RooRealVar * frac = new RooRealVar(fname,fname,fracv,0.,1.);
+            fracs->add(*frac);
+        }
+    }
 
-	bkg = new RooAddPdf("totbkg","totbkg",*pdfs,*fracs);
-	return bkg;
+    bkg = new RooAddPdf("totbkg","totbkg",*pdfs,*fracs);
+    return bkg;
 }
 
 

@@ -82,7 +82,7 @@ vector <Color_t> GetDefaultColors();
 RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap myvars, string pmode = "v");
 
 /// \brief Given a PDF type it returns the list of needed parameters to built a RooAbsPdf
-Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMap myvars = Str2VarMap(), string pmode = "v");
+Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMap myvars = Str2VarMap(), string pmode = "v", TString title = "");
 
 /** \brief Given a PDF name returns a RooAbsPdf
  * Available PDFs: Gauss, DGauss, CB, DCB, Argus, Exp, Poly, Cheb
@@ -92,9 +92,9 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
  * it will clone their properties and use the for RooAbsPdf
  * @param pmode : Print level flag (verbose "v", silent "s")
  * */
-RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar * var, Str2VarMap myvars = Str2VarMap(), string opt = "");
-RooAbsPdf * stringToPdf(const char * typepdf1, const char * typepdf2, const char * namepdf, RooRealVar * var1, RooRealVar * var2, Str2VarMap myvars = Str2VarMap(), string opt = "-vn");
-RooAbsPdf * stringToPdf(RooAbsPdf * pdf1, const char * typepdf, const char * namepdf, RooRealVar * var, Str2VarMap myvars = Str2VarMap(), string opt = "-vn");
+RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar * var, Str2VarMap myvars = Str2VarMap(), string opt = "", TString title = "");
+RooAbsPdf * stringToPdf(const char * typepdf1, const char * typepdf2, const char * namepdf, RooRealVar * var1, RooRealVar * var2, Str2VarMap myvars = Str2VarMap(), string opt = "-vn", TString title = "");
+RooAbsPdf * stringToPdf(RooAbsPdf * pdf1, const char * typepdf, const char * namepdf, RooRealVar * var, Str2VarMap myvars = Str2VarMap(), string opt = "-vn", TString title = "");
 
 RooAbsPdf * get2DRooKeys(string name, TTree * tree, RooRealVar * v1, RooRealVar * v2, string opt = "");
 RooAbsPdf * get2DRooKeys(TTree * tree, RooRealVar * v1, RooRealVar * v2, string opt = "");

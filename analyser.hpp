@@ -78,7 +78,6 @@ typedef  Long64_t (*FUNC_PTR)(TreeReader *, vector< Long64_t >);
 
 class Analysis : public ModelBuilder {
 
-	TString title;
 	TCut * cuts;
 	double chi2[2];
 	vector <double> regions;
@@ -108,7 +107,7 @@ class Analysis : public ModelBuilder {
 	public:
 
 	Analysis( TString _name, RooRealVar * _var, RooAbsPdf * pdf = NULL, int ngen = 1000, string opt = "-subtree"):
-		ModelBuilder(_name,_var), title(""), cuts(NULL), init(false), unit(""),
+		ModelBuilder(_name,_var), cuts(NULL), init(false), unit(""),
 		weight(NULL), data(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
 		dataReader(NULL), reducedTree(NULL), dataHist(NULL), scale(1)
 	{
@@ -125,7 +124,7 @@ class Analysis : public ModelBuilder {
 	};	
 
 	Analysis( TString _name, TString _title, TreeReader * reader, TCut * _cuts, RooRealVar * _var = NULL, string _w = ""):
-		ModelBuilder(_name,_var), title(_title), cuts(_cuts), init(false), unit(""),
+		ModelBuilder(_name,_var,_title), cuts(_cuts), init(false), unit(""),
 		weight(NULL), data(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
 		dataReader(reader), reducedTree(NULL), dataHist(NULL), scale(1)
 	{
@@ -143,7 +142,7 @@ class Analysis : public ModelBuilder {
 	};
 
 	Analysis( TString _name, TString _title, string treename, string filename, RooRealVar * _var = NULL, TCut * _cuts = NULL, string _w = ""):
-		ModelBuilder(_name,_var), title(_title), cuts(_cuts), init(false), unit(""),
+		ModelBuilder(_name,_var,_title), cuts(_cuts), init(false), unit(""),
 		weight(NULL), data(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
 	    reducedTree(NULL), dataHist(NULL), scale(1)
 	{
@@ -165,7 +164,7 @@ class Analysis : public ModelBuilder {
 
 	/// \brief Special constructor for single quick fit
 	template <typename T = RooAbsPdf *, typename D = RooDataSet *> Analysis( TString _name, TString _title, D * dd, RooRealVar * _var, T * _sig = (RooAbsPdf*)NULL, string _w = "", string opt = ""):
-		ModelBuilder(_name,_var), title(_title), cuts(NULL), init(false), unit(""),
+		ModelBuilder(_name,_var,_title), cuts(NULL), init(false), unit(""),
 		weight(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
 		dataReader(NULL), reducedTree(NULL), dataHist(NULL), scale(1)
 	{

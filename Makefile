@@ -76,14 +76,14 @@ clean:
 cleanall:
 	@echo "Cleaning ..."
 	@rm -f $(TOOLSDIR)/analysis/lib/*.o
-#	@rm -f $(TOOLSDIR)/roofit/dic/*.*
+	@rm -f $(TOOLSDIR)/roofit/dic/*.*
 	@rm -f $(TOOLSDIR)/roofit/lib/*.o
 	@rm -f $(TOOLSDIR)/lib/*.a
 
 veryclean:
 	@echo "Cleaning ..."
 	@rm -f $(TOOLSDIR)/analysis/lib/*.o
-#	@rm -f $(TOOLSDIR)/roofit/dic/*.*
+	@rm -f $(TOOLSDIR)/roofit/dic/*.*
 	@rm -f $(TOOLSDIR)/roofit/lib/*.o
 	@rm -f $(TOOLSDIR)/lib/*.a
 

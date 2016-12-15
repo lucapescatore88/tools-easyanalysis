@@ -410,7 +410,7 @@ TPaveText * createParamBox(RooAbsPdf * pdf, RooRealVar * obs, string opt, RooFit
         double error = arg->getError();
         if(fitRes) arg->getPropagatedError(*fitRes);
         int precision = 1;
-        while( error > 1.e-6 && error < 0.1)
+        while( error > 1.e-6 && error < 0.1 )
         { 
             error *= 10.;
             precision++;
@@ -510,14 +510,16 @@ TString getLegendLabel( TString title, string opt )
     if(opt.find("-origlegnames")==string::npos)
     {
         size_t pos_ = ((string)leglabel).find("_");
-        if(leglabel.Contains("sig")) pos_ = ((string)leglabel).find("_",pos_+1);
+        while(true) {
+            if(((TString)leglabel)(pos_+1,1)=="{")
+                pos_ = ((string)leglabel).find("_",pos_+1);
+            else break;
+        }
         leglabel = (TString)((string)leglabel).substr(0,pos_);
     }
 
     return leglabel;
 }
-
-
 
 /*
    Allows to make nice plots of data and models including blinded plots
@@ -605,19 +607,14 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
 
 
 	TString category = "";
-        RooCmdArg cut(RooCmdArg::none());
-        //RooCmdArg slice(RooCmdArg::none());
-        //RooCmdArg projData(RooCmdArg::none());
+    RooCmdArg cut(RooCmdArg::none());
 	if(opt.find("-category[")!=string::npos)
 	{
 	    size_t pos = opt.find("-category[");
             size_t posend = opt.find("]",pos);
             category = opt.substr(pos+10, posend - (pos+10) -1 );
             cout << "*************** category is" << category << endl;
-            cut = Cut("samples==samples::"+category);
-	
-	    //slice = Slice(samples,category);
-            //projData = ProjWData(*data)	
+            cut = Cut("samples==samples::"+category);	
 	}
 
         if(data && ( bandname.find("band")!=string::npos || noblind ) )
@@ -760,33 +757,6 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
                                 MoveToBack(), range_model, norm_range
                                 );
 
-		    /*
-                    if(opt.find("-fillbkg")!=string::npos) {
-		      cmdList.Add((RooCmdArg*) Components(curBkg).Clone());
-		      cmdList.Add((RooCmdArg*) DrawOption("F").Clone());
-		      cmdList.Add((RooCmdArg*) FillColor(colors[counter]).Clone());
-		      cmdList.Add((RooCmdArg*) FillStyle(1001).Clone());
-		      cmdList.Add((RooCmdArg*) LineColor(colors[counter]).Clone());
-		      cmdList.Add((RooCmdArg*) LineStyle(0).Clone());
-		      cmdList.Add((RooCmdArg*) LineWidth(0).Clone());
-		      cmdList.Add((RooCmdArg*) MoveToBack().Clone());
-		      cmdList.Add((RooCmdArg*) Name(myBkgName).Clone());
-		      cmdList.Add((RooCmdArg*) range_model.Clone());
-		      cmdList.Add((RooCmdArg*) norm_range.Clone());
-		    }
-                    else {
-		      cmdList.Add((RooCmdArg*) Components(curBkg).Clone());
-		      cmdList.Add((RooCmdArg*) DrawOption("L").Clone());
-		      cmdList.Add((RooCmdArg*) LineColor(colors[counter]).Clone());
-		      cmdList.Add((RooCmdArg*) LineStyle(styles[counter]).Clone());
-		      cmdList.Add((RooCmdArg*) MoveToBack().Clone());
-		      cmdList.Add((RooCmdArg*) Name(myBkgName).Clone());
-		      cmdList.Add((RooCmdArg*) range_model.Clone());
-		      cmdList.Add((RooCmdArg*) norm_range.Clone());
-		    }
-		    model->plotOn(frame, cmdList);
-		    */
-
                     counter++;
 
                     TString leglabel = getLegendLabel(myBkgTitle,opt); 
@@ -816,11 +786,16 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
     if(opt.find("-min")!=string::npos)
     {
         size_t pos = opt.find("-min");
-        TString strMin = opt.substr(pos+4,string::npos);
-        frame->SetMinimum(strMin.Atof());
+        if(opt.find("-minlog")!=string::npos) {
+            TString strMin = opt.substr(pos+7,string::npos);
+            frame->SetMinimum(strMin.Atof());
+        }
+        else {
+            TString strMin = opt.substr(pos+4,string::npos);
+            frame->SetMinimum(strMin.Atof());
+        }
     }
-    //else if(opt.find("-log")!=string::npos) frame->SetMinimum(0.5);
-    else if(opt.find("-log")!=string::npos) frame->SetMinimum(min * 1e-1);
+    else if(opt.find("-log")!=string::npos) frame->SetMinimum(min * 0.1);
     else frame->SetMinimum(0.);
     if(opt.find("-max")!=string::npos)
     {
@@ -829,6 +804,7 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
         frame->SetMaximum(strMin.Atof());
     }
     if(Xtitle!="") frame->SetXTitle(((TString)Xtitle).ReplaceAll("__var__",""));
+    else frame->SetXTitle(((TString)var->GetName()).ReplaceAll("__var__",""));
     if(Ytitle!="") frame->SetYTitle(Ytitle);
 
     return frame;
@@ -921,15 +897,17 @@ TString getPrintParName(string typepdf_, TString namepdf_)
 }
 
 
-Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMap myvars, string opt)
+Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMap myvars, string opt, TString title)
 {
     Str2VarMap parout;
     if(typepdf_.find("Poly")!=string::npos || typepdf_.find("Cheb")!=string::npos) return parout;
 
     Str2VarMap stval_list;
-    double sc = val->getVal()/5620.; 
-    TString pstrname = getPrintParName(typepdf_, namepdf_);
+    double sc = val->getVal()/5000.;
     namepdf_ = namepdf_.ReplaceAll("__noprint__","");
+    if(title == "") title = namepdf_;
+    TString pstrname = getPrintParName(typepdf_, title);
+    //if(((string)namepdf_).find("sig")==string::npos) pstrname = getPrintParName(typepdf_, namepdf_); 
 
     stval_list["m"]   = new RooRealVar("m_"+namepdf_,  "m"+pstrname,        val->getVal(),val->getMin(),val->getMax());
     stval_list["mg"]  = new RooRealVar("mg_"+namepdf_, "m_{gauss}"+pstrname,val->getVal(),val->getVal()*0.5,val->getVal()*2.);
@@ -1050,23 +1028,22 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
 
 
 
-RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar * var, Str2VarMap myvars, string opt)
+RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar * var, Str2VarMap myvars, string opt, TString title)
 {
     RooAbsPdf * pdf = NULL;
     string typepdf_ = (string)typepdf;
     TString namepdf_ = ((TString)namepdf).ReplaceAll("bkg_","");
     namepdf_ = namepdf_.ReplaceAll("_print","");
     namepdf_ = namepdf_.ReplaceAll("__noprint__","");
+    if(title == "") title = namepdf_;
 
-    size_t posname = opt.find("-vn");
-    if(posname!=string::npos)
-        opt += "-n"+(string)var->GetName();
+    opt += "-n"+(string)var->GetName();
 
-    Str2VarMap p = getPar(typepdf_,namepdf_,var,myvars,opt);
+    Str2VarMap p = getPar(typepdf_,namepdf_,var,myvars,opt,title);
 
     if(typepdf_.substr(0,5).find("Gauss")!=string::npos)
     {
-        pdf = new RooGaussian(namepdf,namepdf,*var,*p["m"],*p["s"]);
+        pdf = new RooGaussian(namepdf,title,*var,*p["m"],*p["s"]);
     }
     else if(typepdf_.find("DGauss")!=string::npos)
     {
@@ -1163,10 +1140,10 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
             maxs.push_back(max);
         }
         RooArgList * parList = new RooArgList("parList");
-        TString pstrname = getPrintParName(typepdf_, namepdf_);
+        TString pstrname = getPrintParName(typepdf_, title);
         for(int i = 0; i < npar; i++)
         {
-            RooRealVar * v = new RooRealVar(Form("c%i_",i)+namepdf_,Form("c_{%i}"+pstrname,i),pvals[i],mins[i],maxs[i]);
+            RooRealVar * v = new RooRealVar(Form("c%i_",i)+namepdf_,Form("c_%i"+pstrname,i),pvals[i],mins[i],maxs[i]);
             parList->add(*v);
         }
 
@@ -1231,23 +1208,20 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
     else return pdf;
 }
 
-
-
-RooAbsPdf * stringToPdf(const char * typepdf1, const char * typepdf2, const char * namepdf, RooRealVar * var1, RooRealVar * var2, Str2VarMap myvars, string opt)
+RooAbsPdf * stringToPdf(const char * typepdf1, const char * typepdf2, const char * namepdf, RooRealVar * var1, RooRealVar * var2, Str2VarMap myvars, string opt, TString title)
 {
-    RooAbsPdf * pdf1 = stringToPdf(typepdf1, ((string)namepdf + "_" + var1->GetName()).c_str(), var1, myvars, opt);
-    RooAbsPdf * pdf2 = stringToPdf(typepdf2, ((string)namepdf + "_" + var2->GetName()).c_str(), var2, myvars, opt); 
+    RooAbsPdf * pdf1 = stringToPdf(typepdf1, ((string)namepdf + "_" + var1->GetName()).c_str(), var1, myvars, opt, title);
+    RooAbsPdf * pdf2 = stringToPdf(typepdf2, ((string)namepdf + "_" + var2->GetName()).c_str(), var2, myvars, opt, title); 
     RooAbsPdf * totpdf = new RooProdPdf(namepdf,namepdf,*pdf1,*pdf2);
     return totpdf;
 }
 
-RooAbsPdf * stringToPdf(RooAbsPdf * pdf1, const char * typepdf, const char * namepdf, RooRealVar * var, Str2VarMap myvars, string opt)
+RooAbsPdf * stringToPdf(RooAbsPdf * pdf1, const char * typepdf, const char * namepdf, RooRealVar * var, Str2VarMap myvars, string opt, TString title)
 {
-    RooAbsPdf * pdf2 = stringToPdf(typepdf, ((string)namepdf + "_" + var->GetName()).c_str(), var, myvars, opt); 
+    RooAbsPdf * pdf2 = stringToPdf(typepdf, ((string)namepdf + "_" + var->GetName()).c_str(), var, myvars, opt, title); 
     RooAbsPdf * totpdf = new RooProdPdf(namepdf,namepdf,*pdf1,*pdf2);
     return totpdf;
 }
-
 
 RooAbsPdf * get2DRooKeys(string name, TTree * tree, RooRealVar * v1, RooRealVar * v2, string opt)
 {

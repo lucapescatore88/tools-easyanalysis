@@ -750,11 +750,10 @@ RooPlot* Analysis::Print(bool domodel, RooAbsData * data, string option, unsigne
 {
     if(!data) { cout << "WARNING!: No data available." << endl; domodel = true; }
 
-    unsigned posX = option.find("-xu");
-    if( posX > 1e4 ) posX = option.find("-x");
-    else if(unit!="") Xtitle = option.substr(posX+3,option.find("-",posX+3) - posX - 3) + " ["+ unit +"]";
-    if( posX < 1e4 && Xtitle == "") Xtitle = option.substr(posX+2,option.find("-",posX+2) - posX - 2);
-    Xtitle = (string)((TString)Xtitle).ReplaceAll("__var__","");
+    unsigned posX = option.find("-x");
+    if(posX < 1e4) Xtitle = option.substr(posX+2,option.find("-",posX+2) - posX - 2);
+    if(unit!="") Xtitle += " ["+ unit +"]";
+    
     if(!myvar) myvar = var;
 
     TString Ytitle = "";
@@ -779,26 +778,12 @@ RooPlot* Analysis::Print(bool domodel, RooAbsData * data, string option, unsigne
     if(domodel)
     {
         if(option.find("-linlog")!=string::npos)
-        {
-            if(option.find("-andpulls")!=string::npos)
-            {
-                string optLin = option;
-                optLin.replace(optLin.find("log"), 3, "");
-                optLin.replace(optLin.find("-andpulls"), 9, "");
-                ModelBuilder::Print(title, Xtitle, optLin, data, bins, regStr, range, m_fitRes, Ytitle, myvar);
-                string optLog = option;
-                optLog.replace(optLog.find("lin"), 3, "");
-                optLog.replace(optLog.find("-andpulls"), 9, "");
-                ModelBuilder::Print(title, Xtitle, optLog, data, bins, regStr, range, m_fitRes,Ytitle, myvar);
-            }
-            string optLin = option;
-            optLin.replace(optLin.find("log"), 3, "");
-            ModelBuilder::Print(title, Xtitle, optLin, data, bins, regStr, range, m_fitRes, Ytitle, myvar);
+        {   
             string optLog = option;
             optLog.replace(optLog.find("lin"), 3, "");
-            return ModelBuilder::Print(title, Xtitle, optLog, data, bins, regStr, range, m_fitRes, Ytitle, myvar);
+            ModelBuilder::Print(title, Xtitle, optLog, data, bins, regStr, range, m_fitRes,Ytitle, myvar);
         }
-        else return ModelBuilder::Print(title, Xtitle, option, data, bins, regStr, range, m_fitRes, Ytitle, myvar);
+        return ModelBuilder::Print(title, Xtitle, option, data, bins, regStr, range, m_fitRes, Ytitle, myvar);
     }
     else
     {
@@ -1148,7 +1133,7 @@ RooDataSet * Analysis::CalcSWeightRooFit(double min, double max, unsigned nbins,
 
   data->Print();
   sweights.Print();
-  reducedTree->Print();
+  //reducedTree->Print();
 
   TCanvas *c = new TCanvas();
   gStyle->SetOptStat(0);
@@ -1158,11 +1143,11 @@ RooDataSet * Analysis::CalcSWeightRooFit(double min, double max, unsigned nbins,
 
   c->Print((TString) name + "_sWeights.pdf");
 
-  reducedTree->Draw(var->GetName()+(TString)">>hSWHisto_"+sweights[0].GetName(),sweights[0].GetName());
-  TH1D *hSWHisto = (TH1D*)gPad->GetPrimitive((TString)"hSWHisto_"+sweights[0].GetName());
-
   reducedTree->Draw(var->GetName()+(TString)">>hHisto_"+sweights[0].GetName());
   TH1D *hHisto = (TH1D*)gPad->GetPrimitive((TString)"hHisto_"+sweights[0].GetName());
+
+  reducedTree->Draw(var->GetName()+(TString)">>hSWHisto_"+sweights[0].GetName(),sweights[0].GetName());
+  TH1D *hSWHisto = (TH1D*)gPad->GetPrimitive((TString)"hSWHisto_"+sweights[0].GetName());
 
   hSWHisto->SetLineColor(1);
   hHisto->SetLineColor(4);
