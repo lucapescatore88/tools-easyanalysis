@@ -9,7 +9,7 @@ using namespace RooFit;
 
 
 
-string ModelBuilder::pmode = "v";
+string ModelBuilder::m_pmode = "v";
 
 void ModelBuilder::SetModel(RooAbsPdf * _model)
 { 
@@ -67,12 +67,12 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
     bool noBkg = (optstr.find("-nobkg") != string::npos);
     bool doExp = (optstr.find("-exp") != string::npos);
     if( doExp ) AddBkgComponent("exp","Exp",1.e4,"-ibegin");
-    if( totBkgMode ) bkg_fractions.clear();
+    if( m_totBkgMode ) bkg_fractions.clear();
 
     for(unsigned i = 0; i < bkg_components.size(); i++)
     {
         bkgList->add(*(bkg_components[i]));
-        if(!totBkgMode) fracList->add(*(bkg_fractions[i]));
+        if(!m_totBkgMode) fracList->add(*(bkg_fractions[i]));
         else { if(i>0) fracList->add(*(new RooRealVar(Form("frac_%i",i),"Frac",0.5,0.,1))); }
     }
 
@@ -93,7 +93,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
 
     if(!noBkg && !bkg_components.empty())
     {
-        if(totBkgMode) model = new RooAddPdf("model"+myname,"model"+myname,RooArgSet(*sig,*bkg),RooArgSet(*nsig,*nbkg));
+        if(m_totBkgMode) model = new RooAddPdf("model"+myname,"model"+myname,RooArgSet(*sig,*bkg),RooArgSet(*nsig,*nbkg));
         else
         {
             pdfs.add(*bkgList);
@@ -103,12 +103,12 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
     }
     else model = sig; 
 
-    if(pmode=="v")
+    if(m_pmode=="v")
     {
         cout << "\n" << name << ": Initialized Correctly! The model is:" << endl;
         model->Print();
     }
-    isvalid = true;
+    m_isvalid = true;
     return model;
 }
 
@@ -401,7 +401,7 @@ double ModelBuilder::GetNBkgVal(double min, double max, double * valerr, RooFitR
     RooFormulaVar * nbkgval = new RooFormulaVar("nbkgval","nbkgval",(TString)nbkg->GetName() + " * " + (TString)integ->GetName(),RooArgSet(*nbkg,*integ));
     double integral = nbkg->getVal()*integ->getVal();
     if(valerr && fitRes) *valerr = nbkgval->getPropagatedError(*fitRes);
-    var->setRange(tmpvar->getMin(),tmpvar->getMax());
+    var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax());
     return integral;
 }
 
@@ -433,7 +433,7 @@ double ModelBuilder::GetNSigVal(double min, double max, double * valerr, RooFitR
                 RooArgSet(*nsig,*integ,*fit_integ));
     }
     if(valerr && fitRes) *valerr = nsigval->getPropagatedError(*fitRes);
-    var->setRange(tmpvar->getMin(),tmpvar->getMax());
+    var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax());
     return res;
 }
 
@@ -457,7 +457,7 @@ double ModelBuilder::GetSigVal(double * errHi, double * errLo)
 
 RooAbsReal * ModelBuilder::GetTotNBkg()
 {
-    if(totBkgMode || bkg_fractions.size()==0) return nbkg;
+    if(m_totBkgMode || bkg_fractions.size()==0) return nbkg;
     if(bkg_fractions.size()==1) { nbkg = bkg_fractions[0]; return nbkg; }
 
     stringstream formula;
@@ -474,7 +474,7 @@ RooAbsReal * ModelBuilder::GetTotNBkg()
 
 RooAbsPdf * ModelBuilder::CalcTotBkg()
 {
-    if(totBkgMode || bkg_fractions.size()<=1) return bkg;
+    if(m_totBkgMode || bkg_fractions.size()<=1) return bkg;
 
     RooAbsReal * nbkg = GetTotNBkg();
     RooArgSet * pdfs = new RooArgSet("BkgPdfs");

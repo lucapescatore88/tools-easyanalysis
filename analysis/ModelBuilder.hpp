@@ -17,12 +17,12 @@ using namespace std;
 
 class ModelBuilder {
 
-    bool isvalid;
+    bool m_isvalid;
     bool doNegSig, doNegBkg;
 
     protected:
 
-    static string pmode;
+    static string m_pmode;
     TString name;
     TString title;
     RooRealVar * var;
@@ -34,18 +34,18 @@ class ModelBuilder {
     RooAbsReal * nbkg;
     vector <RooAbsPdf *> bkg_components;
     vector <RooAbsReal *> bkg_fractions;
-    RooRealVar * tmpvar;
-    bool totBkgMode;
+    RooRealVar * m_tmpvar;
+    bool m_totBkgMode;
     vector<Color_t> mycolors;
 
-    void ForceValid() { isvalid = true; }
+    void ForceValid() { m_isvalid = true; }
 
     /// \brief Wrapper for the external function stringToPdf() which returns a model from a string
 
     RooAbsPdf * StringToPdf(const char * typepdf, const char * namepdf, Str2VarMap mypars, RooRealVar * myvar = NULL, TString title = "")
     {
         if(!myvar) myvar = var; 
-        return stringToPdf(typepdf, namepdf, myvar, mypars, pmode, title);
+        return stringToPdf(typepdf, namepdf, myvar, mypars, m_pmode, title);
     }
 
     /** \brief Returns a PDF starting from different kinds of objects
@@ -180,8 +180,8 @@ class ModelBuilder {
     //Constructors
 
     ModelBuilder():
-        isvalid(false), doNegSig(false), doNegBkg(false), var(NULL), sig(NULL), 
-        bkg(NULL), totBkgMode(false), mycolors(vector<Color_t>())
+        m_isvalid(false), doNegSig(false), doNegBkg(false), var(NULL), sig(NULL), 
+        bkg(NULL), m_totBkgMode(false), mycolors(vector<Color_t>())
     {
         nsig = new RooRealVar("nsig","nsig",0.,0.,1.e8);
         nbkg = new RooRealVar("nbkg","nbkg",0.,0.,1.e8);
@@ -190,14 +190,14 @@ class ModelBuilder {
     }
 
     ModelBuilder(TString _name, RooRealVar * _var, TString _title = ""):
-        isvalid(false), doNegSig(false), doNegBkg(false), name(_name), title(_title), 
-        var(_var), sig(NULL), bkg(NULL), totBkgMode(false), mycolors(vector<Color_t>())
+        m_isvalid(false), doNegSig(false), doNegBkg(false), name(_name), title(_title), 
+        var(_var), sig(NULL), bkg(NULL), m_totBkgMode(false), mycolors(vector<Color_t>())
     {
         if(var)
         {
             if( ((string)var->GetTitle()).find("__var__")==string::npos )
                 var->SetTitle( (TString)var->GetTitle()+"__var__" );
-            tmpvar = new RooRealVar(*var); vars.push_back(var); 
+            m_tmpvar = new RooRealVar(*var); vars.push_back(var); 
         }
         nsig = new RooRealVar("nsig_"+name,"N_{sig}",0.,0.,1.e8);
         nbkg = new RooRealVar("nbkg_"+name,"N_{bkg}",0.,0.,1.e8);
@@ -304,9 +304,9 @@ class ModelBuilder {
 
         if(_frac < 0) { min = val; max = val; }
 
-        if(totBkgMode) 
+        if(m_totBkgMode) 
         {
-            if(val > 1) { cout << "Attention in 'totBkgMode' the nevt must be between 0 and 1" << endl; return NULL; }
+            if(val > 1) { cout << "Attention in 'm_totBkgMode' the nevt must be between 0 and 1" << endl; return NULL; }
             frac = new RooRealVar("f"+nstr,"f_{"+(TString)_name+"}",val,0,1);
         }
         else if((TMath::Abs(_frac) > 0 && TMath::Abs(_frac) <= 1) || opt.find("-frac")!=string::npos)
@@ -469,16 +469,16 @@ class ModelBuilder {
     void SetTitle(TString _title) { title = _title; }
 
     /** \brief Sets the variable to fit "var".
-     * It also creates a copy of the initial variable "tmpvar". In fact when fitting the varible is modified and
+     * It also creates a copy of the initial variable "m_tmpvar". In fact when fitting the varible is modified and
      * if you want to fit again or change the model and refit you need to reset the variable as it was.
      * */
-    void SetVariable(RooRealVar * _var) { var = _var; tmpvar = new RooRealVar(*var); }
+    void SetVariable(RooRealVar * _var) { var = _var; m_tmpvar = new RooRealVar(*var); }
 
     /** \brief Sets the background mode
      * Normally the model is built as model = nsig*sig + nbkg1*bkg1 + nbkg2*bkg2 * ...
-     * If the totBkgModel is set to "tot" the model is built as model = nsig*sig + nTotbkg*(fracBkg1*bkg1 + fracBkg2*bkg2 + ...)
+     * If the m_totBkgModel is set to "tot" the model is built as model = nsig*sig + nTotbkg*(fracBkg1*bkg1 + fracBkg2*bkg2 + ...)
      * */
-    void SetBkgMode( bool mode ) { totBkgMode = mode; }
+    void SetBkgMode( bool mode ) { m_totBkgMode = mode; }
     void SetSig(RooAbsPdf * _sig) { sig = _sig; }
     ///\brief Forces a model
     void SetModel(RooAbsPdf * _model);
@@ -487,13 +487,13 @@ class ModelBuilder {
     void SetBkg(vector<RooAbsPdf *> _bkg_comp) { bkg_components = _bkg_comp; }
     void SetName(const char * newname) { name = newname; }
     void ClearBkgList() { bkg_components.clear(); bkg_fractions.clear(); }
-    void ResetVariable() { var->setVal(tmpvar->getVal()); var->setRange(tmpvar->getMin(),tmpvar->getMax()); };
+    void ResetVariable() { var->setVal(m_tmpvar->getVal()); var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax()); };
 
     RooAbsPdf * GetParamsGaussian(RooFitResult * fitRes);
     RooDataSet * GetParamsVariations(int nvariations = 10000, RooFitResult * fitRes = NULL);
 
     ////\brief Return true if the model was correctly built and initialized
-    bool isValid() { return isvalid; }
+    bool isValid() { return m_isvalid; }
     //bool isExtended() { return extended; }
     TString GetName() { return name; }
     ///\brief Return the variable to fit
@@ -537,7 +537,7 @@ class ModelBuilder {
     ///\brief Returns a Str2VarMap object containing all paramters of the entire model PDF, inclusing yields
     Str2VarMap GetParams(string opt = "");
 
-    static void SetPrintLevel(string mode) { pmode = mode; }
+    static void SetPrintLevel(string mode) { m_pmode = mode; }
 
     /** \brief Prints a plots with the model on it using the GetFrame() function.
      * @param title:  Title for the plot

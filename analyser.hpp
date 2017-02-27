@@ -85,7 +85,7 @@ class Analysis : public ModelBuilder {
 	vector <string> regStr;
 	bool init;
 	string unit;
-	static string pmode;
+	static string m_pmode;
 	RooAbsReal * weight;
 	RooDataSet * data;
 	RooFitResult * m_fitRes;
@@ -209,8 +209,8 @@ class Analysis : public ModelBuilder {
 	        m_fitRes = fitRes;
 	}
 
-	static void SetPrintLevel(string mode) { pmode = mode; ModelBuilder::SetPrintLevel(mode); TreeReader::SetPrintLevel(mode);  }
-	static string GetPrintLevel() { return pmode; }
+	static void SetPrintLevel(string mode) { m_pmode = mode; ModelBuilder::SetPrintLevel(mode); TreeReader::SetPrintLevel(mode);  }
+	static string GetPrintLevel() { return m_pmode; }
 
 	TTree * GetReducedTree() { return reducedTree; }
 	TreeReader * GetTreeReader() { return dataReader; }

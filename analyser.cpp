@@ -8,7 +8,7 @@ using namespace RooStats;
 RooRealVar * Scaler::_var = NULL;
 double Scaler::_scale = 1.;
 
-string Analysis::pmode = "v";
+string Analysis::m_pmode = "v";
 
 void Analysis::AddAllVariables()
 {
@@ -36,7 +36,7 @@ void Analysis::AddAllVariables()
 bool Analysis::Initialize(string option, double frac)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if (pmode == "v") cout << endl << name << ": Initialize " << option << endl;
+    if (m_pmode == "v") cout << endl << name << ": Initialize " << option << endl;
 
     chi2[0] = chi2[1] = -1;
 
@@ -67,7 +67,7 @@ bool Analysis::Initialize(string option, double frac)
 
     bool result = ModelBuilder::Initialize(option);
     if(bkg_components.size()==0) ((RooRealVar*)nsig)->setVal(data->numEntries());
-    if (pmode == "v")
+    if (m_pmode == "v")
     {
         cout << endl << name << ": PrintParams" << endl << endl;
 	ModelBuilder::PrintParams(option);
@@ -80,7 +80,7 @@ bool Analysis::Initialize(string option, double frac)
 void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if(pmode == "v") cout << endl << name << ": CreateReducedTree " << option << endl;
+    if(m_pmode == "v") cout << endl << name << ": CreateReducedTree " << option << endl;
 
     TCut doCuts = "";
     if (cuts)
@@ -98,12 +98,12 @@ void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
 
     if( scale!=1 && !dataReader->HasVar( ((string)var->GetName()+"_unscaled").c_str() ) )
     {
-        if(pmode == "v") cout << "Scaling variable... " << endl;
-        string oldpmode = TreeReader::GetPrintLevel();
+        if(m_pmode == "v") cout << "Scaling variable... " << endl;
+        string oldm_pmode = TreeReader::GetPrintLevel();
         TreeReader::SetPrintLevel("s");
         Scaler::Set(scale,var);
         applyFunc(&Scaler::Scale);
-        TreeReader::SetPrintLevel(oldpmode);
+        TreeReader::SetPrintLevel(oldm_pmode);
     }
 
     return;
@@ -117,7 +117,7 @@ void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
 RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if (pmode == "v") cout << endl << name << ": CreateDataSet " << option << endl;
+    if (m_pmode == "v") cout << endl << name << ": CreateDataSet " << option << endl;
 
     if (reducedTree && (option.find("-forcehist") == string::npos))
     {
@@ -127,7 +127,7 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
         for (unsigned i = 0; i < vars.size(); ++i)
             varList.add(*(vars[i]));
 
-        if (pmode == "v") cout << "Candidates: " << reducedTree->GetEntries() << endl;
+        if (m_pmode == "v") cout << "Candidates: " << reducedTree->GetEntries() << endl;
         if (dataReader && !dataReader->HasVar(var->GetName()))
             cout << "WARNING: the tree does not contain the requested variable!" << endl;
 
@@ -141,7 +141,7 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
 
         CreateHisto("-usedataset");
 
-        if (pmode == "v") data->Print();
+        if (m_pmode == "v") data->Print();
     }
     else if (dataHist)
     {
@@ -216,10 +216,10 @@ void Analysis::AddGaussConstraint(RooRealVar * par, double mean, double sigma)
     RooRealVar  *cm = new RooRealVar("cm_"+name, "mean_"+name, mean);
     RooRealVar  *cs = new RooRealVar("cs_"+name, "error_"+name, sigma);
     RooGaussian *constr = new RooGaussian("constr_"+name, "constr_"+name, *par, *cm, *cs);
-    if (pmode == "v") cout << "Constraining... " << endl;
+    if (m_pmode == "v") cout << "Constraining... " << endl;
     par->Print();
     constr->Print();
-    if (pmode == "v") cout << Form("Constraint : "+name+"%s -> gauss(%f,%f)",mean,sigma) << endl;
+    if (m_pmode == "v") cout << Form("Constraint : "+name+"%s -> gauss(%f,%f)",mean,sigma) << endl;
 
     AddConstraint(constr);
 }
@@ -327,7 +327,7 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
         return NULL;
     }
 
-    if (pmode == "v") cout << endl << name << ": Fit " << var->getTitle() << " (" << nbins << "," << minr << "," << maxr << ") " << option << endl;
+    if (m_pmode == "v") cout << endl << name << ": Fit " << var->getTitle() << " (" << nbins << "," << minr << "," << maxr << ") " << option << endl;
 
     RooAbsData * mydata = data;
     if(low_opt.find("-docuts")==string::npos || !data || extracuts != "" )
@@ -341,7 +341,7 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
         }
     }
 
-    if ((pmode != "v") || (low_opt.find("-quiet") != string::npos))
+    if ((m_pmode != "v") || (low_opt.find("-quiet") != string::npos))
         RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL);
 
     if (mydata)
@@ -373,7 +373,7 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
         RooFormulaVar nll2("nll2",("@0-"+to_string(nll0)).c_str(),*nll);
         RooMinuit m(nll2);
 
-        if (low_opt.find("-quiet")
+        if (low_opt.find("-quiet") != string::npos)
         {
             m.setPrintLevel(-1);
             m.setWarnLevel(-1);
@@ -407,17 +407,9 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
         option += "-nocost";
     }
 
-    var->setVal(tmpvar->getVal());
+    var->setVal(m_tmpvar->getVal());
     double range[2] = {minr, maxr};
     RooPlot *plot = (RooPlot*) PrintAndCalcChi2(nbins, range, option, mydata);
-
-    /*
-    if(vars.size()>1)
-    {
-        for(size_t v = 1; v < vars.size(); v++)
-            PrintVar(vars[v],nbins,option+"-vname");
-    }
-	*/
 
     if(option.find("-hidesig") != string::npos) ((RooRealVar*) nsig)->setConstant(0);
 
@@ -429,49 +421,42 @@ RooWorkspace * Analysis::SaveToRooWorkspace(string option)
 {
     RooWorkspace * ws = new RooWorkspace("ws_"+name);
     if(option != "") ws->SetName("ws_"+name+"_"+option);
-    if (pmode == "v") cout << endl << name << ": SaveToRooWorkspace" << endl;
+    if (m_pmode == "v") cout << endl << name << ": SaveToRooWorkspace" << endl;
 
 
     if(option == "")
     if(model)
     {
 	ws->import(*model);
-	if (pmode == "v") cout << "model: " << model->GetName() << endl;
+	if (m_pmode == "v") cout << "model: " << model->GetName() << endl;
     }
 
     if(option == "sig")
     if(sig)
     {
         ws->import(*sig);
-	if (pmode == "v") cout << "signal: " << sig->GetName() << endl;
+	if (m_pmode == "v") cout << "signal: " << sig->GetName() << endl;
     }
 
     if(option == "bkg")
     if(bkg)
     {
         ws->import(*bkg);
-	if (pmode == "v") cout << "background: " << bkg->GetName() << endl;
+	if (m_pmode == "v") cout << "background: " << bkg->GetName() << endl;
     }
 
     if(data)
     {
         ws->import(*data);
-	if (pmode == "v") cout << "data: " << data->GetName() << endl;
+	if (m_pmode == "v") cout << "data: " << data->GetName() << endl;
     }
-    /*
-    if (pmode == "v")
-    {
-        cout << endl;
-        ws->Print();
-        cout << endl;
-    }
-    */    
+
     return ws;
 }
 
 void Analysis::ImportModel(RooWorkspace * ws)
 {
-    if (pmode == "v") cout << endl << name << ": ImportModel" << endl << endl;
+    if (m_pmode == "v") cout << endl << name << ": ImportModel" << endl << endl;
 
     bkg_fractions.clear();
     bkg_components.clear();
@@ -481,7 +466,7 @@ void Analysis::ImportModel(RooWorkspace * ws)
     while( (arg=(TObject *)it->Next()) )
     {
         string name = arg->GetName();
-	//if (pmode == "v") cout << name << endl;
+	//if (m_pmode == "v") cout << name << endl;
         if(name.find("model")!=string::npos)
             model = (RooAbsPdf*)arg;
 	
@@ -509,7 +494,7 @@ void Analysis::ImportModel(RooWorkspace * ws)
 
     init = true;
     ForceValid();
-    if (pmode == "v")
+    if (m_pmode == "v")
     {
         cout << name << ": PrintParams" << endl << endl;
 	ModelBuilder::PrintParams();
@@ -518,14 +503,14 @@ void Analysis::ImportModel(RooWorkspace * ws)
 
 void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
 {
-    if (pmode == "v") cout << endl << name << ": ImportModel" << endl << endl;
+    if (m_pmode == "v") cout << endl << name << ": ImportModel" << endl << endl;
 
     TIterator * itSig = wsSig->componentIterator();
     TObject * argSig;
     while( (argSig=(TObject *)itSig->Next()) )
     {
         string name = argSig->GetName();
-	//if (pmode == "v") cout << name << endl;
+	//if (m_pmode == "v") cout << name << endl;
 	if (name.find("totsig")!=string::npos)
 	    sig = (RooAbsPdf*)argSig;
     }
@@ -535,7 +520,7 @@ void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
     while( (argBkg=(TObject *)itBkg->Next()) )
     {
         string name = argBkg->GetName();
-	//if (pmode == "v") cout << "Importing... " << name << endl;
+	//if (m_pmode == "v") cout << "Importing... " << name << endl;
         if (name.find("totbkg")!=string::npos)
 	{
             bkg = (RooAbsPdf*)argBkg;
@@ -546,7 +531,7 @@ void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
     init = true;
     ForceValid();
     /*
-    if (pmode == "v")
+    if (m_pmode == "v")
     {
         cout << name << ": PrintParams" << endl << endl;
 	ModelBuilder::PrintParams();
@@ -556,13 +541,13 @@ void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
 
 void Analysis::ImportData(RooWorkspace * ws)
 {
-    if (pmode == "v") cout << endl << name << ": ImportData" << endl;
+    if (m_pmode == "v") cout << endl << name << ": ImportData" << endl;
 
     list<RooAbsData *> mylist = ws->allData();
     for (std::list<RooAbsData *>::iterator it=mylist.begin(); it != mylist.end(); ++it)
     {
         string name = (*it)->GetName();
-	//if (pmode == "v") cout << name << endl;
+	//if (m_pmode == "v") cout << name << endl;
         if(name.find("data_")!=string::npos)
             data = (RooDataSet*)(*it);
     }
@@ -590,7 +575,7 @@ TTree * Analysis::applyFunc(void (*addFunc)(TreeReader *,  TTree *, bool), doubl
 TTree * Analysis::applyCuts(TCut _cuts, bool substtree, void (*addFunc)(TreeReader *,  TTree *, bool),  double frac)
 {
     if( !dataReader ) {cout << "WARNING: No tree available! Set one before applying cuts." << endl; return NULL;}
-    if( pmode=="v" ) cout << endl << name << ": Creating new tree with candidates which passed all cuts" << endl;
+    if( m_pmode=="v" ) cout << endl << name << ": Creating new tree with candidates which passed all cuts" << endl;
 
     if(cuts) _cuts += *cuts;
     TTree * newTree = new TTree("cand"+name,"");
@@ -645,7 +630,7 @@ TTree * Analysis::GetSingleTree(FUNC_PTR choose, TString namevar, bool reset)
         return NULL;
     }
 
-    if (pmode == "v") cout << name << ": Checking multiple candidates" << endl;
+    if (m_pmode == "v") cout << name << ": Checking multiple candidates" << endl;
 
     TTree *singleTree = (TTree*) reducedTree->CloneTree(0);
     int isSingle, multiplicity;
@@ -671,7 +656,7 @@ TTree * Analysis::GetSingleTree(FUNC_PTR choose, TString namevar, bool reset)
     ULong64_t lastEvtNumber = reducedReader->GetValue("eventNumber");
     UInt_t    lastRunNumber = reducedReader->GetValue("runNumber");	
 
-    if (pmode == "v") cout << endl;
+    if (m_pmode == "v") cout << endl;
 
     //TH1I * ncandhisto = new TH1I("ncand"+name,"ncand",10,0,10);
 
@@ -713,7 +698,7 @@ TTree * Analysis::GetSingleTree(FUNC_PTR choose, TString namevar, bool reset)
         entryn.push_back(i);
     }
 
-    if (pmode == "v") cout << endl;
+    if (m_pmode == "v") cout << endl;
     if (reset) reducedTree = singleTree;
 
     return singleTree;
@@ -887,7 +872,7 @@ void Analysis::SetBlindRegion(double min, double max)
 TTree * Analysis::Generate(int nevt, string option)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if(pmode=="v") cout << endl << name << ": Generating " << nevt << " events (" << option << ")" << endl;
+    if(m_pmode=="v") cout << endl << name << ": Generating " << nevt << " events (" << option << ")" << endl;
 
     if(model)
     {
@@ -925,7 +910,7 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
     cout << fixed << setprecision(3);
-    if(pmode=="v") cout << endl << name << ": Generating " << nsigevt << " signal events and " << nbkgevt << " bkg events (" << option << ")" << endl;
+    if(m_pmode=="v") cout << endl << name << ": Generating " << nsigevt << " signal events and " << nbkgevt << " bkg events (" << option << ")" << endl;
     
     if(sig && bkg)
     {
@@ -983,7 +968,7 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
 RooDataSet * Analysis::CalcSWeight(double min, double max, unsigned nbins, bool unbinned, string option)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if (pmode == "v") cout << endl << name << ": CalcSWeight " << option << endl;
+    if (m_pmode == "v") cout << endl << name << ": CalcSWeight " << option << endl;
 
     TString oldname = name;
     if(option.find("-nofit")==string::npos)
@@ -1102,7 +1087,7 @@ RooDataSet * Analysis::CalcSWeight(double min, double max, unsigned nbins, bool 
 RooDataSet * Analysis::CalcSWeightRooFit(double min, double max, unsigned nbins, bool unbinned, string option)
 {
   transform(option.begin(), option.end(), option.begin(), ::tolower);
-  if (pmode == "v") cout << endl << name << ": CalcSWeightRooFit " << option << endl;
+  if (m_pmode == "v") cout << endl << name << ": CalcSWeightRooFit " << option << endl;
 
   RooDataSet::setDefaultStorageType(RooAbsData::Tree);
 
