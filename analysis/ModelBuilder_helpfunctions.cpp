@@ -876,7 +876,7 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
         if(par_v < curpar->getMin()) curpar->setMin(par_v/10.);
         if(par_v > curpar->getMax()) curpar->setMax(par_v*10.);
         
-	if(parstr.substr(pos-1,2).find("X")!=string::npos) curpar->setConstant(kTRUE);
+	    if(parstr.substr(pos-1,2).find("X")!=string::npos) curpar->setConstant(kTRUE);
     }
 
     return curpar;
@@ -907,8 +907,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     namepdf_ = namepdf_.ReplaceAll("__noprint__","");
     if(title == "") title = namepdf_;
     TString pstrname = getPrintParName(typepdf_, title);
-    //if(((string)namepdf_).find("sig")==string::npos) pstrname = getPrintParName(typepdf_, namepdf_); 
-
+    
     stval_list["m"]   = new RooRealVar("m_"+namepdf_,  "m"+pstrname,        val->getVal(),val->getMin(),val->getMax());
     stval_list["mg"]  = new RooRealVar("mg_"+namepdf_, "m_{gauss}"+pstrname,val->getVal(),val->getVal()*0.5,val->getVal()*2.);
     stval_list["mcb"] = new RooRealVar("mcb_"+namepdf_,"m_{cb}"+pstrname,   val->getVal(),val->getVal()*0.5,val->getVal()*2.);
@@ -945,27 +944,27 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     stval_list["l"] = new RooRealVar("l_"+namepdf_,"l"+pstrname, -5,-10.,-1.);
     stval_list["z"] = new RooRealVar("z_"+namepdf_,"z"+pstrname, 0.005,0.,0.01);
 
-    std::map <string, string *> par_list;
-    string ApolloniosPar[]  = {"m", "s", "b", "a", "n", ""};
-    string ArgusPar[]       = {"m0", "p", "c", ""};
-    string BreitWignerPar[] = {"m", "s", "g", ""};
-    string CBPar[]          = {"m", "s", "a", "n", ""};
-    string CBGaussPar[]     = {"m", "s", "a", "n", "sg", "fg", ""};
-    string DCBPar[]         = {"m", "s", "s2", "f", "a", "a2",   "n", "n2", ""};
-    string DCBPar_Sn[]      = {"m", "s", "s2", "f", "a", "a2",   "n", ""};
-    string DCBPar_OST[]     = {"m", "s", "s2", "f", "a", "a2os", "n", "n2", ""};
-    string DCBGaussPar[]    = {"m", "s", "s2", "s3", "f", "f2", "a", "a2os", "n", "n2", ""};
-    string TCBPar[]         = {"m", "s", "s2", "s3", "f", "f2", "a", "a2", "a3", "n", "n2", "n3", ""};
-    string ExpPar[]         = {"b", ""};
-    string ExpAGaussPar[]   = {"m", "s", "b", ""};
-    string ExpCGaussPar[]   = {"s", "b", ""};
-    string GammaPar[]       = {"g", "b", "m", ""};
-    string GausPar[]        = {"m", "s", ""};
-    string DGausPar[]       = {"m", "s", "s2", "f", ""};
-    string TGausPar[]       = {"m", "s", "s2", "s3", "f", "f2", ""};
-    string IpatiaPar[]      = {"m", "s", "b", "l", "z", "a", "n", ""};
-    string Ipatia2Par[]     = {"m", "s", "b", "l", "z", "a", "n", "a2", "n2", ""};
-    string VoigtPar[]       = {"m", "s", "g", ""};
+    std::map <string, vector<string>> par_list;
+    vector<string> ApolloniosPar    {"m", "s", "b", "a", "n"};
+    vector<string> ArgusPar         {"m0", "p", "c"};
+    vector<string> BreitWignerPar   {"m", "s", "g"};
+    vector<string> CBPar            {"m", "s", "a", "n"};
+    vector<string> CBGaussPar       {"m", "s", "a", "n", "sg", "fg"};
+    vector<string> DCBPar           {"m", "s", "s2", "f", "a", "a2",   "n", "n2"};
+    vector<string> DCBPar_Sn        {"m", "s", "s2", "f", "a", "a2",   "n"};
+    vector<string> DCBPar_OST       {"m", "s", "s2", "f", "a", "a2os", "n", "n2"};
+    vector<string> DCBGaussPar      {"m", "s", "s2", "s3", "f", "f2", "a", "a2os", "n", "n2"};
+    vector<string> TCBPar           {"m", "s", "s2", "s3", "f", "f2", "a", "a2", "a3", "n", "n2", "n3"};
+    vector<string> ExpPar           {"b"};
+    vector<string> ExpAGaussPar     {"m", "s", "b"};
+    vector<string> ExpCGaussPar     {"s", "b"};
+    vector<string> GammaPar         {"g", "b", "m"};
+    vector<string> GausPar          {"m", "s"};
+    vector<string> DGausPar         {"m", "s", "s2", "f"};
+    vector<string> TGausPar         {"m", "s", "s2", "s3", "f", "f2"};
+    vector<string> IpatiaPar        {"m", "s", "b", "l", "z", "a", "n"};
+    vector<string> Ipatia2Par       {"m", "s", "b", "l", "z", "a", "n", "a2", "n2"};
+    vector<string> VoigtPar         {"m", "s", "g"};
 
     par_list["Apollonios"]  = ApolloniosPar;
     par_list["Argus"]       = ArgusPar;
@@ -997,12 +996,12 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     string parstr = "";
     size_t endtype = typepdf_.find("-");
     if(endtype!=string::npos) parstr = typepdf_.substr(endtype,string::npos);
-    string * pars = par_list[typepdf_.substr(0,endtype)];
+    vector<string> pars = par_list[typepdf_.substr(0,endtype)];
 
-    for(int i = 0; pars[i]!=""; i++)
+    for( auto par : pars )
     {
-        if(pars[i] == "a2os") parout["a2"] = addPar(pars[i], parstr, stval_list, myvars, opt);
-        else parout[pars[i]] = addPar(pars[i], parstr, stval_list, myvars, opt);
+        if(par == "a2os") parout["a2"] = addPar(par, parstr, stval_list, myvars, opt);
+        else parout[par] = addPar(par, parstr, stval_list, myvars, opt);
     }
 
     if(plusgaus!=string::npos)
