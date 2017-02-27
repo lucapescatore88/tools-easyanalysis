@@ -5,6 +5,7 @@
 #ifndef ANALYSER_HPP
 #define ANALYSER_HPP
 
+#include "RooMinuit.h"
 #include "RooRandom.h"
 #include "RooWorkspace.h"
 #include "RooRealVar.h"

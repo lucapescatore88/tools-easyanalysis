@@ -8,34 +8,36 @@
 #include "RooStats/SPlot.h"
 #include "RooDataSet.h"
 #include "RooRealVar.h"
+
 #include "RooGaussian.h"
 #include "RooExponential.h"
 #include "RooCBShape.h"
 #include "RooChebychev.h"
 #include "RooVoigtian.h"
 #include "RooBreitWigner.h"
+#include "RooGExpModel.h"
+#include "RooArgusBG.h"
+#include "RooGamma.h"
+#include "RooKeysPdf.h"
+#include "RooNDKeysPdf.h"
+#include "RooHistPdf.h"
+#include "RooProdPdf.h"
+#include "RooPolynomial.h"
+
 #include "RooAddPdf.h"
 #include "RooDataSet.h"
 #include "RooChi2Var.h"
 #include "RooDataHist.h"
 #include "RooAbsData.h"
-#include "RooProdPdf.h"
-#include "RooPolynomial.h"
 #include "RooAddition.h"
 #include "RooProduct.h"
 #include "RooAbsPdf.h"
 #include "RooFit.h"
 #include "RooFitResult.h"
 #include "RooWorkspace.h"
-#include "RooGExpModel.h"
-#include "RooArgusBG.h"
-#include "RooGamma.h"
 #include "RooConstVar.h"
 #include "RooNumConvPdf.h"
 #include "RooFFTConvPdf.h"
-#include "RooKeysPdf.h"
-#include "RooNDKeysPdf.h"
-#include "RooHistPdf.h"
 #include "RooPlot.h"
 
 #include "TLegend.h"
@@ -119,6 +121,7 @@ void fixParam(RooAbsPdf * pdf, RooArgSet * obs, RooArgSet * set, string fix = ""
 /// \brief Returns a RooArgSet containing a copy of all the free parameters in a RooAbsPdf
 RooArgSet * copyFreePars(RooAbsPdf * pdf, RooArgSet vars);
 RooArgSet * gaussianConstraints(RooAbsPdf * pdf, RooArgSet vars);
+//RooAbsPdf * corrGaussConstraints(RooAbsPdf * pdf, RooArgSet vars);
 
 string isParInMap( string par, Str2VarMap myvars, string option = "");
 

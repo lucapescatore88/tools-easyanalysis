@@ -353,7 +353,8 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
         RooCmdArg isExtended = Extended(kTRUE);
         if ( (low_opt.find("-noextended") != string::npos) || (bkg_components.size() < 1) )
             isExtended = Extended(kFALSE);
-
+        
+        /*
         RooCmdArg isQuiet = PrintLevel(2);
         if (low_opt.find("-quiet") != string::npos)
             isQuiet = PrintLevel(-1);
@@ -361,12 +362,37 @@ RooPlot * Analysis::Fit(double min, double max, unsigned nbins, bool unbinned, s
         RooCmdArg useMinos = Minos(kFALSE);
         if (low_opt.find("-minos") != string::npos)
             useMinos = Minos(kTRUE);
-
+        
         m_fitRes = model->fitTo(*mydata, fitRange, isExtended,
                 SumW2Error(true), isQuiet, Warnings(false), useMinos, Save(true), constraints);
-	
-	if (low_opt.find("-quiet") == string::npos)
-		cout << name << " :  CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << endl;
+	    */
+
+        // Prepare Likelihood
+        RooAbsReal * nll = model->createNLL(*mydata,isExtended);
+        double nll0 = nll->getVal(nll->getVariables());
+        RooFormulaVar nll2("nll2",("@0-"+to_string(nll0)).c_str(),*nll);
+        RooMinuit m(nll2);
+
+        if (low_opt.find("-quiet")
+        {
+            m.setPrintLevel(-1);
+            m.setWarnLevel(-1);
+        }
+
+        int i(0);
+        while (m_fitRes == NULL || m_fitRes->covQual() < 3) // loop until convergence
+        { 
+             m.migrad() ;
+             m.hesse() ;
+             if (low_opt.find("-minos") != string::npos) m.minos();
+             m_fitRes = m.save();
+             
+             ++i; if (i>20) break; // exit after 20 iterations
+        }
+
+
+	    if (low_opt.find("-quiet") == string::npos)
+		    cout << name << " :  CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << endl;
          
     }
     else
@@ -931,7 +957,7 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
 	    double ntot = nsigevt+nbkgevt;
 	    double frac = nsigevt/ntot;
 	    RooRealVar * f_sig = new RooRealVar("f_sig","f_sig",frac);  
-            RooAbsPdf * tot = new RooAddPdf("total_pdf","total_pdf",RooArgSet(*sig, *bkg), RooArgSet(*f_sig));
+        RooAbsPdf * tot = new RooAddPdf("total_pdf","total_pdf",RooArgSet(*sig, *bkg), RooArgSet(*f_sig));
 	    cout << "Generating nsig/ntot = " << f_sig->getVal() << endl;
 	    data = tot->generate(varList,ntot,ext);
 	    

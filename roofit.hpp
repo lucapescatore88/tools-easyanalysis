@@ -8,5 +8,6 @@
 #include "RooIpatia.h"
 #include "RooIpatia2.h"
 #include "RooLogGamma.h"
+#include "RooJohnson.h"
 
 #endif

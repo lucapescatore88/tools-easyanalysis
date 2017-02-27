@@ -91,19 +91,6 @@ TTree * generate(RooArgSet * set, RooAbsPdf * pdf, int nevt, string opt)
 
 TTree * generate(RooArgSet * set, RooAbsPdf * pdfSig, float nsig, RooAbsPdf * pdfBkg, float nbkg, string opt)
 {
-    /*
-	TTree * t_Sig = generate(set, pdfSig, nsig, opt);
-    TTree * t_Bkg = generate(set, pdfBkg, nbkg, opt);
-
-    cout << "Generated: " << t_Sig->GetEntries() << " signal and " << t_Bkg->GetEntries() << " background" << endl;
-
-    TList * list = new TList;
-    list->Add(t_Sig);
-    list->Add(t_Bkg);
-
-    return TTree::MergeTrees(list);
-	*/
-	
 	double ntot = nsig+nbkg;
 	double frac = nsig / ntot;
 	RooRealVar * f_sig = new RooRealVar("f_sig","f_sig",frac);

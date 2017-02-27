@@ -46,33 +46,6 @@ RooDataSet * ModelBuilder::GetParamsVariations(int nvariations, RooFitResult * f
     gauss->Print();
     RooDataSet * variations = gauss->generate(*params,nvariations);
     return variations;
-
-    /*
-       TRandom3  rndm(0);
-
-       while ( out->numEntries() < nvariations )
-       {
-       RooArgSet * set = new RooArgSet("row");	
-
-       RooArgSet * params = model->getParameters(RooDataSet("v","",RooArgSet(*var)));
-       TIterator *it = params->createIterator();
-       RooRealVar * arg;
-       while( (arg=(RooRealVar*)it->Next()) )
-       {
-       if(arg->getAttribute("Constant")) continue;
-
-       set->add(RooRealVar(arg->GetName(),
-       arg->GetTitle(),
-       rndm.Gaus(arg->getVal(),arg->getError()),
-       arg->getMin(),
-       arg->getMax()));
-       }
-       if(out) out->addFast(*set);
-       else out = new RooDataSet(name+"_param_variations",name+"_param_variations",*set);
-       }
-
-       return out;
-       */
 }
 
 /*
@@ -109,10 +82,8 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
     }
     else if(bkg_components.size()==1)
     {
-        //bkg = (RooAbsPdf*)(bkg_components[0]->Clone("totbkg"+myname));
         bkg = bkg_components[0];
         bkg->SetName("totbkg"+myname);
-        //bkg = new RooAddPdf("totbkg"+myname,"totbkg"+myname,*bkg_components[0]);
     }
 
     GetTotNBkg();
@@ -209,9 +180,7 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
 
         leg = new TLegend(x1,y1,x2,y2);
     }
-
-    //Xtitle = Xtitle.ReplaceAll("__var__","");
-
+    
     if(!myvar) myvar = var;
 
     if(!isValid()) {
