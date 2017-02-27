@@ -4,6 +4,7 @@
 #include "ReadTree_comp.hpp"
 #include "general_functions.hpp"
 #include "ModelBuilder_helpfunctions.hpp"
+#include "StringToPdf.hpp"
 
 using namespace std;
 
