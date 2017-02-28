@@ -13,26 +13,26 @@ string ModelBuilder::m_pmode = "v";
 
 void ModelBuilder::SetModel(RooAbsPdf * _model)
 { 
-    model = _model;
-    sig = model;
+    m_model = _model;
+    sig = m_model;
     Str2VarMap pars = GetParams();
-    if(pars["nsig"]) nsig = pars["nsig"];
+    if(pars["nsig"]) m_nsig = pars["nsig"];
 }
 
 
 RooAbsPdf * ModelBuilder::GetParamsGaussian(RooFitResult * fitRes)
 {
-    RooArgSet * params = model->getParameters(RooDataSet("v","",RooArgSet(*var)));
+    RooArgSet * params = m_model->getParameters(RooDataSet("v","",RooArgSet(*m_var)));
 
     return (RooAbsPdf *)(new RooMultiVarGaussian(
-                name+"_multivar_gauss",name+"_multivar_gauss",
+                m_name+"_multivar_gauss",m_name+"_multivar_gauss",
                 *params,fitRes->covarianceMatrix()));
 }
 
 
 RooDataSet * ModelBuilder::GetParamsVariations(int nvariations, RooFitResult * fitRes)
 {
-    RooArgSet * params = model->getParameters(RooDataSet("v","",RooArgSet(*var)));
+    RooArgSet * params = m_model->getParameters(RooDataSet("v","",RooArgSet(*m_var)));
 
     cout << "Making variations of " << endl;	
     params->Print();
@@ -41,7 +41,7 @@ RooDataSet * ModelBuilder::GetParamsVariations(int nvariations, RooFitResult * f
     cout << "End matrix" << endl;
 
     RooMultiVarGaussian * gauss = new RooMultiVarGaussian(
-            name+"_multivar_gauss",name+"_multivar_gauss",
+            m_name+"_multivar_gauss",m_name+"_multivar_gauss",
             *params,fitRes->covarianceMatrix());
     gauss->Print();
     RooDataSet * variations = gauss->generate(*params,nvariations);
@@ -59,57 +59,57 @@ RooDataSet * ModelBuilder::GetParamsVariations(int nvariations, RooFitResult * f
 RooAbsPdf * ModelBuilder::Initialize(string optstr)
 {
     TString myname = "";
-    myname = "_"+name;
+    myname = "_"+m_name;
 
-    RooArgList * bkgList = new RooArgList("bkgList_"+name);
-    RooArgList * fracList = new RooArgList("fracList_"+name);
+    RooArgList * bkgList = new RooArgList("bkgList_"+m_name);
+    RooArgList * fracList = new RooArgList("fracList_"+m_name);
 
     bool noBkg = (optstr.find("-nobkg") != string::npos);
     bool doExp = (optstr.find("-exp") != string::npos);
     if( doExp ) AddBkgComponent("exp","Exp",1.e4,"-ibegin");
-    if( m_totBkgMode ) bkg_fractions.clear();
+    if( m_totBkgMode ) m_bkg_fractions.clear();
 
-    for(unsigned i = 0; i < bkg_components.size(); i++)
+    for(unsigned i = 0; i < m_bkg_components.size(); i++)
     {
-        bkgList->add(*(bkg_components[i]));
-        if(!m_totBkgMode) fracList->add(*(bkg_fractions[i]));
+        bkgList->add(*(m_bkg_components[i]));
+        if(!m_totBkgMode) fracList->add(*(m_bkg_fractions[i]));
         else { if(i>0) fracList->add(*(new RooRealVar(Form("frac_%i",i),"Frac",0.5,0.,1))); }
     }
 
-    if(bkg_components.size()>1)
+    if(m_bkg_components.size()>1)
     { 
         bkg = new RooAddPdf("totbkg"+myname,"totbkg"+myname,*bkgList,*fracList);
     }
-    else if(bkg_components.size()==1)
+    else if(m_bkg_components.size()==1)
     {
-        bkg = bkg_components[0];
+        bkg = m_bkg_components[0];
         bkg->SetName("totbkg"+myname);
     }
 
     GetTotNBkg();
 
     if(!sig) { cout << "WARNING: Signal not set!!" << endl; return NULL; }
-    RooArgList pdfs(*sig), nevts(*nsig);
+    RooArgList pdfs(*sig), nevts(*m_nsig);
 
-    if(!noBkg && !bkg_components.empty())
+    if(!noBkg && !m_bkg_components.empty())
     {
-        if(m_totBkgMode) model = new RooAddPdf("model"+myname,"model"+myname,RooArgSet(*sig,*bkg),RooArgSet(*nsig,*nbkg));
+        if(m_totBkgMode) m_model = new RooAddPdf("model"+myname,"model"+myname,RooArgSet(*sig,*bkg),RooArgSet(*m_nsig,*m_nbkg));
         else
         {
             pdfs.add(*bkgList);
             nevts.add(*fracList);
-            model = new RooAddPdf("model"+myname,"model"+myname,pdfs,nevts);
+            m_model = new RooAddPdf("model"+myname,"model"+myname,pdfs,nevts);
         }
     }
-    else model = sig; 
+    else m_model = sig; 
 
     if(m_pmode=="v")
     {
-        cout << "\n" << name << ": Initialized Correctly! The model is:" << endl;
-        model->Print();
+        cout << "\n" << m_name << ": Initialized Correctly! The model is:" << endl;
+        m_model->Print();
     }
     m_isvalid = true;
-    return model;
+    return m_model;
 }
 
 
@@ -181,7 +181,7 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
         leg = new TLegend(x1,y1,x2,y2);
     }
     
-    if(!myvar) myvar = var;
+    if(!myvar) myvar = m_var;
 
     if(!isValid()) {
         cout << "**** WARNING: Model is not valid, probably not initialised. *****" << endl;
@@ -190,7 +190,7 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
 
     // Create main frame
 
-    frame = GetFrame(myvar, data, model, opt, bins, range, regStr, Xtitle, Ytitle, leg, mycolors);
+    frame = getFrame(myvar, data, m_model, opt, bins, range, regStr, Xtitle, Ytitle, leg, m_colors);
     if(opt.find("-noplot")!=string::npos) return frame;
 
     TString logstr = "";
@@ -200,14 +200,14 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
     TH1 * residuals = NULL;
     string pullopt = "p";
     if(opt.find("resid")!=string::npos) pullopt = "r";
-    if(data && (opt.find("pulls")!=string::npos || opt.find("resid")!=string::npos)) residuals = GetPulls(frame,NULL,pullopt);
+    if(data && (opt.find("pulls")!=string::npos || opt.find("resid")!=string::npos)) residuals = getPulls(frame,NULL,pullopt);
 
     // If "-H" option draw pulls distribution too
 
     if(opt.find("-H")!=string::npos)
     {
         TH1D * resH = NULL;
-        if(pullopt=="p") resH = new TH1D( "rH"+name, "Pulls distribution", 15, -5, 5 );
+        if(pullopt=="p") resH = new TH1D( "rH"+m_name, "Pulls distribution", 15, -5, 5 );
         else resH = new TH1D( "rH", "", 15, -3, 3 );
         for(int i = 0; i < residuals->GetNbinsX(); i++) resH->Fill(residuals->GetBinContent(i));
         gStyle->SetOptStat(0);
@@ -216,7 +216,7 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
         resH->GetYaxis()->SetTitle("Bins");
         resH->Draw();
         resH->Fit("gaus");
-        c->Print(name+"_pullsHist.pdf");
+        c->Print(m_name+"_pullsHist.pdf");
     }
 
     // "-andpulls" option draws pulls on the same canvas as the main frame otherwise 2 different pdfs are created
@@ -267,11 +267,11 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
     else if(residuals)
     {
         if(Xtitle!="") residuals->GetXaxis()->SetTitle(Xtitle);
-        else residuals->GetXaxis()->SetTitle(var->GetName());
+        else residuals->GetXaxis()->SetTitle(m_var->GetName());
         residuals->GetYaxis()->SetTitle("pulls");
         residuals->Draw();
-        if(opt.find("-eps")!=string::npos) c->Print(name+logstr+"_residuals.eps");
-        else c->Print(name+logstr+"_residuals.pdf");
+        if(opt.find("-eps")!=string::npos) c->Print(m_name+logstr+"_residuals.eps");
+        else c->Print(m_name+logstr+"_residuals.pdf");
     }
 
     // If set draw legend, box for fit failed warning, LHCb
@@ -345,8 +345,8 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
 
     if(opt.find("-none")==string::npos)
     {
-        TString pname = name;
-        if(!data) pname = "model_"+name;
+        TString pname = m_name;
+        if(!data) pname = "model_"+m_name;
         if(title!="") pname = title;
         pname = pname.ReplaceAll(" ","").ReplaceAll("#rightarrow","2");
         pname = pname.ReplaceAll("#","").ReplaceAll("__","_");
@@ -376,13 +376,13 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
 
 Str2VarMap ModelBuilder::GetSigParams(string opt)
 {
-    return GetParamList(sig, var, opt);
+    return getParamList(sig, m_vars, opt);
 }
 
 
 Str2VarMap ModelBuilder::GetParams(string opt)
 {
-    return GetParamList(model, var, opt);
+    return getParamList(m_model, m_vars, opt);
 }
 
 
@@ -393,47 +393,47 @@ double ModelBuilder::GetNBkgVal(double min, double max, double * valerr, RooFitR
 {
     GetTotNBkg();
 
-    if(valerr && fitRes) *valerr = nbkg->getPropagatedError(*fitRes);
-    if(min == max) return nbkg->getVal();
+    if(valerr && fitRes) *valerr = m_nbkg->getPropagatedError(*fitRes);
+    if(min == max) return m_nbkg->getVal();
 
-    var->setRange("myrange",min,max);
-    RooAbsReal * integ = bkg->createIntegral(*var,NormSet(*var),Range("myrange"));
-    RooFormulaVar * nbkgval = new RooFormulaVar("nbkgval","nbkgval",(TString)nbkg->GetName() + " * " + (TString)integ->GetName(),RooArgSet(*nbkg,*integ));
-    double integral = nbkg->getVal()*integ->getVal();
+    m_var->setRange("myrange",min,max);
+    RooAbsReal * integ = bkg->createIntegral(*m_var,NormSet(*m_var),Range("myrange"));
+    RooFormulaVar * nbkgval = new RooFormulaVar("nbkgval","nbkgval",(TString)m_nbkg->GetName() + " * " + (TString)integ->GetName(),RooArgSet(*m_nbkg,*integ));
+    double integral = m_nbkg->getVal()*integ->getVal();
     if(valerr && fitRes) *valerr = nbkgval->getPropagatedError(*fitRes);
-    var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax());
+    m_var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax());
     return integral;
 }
 
 double ModelBuilder::GetNSigVal(double min, double max, double * valerr, RooFitResult * fitRes, double fmin, double fmax)
 {
-    bool isRooAbs = ((string)typeid(nsig).name()).find("Abs")!=string::npos;
+    bool isRooAbs = ((string)typeid(m_nsig).name()).find("Abs")!=string::npos;
 
-    double sigval = nsig->getVal();
-    if(valerr && !isRooAbs) *valerr = ((RooRealVar *)nsig)->getError();
-    else if(valerr && fitRes) *valerr = nsig->getPropagatedError(*fitRes); 
+    double sigval = m_nsig->getVal();
+    if(valerr && !isRooAbs) *valerr = ((RooRealVar *)m_nsig)->getError();
+    else if(valerr && fitRes) *valerr = m_nsig->getPropagatedError(*fitRes); 
     if(min == max) return sigval;
 
-    var->setRange("myrange",min,max);
-    RooAbsReal * integ = sig->createIntegral(*var,NormSet(*var),Range("myrange"));
+    m_var->setRange("myrange",min,max);
+    RooAbsReal * integ = sig->createIntegral(*m_var,NormSet(*m_var),Range("myrange"));
     double res = sigval*integ->getVal();
     RooAbsReal * fit_integ = NULL;
 
     RooFormulaVar * nsigval = new RooFormulaVar("nsigval",
-            "nsigval",(TString)nsig->GetName() + " * " + (TString)integ->GetName(),
-            RooArgSet(*nsig,*integ));
+            "nsigval",(TString)m_nsig->GetName() + " * " + (TString)integ->GetName(),
+            RooArgSet(*m_nsig,*integ));
     if(fmin > fmax)
     {
-        var->setRange("myfitrange",min,max);
-        fit_integ = sig->createIntegral(*var,NormSet(*var),Range("myfitrange"));
+        m_var->setRange("myfitrange",min,max);
+        fit_integ = sig->createIntegral(*m_var,NormSet(*m_var),Range("myfitrange"));
         double norm = fit_integ->getVal();
         res /= norm;
         nsigval = new RooFormulaVar("nsigval",
-                "nsigval",(TString)nsig->GetName() + " * " + (TString)integ->GetName()  + " / " + (TString)fit_integ->GetName(),
-                RooArgSet(*nsig,*integ,*fit_integ));
+                "nsigval",(TString)m_nsig->GetName() + " * " + (TString)integ->GetName()  + " / " + (TString)fit_integ->GetName(),
+                RooArgSet(*m_nsig,*integ,*fit_integ));
     }
     if(valerr && fitRes) *valerr = nsigval->getPropagatedError(*fitRes);
-    var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax());
+    m_var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax());
     return res;
 }
 
@@ -444,11 +444,11 @@ double ModelBuilder::GetSigVal(double * valerr, RooFitResult * fitRes)
 
 double ModelBuilder::GetSigVal(double * errHi, double * errLo) 
 {
-    string tnsig = typeid(nsig).name();
+    string tnsig = typeid(m_nsig).name();
     if(tnsig.find("Abs")!=string::npos) cout << "WARNING: nsig is not a RooRealVar! Error will not make sense." << endl;
-    *errHi = ((RooRealVar *)nsig)->getErrorHi();
-    *errLo = ((RooRealVar *)nsig)->getErrorLo();
-    return nsig->getVal();
+    *errHi = ((RooRealVar *)m_nsig)->getErrorHi();
+    *errLo = ((RooRealVar *)m_nsig)->getErrorLo();
+    return m_nsig->getVal();
 }
 
 
@@ -457,35 +457,35 @@ double ModelBuilder::GetSigVal(double * errHi, double * errLo)
 
 RooAbsReal * ModelBuilder::GetTotNBkg()
 {
-    if(m_totBkgMode || bkg_fractions.size()==0) return nbkg;
-    if(bkg_fractions.size()==1) { nbkg = bkg_fractions[0]; return nbkg; }
+    if(m_totBkgMode || m_bkg_fractions.size()==0) return m_nbkg;
+    if(m_bkg_fractions.size()==1) { m_nbkg = m_bkg_fractions[0]; return m_nbkg; }
 
     stringstream formula;
-    RooArgList * bkgList = new RooArgList("nbkgList_"+name);
-    for(unsigned i = 0; i < bkg_fractions.size(); i++)
+    RooArgList * bkgList = new RooArgList("nbkgList_"+m_name);
+    for(unsigned i = 0; i < m_bkg_fractions.size(); i++)
     {
         if(i > 0) formula << " + ";
-        formula << bkg_fractions[i]->GetName();
-        bkgList->add(*(bkg_fractions[i]));
+        formula << m_bkg_fractions[i]->GetName();
+        bkgList->add(*(m_bkg_fractions[i]));
     }
-    nbkg = new RooFormulaVar("nbkg_tot",formula.str().c_str(),*bkgList);
-    return nbkg;
+    m_nbkg = new RooFormulaVar("nbkg_tot",formula.str().c_str(),*bkgList);
+    return m_nbkg;
 }
 
 RooAbsPdf * ModelBuilder::CalcTotBkg()
 {
-    if(m_totBkgMode || bkg_fractions.size()<=1) return bkg;
+    if(m_totBkgMode || m_bkg_fractions.size()<=1) return bkg;
 
-    RooAbsReal * nbkg = GetTotNBkg();
+    RooAbsReal * m_nbkg = GetTotNBkg();
     RooArgSet * pdfs = new RooArgSet("BkgPdfs");
     RooArgSet * fracs = new RooArgSet("BkgFracs");
-    for(unsigned i = 0; i < bkg_fractions.size(); i++)
+    for(unsigned i = 0; i < m_bkg_fractions.size(); i++)
     {
-        pdfs->add(*bkg_components[i]);
-        if(i!=bkg_fractions.size()-1)
+        pdfs->add(*m_bkg_components[i]);
+        if(i!=m_bkg_fractions.size()-1)
         {
-            TString fname = bkg_fractions[i]->GetName()+(TString)"_frac";
-            double fracv = bkg_fractions[i]->getVal() / ((double) nbkg->getVal());
+            TString fname = m_bkg_fractions[i]->GetName()+(TString)"_frac";
+            double fracv = m_bkg_fractions[i]->getVal() / ((double) m_nbkg->getVal());
             RooRealVar * frac = new RooRealVar(fname,fname,fracv,0.,1.);
             fracs->add(*frac);
         }
@@ -502,32 +502,32 @@ RooAbsPdf * ModelBuilder::CalcTotBkg()
 
 float ModelBuilder::GetReducedSWeight(float value)
 {
-    var->setVal(value);
-    return (nsig->getVal() * sig->getVal(*var)) / ((nsig->getVal() + nbkg->getVal()) * model->getVal(*var));
+    m_var->setVal(value);
+    return (m_nsig->getVal() * sig->getVal(*m_var)) / ((m_nsig->getVal() + m_nbkg->getVal()) * m_model->getVal(*m_var));
 }
 
 void ModelBuilder::PrintComposition(float min, float max, RooFitResult * fitRes)
 {
     GetTotNBkg();
-    if(max > min) var->setRange("myrange",min,max);
-    else { var->setRange("myrange",var->getMin(),var->getMax()); min = var->getMin(); max = var->getMax(); }
+    if(max > min) m_var->setRange("myrange",min,max);
+    else { m_var->setRange("myrange",m_var->getMin(),m_var->getMax()); min = m_var->getMin(); max = m_var->getMax(); }
 
     cout << "Composition in [" << min << "," << max << "]" << endl;
 
-    RooAbsReal * integ = model->createIntegral(*var,NormSet(*var),Range("myrange"));
-    RooAbsReal * totalf = new RooFormulaVar("totalf","","( " +(TString)nsig->GetName() + " + " + (TString)nbkg->GetName() + ") * " + (TString)integ->GetName(),RooArgSet(*nsig,*nbkg,*integ));
+    RooAbsReal * integ = m_model->createIntegral(*m_var,NormSet(*m_var),Range("myrange"));
+    RooAbsReal * totalf = new RooFormulaVar("totalf","","( " +(TString)m_nsig->GetName() + " + " + (TString)m_nbkg->GetName() + ") * " + (TString)integ->GetName(),RooArgSet(*m_nsig,*m_nbkg,*integ));
 
-    RooAbsReal * siginteg = sig->createIntegral(*var,NormSet(*var),Range("myrange"));
-    RooAbsReal * sigf = new RooFormulaVar("sigf","",(TString)nsig->GetName() + " * " + (TString)siginteg->GetName() + " / " + totalf->GetName(),RooArgSet(*nsig,*siginteg,*totalf));
+    RooAbsReal * siginteg = sig->createIntegral(*m_var,NormSet(*m_var),Range("myrange"));
+    RooAbsReal * sigf = new RooFormulaVar("sigf","",(TString)m_nsig->GetName() + " * " + (TString)siginteg->GetName() + " / " + totalf->GetName(),RooArgSet(*m_nsig,*siginteg,*totalf));
     cout << "Signal : " << 100 * sigf->getVal();
     if(fitRes) cout << " +/- " << sigf->getPropagatedError(*fitRes);
     cout << "%" << endl;
 
-    for(unsigned b = 0; b < bkg_components.size(); b++)
+    for(unsigned b = 0; b < m_bkg_components.size(); b++)
     {
-        RooAbsReal * bkginteg = bkg_components[b]->createIntegral(*var,NormSet(*var),Range("myrange"));
-        RooAbsReal * bkgf = new RooFormulaVar("bkgf","",(TString)bkg_fractions[b]->GetName() + " * " + (TString)bkginteg->GetName() + " / " + totalf->GetName(),RooArgSet(*bkg_fractions[b],*bkginteg,*totalf));
-        cout << bkg_fractions[b]->GetName() << " : " << 100 * bkgf->getVal();
+        RooAbsReal * bkginteg = m_bkg_components[b]->createIntegral(*m_var,NormSet(*m_var),Range("myrange"));
+        RooAbsReal * bkgf = new RooFormulaVar("bkgf","",(TString)m_bkg_fractions[b]->GetName() + " * " + (TString)bkginteg->GetName() + " / " + totalf->GetName(),RooArgSet(*m_bkg_fractions[b],*bkginteg,*totalf));
+        cout << m_bkg_fractions[b]->GetName() << " : " << 100 * bkgf->getVal();
         if(fitRes) cout << " +/- " << bkgf->getPropagatedError(*fitRes);
         cout << "%" << endl;
     }	

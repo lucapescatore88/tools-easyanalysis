@@ -57,7 +57,7 @@
 #include <iomanip>
 #include <typeinfo>
 
-#include "ReadTree_comp.hpp"
+#include "TreeReader.hpp"
 #include "ModelBuilder.hpp"
 #include "general_functions.hpp"
 
@@ -73,120 +73,121 @@ typedef  Long64_t (*FUNC_PTR)(TreeReader *, vector< Long64_t >);
 /** \class Analysis
  *  \brief Allows to handle data starting from TTree or TH1
  *  allows to make cuts and check for multiple candidates.
- *  Then using the ModelBuilder class it allows to create a model
+ *  Then using the ModelBuilder class it allows to create a m_model
  *  and finally you can Fit it to the dataset with advanced options.
  * */
 
 class Analysis : public ModelBuilder {
 
-	TCut * cuts;
-	double chi2[2];
-	vector <double> regions;
-	vector <string> regStr;
-	bool init;
-	string unit;
+	TCut * m_cuts;
+	double m_chi2[2];
+	vector <double> m_regions;
+	vector <string> m_regStr;
+	bool m_init;
+	string m_unit;
 	static string m_pmode;
-	RooAbsReal * weight;
-	RooDataSet * data;
+	RooAbsReal * m_weight;
+	RooDataSet * m_data;
 	RooFitResult * m_fitRes;
-	double fitmin;
-	double fitmax;
-        RooArgSet * constr;
+	double m_fitmin;
+	double m_fitmax;
+    RooArgSet * m_constr;
 
-/** \brief Converts the information in the Analysis object in a RooDataSet which can be fitted
- **/ 
+    /** \brief Converts the information in the Analysis object in a RooDataSet which can be fitted
+    **/
+
 	RooDataSet * CreateDataSet(string opt = "", TCut mycuts = "");
 	TH1 * CreateHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", string opt = "", TH1 * htemplate = NULL);	
 	TH1 * CreateHisto(string opt);
 
-	TreeReader * dataReader;
-	TTree * reducedTree;
-	TH1 * dataHist;
+	TreeReader * m_dataReader;
+	TTree * m_reducedTree;
+	TH1 * m_dataHist;
 
 	double scale;
 
 	public:
 
 	Analysis( TString _name, RooRealVar * _var, RooAbsPdf * pdf = NULL, int ngen = 1000, string opt = "-subtree"):
-		ModelBuilder(_name,_var), cuts(NULL), init(false), unit(""),
-		weight(NULL), data(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
-		dataReader(NULL), reducedTree(NULL), dataHist(NULL), scale(1)
+		ModelBuilder(_name,_var), m_cuts(NULL), m_init(false), m_unit(""),
+		m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
+		m_dataReader(NULL), m_reducedTree(NULL), m_dataHist(NULL), scale(1)
 	{
 		SetVariable(_var);
-		constr = new RooArgSet("constraints_"+name);
+		m_constr = new RooArgSet("constraints_"+m_name);
 
 		if(pdf)
 		{
 			SetModel(pdf);
 			Generate(ngen,opt);
-			init = true;
+			m_init = true;
 			ForceValid();
 		}
 	};	
 
 	Analysis( TString _name, TString _title, TreeReader * reader, TCut * _cuts, RooRealVar * _var = NULL, string _w = ""):
-		ModelBuilder(_name,_var,_title), cuts(_cuts), init(false), unit(""),
-		weight(NULL), data(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
-		dataReader(reader), reducedTree(NULL), dataHist(NULL), scale(1)
+		ModelBuilder(_name,_var,_title), m_cuts(_cuts), m_init(false), m_unit(""),
+		m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
+		m_dataReader(reader), m_reducedTree(NULL), m_dataHist(NULL), scale(1)
 	{
-		if(!var) 
+		if(!m_var) 
         {
             SetVariable(new RooRealVar("x","",0)); 
-		    vars.push_back(var);
+		    m_vars.push_back(m_var);
         }
-        constr = new RooArgSet("constraints_"+name);
+        m_constr = new RooArgSet("constraints_"+m_name);
 		if(_w != "") SetWeight( (TString)_w );
         
         if(!reader) cout << "Attention!! Your TreeReader is NULL, this is noing to break..." << endl;
 		if(!reader->isValid()) reader->Initialize();
-		reducedTree = (TTree *)reader->GetChain()->Clone("reduced_"+name);
+		m_reducedTree = (TTree *)reader->GetChain()->Clone("reduced_"+m_name);
 	};
 
 	Analysis( TString _name, TString _title, string treename, string filename, RooRealVar * _var = NULL, TCut * _cuts = NULL, string _w = ""):
-		ModelBuilder(_name,_var,_title), cuts(_cuts), init(false), unit(""),
-		weight(NULL), data(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
-	    reducedTree(NULL), dataHist(NULL), scale(1)
+		ModelBuilder(_name,_var,_title), m_cuts(_cuts), m_init(false), m_unit(""),
+		m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
+	    m_reducedTree(NULL), m_dataHist(NULL), scale(1)
 	{
-		if(!var) 
+		if(!m_var) 
         {
             SetVariable(new RooRealVar("x","",0));
-		    vars.push_back(var);
+		    m_vars.push_back(m_var);
         }
-        constr = new RooArgSet("constraints_"+name);
+        m_constr = new RooArgSet("constraints_"+m_name);
         if(_w != "") SetWeight( (TString)_w );
 
 		TreeReader * reader = new TreeReader(treename.c_str());
 		reader->AddFile(filename.c_str());
 		reader->Initialize();
-		dataReader = reader;
-		reducedTree = (TTree *)reader->GetChain()->Clone("reduced_"+name);
+		m_dataReader = reader;
+		m_reducedTree = (TTree *)reader->GetChain()->Clone("reduced_"+m_name);
 	};
 
 
 	/// \brief Special constructor for single quick fit
 	template <typename T = RooAbsPdf *, typename D = RooDataSet *> Analysis( TString _name, TString _title, D * dd, RooRealVar * _var, T * _sig = (RooAbsPdf*)NULL, string _w = "", string opt = ""):
-		ModelBuilder(_name,_var,_title), cuts(NULL), init(false), unit(""),
-		weight(NULL), m_fitRes(NULL), fitmin(0.), fitmax(0.),
-		dataReader(NULL), reducedTree(NULL), dataHist(NULL), scale(1)
+		ModelBuilder(_name,_var,_title), m_cuts(NULL), m_init(false), m_unit(""),
+		m_weight(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
+		m_dataReader(NULL), m_reducedTree(NULL), m_dataHist(NULL), scale(1)
 	{
-		if(!var) 
+		if(!m_var) 
         {
             SetVariable(new RooRealVar("x","",0));
-		    vars.push_back(var);
+		    m_vars.push_back(m_var);
         }
-        constr = new RooArgSet("constraints_"+name);
+        m_constr = new RooArgSet("constraints_"+m_name);
 		if(_w != "") SetWeight( (TString)_w );		
 
 		string tdata = typeid(D).name();
-		if(tdata.find("RooDataSet")!=string::npos) data = (RooDataSet *)dd;
+		if(tdata.find("RooDataSet")!=string::npos) m_data = (RooDataSet *)dd;
 		else if(tdata.find("TTree")!=string::npos) 
         { 
-            dataReader = new TreeReader((TTree *)dd);
-            dataReader->Initialize();
-            reducedTree = (TTree *)dd; 
+            m_dataReader = new TreeReader((TTree *)dd);
+            m_dataReader->Initialize();
+            m_reducedTree = (TTree *)dd; 
             CreateDataSet(); 
         }
-		else if(tdata.find("TH1")!=string::npos) { dataHist = (TH1 *)dd; CreateDataSet(); }
+		else if(tdata.find("TH1")!=string::npos) { m_dataHist = (TH1 *)dd; CreateDataSet(); }
 		else cout << "Type '" << tdata << "' not supported!" << endl;
 
 		if(_sig) { SetSignal(_sig,1.e4,opt); Initialize(""); }
@@ -194,27 +195,22 @@ class Analysis : public ModelBuilder {
 
 	~Analysis()
 	{
-		if(dataReader) delete dataReader;
-		if(cuts) delete cuts;
-		if(reducedTree) delete reducedTree;
-		if(dataHist) delete dataHist;
+		if(m_dataReader) delete m_dataReader;
+		if(m_cuts) delete m_cuts;
+		if(m_reducedTree) delete m_reducedTree;
+		if(m_dataHist) delete m_dataHist;
 	};
 
 
-        RooFitResult * GetFitRes() {
-	        return m_fitRes;
-	}
-
-        void SetFitRes(RooFitResult *fitRes = NULL) {
-	        m_fitRes = fitRes;
-	}
+    RooFitResult * GetFitRes() { return m_fitRes; }
+    void SetFitRes(RooFitResult *fitRes = NULL) { m_fitRes = fitRes; }
 
 	static void SetPrintLevel(string mode) { m_pmode = mode; ModelBuilder::SetPrintLevel(mode); TreeReader::SetPrintLevel(mode);  }
 	static string GetPrintLevel() { return m_pmode; }
 
-	TTree * GetReducedTree() { return reducedTree; }
-	TreeReader * GetTreeReader() { return dataReader; }
-	TH1 * GetHisto() { return dataHist; }
+	TTree * GetReducedTree() { return m_reducedTree; }
+	TreeReader * GetTreeReader() { return m_dataReader; }
+	TH1 * GetHisto() { return m_dataHist; }
 
 	/** \brief Sets units finding the scale factor too
 	 *  @param inUnit: unit of the input data. Based on the inUit-outUnit difference the scale factor is found. <br>Works only with masses in eV-PeV.
@@ -229,7 +225,7 @@ class Analysis : public ModelBuilder {
 	 **/
 	void SetUnits(string outUnit, double scalefactor = 1);
 	double GetScale() { return scale; }
-	string GetUnits() { return unit; }
+	string GetUnits() { return m_unit; }
 
 	/** \brief Adds a variable to the internal DataSet
 	 * An Analysis object can also be used to create RooDataSet objects to use then somewhere else. Therefore it comes usefull to have in the RooDataSet more than one variable. This can me added simpy by name (if it exists in the input tree).
@@ -238,29 +234,29 @@ class Analysis : public ModelBuilder {
     { 
         if( ((string)v->GetTitle()).find("__var__")==string::npos )
                 v->SetTitle((TString)v->GetTitle()+"__var__"); 
-        vars.push_back(v); 
+        m_vars.push_back(v); 
     }
-	void AddVariable(TString vname) { RooRealVar * v = new RooRealVar(vname,vname+"__var__",0.); vars.push_back(v); }
+	void AddVariable(TString vname) { RooRealVar * v = new RooRealVar(vname,vname+"__var__",0.); m_vars.push_back(v); }
 	void AddAllVariables();
-	bool isValid() { return init; }
+	bool isValid() { return m_init; }
 
 	/** Function to unitialize the Analysis object before fitting
-	 *	<br> Runs ModelBuilder::Initialize() to initialize the model
+	 *	<br> Runs ModelBuilder::Initialize() to initialize the m_model
 	 *	<br> Runs CreatedataSet() to initialize the data
 	 **/
 	bool Initialize(string _usesig = "-exp", double frac = -1.);
 	void CreateReducedTree(string option = "", double frac = -1., TCut cuts = "");
-	RooAbsReal * CreateLogL()
+	RooAbsReal * CreateLogL(RooCmdArg extended)
 	{ 
-		if(model && data) return model->createNLL(*data);
+		if(m_model && m_data) return m_model->createNLL(*m_data,extended);
 		else return NULL;
 	}
-	void SetWeight( TString w ) { weight = new RooRealVar(w,w,1.); return; }
-    string GetWeight() { if (!weight) return ""; else return weight->GetName(); }
-	void SetDataSet( RooDataSet * d ) { data = d; }
-	void SetCuts( TCut _cuts ) { cuts = &_cuts; }
-	void SetCuts( TCut * _cuts ) { cuts = _cuts; }
-	void SetCuts( TString _cuts ) { TCut tmpcut = (TCut)_cuts; cuts = &tmpcut; }
+	void SetWeight( TString w ) { m_weight = new RooRealVar(w,w,1.); return; }
+    string GetWeight() { if (!m_weight) return ""; else return m_weight->GetName(); }
+	void SetDataSet( RooDataSet * d ) { m_data = d; }
+	void SetCuts( TCut _cuts ) { m_cuts = &_cuts; }
+	void SetCuts( TCut * _cuts ) { m_cuts = _cuts; }
+	void SetCuts( TString _cuts ) { m_cuts = new TCut(_cuts); }
 	
     RooWorkspace * SaveToRooWorkspace(string option = "");
     void ImportModel(RooWorkspace * ws);
@@ -270,32 +266,32 @@ class Analysis : public ModelBuilder {
    
     RooDataSet * GetDataSet( string opt = "" )
     {
-	if(opt.find("-recalc")!=string::npos || !data) return CreateDataSet(opt);
-	else return data;
+	if(opt.find("-recalc")!=string::npos || !m_data) return CreateDataSet(opt);
+	else return m_data;
     }
     TH1 * GetHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", TH1 * htemplate = NULL)
     { return CreateHisto(min,max,nbin,_cuts,_weight); }
 
-    void AddConstraint(RooAbsReal * pdfconst) { constr->add(*pdfconst); }
+    void AddConstraint(RooAbsReal * pdfconst) { m_constr->add(*pdfconst); }
     void AddGaussConstraint(TString name, double mean, double sigma);
     void AddGaussConstraint(RooRealVar * par, double mean = -1e9, double sigma = -1e9);
-    RooArgSet * GetConstraints() { return constr; }
+    RooArgSet * GetConstraints() { return m_constr; }
 
 /** \brief Adds a blinded region.
- If you have to add more than one region you must add them in order from low to high and the must not overlap. If you set one or more regions parameters will be hidden and model and data will not be plotted in those regions.
+ If you have to add more than one region you must add them in order from low to high and the must not overlap. If you set one or more regions parameters will be hidden and m_model and data will not be plotted in those regions.
  **/
 	void SetBlindRegion(double min, double max);
-	void Reset() { regions.clear(); ClearBkgList(); ResetVariable(); vars.clear(); vars.push_back(var); chi2[0] = chi2[1] = -1; sig = NULL, bkg = NULL; init = false; }
+	void Reset() { m_regions.clear(); ClearBkgList(); ResetVariable(); m_vars.clear(); m_vars.push_back(m_var); m_chi2[0] = m_chi2[1] = -1; sig = NULL, bkg = NULL; m_init = false; }
 
-	/** \brief Generates events using the model internally set and a specific number of total events
-	 * @param nevt: Number of events to generate (N.B.: this is Nsig+Nbkg and the fraction between is supposed to be right in the model)
+	/** \brief Generates events using the m_model internally set and a specific number of total events
+	 * @param nevt: Number of events to generate (N.B.: this is Nsig+Nbkg and the fraction between is supposed to be right in the m_model)
 	 * @param opt: Options:
 	 * <br> "-seed(n)":  To set a specific seed
 	 * <br> "-smear(r)": "r" is a double interpreted as resolution. The generated events will be gaussian smeared by this resolution.
 	 **/
 	TTree * Generate(int nevt, string opt = "-subtree");
 
-/** \brief Generate events using the model inetrnally set and a specific number of signal and background events
+/** \brief Generate events using the m_model inetrnally set and a specific number of signal and background events
 	 * @param nsigevt: Number of signal events to generate
 	 * @param nbkgevt: Number of background events to generate      
  	 * @param opt: Options:
@@ -331,18 +327,18 @@ class Analysis : public ModelBuilder {
 **/
 	TTree * GetSingleTree(FUNC_PTR choose = NULL, TString namevar = "", bool reset = false);
 
-     TTree * GetSingles(vector<FUNC_PTR> choose, vector <TString> namevars)
-     {
+    TTree * GetSingles(vector<FUNC_PTR> choose, vector <TString> namevars)
+    {
         if(choose.size()!=namevars.size()) {
             cout << "ATTENTION: The vector of choose functions and their names must have the same size" << endl; return NULL; }
         for(size_t cf = 0; cf < choose.size(); cf++)
             GetSingleTree(choose[cf],namevars[cf],true);
-        return reducedTree;
-     }
+        return m_reducedTree;
+    }
 
     
-/** \brief Fits the "reducedTree" with the "model"
- * Data and model must be previourly set and initialized.
+/** \brief Fits the "reducedTree" with the "m_model"
+ * Data and m_model must be previourly set and initialized.
   <br>One can set the fit range and number of bins for chi2. If not set the variable range is used.
   @param min, max: fitting interval, if min => max all available is used 
   @param nbins: n of bins to use (if unbinned this is only for display)
@@ -360,8 +356,8 @@ class Analysis : public ModelBuilder {
 	RooPlot * Fit(double min = 0, double max = 0., unsigned nbins = 50, bool unbinned = false, string print = "-range-log", TCut mycuts = "");
     RooPlot * Fit(string option, TCut extracuts);
 
-/** \brief Makes nice plots of data and models including blinded plots
-  @param model: if true plots model on data
+/** \brief Makes nice plots of data and m_models including blinded plots
+  @param m_model: if true plots m_model on data
   @param opt: options string. Options available are:
   <br>"-fillSig"  -> signal is filled with color instead of dashed line
   <br>"-fillBkg"  -> bkg is filled with color instead of dashed line
@@ -374,7 +370,7 @@ class Analysis : public ModelBuilder {
   @param Xtitle: X axis label
   @param title: title
  **/
-	RooPlot * Print(bool domodel,  RooAbsData * data,  string opt = "-range-keepname", unsigned bins = 50, double * range = NULL, TString Xtitle = "", TString title = "", RooRealVar * myvar = NULL);
+	RooPlot * Print(bool dom_model,  RooAbsData * _data,  string opt = "-range-keepname", unsigned bins = 50, double * range = NULL, TString Xtitle = "", TString title = "", RooRealVar * myvar = NULL);
 	RooPlot * Print(string opt = "-range-keepname", unsigned bins = 50, double * range = NULL, TString Xtitle = "", TString title = "", RooRealVar * myvar = NULL);
 	RooPlot * PrintAndCalcChi2(int nbins, double * range, string print, RooAbsData * mydata = NULL );
 	RooPlot * PrintVar(RooRealVar * myvar, int nbins = 50, string option = ""); 
@@ -386,7 +382,7 @@ class Analysis : public ModelBuilder {
 
 	double GetNBkgVal(double min = 0, double max = 0, double * valerr = NULL)
 	{
-		if(!init || !m_fitRes) return -1;
+		if(!m_init || !m_fitRes) return -1;
 		return ModelBuilder::GetNBkgVal(min,max,valerr,m_fitRes);
 	}
 	double GetNBkgErr()
@@ -397,8 +393,8 @@ class Analysis : public ModelBuilder {
 	}
 	double GetNSigVal(double min = 0, double max = 0, double * valerr = NULL)
 	{
-		if(!init || !m_fitRes) return -1;
-		return ModelBuilder::GetNSigVal(min,max,valerr,m_fitRes,fitmin,fitmax);
+		if(!m_init || !m_fitRes) return -1;
+		return ModelBuilder::GetNSigVal(min,max,valerr,m_fitRes,m_fitmin,m_fitmax);
 	}
 	double GetNSigErr()
 	{
@@ -415,7 +411,7 @@ class Analysis : public ModelBuilder {
 		return ModelBuilder::GetSigFraction(min, max, valerr, m_fitRes);
 	}
 
-    RooRealVar * GetPar(string name) { return GetParam(model,name); }
+    RooRealVar * GetPar(string name) { return getParam(m_model,name); }
     double GetParVal(string name) 
     { 
         RooRealVar * par = GetPar(name);
@@ -444,7 +440,7 @@ class Analysis : public ModelBuilder {
 		return ModelBuilder::GetParamsVariations(nvariations,m_fitRes);
 	}
 
-	/** \brief Calculates S-weight for the data and model set
+	/** \brief Calculates S-weight for the data and m_model set
   		The function will perform a fit but it could help to Fit first anyway.
 	 	@param min,max: Calculates S-weight only in [min,max]
 		@param nbins:   Number of bins (just for display if unbinned fit)

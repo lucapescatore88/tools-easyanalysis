@@ -268,7 +268,7 @@ TH1D* residualHist( const RooHist* rhist, const RooCurve* curve, float * range, 
 }
 
 
-TH1 * GetPulls(RooPlot * pl, float * range, string opt)
+TH1 * getPulls(RooPlot * pl, float * range, string opt)
 {
     RooHist* histogram = pl->getHist("data");
     RooCurve* curve = pl->getCurve("model");
@@ -456,17 +456,17 @@ vector<TH1*> createRandomFluctuations(TH2D * input, int nRandom, char limit)
  * By extracting the row with Y = slice
  * */
 
-TH1 * GetSliceX(TH2 *hHisto, double slice)
+TH1 * getSliceX(TH2 *hHisto, double slice)
 {
     int bin = hHisto->GetXaxis()->FindBin(slice);
-    return GetSliceX(hHisto,bin);
+    return getSliceX(hHisto,bin);
 }
 
 /** \brief Extracts a TH1 from a TH2
  * By extracting the Y row, where "bin" is the bin number (remember starts from 1)
  * */
 
-TH1 * GetSliceX(TH2 *hHisto, int bin)
+TH1 * getSliceX(TH2 *hHisto, int bin)
 {
     TH1 *hSlice = new TH1D("", "", hHisto->GetNbinsY(), hHisto->GetYaxis()->GetXmin(), hHisto->GetYaxis()->GetXmax());
     hSlice->SetXTitle(hHisto->GetYaxis()->GetTitle());
@@ -486,7 +486,7 @@ TH1 * GetSliceX(TH2 *hHisto, int bin)
   \brief Sets to zero bins with percent error grater than cut and outside the interval [min,max]
   */
 
-void CleanHistos(TH1 &histo, float cut, float min, float max)
+void cleanHistos(TH1 &histo, float cut, float min, float max)
 {
     for(int j = 0; j != histo.GetNbinsX(); ++j)
     {
@@ -527,7 +527,7 @@ void ShiftHistos(TH1 &histo, float shift)
  */
 
 
-TH1* SetdNdeta(TH1* histo, vector<float > &labels, int nDiv, float dNmax)
+TH1* setLabels(TH1* histo, vector<float > &labels, int nDiv, float dNmax)
 {
     for(int j = 1; j != histo->GetNbinsX()+1; ++j)
     {
@@ -550,7 +550,7 @@ TH1* SetdNdeta(TH1* histo, vector<float > &labels, int nDiv, float dNmax)
   \brief Divides each bin by its width 
   */
 
-void UniformBins(TH1 *histo)
+void uniformBins(TH1 *histo)
 {
     for(int j = 1; j != histo->GetNbinsX()+1; ++j)
     {
@@ -576,7 +576,7 @@ void UniformBins(TH1 *histo)
  *
  */
 
-float ComputeMCError(bool mean, char* formula, float best, Double_t *param, Double_t *err, int ntry, bool gauss, bool valAss)
+float computeMCError(bool mean, char* formula, float best, Double_t *param, Double_t *err, int ntry, bool gauss, bool valAss)
 {
 
     TF1* funz = new TF1("funz",formula,0,100);
@@ -637,7 +637,7 @@ float ComputeMCError(bool mean, char* formula, float best, Double_t *param, Doub
   \brief Divides each bin for it's center plus a constant
   */
 
-void DivideForBinCenter(TH1 &histo, float cost)
+void divideForBinCenter(TH1 &histo, float cost)
 {
     for(int j = 1; j != histo.GetNbinsX()+1; ++j )
     {
@@ -664,7 +664,7 @@ void DivideForBinCenter(TH1 &histo, float cost)
  */
 
 
-TH1F *RebinHisto(TH1 &histo, float init, vector<float> sizes, char* title, bool media)
+TH1F * rebinHisto(TH1 &histo, float init, vector<float> sizes, char* title, bool media)
 {
     vector <float> Bin;
     float bin = init;
@@ -708,13 +708,13 @@ TH1F *RebinHisto(TH1 &histo, float init, vector<float> sizes, char* title, bool 
  *
  */
 
-TH1F *RebinHisto(TH1 &histo, TH1 &tamplateHisto, char* title, bool media)
+TH1F *rebinHisto(TH1 &histo, TH1 &tamplateHisto, char* title, bool media)
 {
     vector<float> sizes;
     float init = tamplateHisto.GetBinLowEdge(1);
     for(int tmpBin = 1; tmpBin < tamplateHisto.GetNbinsX()+1; tmpBin++) sizes.push_back(tamplateHisto.GetBinWidth(tmpBin));
 
-    TH1F* RebinnedHisto = RebinHisto(histo, init, sizes, title, media);
+    TH1F* RebinnedHisto = rebinHisto(histo, init, sizes, title, media);
 
     return RebinnedHisto;
 }
@@ -727,7 +727,7 @@ TH1F *RebinHisto(TH1 &histo, TH1 &tamplateHisto, char* title, bool media)
  *
  */
 
-TH1F *RebinHisto(TH1 &histo, float error, char* title, bool media)
+TH1F *rebinHisto(TH1 &histo, float error, char* title, bool media)
 {
     vector<float> edges;
     vector<float> sizes;
@@ -754,7 +754,7 @@ TH1F *RebinHisto(TH1 &histo, float error, char* title, bool media)
 
     for(size_t j = 1; j != edges.size(); j++) sizes.push_back(edges[j] - edges[j-1]);
 
-    TH1F* RebinnedHisto = RebinHisto(histo, init, sizes, title, media);
+    TH1F* RebinnedHisto = rebinHisto(histo, init, sizes, title, media);
 
     return RebinnedHisto;
 }
@@ -765,7 +765,7 @@ TH1F *RebinHisto(TH1 &histo, float error, char* title, bool media)
   \brief Computes sqrt(statErr^2 + sysErr^2) and sets it to the histogram
   */
 
-void AddSystematicError(TH1 &histo, float sysError)
+void addSystematicError(TH1 &histo, float sysError)
 {
     for(int tmpBin = 1; tmpBin != histo.GetNbinsX()+1; tmpBin++) 
     {
@@ -780,7 +780,7 @@ void AddSystematicError(TH1 &histo, float sysError)
   \brief Computes the scalar product of vector "v" with scalar "c"
   */
 
-vector <double> ScalarProd(vector<double> v, double c)
+vector <double> scalarProd(vector<double> v, double c)
 {
     vector<double> res = v;
     for(unsigned n = 0; n < v.size(); n++) res[n] *= c;
@@ -835,156 +835,5 @@ double * decodeBinning(string str, int * _nbins, string opt)
     return res;
 }
 
-
-
-/*
-   double optimizeCut(string analysis, TString part, TTree *treeSig, TTree *treeBkg, TCut baseCut, TCut sigCut, TCut sideBandCut, double sigNorm, double bkgNorm, TString MCweight, int nSteps, string fmerit, const char *oCut, bool print)
-   {
-
-   TFile ofile((TString) analysis + "_optimize.root", "recreate");
-   TGraph *gSignal     = new TGraph();
-   TGraph *gBackground = new TGraph();
-   TGraph *gPurity     = new TGraph();
-   TGraph *gFOM        = new TGraph();
-   TGraph *gROC        = new TGraph();
-
-   double step     = 1. / nSteps;
-   double startW   = step;
-   double curW     = startW;
-   double optimalW = startW;
-   double maxSig, maxP, maxEff, maxBkgRej, pasB, pasS;
-   maxSig = maxP = maxEff = maxBkgRej = pasB = pasS = -1;
-
-   cout << "Optimizing..." << endl;
-   for (int i = 1; i < nSteps; ++i)
-   {
-   showPercentage(i, nSteps, 0, nSteps);
-
-   TString select((TString) oCut + Form(" > %e", curW));
-
-   if (MCweight != "") treeSig->Draw(vplot+" >> hS", MCweight + " * (" + (TString) (baseSigCut + (TCut) select) + ")");
-   else treeSig->Draw(vplot+" >> hS", baseSigCut && select);
-   TH1D* hS = (TH1D*) gPad->GetPrimitive("hS");
-   double S = sigNorm * hS->Integral();
-
-   double B = bkgNorm * treeBkg->GetEntries(baseBkgCut && select);
-
-   double eff    = S / totS;
-   double P      = S / (S + B);
-   double bkgRej = (1 - B / totB);
-   double signif = 0;
-
-   if (fmerit == "significance") signif = S / TMath::Sqrt(B + S);
-   else if (fmerit.find("punzi") != string::npos)
-   {
-   TString str_nsigma = fmerit.substr(5, string::npos);
-   int nsigma = str_nsigma.Atof();
-   if (fmerit == "punzi") nsigma = 5;
-   signif = S / (nsigma / 2. + TMath::Sqrt(B));
-   }
-
-   gSignal->SetPoint(i, curW, S);
-   gBackground->SetPoint(i, curW, B);
-   if (B != 0) gPurity->SetPoint(i, curW, P);
-   gFOM->SetPoint(i, curW, signif);
-   gROC->SetPoint(i, eff, bkgRej);
-   if (signif > maxSig)
-   {
-   pasS      = S;
-   pasB      = B;
-   maxSig    = signif;
-   maxEff    = eff;
-   maxP      = P;
-   maxBkgRej = bkgRej;
-   optimalW  = curW;
-   }
-
-   curW += step;
-   }
-
-   cout << endl;
-   cout << fixed << setprecision(3) << "Optimal Cut    = " << oCut << " > " << optimalW << endl;
-   cout << fixed << setprecision(1) << "Bkg Rejection  = " << maxBkgRej * 100 << endl;
-   cout << fixed << setprecision(1) << "Sig Efficiency = " << maxEff * 100 << endl;
-   cout << endl;
-
-ofile.cd();
-gSignal->Write("Signal");
-gBackground->Write("Background");
-gPurity->Write("Purity");
-gFOM->Write("FoM");
-gROC->Write("ROC");
-
-if (print && nSteps > 0)
-{	
-    TCanvas * c = new TCanvas();
-
-    gFOM->GetXaxis()->SetTitle("MVA Cut");
-    if (fmerit == "significance") gFOM->GetYaxis()->SetTitle("S/#sqrt{S+B}");
-    else gFOM->GetYaxis()->SetTitle("S/(n_{#sigma}/2 + #sqrt{B})");
-    gFOM->SetMarkerSize(0.8);
-    gFOM->SetMarkerStyle(20);
-    gFOM->Draw("AP");
-    TLine *l1 = new TLine(optimalW, 0, optimalW, maxSig * 1.1);
-    l1->SetLineColor(kRed);
-    l1->Draw("same");
-    //TLatex lFoM(0.1, maxSig * 0.1, Form("Significance = %f", maxSig));
-    //lFoM.Draw();
-    c->Print((analysis + "_FoM.pdf").c_str());
-    c->Print((analysis + "_FoM.C").c_str());
-
-    gPurity->GetXaxis()->SetTitle("MVA Cut");
-    gPurity->GetYaxis()->SetTitle("S/(S+B)");
-    gPurity->SetMarkerSize(0.8);
-    gPurity->SetMarkerStyle(20);
-    gPurity->Draw("AP");
-    TLine *l2 = new TLine(optimalW, 0, optimalW, maxP * 1.1);
-    l2->SetLineColor(kRed);
-    l2->Draw("same");
-    TLatex lPur(0.1, maxP * 0.1, Form("Purity = %f", maxP));
-    lPur.Draw();
-    c->Print((analysis + "_Purity.pdf").c_str());
-    c->Print((analysis + "_Purity.C").c_str());
-
-    c->SetLogy();
-    c->Clear();
-    gSignal->SetMarkerColor(kBlue);
-    gSignal->SetMarkerSize(0.8);
-    gSignal->SetMarkerStyle(20);
-    gBackground->SetMarkerColor(kRed);
-    gBackground->SetMarkerSize(0.8);
-    gBackground->SetMarkerStyle(20);
-    TMultiGraph *mg = new TMultiGraph();
-    mg->Add(gBackground);
-    mg->Add(gSignal);
-    mg->Draw("AP");
-    mg->SetTitle("Sig (blue), Bkg (red)");
-    mg->GetXaxis()->SetTitle("MVA Cut");
-    mg->GetYaxis()->SetTitle("Candidates");
-    TLine *l3 = new TLine(optimalW, 0, optimalW, TMath::Max(totS, totB));
-    l3->SetLineColor(kRed);
-    l3->Draw("same");
-    c->Print((analysis + "_Candidates.pdf").c_str());
-    c->Print((analysis + "_Candidates.C").c_str());
-
-    c->SetLogy(0);
-    gROC->SetMarkerSize(0.8);
-    gROC->SetMarkerStyle(20);
-    gROC->GetYaxis()->SetTitle("1 - #varepsilon_{Bkg}");
-    gROC->GetXaxis()->SetTitle("#varepsilon_{Sig}");
-    gROC->Draw("AP");
-    c->Print((analysis + "_ROC.pdf").c_str());
-    c->Print((analysis + "_ROC.C").c_str());
-
-    delete c;
-}
-
-ofile.Close();
-
-return optimalW;
-
-}
-
-*/
 
 

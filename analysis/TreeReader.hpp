@@ -34,7 +34,7 @@ using namespace std;
 
 typedef enum
 {
-	BOOL, INT, UINT, FLOAT, DOUBLE, LONG64, ULONG64, CHAR, UCHAR, SHORT, USHORT
+  BOOL, INT, UINT, FLOAT, DOUBLE, LONG64, ULONG64, CHAR, UCHAR, SHORT, USHORT, VDOUBLE
 } TypeVAR;
 
 
@@ -67,6 +67,7 @@ class TypeDB {
 			names.push_back("UChar_t");
 			names.push_back("Short_t");
 			names.push_back("UShort_t");
+			names.push_back("vector<double>");
 
 			branchIDs.push_back("O");
 			branchIDs.push_back("I");
@@ -79,16 +80,17 @@ class TypeDB {
 			branchIDs.push_back("b");
 			branchIDs.push_back("S");
 			branchIDs.push_back("s");
+			branchIDs.push_back("");
 		}
 
 		init = true;
 	}
 
-    static inline string getTypeName( unsigned int id )
-    {
-        if(id < names.size()) return names[id];
-        else return (string)"";
-    }
+        static inline string getTypeName( unsigned int id )
+        {
+	  if(id < names.size()) return names[id];
+	  else return (string)"";
+	}
 
 	static inline int getType(const char *name)
 	{
@@ -136,6 +138,7 @@ class variable {
 			case UCHAR:   { value.myUChar = new UChar_t[arraySize];  break; }
 			case SHORT:   { value.myShort = new Short_t[arraySize];  break; }
 			case USHORT:  { value.myUShort = new UShort_t[arraySize];  break; }
+			//case VDOUBLE: { value.myVDouble = new vector<double>[arraySize]; break; }
 			default: return false;
 		}
 
@@ -162,6 +165,7 @@ class variable {
 		UChar_t   *myUChar;
 		Short_t   *myShort;
 		UShort_t  *myUShort;
+	  //vector<double> *myVDouble;
 	        void      *address;
 	} value;
 
@@ -188,17 +192,18 @@ class variable {
 	{
         switch (type)
 		{
-			case BOOL:    { return value.myBool[iValue];   break; }
-			case INT:     { return value.myInt[iValue];    break; }
-			case UINT:    { return value.myUint[iValue];   break; }
-			case FLOAT:   { return value.myFloat[iValue];  break; }
-			case DOUBLE:  { return value.myDouble[iValue]; break; }
-			case LONG64:  { return value.myLong[iValue];   break; }
-			case ULONG64: { return value.myULong[iValue];  break; }
-			case CHAR:    { return value.myChar[iValue];   break; }
-			case UCHAR:   { return value.myUChar[iValue];  break; }
-			case SHORT:   { return value.myShort[iValue];  break; }
-			case USHORT:  { return value.myUShort[iValue]; break; }
+			case BOOL:    { return value.myBool[iValue];    break; }
+			case INT:     { return value.myInt[iValue];     break; }
+			case UINT:    { return value.myUint[iValue];    break; }
+			case FLOAT:   { return value.myFloat[iValue];   break; }
+			case DOUBLE:  { return value.myDouble[iValue];  break; }
+			case LONG64:  { return value.myLong[iValue];    break; }
+			case ULONG64: { return value.myULong[iValue];   break; }
+			case CHAR:    { return value.myChar[iValue];    break; }
+			case UCHAR:   { return value.myUChar[iValue];   break; }
+			case SHORT:   { return value.myShort[iValue];   break; }
+			case USHORT:  { return value.myUShort[iValue];  break; }
+			//case VDOUBLE: { return value.myVDouble[iValue]; break; }
 			default: return -999;
 		}
 	}
@@ -207,18 +212,19 @@ class variable {
 	{
 		switch (type)
 		{
-			case BOOL:    { return reinterpret_cast<T*>(value.myBool);   break; }
-			case INT:     { return reinterpret_cast<T*>(value.myInt);    break; }
-			case UINT:    { return reinterpret_cast<T*>(value.myUint);   break; }
-			case FLOAT:   { return reinterpret_cast<T*>(value.myFloat);  break; }
-			case DOUBLE:  { return reinterpret_cast<T*>(value.myDouble); break; }
-			case LONG64:  { return reinterpret_cast<T*>(value.myLong);   break; }
-			case ULONG64: { return reinterpret_cast<T*>(value.myULong);  break; }
-			case CHAR:    { return reinterpret_cast<T*>(value.myChar);   break; }
-			case UCHAR:   { return reinterpret_cast<T*>(value.myUChar);  break; }
-			case SHORT:   { return reinterpret_cast<T*>(value.myShort);  break; }
-			case USHORT:  { return reinterpret_cast<T*>(value.myUShort); break; }
-			default: { cout << "ATTENTION! Type not available!" << endl; return NULL; }
+			case BOOL:    { return reinterpret_cast<T*>(value.myBool);    break; }
+			case INT:     { return reinterpret_cast<T*>(value.myInt);     break; }
+			case UINT:    { return reinterpret_cast<T*>(value.myUint);    break; }
+			case FLOAT:   { return reinterpret_cast<T*>(value.myFloat);   break; }
+			case DOUBLE:  { return reinterpret_cast<T*>(value.myDouble);  break; }
+			case LONG64:  { return reinterpret_cast<T*>(value.myLong);    break; }
+			case ULONG64: { return reinterpret_cast<T*>(value.myULong);   break; }
+			case CHAR:    { return reinterpret_cast<T*>(value.myChar);    break; }
+			case UCHAR:   { return reinterpret_cast<T*>(value.myUChar);   break; }
+			case SHORT:   { return reinterpret_cast<T*>(value.myShort);   break; }
+			case USHORT:  { return reinterpret_cast<T*>(value.myUShort);  break; }
+			//case VDOUBLE: { return reinterpret_cast<T*>(value.myVDouble); break; }
+			default: { cout << "*** WARNING: Type not available!" << endl; return NULL; }
 		}
 	}	
 };
@@ -310,8 +316,8 @@ class TreeReader {
 
 	~TreeReader()
 	{
-		if(fChain) delete fChain;
-		varList.clear();
+	        //if(fChain) delete fChain;
+	        varList.clear();
 	}
 
 	///Sets the flag to enable verbose mode "v" or silent mode "s"
@@ -404,6 +410,7 @@ class TreeReader {
 	/// \brief Print the list of files linked by the internal TChain object
 	
 	void PrintListOfFiles();
+	void PrintListOfVariables();
 
 	/// \brief Returns the internal TChain object
 

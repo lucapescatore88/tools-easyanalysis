@@ -35,7 +35,7 @@
 #include <iomanip>
 #include <typeinfo>
 
-#include "ReadTree_comp.hpp"
+#include "TreeReader.hpp"
 #include "ModelBuilder.hpp"
 #include "general_functions.hpp"
 #include "analyser.hpp"
@@ -125,7 +125,7 @@ class MultiAnalysis {
 
     RooWorkspace * SaveToRooWorkspace();
 
-    RooRealVar * GetPar(string name) { return GetParam(combModel,name); }
+    RooRealVar * GetPar(string name) { return getParam(combModel,name); }
     double GetParVal(string name) 
     { 
         RooRealVar * par = GetPar(name);

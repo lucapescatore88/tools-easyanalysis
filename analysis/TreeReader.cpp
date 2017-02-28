@@ -1,4 +1,4 @@
-#include "ReadTree_comp.hpp"
+#include "TreeReader.hpp"
 
 using namespace std;
 
@@ -46,7 +46,7 @@ void TreeReader::AddFile(const char *fileName, const char* treeName, Long64_t ma
         else 
 	*/
 	fChain->AddFile(fileName,maxEntries,treeName);
-	if (pmode=="v") cout << "Adding file: " << fileName << endl;
+	if (pmode=="v") cout << "Adding file: " << fileName << " " << treeName << endl;
     }
 }
 
@@ -149,6 +149,8 @@ bool TreeReader::Initialize(vector <string> br, string opt)
         if (id >= 0)
         {
             bool addVar = true;
+	    if (curtype.find("vector")!=std::string::npos) addVar = false;
+
             if (br.size()>0)
             {
                 addVar = false;
@@ -349,6 +351,34 @@ void TreeReader::PrintListOfFiles()
 	    }
 	    cout << endl;
 	}
+    }
+
+    return;
+}
+
+
+
+void TreeReader::PrintListOfVariables()
+{
+    if (!init)
+    {
+        cout << "*** WARNING: tree " << fChain->GetName() << " not initialized" << endl;
+        return;
+    }
+
+    if (pmode=="v")
+    {
+        vector<variable*> varList = GetVarList();
+
+	cout << endl;
+	cout << endl << "Set up " << varList.size() << " branches" << endl;
+
+	cout << endl;
+	for (unsigned i = 0; i < varList.size(); ++i)
+	{
+	    cout << varList[i]->name << " " << varList[i]->bname << " " << varList[i]->title << endl;
+	}
+	cout << endl;
     }
 
     return;

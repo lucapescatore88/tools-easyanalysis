@@ -1,7 +1,7 @@
 #ifndef MODEL_BUILDER_HPP
 #define MODEL_BUILDER_HPP
 
-#include "ReadTree_comp.hpp"
+#include "TreeReader.hpp"
 #include "general_functions.hpp"
 #include "ModelBuilder_helpfunctions.hpp"
 #include "StringToPdf.hpp"
@@ -19,34 +19,38 @@ using namespace std;
 class ModelBuilder {
 
     bool m_isvalid;
-    bool doNegSig, doNegBkg;
+    bool m_doNegSig, m_doNegBkg;
 
     protected:
 
     static string m_pmode;
-    TString name;
-    TString title;
-    RooRealVar * var;
-    vector<RooRealVar *> vars; 
-    RooAbsPdf * model;
+    TString m_name;
+    TString m_title;
+
+    RooRealVar * m_var;
+    vector<RooRealVar *> m_vars; 
+    RooRealVar * m_tmpvar;
+    vector<RooRealVar *> m_tmpvars; 
+
+    RooAbsPdf * m_model;
     RooAbsPdf * sig;
     RooAbsPdf * bkg;
-    RooAbsReal * nsig;
-    RooAbsReal * nbkg;
-    vector <RooAbsPdf *> bkg_components;
-    vector <RooAbsReal *> bkg_fractions;
-    RooRealVar * m_tmpvar;
+    RooAbsReal * m_nsig;
+    RooAbsReal * m_nbkg;
+    vector <RooAbsPdf *> m_bkg_components;
+    vector <RooAbsReal *> m_bkg_fractions;
+    
     bool m_totBkgMode;
-    vector<Color_t> mycolors;
+    vector<Color_t> m_colors;
 
     void ForceValid() { m_isvalid = true; }
 
-    /// \brief Wrapper for the external function stringToPdf() which returns a model from a string
+    /// \brief Wrapper for the external function stringToPdf() which returns a m_model from a string
 
-    RooAbsPdf * StringToPdf(const char * typepdf, const char * namepdf, Str2VarMap mypars, RooRealVar * myvar = NULL, TString title = "")
+    RooAbsPdf * StringToPdf(const char * typepdf, const char * namepdf, Str2VarMap mypars, RooRealVar * myvar = NULL, TString _title = "")
     {
-        if(!myvar) myvar = var; 
-        return stringToPdf(typepdf, namepdf, myvar, mypars, m_pmode, title);
+        if(!myvar) myvar = m_var; 
+        return stringToPdf(typepdf, namepdf, myvar, mypars, m_pmode, _title);
     }
 
     /** \brief Returns a PDF starting from different kinds of objects
@@ -59,7 +63,7 @@ class ModelBuilder {
      *
      * @param _base:  Object to start with to create the PDF
      * @param _name:  Name to give to the newly created PDF
-     * @param myvars: This works only if the given type is a string. While creating the model it looks if its parameters are already in "myvars". And if it finds them it uses them to create the new PDF. Does nothing if myvars contains no parameters or wrong parameters or if the given type is not "string".
+     * @param myvars: This works only if the given type is a string. While creating the m_model it looks if its parameters are already in "myvars". And if it finds them it uses them to create the new PDF. Does nothing if myvars contains no parameters or wrong parameters or if the given type is not "string".
      * @param weight: In case the starting object is a TTree distributions are created considering the variable "weight" as an event-by-event weight.
      * @param opt:    Options:
      *                This is important because every parameter name must be unique in RooFit.
@@ -69,17 +73,17 @@ class ModelBuilder {
      *                e.g.: "-c[B0_PT > 50 && Kst_P > 200]-v[B0_PT,Kst_P]"
      *                <br> "-s(n)" (TTree only): n = 1 or n = 2 (default) defines how fine is the resolution of the smoothing
      *	*/
-    template <class T> RooAbsPdf * getPdf(T * _base, const char * _name, Str2VarMap mypars = Str2VarMap(), string weight = "", string opt = "", RooRealVar * myvar = NULL, TString title = "")
+    template <class T> RooAbsPdf * getPdf(T * _base, const char * _name, Str2VarMap mypars = Str2VarMap(), string weight = "", string opt = "", RooRealVar * myvar = NULL, TString _title = "")
     {
         string t = typeid(T).name();
         RooAbsPdf * res = NULL;
 
-        if(title=="") title = _name;
+        if(_title=="") _title = _name;
 
-        if(!myvar) myvar = var;
+        if(!myvar) myvar = m_var;
         if((t.find("c")!=string::npos && t.length()==1) || t.find("TString")!=string::npos)
         {
-            res = (RooAbsPdf*)StringToPdf((const char *)_base, _name, mypars, myvar, title);
+            res = (RooAbsPdf*)StringToPdf((const char *)_base, _name, mypars, myvar, _title);
         }
         else if(t.find("RooAbsPdf")!=string::npos)
         {
@@ -87,8 +91,8 @@ class ModelBuilder {
 
             if(t.find("vector")!=string::npos)
             {
-                RooArgList * pdfList = new RooArgList("pdfList_"+name);
-                RooArgList * fracList = new RooArgList("fracPdfList_"+name);
+                RooArgList * pdfList = new RooArgList("pdfList_"+m_name);
+                RooArgList * fracList = new RooArgList("fracPdfList_"+m_name);
 
                 vector<RooAbsPdf *> * myv = (vector<RooAbsPdf *> *)_base;
                 for(unsigned e = 0; e < myv->size(); e++)
@@ -98,14 +102,14 @@ class ModelBuilder {
                     if(e>0)fracList->add(*f);
                 }
 
-                res = new RooAddPdf("totpdf_"+name,"totpdf_"+title,*pdfList,*fracList);
+                res = new RooAddPdf("totpdf_"+m_name,"totpdf_"+_title,*pdfList,*fracList);
             }
 
             res->SetName(_name);
         }
         else if(t.find("TTree")!=string::npos)
         {	
-            RooArgSet * vars = new RooArgSet(*myvar);
+            RooArgSet * m_vars = new RooArgSet(*myvar);
             if(opt.find("-v[")!=string::npos)
             {
                 size_t pos = opt.find("-v[") + 2; 
@@ -116,7 +120,7 @@ class ModelBuilder {
                     size_t pos2 = opt.find(",",pos+1);
                     TString vname = (TString)opt.substr(pos+1,pos2-pos-1);
                     if(pos2 >= posend) vname.ReplaceAll("]","");
-                    vars->add(*(new RooRealVar(vname,vname,0.)));
+                    m_vars->add(*(new RooRealVar(vname,vname,0.)));
                     if(pos2 < posend) pos = pos2;
                     else break;
                 }
@@ -125,10 +129,10 @@ class ModelBuilder {
             RooDataSet * sigDataSet = NULL;
             if(weight!="")
             {
-                vars->add(*(new RooRealVar(weight.c_str(),weight.c_str(),0.)));
-                sigDataSet = new RooDataSet((TString)_name+"_DataSet_"+name,"",(TTree*)_base,*vars,0,weight.c_str());
+                m_vars->add(*(new RooRealVar(weight.c_str(),weight.c_str(),0.)));
+                sigDataSet = new RooDataSet((TString)_name+"_DataSet_"+m_name,"",(TTree*)_base,*m_vars,0,weight.c_str());
             }
-            else sigDataSet = new RooDataSet((TString)_name+"_DataSet_"+name,"",(TTree*)_base,*vars);
+            else sigDataSet = new RooDataSet((TString)_name+"_DataSet_"+m_name,"",(TTree*)_base,*m_vars);
 
             if(opt.find("-c[")!=string::npos)
             {
@@ -144,9 +148,9 @@ class ModelBuilder {
                 int pos = opt.find("-rho");
                 string rhostr = opt.substr(pos+4,20);
                 double rho = ((TString)rhostr).Atof();
-                res = new RooKeysPdf((TString)_name,title,*myvar,*sigDataSet,RooKeysPdf::MirrorBoth,rho);
+                res = new RooKeysPdf((TString)_name,_title,*myvar,*sigDataSet,RooKeysPdf::MirrorBoth,rho);
             }
-            else res = new RooKeysPdf((TString)_name,title,*myvar,*sigDataSet,RooKeysPdf::MirrorBoth,2);
+            else res = new RooKeysPdf((TString)_name,_title,*myvar,*sigDataSet,RooKeysPdf::MirrorBoth,2);
 
             if(opt.find("-print")!=string::npos)
             {
@@ -163,13 +167,13 @@ class ModelBuilder {
         }
         else if(t.find("TH1")!=string::npos)
         {
-            RooDataHist * sigDataHist = new RooDataHist((TString)_name+"_DataHist"+name,"",*myvar,(TH1*)_base,6);
+            RooDataHist * sigDataHist = new RooDataHist((TString)_name+"_DataHist"+m_name,"",*myvar,(TH1*)_base,6);
             res = new RooHistPdf((TString)_name,_name,*myvar,*sigDataHist);
         }
         else
         {
-            if(((string)_name).find("_noprint")!=string::npos) cout << name << ": ATTANTION:_noprint option in background name: component won't be added to background list" << endl;
-            else cout << name << ": ***** ATTANTION: Wrong type (" << t << ") given to getPdf. Only string, RooAbsPdf, vector<RooAbsPdf *>, TTree and TH1 are allowed! *****" << endl;
+            if(((string)_name).find("_noprint")!=string::npos) cout << m_name << ": ATTANTION:_noprint option in background name: component won't be added to background list" << endl;
+            else cout << m_name << ": ***** ATTANTION: Wrong type (" << t << ") given to getPdf. Only string, RooAbsPdf, vector<RooAbsPdf *>, TTree and TH1 are allowed! *****" << endl;
         }
 
         return res;
@@ -181,46 +185,46 @@ class ModelBuilder {
     //Constructors
 
     ModelBuilder():
-        m_isvalid(false), doNegSig(false), doNegBkg(false), var(NULL), sig(NULL), 
-        bkg(NULL), m_totBkgMode(false), mycolors(vector<Color_t>())
+        m_isvalid(false), m_doNegSig(false), m_doNegBkg(false), m_var(NULL), sig(NULL), 
+        bkg(NULL), m_totBkgMode(false), m_colors(vector<Color_t>())
     {
-        nsig = new RooRealVar("nsig","nsig",0.,0.,1.e8);
-        nbkg = new RooRealVar("nbkg","nbkg",0.,0.,1.e8);
-        name = "model";
-        title = name;
+        m_nsig = new RooRealVar("nsig","nsig",0.,0.,1.e8);
+        m_nbkg = new RooRealVar("nbkg","nbkg",0.,0.,1.e8);
+        m_name = "model";
+        m_title = m_name;
     }
 
     ModelBuilder(TString _name, RooRealVar * _var, TString _title = ""):
-        m_isvalid(false), doNegSig(false), doNegBkg(false), name(_name), title(_title), 
-        var(_var), sig(NULL), bkg(NULL), m_totBkgMode(false), mycolors(vector<Color_t>())
+        m_isvalid(false), m_doNegSig(false), m_doNegBkg(false), m_name(_name), m_title(_title), 
+        m_var(_var), sig(NULL), bkg(NULL), m_totBkgMode(false), m_colors(vector<Color_t>())
     {
-        if(var)
+        if(m_var)
         {
-            if( ((string)var->GetTitle()).find("__var__")==string::npos )
-                var->SetTitle( (TString)var->GetTitle()+"__var__" );
-            m_tmpvar = new RooRealVar(*var); vars.push_back(var); 
+            if( ((string)m_var->GetTitle()).find("__var__")==string::npos )
+                m_var->SetTitle( (TString)m_var->GetTitle()+"__var__" );
+            m_tmpvar = new RooRealVar(*m_var); 
+            m_vars.push_back(m_var); 
         }
-        nsig = new RooRealVar("nsig_"+name,"N_{sig}",0.,0.,1.e8);
-        nbkg = new RooRealVar("nbkg_"+name,"N_{bkg}",0.,0.,1.e8);
-        if (title=="") title = name;
+        m_nsig = new RooRealVar("nsig_"+m_name,"N_{sig}",0.,0.,1.e8);
+        m_nbkg = new RooRealVar("nbkg_"+m_name,"N_{bkg}",0.,0.,1.e8);
+        if (_title=="") m_title = m_name;
     }
 
     ~ModelBuilder()
     {
-        delete var;
-        delete model;
+        delete m_var;
+        delete m_model;
         delete sig;
         delete bkg;
-        delete nsig;
-        delete nbkg;
+        delete m_nsig;
+        delete m_nbkg;
 
-        for(unsigned i = 0; i < bkg_components.size(); i++)
+        for(unsigned i = 0; i < m_bkg_components.size(); i++)
         {
-            delete bkg_components[i];
-            delete bkg_fractions[i];
+            delete m_bkg_components[i];
+            delete m_bkg_fractions[i];
         }
     }
-
 
 
     //Methods
@@ -257,33 +261,33 @@ class ModelBuilder {
         transform(lowopt.begin(), lowopt.end(), lowopt.begin(), ::tolower);
         RooAbsReal * frac = NULL;
 
-        nstr+=("_"+name);
+        nstr+=("_"+m_name);
 
         if(opt.find("-frac")!=string::npos) {
 
-            TString ss( (TString)nsig->GetName() + " * " + _frac->GetName() );
-            frac = new RooFormulaVar("n"+nstr,"f_{"+(TString)_name+"}^{wrtsig}",ss,RooArgSet(*_frac,*nsig));
+            TString ss( (TString)m_nsig->GetName() + " * " + _frac->GetName() );
+            frac = new RooFormulaVar("n"+nstr,"f_{"+(TString)_name+"}^{wrtsig}",ss,RooArgSet(*_frac,*m_nsig));
         }
         else { frac = _frac; }
 
-        frac->SetName((TString)frac->GetName()+"_"+name);
+        frac->SetName((TString)frac->GetName()+"_"+m_name);
 
-        nstr += "__for_" + (TString)var->GetName();
-        RooAbsPdf * comp = getPdf(_comp,nstr,myvars,weight,opt,(RooRealVar *)NULL, (TString)_name+"_"+title);	
+        nstr += "__for_" + (TString)m_var->GetName();
+        RooAbsPdf * comp = getPdf(_comp,nstr,myvars,weight,opt,(RooRealVar *)NULL, (TString)_name+"_"+m_title);	
 
         if(comp!=NULL && _frac != NULL && lowopt.find("-nofit")==string::npos)
         {
             if(lowopt.find("-ibegin")==string::npos)
             {
-                bkg_components.push_back(comp);
-                bkg_fractions.push_back(frac);
-                SetLastBkgColor(GetDefaultColors()[bkg_components.size()-1]);
+                m_bkg_components.push_back(comp);
+                m_bkg_fractions.push_back(frac);
+                SetLastBkgColor(GetDefaultColors()[m_bkg_components.size()-1]);
             }
             else
             {
-                bkg_components.insert(bkg_components.begin(),comp);
-                bkg_fractions.insert(bkg_fractions.begin(),frac);
-                mycolors.insert(mycolors.begin(),GetDefaultColors()[bkg_components.size()-1]);
+                m_bkg_components.insert(m_bkg_components.begin(),comp);
+                m_bkg_fractions.insert(m_bkg_fractions.begin(),frac);
+                m_colors.insert(m_colors.begin(),GetDefaultColors()[m_bkg_components.size()-1]);
             }
         }
 
@@ -300,7 +304,7 @@ class ModelBuilder {
         double val = TMath::Abs(_frac);
         if(val == 0) val = 1e3;
         double min = 0;
-	    if(doNegBkg) min = -3 * TMath::Sqrt(val);
+	    if(m_doNegBkg) min = -3 * TMath::Sqrt(val);
         double max = 1.e7;
 
         if(_frac < 0) { min = val; max = val; }
@@ -312,9 +316,9 @@ class ModelBuilder {
         }
         else if((TMath::Abs(_frac) > 0 && TMath::Abs(_frac) <= 1) || opt.find("-frac")!=string::npos)
         {
-            TString ss( (TString)nsig->GetName() + Form(" * %e", val) );
-            if(!nsig) { cout << "Attention if you use this option abs(nevt) < 1 you must set the signal first." << endl; return NULL; }
-            frac = new RooFormulaVar("n"+nstr,"f_{"+(TString)_name+"}^{wrtsig}",ss,*nsig);
+            TString ss( (TString)m_nsig->GetName() + Form(" * %e", val) );
+            if(!m_nsig) { cout << "Attention if you use this option abs(nevt) < 1 you must set the signal first." << endl; return NULL; }
+            frac = new RooFormulaVar("n"+nstr,"f_{"+(TString)_name+"}^{wrtsig}",ss,*m_nsig);
         }
         else frac = new RooRealVar("n"+nstr,"N_{"+(TString)_name+"}",val,min,max);
 
@@ -334,9 +338,9 @@ class ModelBuilder {
     template <class T> RooAbsPdf * SetExtraBkgDimension(const char * _name, T * _pdf, RooRealVar * extravar, string opt = "", Str2VarMap myvars = Str2VarMap(), string weight = "")
     {
         int ind = -1;
-        for (int bb = 0; bb < bkg_components.size(); bb++)
+        for (int bb = 0; bb < m_bkg_components.size(); bb++)
         {
-            if( ((string)bkg_components[bb]->GetName()).find(_name) != string::npos )
+            if( ((string)m_bkg_components[bb]->GetName()).find(_name) != string::npos )
             {
                 ind = bb;
                 break;
@@ -345,7 +349,7 @@ class ModelBuilder {
 
         if(ind==-1) { cout << "You must set a background component with the specified name using AddBkgComponent() first" << endl; return NULL; }
 
-        RooAbsPdf * old_bkg = bkg_components[ind];
+        RooAbsPdf * old_bkg = m_bkg_components[ind];
 
         TString pdfname   = ((TString)old_bkg->GetName()).ReplaceAll("__noprint__",""); 
         size_t posfor = ((string)pdfname).find("__for");
@@ -354,12 +358,12 @@ class ModelBuilder {
         old_bkg->SetName(pdfname+"__noprint__");
 
         RooAbsPdf * new_comp = getPdf(_pdf, name_comp, myvars, weight, opt, extravar);
-        bkg_components[ind] = new RooProdPdf("prod","",*old_bkg,*new_comp);
+        m_bkg_components[ind] = new RooProdPdf("prod","",*old_bkg,*new_comp);
 
-        bkg_components[ind]->SetName(name_tot);
-        bkg_components[ind]->SetTitle(name_tot);
+        m_bkg_components[ind]->SetName(name_tot);
+        m_bkg_components[ind]->SetTitle(name_tot);
 
-        return bkg_components[ind];
+        return m_bkg_components[ind];
     }
 
     template <class T> RooAbsPdf * SetExtraBkgDimension(const char * _name, T * _pdf, RooRealVar * extravar, string opt, string weight, Str2VarMap myvars = Str2VarMap())
@@ -380,15 +384,15 @@ class ModelBuilder {
         transform(lowopt.begin(), lowopt.end(), lowopt.begin(), ::tolower);
 
         ResetVariable();
-        TString myname = "_" + name;
-        nsig = _nsig;
-        nsig->SetName((TString)nsig->GetName()+myname);
-        myname += "__for_" + (TString)var->GetName();
+        TString myname = "_" + m_name;
+        m_nsig = _nsig;
+        m_nsig->SetName((TString)m_nsig->GetName()+myname);
+        myname += "__for_" + (TString)m_var->GetName();
         if(_sig) 
         {
-            sig = getPdf(_sig,"sig"+myname, myvars, weight, opt, (RooRealVar *)NULL, "sig_"+title);
+            sig = getPdf(_sig,"sig"+myname, myvars, weight, opt, (RooRealVar *)NULL, "sig_"+m_title);
             sig->SetName("totsig"+myname);
-            sig->SetTitle("totsig_"+title);
+            sig->SetTitle("totsig_"+m_title);
         }
         return sig;
     }
@@ -399,12 +403,12 @@ class ModelBuilder {
         double val = TMath::Abs(_nsig);
         if(val == 0) val = 1e3;
         double min = 0;
-        if(doNegSig) min = -3 * TMath::Sqrt(val);
+        if(m_doNegSig) min = -3 * TMath::Sqrt(val);
         double max = 1.e7;
         if(_nsig < 0) { min = val; max = val; }
 
-        if(TMath::Abs(_nsig) > 0 && TMath::Abs(_nsig) <= 1) tmpnsig = new RooRealVar("nsig","N_{"+title+"}",val*max,min,max);
-        else tmpnsig = new RooRealVar("nsig","N_{"+title+"}",val,min,max);
+        if(TMath::Abs(_nsig) > 0 && TMath::Abs(_nsig) <= 1) tmpnsig = new RooRealVar("nsig","N_{"+m_title+"}",val*max,min,max);
+        else tmpnsig = new RooRealVar("nsig","N_{"+m_title+"}",val,min,max);
 
         return SetSignal(_sig,tmpnsig,opt,myvars,weight);
     }
@@ -445,16 +449,16 @@ class ModelBuilder {
     }
 
     void AllowNegativeYield(string option = "", bool cond = true) {
-      cout << endl << name << ": AllowNegativeYield";
+      cout << endl << m_name << ": AllowNegativeYield";
       if (option.find("sig") != string::npos)
 	{
-	  doNegSig = cond;
-	  if (doNegSig) cout << " - Signal";
+	  m_doNegSig = cond;
+	  if (m_doNegSig) cout << " - Signal";
 	}
       if (option.find("bkg") != string::npos)
 	{
-	  doNegBkg = cond;
-	  if (doNegBkg) cout << " - Backgrounds";
+	  m_doNegBkg = cond;
+	  if (m_doNegBkg) cout << " - Backgrounds";
 	}
       cout << endl << endl;
       return;
@@ -462,18 +466,18 @@ class ModelBuilder {
 
     void SetLastBkgColor(Color_t color) 
     {
-        if(mycolors.size() == bkg_components.size()) mycolors[mycolors.size()-1] = color;
-        else mycolors.push_back(color); 
+        if(m_colors.size() == m_bkg_components.size()) m_colors[m_colors.size()-1] = color;
+        else m_colors.push_back(color); 
     }
-    vector <Color_t> GetColors() { return mycolors; }
+    vector <Color_t> GetColors() { return m_colors; }
 
-    void SetTitle(TString _title) { title = _title; }
+    void SetTitle(TString _title) { m_title = _title; }
 
     /** \brief Sets the variable to fit "var".
      * It also creates a copy of the initial variable "m_tmpvar". In fact when fitting the varible is modified and
      * if you want to fit again or change the model and refit you need to reset the variable as it was.
      * */
-    void SetVariable(RooRealVar * _var) { var = _var; m_tmpvar = new RooRealVar(*var); }
+    void SetVariable(RooRealVar * _var) { m_var = _var; m_tmpvar = new RooRealVar(*m_var); }
 
     /** \brief Sets the background mode
      * Normally the model is built as model = nsig*sig + nbkg1*bkg1 + nbkg2*bkg2 * ...
@@ -483,12 +487,12 @@ class ModelBuilder {
     void SetSig(RooAbsPdf * _sig) { sig = _sig; }
     ///\brief Forces a model
     void SetModel(RooAbsPdf * _model);
-    void SetNSig(RooAbsReal * _nsig) { nsig = _nsig; }
+    void SetNSig(RooAbsReal * _nsig) { m_nsig = _nsig; }
     void SetBkg(RooAbsPdf * _bkg) { bkg = _bkg; }
-    void SetBkg(vector<RooAbsPdf *> _bkg_comp) { bkg_components = _bkg_comp; }
-    void SetName(const char * newname) { name = newname; }
-    void ClearBkgList() { bkg_components.clear(); bkg_fractions.clear(); }
-    void ResetVariable() { var->setVal(m_tmpvar->getVal()); var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax()); };
+    void SetBkg(vector<RooAbsPdf *> _bkg_comp) { m_bkg_components = _bkg_comp; }
+    void SetName(const char * newname) { m_name = newname; }
+    void ClearBkgList() { m_bkg_components.clear(); m_bkg_fractions.clear(); }
+    void ResetVariable() { m_var->setVal(m_tmpvar->getVal()); m_var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax()); };
 
     RooAbsPdf * GetParamsGaussian(RooFitResult * fitRes);
     RooDataSet * GetParamsVariations(int nvariations = 10000, RooFitResult * fitRes = NULL);
@@ -496,11 +500,11 @@ class ModelBuilder {
     ////\brief Return true if the model was correctly built and initialized
     bool isValid() { return m_isvalid; }
     //bool isExtended() { return extended; }
-    TString GetName() { return name; }
+    TString GetName() { return m_name; }
     ///\brief Return the variable to fit
-    RooRealVar * GetVariable() { return var; }
+    RooRealVar * GetVariable() { return m_var; }
     ///\brief Returns the model pdf
-    RooAbsPdf * GetModel() { return model; }
+    RooAbsPdf * GetModel() { return m_model; }
     ///\brief Returns the signal pdf
     RooAbsPdf * GetSig() { return sig; }
     ///\brief Returns a pdf corresponding to the sum of all bkg PDFs
@@ -516,23 +520,23 @@ class ModelBuilder {
     ///\brief Return S/(S+B) integrating sig and bkg in [min,max]
     double GetSigFraction(float min, float max, double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Returns the full list of bkg PDFs
-    vector<RooAbsPdf *> GetBkgComponents() { return bkg_components; }
+    vector<RooAbsPdf *> GetBkgComponents() { return m_bkg_components; }
     ///\brief Prints to screen the composition e.g signal = NSIG / NTOT, bkg1 = NBKG1/NTOT, etc
     void PrintComposition(float min = 0., float max = 0., RooFitResult * fitRes = NULL);
     ///\brief Returns the full list of bkg yields variables
-    vector<RooAbsReal *> GetBkgFractions() { return bkg_fractions; }
+    vector<RooAbsReal *> GetBkgFractions() { return m_bkg_fractions; }
     ///\brief Returns the number of sig events in the full range. Same as GetNSigVal(0,0)
     double GetSigVal(double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Returns the number of sig events in the full range. And can also return its asymmetric error
     double GetSigVal(double * errHi, double * errLo); 
-    bool CheckModel() { return checkModel(model); };
+    bool CheckModel() { return checkModel(m_model); };
 
     /** \brief Returns the number of total bkg evens
      * Returns a RooAbsReal variable which is a RooFormulaVar built as the sum of all bkg yields.
      */
     RooAbsReal * GetTotNBkg();
     RooAbsPdf * CalcTotBkg();
-    RooAbsReal * GetNSigPtr() { return nsig; }
+    RooAbsReal * GetNSigPtr() { return m_nsig; }
     ///\brief Returns a Str2VarMap object containing all paramters only of the signal PDF 
     Str2VarMap GetSigParams(string opt = "");
     ///\brief Returns a Str2VarMap object containing all paramters of the entire model PDF, inclusing yields

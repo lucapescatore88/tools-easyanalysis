@@ -23,7 +23,7 @@ vector <Color_t> GetDefaultColors()
 // Gets the list of parameters of a RooAbsPdf in Str2VarMap form
 // opt=="-cut" cuts the names and keeps the part before the underscore "(alwayskept)_(optional)"
 
-RooRealVar * GetParam(RooAbsPdf * pdf, string name, string opt)
+RooRealVar * getParam(RooAbsPdf * pdf, string name, string opt)
 {
     RooArgSet * params = pdf->getParameters(RooDataSet());
     TIterator * it = params->createIterator();
@@ -43,7 +43,7 @@ RooRealVar * GetParam(RooAbsPdf * pdf, string name, string opt)
     return NULL;
 }
 
-Str2VarMap GetParams(RooAbsPdf * pdf, RooArgSet obs, vector < string > pnames, string opt)
+Str2VarMap getParams(RooAbsPdf * pdf, RooArgSet obs, vector < string > pnames, string opt)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
 
@@ -67,18 +67,24 @@ Str2VarMap GetParams(RooAbsPdf * pdf, RooArgSet obs, vector < string > pnames, s
     return out;
 }
 
-Str2VarMap GetParamList(RooAbsPdf * pdf, RooAbsReal * var, string opt)
+Str2VarMap getParamList(RooAbsPdf * pdf, RooAbsReal * var, string opt)
 {
-    return GetParamList(pdf, RooArgSet(*var), opt); 
+    return getParamList(pdf, RooArgSet(*var), opt); 
 }
 
-Str2VarMap GetParamList(RooAbsPdf * pdf, RooArgSet obs, string opt)
+Str2VarMap getParamList(RooAbsPdf * pdf, RooArgSet obs, string opt)
 {
-    return GetParams( pdf, obs, vector < string >() , opt);
+    return getParams( pdf, obs, vector < string >() , opt);
 }
 
+Str2VarMap getParamList(RooAbsPdf * pdf, vector<RooRealVar *> vars, string opt)
+{
+    RooArgSet obs("Observables");
+    for (auto v : vars) obs.add(*v);
+    return getParams( pdf, obs, vector < string >() , opt);
+}
 
-void GetParam(RooFitResult *fRes, string name, double &par, double &parE, string type) 
+void getParam(RooFitResult *fRes, string name, double &par, double &parE, string type) 
 {
     RooArgList cPars = fRes->constPars();
     RooArgList fPars = fRes->floatParsFinal();
@@ -113,18 +119,18 @@ void GetParam(RooFitResult *fRes, string name, double &par, double &parE, string
     return;
 }
 
-double GetParVal(RooFitResult *fRes, string name, string type) {
+double getParVal(RooFitResult *fRes, string name, string type) {
 
     double par, parE;
-    GetParam(fRes, name, par, parE, type);
+    getParam(fRes, name, par, parE, type);
 
     return par;
 }
 
-double GetParErr(RooFitResult *fRes, string name, string type) {
+double getParErr(RooFitResult *fRes, string name, string type) {
 
     double par, parE;
-    GetParam(fRes , name, par, parE, type);
+    getParam(fRes , name, par, parE, type);
     return parE;
 }
 
@@ -214,10 +220,7 @@ void PrintPars(Str2VarMap pars, string opt)
             catch(string err) {}
             cout << "$\t\t \\\\" << endl;
         }
-        else {
-            //cout << "Search name: " << iter->first << endl;
-            iter->second->Print();
-        }
+        else { iter->second->Print(); }
     }	
 }
 
@@ -225,7 +228,7 @@ void PrintPars(Str2VarMap pars, string opt)
 
 void printParams(RooAbsPdf * pdf, RooArgSet obs, string opt)
 {
-    Str2VarMap pars = GetParamList(pdf, obs, opt+"-orignames");
+    Str2VarMap pars = getParamList(pdf, obs, opt+"-orignames");
     PrintPars(pars, opt);
 }
 
@@ -486,7 +489,7 @@ Str2VarMap setConstant(Str2VarMap * pars, vector<string> names, string opt)
 
 Str2VarMap setConstant(RooAbsPdf * pdf, RooRealVar * var, vector<string> names, string opt)
 {
-    Str2VarMap pars = GetParamList(pdf,var,opt+"-orignames");
+    Str2VarMap pars = getParamList(pdf,var,opt+"-orignames");
     return setConstant(&pars,names,opt);
 }
 
@@ -544,7 +547,7 @@ TString getLegendLabel( TString title, string opt )
    @param leg: A TLegend object to fill
  **/
 
-RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt, unsigned bins,
+RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt, unsigned bins,
         double * range, vector<string> regStr, TString Xtitle, TString Ytitle, TLegend * leg, vector <Color_t> custom_colors)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
@@ -808,23 +811,23 @@ RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
     return frame;
 }
 
-RooPlot * GetFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt, 
+RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt, 
         unsigned bins, double * range, vector<string> regStr, TString Xtitle, TString Ytitle, 
         TLegend * leg, vector <Color_t>custom_colors)
 {
-    return GetFrame(var, data, model, opt, bins, range, regStr, Xtitle, Ytitle, leg, custom_colors);
+    return getFrame(var, data, model, opt, bins, range, regStr, Xtitle, Ytitle, leg, custom_colors);
 }
 
-RooPlot * GetFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt,
+RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt,
         unsigned bins, TString Xtitle, TString Ytitle, TLegend * leg, vector <Color_t>custom_colors)
 {
-    return GetFrame(var, data, model, opt, bins, NULL, vector<string>(1,"PlotRange"), Xtitle, Ytitle, leg, custom_colors);
+    return getFrame(var, data, model, opt, bins, NULL, vector<string>(1,"PlotRange"), Xtitle, Ytitle, leg, custom_colors);
 }
 
-RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt,
+RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt,
         unsigned bins, TString Xtitle, TString Ytitle, TLegend * leg, vector <Color_t>custom_colors)
 {
-    return GetFrame(var, data, model, opt, bins, NULL, vector<string>(1,"PlotRange"), Xtitle, Ytitle, leg, custom_colors);
+    return getFrame(var, data, model, opt, bins, NULL, vector<string>(1,"PlotRange"), Xtitle, Ytitle, leg, custom_colors);
 }
 
 

@@ -8,7 +8,7 @@
 #include <vector>
 #include <map>
 
-#include "ReadTree_comp.hpp"
+#include "TreeReader.hpp"
 #include "eff_functions.hpp"
 
 using namespace std;

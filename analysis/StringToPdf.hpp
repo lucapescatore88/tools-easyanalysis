@@ -67,7 +67,7 @@
 #include <algorithm>
 
 #include "general_functions.hpp"
-#include "ReadTree_comp.hpp"
+#include "TreeReader.hpp"
 #include "roofit.hpp"
 #include "ModelBuilder_helpfunctions.hpp"
 

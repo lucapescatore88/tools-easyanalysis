@@ -67,7 +67,7 @@
 #include <algorithm>
 
 #include "general_functions.hpp"
-#include "ReadTree_comp.hpp"
+#include "TreeReader.hpp"
 #include "roofit.hpp"
 
 using namespace std;
@@ -106,11 +106,11 @@ string isParInMap( string par, Str2VarMap myvars, string option = "");
  * Returns null if it doesn't find any.
  * */
 
-RooRealVar * GetParam(RooAbsPdf * pdf, string name, string opt = "");
+RooRealVar * getParam(RooAbsPdf * pdf, string name, string opt = "");
 
-void GetParam(RooFitResult *fRes, string name, double &par, double &parE, string type = "f");
-double GetParVal(RooFitResult *fRes, string name, string type = "f");
-double GetParErr(RooFitResult *fRes, string name, string type = "f");
+void getParam(RooFitResult *fRes, string name, double &par, double &parE, string type = "f");
+double getParVal(RooFitResult *fRes, string name, string type = "f");
+double getParErr(RooFitResult *fRes, string name, string type = "f");
 
 
 
@@ -119,9 +119,10 @@ double GetParErr(RooFitResult *fRes, string name, string type = "f");
  * opt=="-origNames" keeps the names as they are otherwise keeps only the part before the underscore "(alwayskept)_(optional)"
  */
 
-Str2VarMap GetParams(RooAbsPdf * pdf, RooArgSet obs, vector < string > pnames, string opt = "");
-Str2VarMap GetParamList(RooAbsPdf * pdf, RooAbsReal * var, string opt = "");
-Str2VarMap GetParamList(RooAbsPdf * pdf, RooArgSet obs = RooArgSet(), string opt = "");
+Str2VarMap getParams(RooAbsPdf * pdf, RooArgSet obs, vector < string > pnames, string opt = "");
+Str2VarMap getParamList(RooAbsPdf * pdf, RooAbsReal * var, string opt = "");
+Str2VarMap getParamList(RooAbsPdf * pdf, RooArgSet obs = RooArgSet(), string opt = "");
+Str2VarMap getParamList(RooAbsPdf * pdf, vector<RooRealVar *> vars, string opt = "");
 
 bool checkModel(RooAbsPdf * model);
 
@@ -149,15 +150,15 @@ bool checkModel(RooAbsPdf * model);
  **/
 
 
-RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model = NULL, string opt = "", 
+RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model = NULL, string opt = "", 
         unsigned bins = 50, double * range = NULL, vector<string> regStr = vector<string>(1,"PlotRange"),
         TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
-RooPlot * GetFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data = NULL, string opt = "", 
+RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data = NULL, string opt = "", 
         unsigned bins = 50, double * range = NULL, vector<string> regStr = vector<string>(1,"PlotRange"), 
         TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
-RooPlot * GetFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt, 
+RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt, 
         unsigned bins, TString Xtitle, TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
-RooPlot * GetFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt,
+RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt,
         unsigned bins, TString Xtitle, TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
 
 /** Set the paramteres with names in the "names" list to constants
@@ -167,22 +168,22 @@ Str2VarMap setConstant(Str2VarMap * pars, vector<string> names = vector<string>(
 Str2VarMap setConstant(Str2VarMap * pars, string name, string opt = "");
 Str2VarMap setConstant(RooAbsPdf * pdf, RooRealVar * var, vector<string> names = vector<string>(), string opt = "");
 Str2VarMap eraseParameter(Str2VarMap * pars, vector<string> names);
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt = "-scale");
-Str2VarMap ModifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt = "-scale");
 
 /** \brief Allows to modify a parameter (or more) in a RooFormulaVar
  * <br> default       -> Scales the parameter by "c"
  * <br> opt=="-shift" -> Adds a shift by "c"
  */
 Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt = "-scale");
-void PrintPars(Str2VarMap pars, string opt = "");
+Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt = "-scale");
+Str2VarMap ModifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt = "-scale");
+
 TPaveText * createParamBox(RooAbsPdf * pdf, RooRealVar * obs, string opt, RooFitResult * fitRes = NULL);
 
 /** Prints the parameters in a Str2VarMap object
  * <br> opt == "-nocost"  ->  doesn't print constants
  * <br> opt == "-latex"   ->  prints the Title instead of Name of variables assuming latex format
  */
-void PrintPars(Str2VarMap pars, string opt);
+void PrintPars(Str2VarMap pars, string opt = "");
 
 TString getLegendLabel( TString title, string opt = "" );
 

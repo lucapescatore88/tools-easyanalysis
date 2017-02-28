@@ -1,7 +1,7 @@
 #ifndef ANALYSIS_HPP
 #define ANALYSIS_HPP
 
-#include "ReadTree_comp.hpp"
+#include "TreeReader.hpp"
 #include "ModelBuilder.hpp"
 #include "general_functions.hpp"
 #include "optimiser.hpp"

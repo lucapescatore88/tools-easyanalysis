@@ -34,25 +34,22 @@ void MultiAnalysis::PlotCategories()
     TCanvas * c = new TCanvas();
     for(unsigned i = 0; i < categories.size(); i++)
     {
-	RooPlot* frame = ana[i]->GetVariable()->frame();
-	TString cut = "samples==samples::"+categories[i];
+	    RooPlot* frame = ana[i]->GetVariable()->frame();
+    	TString cut = "samples==samples::"+categories[i];
 
         cout << "Category: " << categories[i] << endl;
         combData->Print();
-	combModel->Print();
+	    combModel->Print();
  
         combData->plotOn(frame,Cut(cut));
         RooDataSet::setDefaultStorageType(RooAbsData::Vector);
         RooAbsData * reddata = combData->reduce(cut);
-	combModel->getPdf(categories[i])->plotOn(frame,Normalization(reddata->numEntries(),RooAbsReal::NumEvent));
+	    combModel->getPdf(categories[i])->plotOn(frame,Normalization(reddata->numEntries(),RooAbsReal::NumEvent));
 
         frame->SetTitle("");
         frame->SetXTitle(((TString)ana[i]->GetVariable()->GetName()).ReplaceAll("__var__",""));
         frame->Draw();
         c->Print(name+"_"+categories[i]+".pdf");
-
-	//TH1 * residuals = GetPulls(frame,NULL,"r");	
-	//TH1 * pulls = GetPulls(frame,NULL,"p");
 
     }
 }

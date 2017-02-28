@@ -42,7 +42,7 @@
 #include "RooHist.h"
 #include "TLorentzVector.h"
 
-#include "ReadTree_comp.hpp"
+#include "TreeReader.hpp"
 #include "eff_functions.hpp"
 
 using namespace std;

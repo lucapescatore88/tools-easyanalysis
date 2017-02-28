@@ -42,7 +42,7 @@
 #include "RooHist.h"
 #include "TLorentzVector.h"
 
-#include "ReadTree_comp.hpp"
+#include "TreeReader.hpp"
 #include "eff_functions.hpp"
 
 using namespace std;
@@ -58,35 +58,36 @@ RooDataSet * generateDataSet(TString name, RooArgSet * set, RooAbsPdf * pdf, int
 double luminosity( TString namefile, string doerr = "lumi" );
 double luminosita( vector< TString > namefile, string doerr = "lumi" );
 
-
 double * calcChi2(RooPlot * frame, unsigned npar = 0, double * range = NULL, bool extended = true);
 double residual( double datum, double pdf );
 double pull( double datum, double pdf );
 TH1D* residualHist( const RooHist* rhist, const RooCurve* curve, float * range = NULL, string opt = "");
-TH1 * GetPulls(RooPlot * pl, float * range = NULL, string opt = "");
+TH1 * getPulls(RooPlot * pl, float * range = NULL, string opt = "");
 
 vector<float> computeAverage(TH1* hist);
 vector<float> computeAverage2D(TH2* hist2D);
 
 vector<TH1*> createRandomFluctuations(TH2 * input, int nRandom = 1000, char limit = 'E');
 
-TH1 * GetSliceX(TH2 *hHisto, double slice);
-TH1 * GetSliceX(TH2 *hHisto, int bin);
+TH1 * getSliceX(TH2 *hHisto, double slice);
+TH1 * getSliceX(TH2 *hHisto, int bin);
 
-vector <double> ScalarProd(vector<double> v, double c);
+vector <double> scalarProd(vector<double> v, double c);
 float computeEta(float P, float PT);
 
-void CleanHistos(TH1 &histo, float cut, float min, float max);
-void ShiftHistos(TH1 &histo, float shift);
-void UniformBins(TH1 *histo);
-void AddSystematicError(TH1 &histo, float sysError);
-void DivideForBinCenter(TH1 &histo, float cost = 0.);
+void cleanHistos(TH1 &histo, float cut, float min, float max);
+void shiftHistos(TH1 &histo, float shift);
+void uniformBins(TH1 *histo);
+void addSystematicError(TH1 &histo, float sysError);
+void divideForBinCenter(TH1 &histo, float cost = 0.);
 
-float ComputeMCError(bool mean, char* formula, float best, Double_t *param, Double_t *err, int ntry, bool gauss = false, bool valAss = false);
+float computeMCError(bool mean, char* formula, float best, Double_t *param, Double_t *err, int ntry, bool gauss = false, bool valAss = false);
 
-TH1F *RebinHisto(TH1 &histo, float init, vector<float > sizes, char* title = 0, bool media = false);
-TH1F *RebinHisto(TH1 &histo, TH1 &tamplateHisto, char* title = 0, bool media = false);
-TH1F *RebinHisto(TH1 &histo, float error, char* title = 0, bool media = false);
+TH1F * rebinHisto(TH1 &histo, float init, vector<float > sizes, char* title = 0, bool media = false);
+TH1F * rebinHisto(TH1 &histo, TH1 &tamplateHisto, char* title = 0, bool media = false);
+TH1F * rebinHisto(TH1 &histo, float error, char* title = 0, bool media = false);
+
+TH1* setLabels(TH1* histo, vector<float > &labels, int nDiv, float dNmax);
 
 vector<string> getFilesNames(string filename);
 

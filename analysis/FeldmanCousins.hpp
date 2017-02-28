@@ -42,7 +42,7 @@
 #include "RooCategory.h"
 #include "RooSimultaneous.h"
 
-#include "ReadTree_comp.hpp"
+#include "TreeReader.hpp"
 #include "ModelBuilder.hpp"
 
 using namespace RooFit;
