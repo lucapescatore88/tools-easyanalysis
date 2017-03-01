@@ -27,6 +27,7 @@
 #include "TEntryList.h"
 //#include "TIter.h"
 #include "TChainElement.h"
+#include "RooRealVar.h"
 
 using namespace std;
 
@@ -270,7 +271,7 @@ class TreeReader {
 	TreeReader():
 		nGets(0), continueSorting(true), init(true), selected(false)
 	{
-	        fChain = new TChain();
+	    fChain = new TChain();
 		return;
 	}
 
@@ -333,17 +334,17 @@ class TreeReader {
 	 *
 	 *	*/
 
-        void AddChain(TChain *chain);
+    void AddChain(TChain *chain);
 
 	/** \brief Function to add a chain to the internal TChain
 	 *	*/
 
-        void AddFile(const char *fileName, const char *treeName = "", Long64_t maxEntries = -1);
+    void AddFile(const char *fileName, const char *treeName = "", Long64_t maxEntries = -1);
 
 	/** \brief Function to add a friend to the internal TChain
 	 *	*/
 
-        void AddFriend(const char *fileName, const char *treeName = "");
+    void AddFriend(const char *fileName, const char *treeName = "");
 
 	/** \brief Function to add a list of files to the internal TChain
 	 *
@@ -453,6 +454,18 @@ class TreeReader {
 	/// \brief Checks is the variable "namevar" is stored in the reader
 	
 	inline bool HasVar(const char *namevar) { return (bool)GetVariable(namevar); }
+	bool HasVars(vector<string>vars) 
+	{
+		bool res = true; 
+		for(auto v : vars) res *= HasVar(v.c_str());
+		return res;  
+	}
+	bool HasVars(vector<RooRealVar*>vars) 
+	{
+		bool res = true; 
+		for(auto v : vars) res *= HasVar(v->GetName());
+		return res;  
+	}
 	inline bool isValid() { return init; }
 	
 	/* \brief Returns the pointer to the variable object with name "name" for the current entry

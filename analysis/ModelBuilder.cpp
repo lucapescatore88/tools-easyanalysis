@@ -19,20 +19,22 @@ void ModelBuilder::SetModel(RooAbsPdf * _model)
     if(pars["nsig"]) m_nsig = pars["nsig"];
 }
 
+RooArgSet * ModelBuilder::GetParamsArgSet()
+{
+    return m_model->getParameters(RooDataSet("v","",RooArgSet(*m_var)));
+}
 
 RooAbsPdf * ModelBuilder::GetParamsGaussian(RooFitResult * fitRes)
 {
-    RooArgSet * params = m_model->getParameters(RooDataSet("v","",RooArgSet(*m_var)));
-
     return (RooAbsPdf *)(new RooMultiVarGaussian(
                 m_name+"_multivar_gauss",m_name+"_multivar_gauss",
-                *params,fitRes->covarianceMatrix()));
+                *GetParamsArgSet(),fitRes->covarianceMatrix()));
 }
 
 
 RooDataSet * ModelBuilder::GetParamsVariations(int nvariations, RooFitResult * fitRes)
 {
-    RooArgSet * params = m_model->getParameters(RooDataSet("v","",RooArgSet(*m_var)));
+    RooArgSet * params = GetParamsArgSet();
 
     cout << "Making variations of " << endl;	
     params->Print();
@@ -152,13 +154,13 @@ void ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsData *
 {
     for(auto v : myvars)
     {
-        Print(title, Xtitle, opt, data, bins, vector<string>(), (double *)NULL, fitRes, Ytitle, v);
+        Print(title, Xtitle, opt, data, bins, vector<string>(), fitRes, Ytitle, v);
     }
 }
 
 
 RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsData * data, int bins,
-        vector<string> regStr, double * range, RooFitResult * fitRes, TString Ytitle, RooRealVar * myvar)
+        vector<string> regStr, RooFitResult * fitRes, TString Ytitle, RooRealVar * myvar)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
     RooPlot* frame = NULL;
@@ -190,7 +192,7 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
 
     // Create main frame
 
-    frame = getFrame(myvar, data, m_model, opt, bins, range, regStr, Xtitle, Ytitle, leg, m_colors);
+    frame = getFrame(myvar, data, m_model, opt, bins, regStr, Xtitle, Ytitle, leg, m_colors);
     if(opt.find("-noplot")!=string::npos) return frame;
 
     TString logstr = "";
@@ -556,5 +558,35 @@ double ModelBuilder::GetSOverB(float min, float max, double * valerr, RooFitResu
 }
 
 
+RooWorkspace * ModelBuilder::SaveToRooWorkspace(string option)
+{
+    RooWorkspace * ws = new RooWorkspace("ws_"+m_name);
+    if(option != "") ws->SetName("ws_"+m_name+"_"+option);
+    if (m_pmode == "v") cout << endl << m_name << ": SaveToRooWorkspace" << endl;
+
+
+    if(option == "")
+    if(m_model)
+    {
+       ws->import(*m_model);
+       if (m_pmode == "v") cout << "m_model: " << m_model->GetName() << endl;
+    }
+
+    if(option == "sig")
+    if(m_sig)
+    {
+        ws->import(*m_sig);
+       if (m_pmode == "v") cout << "signal: " << m_sig->GetName() << endl;
+    }
+
+    if(option == "bkg")
+    if(m_bkg)
+    {
+        ws->import(*m_bkg);
+       if (m_pmode == "v") cout << "background: " << m_bkg->GetName() << endl;
+    }
+
+    return ws;
+}
 
 

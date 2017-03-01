@@ -164,8 +164,8 @@ double luminosity( TString namefile, string doerr )
 
 double * calcChi2(RooPlot * frame, unsigned npar, double * range, bool extended)
 {
-    RooHist* hist = frame->getHist("data");
-    RooCurve* curve = frame->getCurve("model");
+    RooHist * hist = frame->getHist("data");
+    RooCurve * curve = frame->getCurve("model");
     if(!(hist && curve)) return NULL;
 
     double ndf = 0, mychi2 = 0;

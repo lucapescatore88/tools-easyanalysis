@@ -117,38 +117,32 @@ map < string, RooPlot * > MultiAnalysis::SimultaneousFit(double min, double max,
 		cout << name << " :  CovQual = " << fitResult->covQual() << ",   Status = " << fitResult->status() << ",   EDM = " << fitResult->edm() << endl;        
 		
 	map < string, RooPlot * > plots;
-	if( opt.find("-noplot")==string::npos ) {
-	  if (isToy)
-	    {
-	      PlotCategories();
-	    }
-	  else
-	    for(unsigned i = 0; i < categories.size(); i++)
-	      {
-		{
-		  RooRealVar * var = ana[i]->GetVariable();
-		  if(opt.find("-noinitmodel")==string::npos && opt.find("-noinitdata")==string::npos)
-		    {
-		      double range[2] = {var->getMin(),var->getMax()};
-		      plots[(string)categories[i]] = ana[i]->Print(opt+"-nochi2", nbins, range);//+"-t"+(string)categories[i]);
+	if( opt.find("-noplot")==string::npos ) 
+    {
+	    if (isToy) PlotCategories();
+	    else
+        {
+	        for(unsigned i = 0; i < categories.size(); i++)
+	        {
+		        RooRealVar * var = ana[i]->GetVariable();
+		        if(opt.find("-noinitmodel")==string::npos && opt.find("-noinitdata")==string::npos)
+		            plots[(string)categories[i]] = ana[i]->Print(opt+"-nochi2", nbins);//+"-t"+(string)categories[i]);
+		        else
+		        {
+		            TCanvas * c = new TCanvas();
+		            RooPlot * pl = new RooPlot(*var,var->getMin(),var->getMax(),nbins);
+		            combData->plotOn(pl,Cut("samples==samples::"+categories[i]));
+		      
+		            pl->SetTitle("");
+		            pl->SetXTitle(((TString)var->GetName()).ReplaceAll("__var__",""));
+		            pl->Draw();
+		            c->Print(name+"_"+categories[i]+".pdf");
+		        }
 		    }
-		  else
-		    {
-		      TCanvas * c = new TCanvas();
-		      RooPlot * pl = new RooPlot(*var,var->getMin(),var->getMax(),nbins);
-		      combData->plotOn(pl,Cut("samples==samples::"+categories[i]));
-		      //combModel->getPdf(categories[i])->plotOn(pl,Normalization(ana[i]->GetDataSet("")->numEntries(),RooAbsReal::NumEvent));
-
-		      pl->SetTitle("");
-		      pl->SetXTitle(((TString)var->GetName()).ReplaceAll("__var__",""));
-		      pl->Draw();
-		      c->Print(name+"_"+categories[i]+".pdf");
-		    }
-		}
 	    }
-	}
+    }
 
-        for(unsigned i = 0; i < categories.size(); i++) ana[i]->SetFitRes(fitResult);
+    for(auto a : ana) a->SetFitRes(fitResult);
 
 	double logL = combModel->createNLL(*combData)->getVal();
 	cout << "\n" << name << ": LogL = " << logL << endl;

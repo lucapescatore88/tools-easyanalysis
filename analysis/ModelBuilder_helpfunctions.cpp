@@ -547,15 +547,15 @@ TString getLegendLabel( TString title, string opt )
    @param leg: A TLegend object to fill
  **/
 
-RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt, unsigned bins,
-        double * range, vector<string> regStr, TString Xtitle, TString Ytitle, TLegend * leg, vector <Color_t> custom_colors)
+RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
+        string opt, unsigned bins, vector<string> regStr, 
+        TString Xtitle, TString Ytitle, 
+        TLegend * leg, vector <Color_t> custom_colors)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
  	if (bins < 1) bins = 50;
-    double tmp_range[] = {var->getMin(), var->getMax()};
-    if(!range) range = &tmp_range[0];	
-    var->setRange("PlotRange",range[0],range[1]);
-    RooPlot * frame = new RooPlot(*var,range[0],range[1],bins);
+    var->setRange("PlotRange",var->getMin(),var->getMax());
+    RooPlot * frame = new RooPlot(*var,var->getMin(),var->getMax(),bins);
 
     if(opt.find("-t")==string::npos) frame->SetTitle("");
     else
@@ -812,22 +812,22 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
 }
 
 RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt, 
-        unsigned bins, double * range, vector<string> regStr, TString Xtitle, TString Ytitle, 
+        unsigned bins, vector<string> regStr, TString Xtitle, TString Ytitle, 
         TLegend * leg, vector <Color_t>custom_colors)
 {
-    return getFrame(var, data, model, opt, bins, range, regStr, Xtitle, Ytitle, leg, custom_colors);
+    return getFrame(var, data, model, opt, bins, regStr, Xtitle, Ytitle, leg, custom_colors);
 }
 
 RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt,
         unsigned bins, TString Xtitle, TString Ytitle, TLegend * leg, vector <Color_t>custom_colors)
 {
-    return getFrame(var, data, model, opt, bins, NULL, vector<string>(1,"PlotRange"), Xtitle, Ytitle, leg, custom_colors);
+    return getFrame(var, data, model, opt, bins, vector<string>(1,"PlotRange"), Xtitle, Ytitle, leg, custom_colors);
 }
 
 RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt,
         unsigned bins, TString Xtitle, TString Ytitle, TLegend * leg, vector <Color_t>custom_colors)
 {
-    return getFrame(var, data, model, opt, bins, NULL, vector<string>(1,"PlotRange"), Xtitle, Ytitle, leg, custom_colors);
+    return getFrame(var, data, model, opt, bins, vector<string>(1,"PlotRange"), Xtitle, Ytitle, leg, custom_colors);
 }
 
 

@@ -151,10 +151,10 @@ bool checkModel(RooAbsPdf * model);
 
 
 RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model = NULL, string opt = "", 
-        unsigned bins = 50, double * range = NULL, vector<string> regStr = vector<string>(1,"PlotRange"),
+        unsigned bins = 50, vector<string> regStr = vector<string>(1,"PlotRange"),
         TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
 RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data = NULL, string opt = "", 
-        unsigned bins = 50, double * range = NULL, vector<string> regStr = vector<string>(1,"PlotRange"), 
+        unsigned bins = 50, vector<string> regStr = vector<string>(1,"PlotRange"), 
         TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
 RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt, 
         unsigned bins, TString Xtitle, TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
