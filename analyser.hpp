@@ -281,7 +281,7 @@ class Analysis : public ModelBuilder {
  If you have to add more than one region you must add them in order from low to high and the must not overlap. If you set one or more regions parameters will be hidden and m_model and data will not be plotted in those regions.
  **/
 	void SetBlindRegion(double min, double max);
-	void Reset() { m_regions.clear(); ClearBkgList(); ResetVariable(); m_vars.clear(); m_vars.push_back(m_var); m_chi2[0] = m_chi2[1] = -1; sig = NULL, bkg = NULL; m_init = false; }
+	void Reset() { m_regions.clear(); ClearBkgList(); ResetVariable(); m_vars.clear(); m_vars.push_back(m_var); m_chi2[0] = m_chi2[1] = -1; m_sig = NULL, m_bkg = NULL; m_init = false; }
 
 	/** \brief Generates events using the m_model internally set and a specific number of total events
 	 * @param nevt: Number of events to generate (N.B.: this is Nsig+Nbkg and the fraction between is supposed to be right in the m_model)
@@ -394,7 +394,7 @@ class Analysis : public ModelBuilder {
 	double GetNSigVal(double min = 0, double max = 0, double * valerr = NULL)
 	{
 		if(!m_init || !m_fitRes) return -1;
-		return ModelBuilder::GetNSigVal(min,max,valerr,m_fitRes,m_fitmin,m_fitmax);
+		return ModelBuilder::GetNSigVal(min,max,valerr,m_fitRes);
 	}
 	double GetNSigErr()
 	{
@@ -448,7 +448,7 @@ class Analysis : public ModelBuilder {
 		@pram options: Options:
 		"-nofit" doesn't perform the fit
 	 **/
-	RooDataSet * CalcSWeight(double min = 0, double max = 0., unsigned nbins = 50, bool unbinned = false, string option = "");
+	//RooDataSet * CalcSWeight(double min = 0, double max = 0., unsigned nbins = 50, bool unbinned = false, string option = "");
 	RooDataSet * CalcSWeightRooFit(double min = 0, double max = 0., unsigned nbins = 50, bool unbinned = false, string option = "");
 };
 

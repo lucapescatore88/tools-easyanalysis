@@ -33,8 +33,8 @@ class ModelBuilder {
     vector<RooRealVar *> m_tmpvars; 
 
     RooAbsPdf * m_model;
-    RooAbsPdf * sig;
-    RooAbsPdf * bkg;
+    RooAbsPdf * m_sig;
+    RooAbsPdf * m_bkg;
     RooAbsReal * m_nsig;
     RooAbsReal * m_nbkg;
     vector <RooAbsPdf *> m_bkg_components;
@@ -184,19 +184,9 @@ class ModelBuilder {
 
     //Constructors
 
-    ModelBuilder():
-        m_isvalid(false), m_doNegSig(false), m_doNegBkg(false), m_var(NULL), sig(NULL), 
-        bkg(NULL), m_totBkgMode(false), m_colors(vector<Color_t>())
-    {
-        m_nsig = new RooRealVar("nsig","nsig",0.,0.,1.e8);
-        m_nbkg = new RooRealVar("nbkg","nbkg",0.,0.,1.e8);
-        m_name = "model";
-        m_title = m_name;
-    }
-
     ModelBuilder(TString _name, RooRealVar * _var, TString _title = ""):
         m_isvalid(false), m_doNegSig(false), m_doNegBkg(false), m_name(_name), m_title(_title), 
-        m_var(_var), sig(NULL), bkg(NULL), m_totBkgMode(false), m_colors(vector<Color_t>())
+        m_var(_var), m_sig(NULL), m_bkg(NULL), m_totBkgMode(false), m_colors(vector<Color_t>())
     {
         if(m_var)
         {
@@ -214,8 +204,8 @@ class ModelBuilder {
     {
         delete m_var;
         delete m_model;
-        delete sig;
-        delete bkg;
+        delete m_sig;
+        delete m_bkg;
         delete m_nsig;
         delete m_nbkg;
 
@@ -254,7 +244,7 @@ class ModelBuilder {
      *  */
     template <class T> RooAbsPdf * AddBkgComponent(const char * _name, T * _comp, RooAbsReal * _frac, string opt = "", Str2VarMap myvars = Str2VarMap(), string weight = "")
     {
-        if(!sig) { cout << "ATTENTION: Signal not set! Set the signal before any background!" << endl; return NULL; }
+        if(!m_sig) { cout << "ATTENTION: Signal not set! Set the signal before any background!" << endl; return NULL; }
 
         TString nstr = "bkg_"+(TString)_name;
         string lowopt = opt;
@@ -297,7 +287,7 @@ class ModelBuilder {
     template <class T> RooAbsPdf * AddBkgComponent(const char * _name, T * _comp, double _frac = 0, string opt = "", Str2VarMap myvars = Str2VarMap(), string weight = "")
     {
 
-        if(!sig) { cout << "ATTENTION: Signal not set! Set the signal before any background!" << endl; return NULL; }
+        if(!m_sig) { cout << "ATTENTION: Signal not set! Set the signal before any background!" << endl; return NULL; }
 
         TString nstr = "bkg_"+(TString)_name;
         RooAbsReal * frac = NULL;
@@ -390,11 +380,11 @@ class ModelBuilder {
         myname += "__for_" + (TString)m_var->GetName();
         if(_sig) 
         {
-            sig = getPdf(_sig,"sig"+myname, myvars, weight, opt, (RooRealVar *)NULL, "sig_"+m_title);
-            sig->SetName("totsig"+myname);
-            sig->SetTitle("totsig_"+m_title);
+            m_sig = getPdf(_sig,"sig"+myname, myvars, weight, opt, (RooRealVar *)NULL, "sig_"+m_title);
+            m_sig->SetName("totsig"+myname);
+            m_sig->SetTitle("totsig_"+m_title);
         }
-        return sig;
+        return m_sig;
     }
 
     template <class T> RooAbsPdf * SetSignal(T * _sig, double _nsig = 0, string opt = "", Str2VarMap myvars = Str2VarMap(), string weight = "")
@@ -425,22 +415,22 @@ class ModelBuilder {
 
     template <class T> RooAbsPdf * SetExtraSignalDimension(T * _sig, RooRealVar * extravar, string opt = "", Str2VarMap myvars = Str2VarMap(), string weight = "")
     {
-        if(!sig) { cout << "You must set the signal using SetSignal() first" << endl; return NULL; }
+        if(!m_sig) { cout << "You must set the signal using SetSignal() first" << endl; return NULL; }
 
-        RooAbsPdf * old_sig = sig;
-        TString pdfname = ((TString)sig->GetName()).ReplaceAll("__noprint__","").ReplaceAll("totsig","sig");
+        RooAbsPdf * old_sig = m_sig;
+        TString pdfname = ((TString)m_sig->GetName()).ReplaceAll("__noprint__","").ReplaceAll("totsig","sig");
         size_t posfor = ((string)pdfname).find("__for");
         TString name_comp = ((string)pdfname).substr(0,posfor)+"__for_"+(TString)extravar->GetName()+"__noprint__";
         TString name_tot = pdfname+"__and_"+(TString)extravar->GetName();
-        sig->SetName(pdfname+"__noprint__");
+        m_sig->SetName(pdfname+"__noprint__");
 
         RooAbsPdf * new_comp = getPdf(_sig, name_comp, myvars, weight, opt, extravar);
 
-        sig = new RooProdPdf("prod","",*old_sig,*new_comp);
-        sig->SetName(name_tot);
-        sig->SetTitle(name_tot);
+        m_sig = new RooProdPdf("prod","",*old_sig,*new_comp);
+        m_sig->SetName(name_tot);
+        m_sig->SetTitle(name_tot);
 
-        return sig;
+        return m_sig;
     }
 
     template <class T> RooAbsPdf * SetExtraSignalDimension(T * _sig, RooRealVar * extravar, string opt, string weight, Str2VarMap myvars = Str2VarMap())
@@ -484,11 +474,11 @@ class ModelBuilder {
      * If the m_totBkgModel is set to "tot" the model is built as model = nsig*sig + nTotbkg*(fracBkg1*bkg1 + fracBkg2*bkg2 + ...)
      * */
     void SetBkgMode( bool mode ) { m_totBkgMode = mode; }
-    void SetSig(RooAbsPdf * _sig) { sig = _sig; }
+    void SetSig(RooAbsPdf * _sig) { m_sig = _sig; }
     ///\brief Forces a model
     void SetModel(RooAbsPdf * _model);
     void SetNSig(RooAbsReal * _nsig) { m_nsig = _nsig; }
-    void SetBkg(RooAbsPdf * _bkg) { bkg = _bkg; }
+    void SetBkg(RooAbsPdf * _bkg) { m_bkg = _bkg; }
     void SetBkg(vector<RooAbsPdf *> _bkg_comp) { m_bkg_components = _bkg_comp; }
     void SetName(const char * newname) { m_name = newname; }
     void ClearBkgList() { m_bkg_components.clear(); m_bkg_fractions.clear(); }
@@ -506,15 +496,15 @@ class ModelBuilder {
     ///\brief Returns the model pdf
     RooAbsPdf * GetModel() { return m_model; }
     ///\brief Returns the signal pdf
-    RooAbsPdf * GetSig() { return sig; }
+    RooAbsPdf * GetSig() { return m_sig; }
     ///\brief Returns a pdf corresponding to the sum of all bkg PDFs
-    RooAbsPdf * GetTotBkg() { return bkg; }
+    RooAbsPdf * GetTotBkg() { return m_bkg; }
     ///\brief Returns the number of bkg events integrating the bkg pdf in [min,max] (Returns nbkg * (int [min,max] of bkg) )
     /// If "fitRes" is passed stores the error in "valerr"
     double GetNBkgVal(double min = 0, double max = 0, double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Returns the number of sig events integrating the sig pdf in [min,max] (Returns nsig * (int [min,max] of sig) )
     /// If "fitRes" is passed stores the error in "valerr"
-    double GetNSigVal(double min = 0, double max = 0, double * valerr = NULL, RooFitResult * fitRes = NULL, double fmin = 0, double fmax = 0);
+    double GetNSigVal(double min = 0, double max = 0, double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Return S/B integrating sig and bkg in [min,max]
     double GetSOverB(float min, float max, double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Return S/(S+B) integrating sig and bkg in [min,max]
