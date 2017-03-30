@@ -573,8 +573,7 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
 	}
 
 	pl->SetTitle("");
-        if(option.find("-noborder")!=string::npos )
-	  leg->SetBorderSize(0);
+    if(option.find("-noborder")!=string::npos ) leg->SetBorderSize(0);
 	pl->addObject(leg);
 	pl->Draw();
 	c->Print("fit_"+(TString)printname+".pdf");

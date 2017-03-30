@@ -209,7 +209,7 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
     if(opt.find("-H")!=string::npos)
     {
         TH1D * resH = NULL;
-        if(pullopt=="p") resH = new TH1D( "rH"+m_name, "Pulls distribution", 15, -5, 5 );
+        if(pullopt=="p") resH = new TH1D( "rH"+m_name, "Pulls distribution", 15, -6, 6 );
         else resH = new TH1D( "rH", "", 15, -3, 3 );
         for(int i = 0; i < residuals->GetNbinsX(); i++) resH->Fill(residuals->GetBinContent(i));
         gStyle->SetOptStat(0);
@@ -227,20 +227,41 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
     {
         TPad * plotPad = new TPad("plotPad", "", .005, .25, .995, .995);
         TPad * resPad = new TPad("resPad", "", .005, .015, .995, .248);
+        if(opt.find("-attach")!=string::npos)
+        {
+            plotPad = new TPad("plotPad", "", .005, .35, .995, .995);
+            resPad = new TPad("resPad", "", .005, .005, .995, .35);
+
+            residuals->SetMinimum(-6.);
+            residuals->SetMaximum(6.);
+        }
+
         plotPad->Draw();
         resPad->Draw();
-
+        
         resPad->cd();
+        if(opt.find("-attach")!=string::npos)
+        {
+            gPad->SetTopMargin(1e-5);
+            gPad->SetBottomMargin(0.4);
+        }
 
         TAxis* yAxis = residuals->GetYaxis();
         TAxis* xAxis = residuals->GetXaxis();
-        yAxis->SetNdivisions(504);
+
+        yAxis->SetNdivisions(505);
         double old_size = yAxis->GetLabelSize();
-        yAxis->SetLabelSize( old_size / 0.33 );
-        yAxis->SetTitleSize( old_size * 3.6  );
-        yAxis->SetTitleOffset(0.3);
+        yAxis->SetLabelSize( old_size * 2 );
+        yAxis->SetTitleSize( old_size * 2.3 );
+        yAxis->SetTitleOffset(0.5);
         yAxis->SetTitle("Pulls");
         xAxis->SetLabelSize( xAxis->GetLabelSize() / 0.33 );
+        if(opt.find("-attach")!=string::npos) 
+        {
+            xAxis->SetTitle(Xtitle);
+            xAxis->SetTitleSize(old_size * 3);
+            xAxis->SetTitleOffset(0.9);
+        }
 
         resPad->cd();
         residuals->Draw();
@@ -264,6 +285,11 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
         residuals->Draw("same");
 
         plotPad->cd();
+        if(opt.find("-attach")!=string::npos) 
+        {  
+            gPad->SetBottomMargin(1e-5);
+            frame->SetMinimum(0.01);
+        }
         logstr+="_fitAndRes";
     }
     else if(residuals)
@@ -424,7 +450,8 @@ double ModelBuilder::GetNSigVal(double min, double max, double * valerr, RooFitR
     RooFormulaVar * nsigval = new RooFormulaVar("nsigval",
             "nsigval",(TString)m_nsig->GetName() + " * " + (TString)integ->GetName(),
             RooArgSet(*m_nsig,*integ));
-    
+   
+    /*
     m_var->setRange("myfitrange",min,max);
     fit_integ = m_sig->createIntegral(*m_var,NormSet(*m_var),Range("myfitrange"));
     double norm = fit_integ->getVal();
@@ -432,7 +459,8 @@ double ModelBuilder::GetNSigVal(double min, double max, double * valerr, RooFitR
     nsigval = new RooFormulaVar("nsigval",
                 "nsigval",(TString)m_nsig->GetName() + " * " + (TString)integ->GetName()  + " / " + (TString)fit_integ->GetName(),
                 RooArgSet(*m_nsig,*integ,*fit_integ));
-    
+    */
+
     if(valerr && fitRes) *valerr = nsigval->getPropagatedError(*fitRes);
     m_var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax());
     return res;

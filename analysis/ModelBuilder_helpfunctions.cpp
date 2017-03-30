@@ -383,6 +383,7 @@ TPaveText * createParamBox(RooAbsPdf * pdf, RooRealVar * obs, string opt, RooFit
         y2 = (TString(ss)).Atof();
     }
     TPaveText * box = new TPaveText(x1,y1,x2,y2,"BRNDC");
+    box->SetFillStyle(1001);
     box->SetFillColor(kWhite);
     box->SetBorderSize(1); 
 

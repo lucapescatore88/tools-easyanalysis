@@ -64,7 +64,7 @@ bool Analysis::Initialize(string option, double frac)
 
     if (m_data) m_init = true;
     else if (!m_reducedTree) cout << "WARNING: No data available!!" << endl;
-    cout << "initialising model" << endl;
+    
     bool result = ModelBuilder::Initialize(option);
     if(m_bkg_components.empty()) ((RooRealVar*)m_nsig)->setVal(m_data->numEntries());
     if (m_pmode == "v")
@@ -72,7 +72,7 @@ bool Analysis::Initialize(string option, double frac)
         cout << endl << m_name << ": PrintParams" << endl << endl;
         ModelBuilder::PrintParams(option);
     }
-    cout << "done" << endl;
+    
     return result;
 }
 
@@ -89,7 +89,7 @@ void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
 
     if (!m_dataReader->isValid()) m_dataReader->Initialize();
 
-    if ((doCuts != "") && (option.find("-docuts") != string::npos))
+    if (option.find("-docuts") != string::npos)
         m_reducedTree = (TTree*) m_dataReader->CopyTree(doCuts, frac, (string) ("reduced_" + m_name));
     else if (!m_reducedTree)
         m_reducedTree = (TTree*) m_dataReader->GetChain()->Clone("reduced_" + m_name);
@@ -333,7 +333,6 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
 
     if (mydata)
     {
-        cout << "Fitting" << endl;
         if (low_opt.find("-constrainall") != string::npos)
             m_constr = gaussianConstraints(m_model,RooArgSet(*m_var));
 
