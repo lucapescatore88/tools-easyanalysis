@@ -52,7 +52,9 @@ bool Analysis::Initialize(string option, double frac)
             string bandname = Form("band_%i",r/2);
             if (r % 2 == 0) bandname = Form("sig_%i",r/2);
             m_var->setRange(bandname.c_str(), allregions[r-1], allregions[r]);
+            
             m_regStr.push_back(bandname);
+            m_reg[bandname] = {allregions[r-1], allregions[r]};
         }
     }
 
@@ -295,7 +297,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         if(m_regStr.size()<2) cout << "WARNING: no regions set!" << endl;
         else
         {
-            for(auto r : m_regStr) if(option.find("band")!=string::npos) ranges += r+",";
+            for(auto r : m_regStr) if(r.find("band")!=string::npos) ranges += r+",";
             ranges.pop_back();
             fitRange = Range(ranges.c_str());
         }
@@ -738,22 +740,22 @@ RooPlot* Analysis::Print(bool dom_model, RooAbsData * _data, string option, unsi
         {   
             string optLog = option;
             optLog.replace(optLog.find("lin"), 3, "");
-            ModelBuilder::Print(title, Xtitle, optLog, _data, bins, m_regStr, m_fitRes,Ytitle, myvar);
+            ModelBuilder::Print(title, Xtitle, optLog, _data, bins, m_regStr, m_reg, m_fitRes,Ytitle, myvar);
         }
-        return ModelBuilder::Print(title, Xtitle, option, _data, bins, m_regStr, m_fitRes, Ytitle, myvar);
+        return ModelBuilder::Print(title, Xtitle, option, _data, bins, m_regStr, m_reg, m_fitRes, Ytitle, myvar);
     }
     else
     {
         TCanvas * myc = new TCanvas();  
         if(option.find("-log")!=string::npos)  myc->SetLogy();
-        RooPlot * frame = getFrame(myvar, _data, NULL, option, bins, m_regStr, Xtitle, Ytitle, NULL, vector<Color_t>());
+        RooPlot * frame = getFrame(myvar, _data, NULL, option, bins, m_regStr, m_reg, Xtitle, Ytitle, NULL, vector<Color_t>());
         if(option.find("-bw")!=string::npos) myc->SetGrayscale();
         frame->Draw();
         if(title=="") myc->Print("data_"+m_name+".pdf");
         else myc->Print(title);
         if(option.find("-linlog")!=string::npos)
         {
-            getFrame(myvar, _data, NULL, option, bins, m_regStr, Xtitle, Ytitle, NULL, vector<Color_t>())->Draw();
+            getFrame(myvar, _data, NULL, option, bins, m_regStr, m_reg, Xtitle, Ytitle, NULL, vector<Color_t>())->Draw();
             if(title=="") myc->Print("data_"+m_name+".pdf");
             else myc->Print(title);
         }

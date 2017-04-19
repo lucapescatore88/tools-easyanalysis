@@ -154,13 +154,13 @@ void ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsData *
 {
     for(auto v : myvars)
     {
-        Print(title, Xtitle, opt, data, bins, vector<string>(), fitRes, Ytitle, v);
+        Print(title, Xtitle, opt, data, bins, vector<string>(), map<string,vector<double>>(), fitRes, Ytitle, v);
     }
 }
 
 
 RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsData * data, int bins,
-        vector<string> regStr, RooFitResult * fitRes, TString Ytitle, RooRealVar * myvar)
+        vector<string> regStr, map<string,vector<double>> reg, RooFitResult * fitRes, TString Ytitle, RooRealVar * myvar)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
     RooPlot* frame = NULL;
@@ -192,7 +192,7 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
 
     // Create main frame
 
-    frame = getFrame(myvar, data, m_model, opt, bins, regStr, Xtitle, Ytitle, leg, m_colors);
+    frame = getFrame(myvar, data, m_model, opt, bins, regStr, reg, Xtitle, Ytitle, leg, m_colors);
     if(opt.find("-noplot")!=string::npos) return frame;
 
     TString logstr = "";
@@ -445,8 +445,7 @@ double ModelBuilder::GetNSigVal(double min, double max, double * valerr, RooFitR
     m_var->setRange("myrange",min,max);
     RooAbsReal * integ = m_sig->createIntegral(*m_var,NormSet(*m_var),Range("myrange"));
     double res = sigval*integ->getVal();
-    RooAbsReal * fit_integ = NULL;
-
+    
     RooFormulaVar * nsigval = new RooFormulaVar("nsigval",
             "nsigval",(TString)m_nsig->GetName() + " * " + (TString)integ->GetName(),
             RooArgSet(*m_nsig,*integ));

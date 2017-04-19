@@ -556,8 +556,8 @@ class ModelBuilder {
      * <br> - "-andpulls"       -> Produced an histogram with pulls and puts it below the main plot
      * */
     RooPlot * Print(TString title = "", TString Xtitle = "", string opt = "", RooAbsData* data = NULL, int bins = 50, 
-            vector<string> regStr = vector<string>(), RooFitResult * fitRes = NULL, 
-            TString Ytitle = "", RooRealVar * myvar = NULL);
+            vector<string> regStr = vector<string>(), map<string,vector<double>> reg = map<string,vector<double>>(), 
+            RooFitResult * fitRes = NULL, TString Ytitle = "", RooRealVar * myvar = NULL);
     void Print(TString title = "", TString Xtitle = "", string opt = "", RooAbsData* data = NULL, int bins = 50, 
             RooFitResult * fitRes = NULL, TString Ytitle = "", vector<RooRealVar *> myvar = vector<RooRealVar *>());
 

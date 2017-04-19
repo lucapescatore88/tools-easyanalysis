@@ -62,7 +62,7 @@ double * calcChi2(RooPlot * frame, unsigned npar = 0, double * range = NULL, boo
 double residual( double datum, double pdf );
 double pull( double datum, double pdf );
 TH1D* residualHist( const RooHist* rhist, const RooCurve* curve, float * range = NULL, string opt = "");
-TH1 * getPulls(RooPlot * pl, float * range = NULL, string opt = "");
+TH1 * getPulls(RooPlot * pl, float * range = NULL, string opt = "", string data = "data", string model = "model");
 
 vector<float> computeAverage(TH1* hist);
 vector<float> computeAverage2D(TH2* hist2D);

@@ -471,19 +471,19 @@ Str2VarMap setConstant(Str2VarMap * pars, vector<string> names, string opt)
 {
     for(Str2VarMapItr iter = (*pars).begin(); iter != (*pars).end(); iter++)
     {
-	string cname = iter->first;
+        string cname = iter->first;
         bool found = false;
         for(unsigned i = 0; i < names.size(); i++)
-	{
+        {
             if( ( names[i] == cname ) ||
-		( cname.find(names[i]) != string::npos && opt.find("contains")!=string::npos ) ) 
-		{ found = true; break; }
-	}
+                    ( cname.find(names[i]) != string::npos && opt.find("contains")!=string::npos ) ) 
+            { found = true; break; }
+        }
         if(opt.find("except")!=string::npos) found = !found;
-	bool setconst = kTRUE;
-	if(opt.find("-free")!=string::npos) setconst = kFALSE;
-	//cout << cname << "  " << found << "  " << setconst << endl;
-	if( names.empty() || found ) ((RooRealVar*)iter->second)->setConstant(setconst);
+        bool setconst = kTRUE;
+        if(opt.find("-free")!=string::npos) setconst = kFALSE;
+        //cout << cname << "  " << found << "  " << setconst << endl;
+        if( names.empty() || found ) ((RooRealVar*)iter->second)->setConstant(setconst);
     }
     return *pars;
 }
@@ -549,12 +549,12 @@ TString getLegendLabel( TString title, string opt )
  **/
 
 RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
-        string opt, unsigned bins, vector<string> regStr, 
+        string opt, unsigned bins, vector<string> regStr, map<string,vector<double>> reg, 
         TString Xtitle, TString Ytitle, 
         TLegend * leg, vector <Color_t> custom_colors)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
- 	if (bins < 1) bins = 50;
+    if (bins < 1) bins = 50;
     var->setRange("PlotRange",var->getMin(),var->getMax());
     RooPlot * frame = new RooPlot(*var,var->getMin(),var->getMax(),bins);
 
@@ -572,201 +572,192 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
     if(opt.find("-fillbkg")!=string::npos) { drawOptBkg = DrawOption("F"); moveBack = MoveToBack(); }
 
     if(regStr.size()==0) regStr.push_back("PlotRange");
+    reg["PlotRange"] = {var->getMin(),var->getMax()};
     bool noblind = (regStr.size()==1);
     RooCmdArg range_data(RooCmdArg::none()); 
     RooCmdArg range_model(RooCmdArg::none()); 
     RooCmdArg norm_range(RooCmdArg::none()); 
+    RooCmdArg norm(RooCmdArg::none());
     RooCmdArg totMcolor = LineColor(4);
-    RooCmdArg blindTotModel(RooCmdArg::none());
-    TString dataname = "data", modelname = "model";
-    double min = 1;
+    TString dataname = "data";
+    TString modelname = "model";
+    double min = 1e9;
 
-    RooLinkedList cmdList;
-
-    for (unsigned i = 0; i < regStr.size(); ++i) 
+    string rangename = "";
+    for(string bandname : regStr) 
     {
-        string bandname = regStr[i];
-        if(bandname.find("band")!=string::npos)
-        {		
-            totMcolor =  LineColor(4);
-            blindTotModel = RooCmdArg::none();
-        }
-        else if(bandname.find("sig")!=string::npos) 
-        {
-            totMcolor =  LineColor(kWhite);
-            blindTotModel = MoveToBack();
-        }
+        if(bandname.find("band")!=string::npos) rangename += bandname + ",";
+    }
+    if(rangename!="") rangename.pop_back();
+    
+    if(!noblind) 
+    {
+        range_data  = CutRange(rangename.c_str());
+        range_model = Range(rangename.c_str());
+        norm_range  = NormRange(rangename.c_str());
+    }
 
-        if(!noblind)
-        {
-            range_data = CutRange(bandname.c_str());
-            range_model = Range(bandname.c_str());
-        }
+    //Plot data and total model
 
-        if(i>0) dataname = Form("data_%i",i);
-        if(i>0) modelname = Form("model_%i",i);
-
-        //Plot data and total model
-
-
-	TString category = "";
+    TString category = "";
     RooCmdArg cut(RooCmdArg::none());
-	if(opt.find("-category[")!=string::npos)
-	{
-	    size_t pos = opt.find("-category[");
-            size_t posend = opt.find("]",pos);
-            category = opt.substr(pos+10, posend - (pos+10) -1 );
-            cout << "*************** category is" << category << endl;
-            cut = Cut("samples==samples::"+category);	
-	}
+    if(opt.find("-category[")!=string::npos)
+    {
+        size_t pos = opt.find("-category[");
+        size_t posend = opt.find("]",pos);
+        category = opt.substr(pos+10, posend - (pos+10) -1 );
+        cut = Cut("samples==samples::"+category);	
+    }
 
-        if(data && ( bandname.find("band")!=string::npos || noblind ) )
+    if( data )
+    {
+        frame->SetMarkerSize(1);
+
+        RooAbsData * datacut = data;
+        if(!noblind) 
         {
-            frame->SetMarkerSize(1);
-            if(opt.find("-sumw2err")!=string::npos) data->plotOn(frame, range_data, Name(dataname), DataError(RooAbsData::SumW2), cut);
-            else data->plotOn(frame, range_data, Name(dataname), cut);
-
-            min = 1e9;
-            RooHist *hist = frame->getHist(dataname);
-            Double_t *cont = hist->GetY();
-            for(int i = 0; i < hist->GetN(); i++)
+            string blindcut = "";
+            for (auto bandname : regStr)
             {
-                if(cont[i]!=0) min = TMath::Min(min, cont[i]);
-            }
-            if (min==1e9) min = 1;
+                if(bandname.find("band")==string::npos) continue;
+                if(blindcut!="") blindcut += " || "; 
+                blindcut += "(" + (string)var->GetName() + " > " + to_string(reg[bandname][0]);
+                blindcut += "&&" + (string)var->GetName() + " < " + to_string(reg[bandname][1]) + ")";   
+            }   
+            
+            datacut = data->reduce(RooArgSet(*var),RooFormulaVar((TString)blindcut,(TString)blindcut,RooArgSet(*var)));
         }
+        if(opt.find("-sumw2err")!=string::npos) datacut->plotOn(frame, range_data, Name(dataname), DataError(RooAbsData::SumW2), cut);
+        else datacut->plotOn(frame, range_data, Name(dataname), cut);
+        
+        RooHist * hist = frame->getHist(dataname);
+        Double_t *cont = hist->GetY();
+        for(int i = 0; i < hist->GetN(); i++)
+            if(cont[i]!=0) min = TMath::Min(min, cont[i]);
+        if (min==1e9) min = 1;
+    }
 
-        vector <Color_t> colors;
-        colors.push_back(kCyan+1);
-        colors.push_back(kRed+1);
-        colors.push_back(kGreen+1);
-        colors.push_back(kOrange);
-        colors.push_back(kMagenta+1);
-        colors.push_back(kGray);
-        colors.push_back(kGray+1);
-        colors.push_back(kGray+2);
-        colors.push_back(kGray+3);
-        if(custom_colors.size() > 0) colors = custom_colors;
-        int styles[] = {3,4,5,6,7,8,9,10,3,4,5,6,7,8,9,10};
+    vector <Color_t> colors = { kCyan+1, kRed+1, kGreen+1, kOrange, kMagenta+1, kGray, kGray+1, kGray+2, kGray+3 };
+    if(custom_colors.size() > 0) colors = custom_colors;
+    int styles[] = {3,4,5,6,7,8,9,10,3,4,5,6,7,8,9,10};
 
-        RooArgSet * stackedBkgs = NULL;
-        if(opt.find("-stackbkg")!=string::npos) stackedBkgs = new RooArgSet("stackedBkgs");
+    RooArgSet * stackedBkgs = NULL;
+    if(opt.find("-stackbkg")!=string::npos) stackedBkgs = new RooArgSet("stackedBkgs");
 
-        if(model && ( bandname.find("band")!=string::npos || noblind ) )
-        {
-            //Plot total model
+    if( model )
+    {
+        //Plot total model
 
-            model->plotOn(frame, totMcolor, Name(modelname), blindTotModel, range_model, norm_range);
+        model->plotOn(frame, totMcolor, Name(modelname), range_model, norm_range, norm);
+        
+        //Plot signal and background components
 
-            //Plot signal and background components
+        int counter = 0;
+        if(opt.find("-stackbkg")==string::npos) counter++;
+        RooArgSet * comps = model->getComponents();
+        TIterator * it = comps->createIterator();
+        RooAbsArg * arg;
+        while( (arg=(RooAbsArg*)it->Next()) )
+        {	
+            TString legstyle = "l";
+            string name = arg->GetName();
+            bool isplot = false;
 
-            int counter = 0;
-            if(opt.find("-stackbkg")==string::npos) counter++;
-            RooArgSet * comps = model->getComponents();
-            TIterator * it = comps->createIterator();
-            RooAbsArg * arg;
-            while( (arg=(RooAbsArg*)it->Next()) )
-            {	
-                TString legstyle = "l";
-                string name = arg->GetName();
-                bool isplot = false;
-
-                if(opt.find("-printonly")==string::npos && name.find("_noprint")==string::npos)
+            if(opt.find("-printonly")==string::npos && name.find("_noprint")==string::npos)
+            {
+                if(name.find("wrtsig")!=string::npos) continue;
+                if( noblind && name.find("totsig")!=string::npos && opt.find("-nototsigplot")==string::npos)
                 {
-                    if(name.find("wrtsig")!=string::npos) continue;
-                    if( noblind && name.find("totsig")!=string::npos && opt.find("-nototsigplot")==string::npos)
-                    {
-                        model->plotOn(frame, Components(*arg), drawOptSig, LineColor(1), Name(arg->GetName()), range_model, norm_range);
-                        isplot = true;
-                    }
-                    else if( noblind && name.find("sig")!=string::npos && opt.find("-plotsigcomp")!=string::npos )
-                    {
-                        model->plotOn(frame, Components(*arg), drawOptSig, 
-                                LineColor(colors[counter]), LineStyle(styles[counter]), 
-                                Name(arg->GetName()), range_model, norm_range);
-                        counter++;
-                        isplot = true;
-                    }
-                    else if(name.find("bkg")!=string::npos && name.find("nbkg")==string::npos) 
-                    {
-                        int style = styles[counter];
-                        if(opt.find("-fillbkg")!=string::npos)
-                        {
-                            legstyle = "f";
-                            style = 0;
-                        }
-                        if(!stackedBkgs)
-                        {
-                            model->plotOn(frame, Components(*arg), drawOptBkg, 
-                                    LineColor(colors[counter]), LineStyle(style), FillColor(colors[counter]), 
-                                    Name(arg->GetName()), moveBack, range_model, norm_range);	
-                            counter++;
-                            isplot = true;
-                        }
-                        else
-                        {
-                            stackedBkgs->add(*arg);
-                        }
-                    }
+                    model->plotOn(frame, Components(*arg), drawOptSig, LineColor(1), Name(arg->GetName()), range_model, norm_range, norm);
+                    isplot = true;
                 }
-                if(name.find("_print")!=string::npos && !isplot)
+                else if( noblind && name.find("sig")!=string::npos && opt.find("-plotsigcomp")!=string::npos )
                 {
                     model->plotOn(frame, Components(*arg), drawOptSig, 
-                            LineColor(colors[counter]), LineStyle(styles[counter]), FillColor(colors[counter]), 
-                            Name(arg->GetName()), moveBack, range_model, norm_range);
+                            LineColor(colors[counter]), LineStyle(styles[counter]), 
+                            Name(arg->GetName()), range_model, norm_range, norm);
                     counter++;
                     isplot = true;
                 }
-
-                TString leglabel = getLegendLabel(arg->GetTitle(), opt);
-                if(i==0 && leg && isplot) leg->AddEntry(frame->findObject(arg->GetName()),leglabel,legstyle);
+                else if(name.find("bkg")!=string::npos && name.find("nbkg")==string::npos) 
+                {
+                    int style = styles[counter];
+                    if(opt.find("-fillbkg")!=string::npos)
+                    {
+                        legstyle = "f";
+                        style = 0;
+                    }
+                    if(!stackedBkgs)
+                    {
+                        model->plotOn(frame, Components(*arg), drawOptBkg, 
+                                LineColor(colors[counter]), LineStyle(style), FillColor(colors[counter]), 
+                                Name(arg->GetName()), moveBack, Range("PlotRange"), norm_range, norm);	
+                        counter++;
+                        isplot = true;
+                    }
+                    else
+                    {
+                        stackedBkgs->add(*arg);
+                    }
+                }
+            }
+            if(name.find("_print")!=string::npos && !isplot)
+            {
+                model->plotOn(frame, Components(*arg), drawOptSig, 
+                        LineColor(colors[counter]), LineStyle(styles[counter]), FillColor(colors[counter]), 
+                        Name(arg->GetName()), moveBack, range_model, norm_range, norm);
+                counter++;
+                isplot = true;
             }
 
-            if(stackedBkgs)
+            TString leglabel = getLegendLabel(arg->GetTitle(), opt);
+            if(leg && isplot) leg->AddEntry(frame->findObject(arg->GetName()),leglabel,legstyle);
+        }
+
+        if(stackedBkgs)
+        {
+            int nbkgs = stackedBkgs->getSize();
+
+            for(int bb = 0; bb < nbkgs; bb++)
             {
-                int nbkgs = stackedBkgs->getSize();
-
-                for(int bb = 0; bb < nbkgs; bb++)
+                RooArgList curBkg;
+                TIterator * it = stackedBkgs->createIterator();
+                int count = 0;
+                RooAbsArg * arg;
+                TString myBkgName, myBkgTitle;
+                while((arg=(RooAbsArg*)it->Next()))
                 {
-                    RooArgList curBkg;
-                    TIterator * it = stackedBkgs->createIterator();
-                    int count = 0;
-                    RooAbsArg * arg;
-                    TString myBkgName, myBkgTitle;
-                    while((arg=(RooAbsArg*)it->Next()))
-                    {
-                        if( count > bb ) break;
-                        count++;
-                        curBkg.add(*arg);
-                        myBkgName = arg->GetName();
-                        myBkgTitle = arg->GetTitle();
-                    }
-
-                    if(opt.find("-fillbkg")!=string::npos)
-                        model->plotOn(frame, Components(curBkg), DrawOption("F"),
-                                FillColor(colors[counter]),
-                                FillStyle(1001),
-                                LineWidth(0.),
-                                LineStyle(0),
-                                LineColor(colors[counter]),
-                                Name(myBkgName),
-                                MoveToBack(), range_model //, norm_range
-                                );
-                    else
-                        model->plotOn(frame, Components(curBkg), DrawOption("L"),
-                                LineColor(colors[counter]),
-                                LineStyle(styles[counter]),
-                                Name(myBkgName),
-                                MoveToBack(), range_model, norm_range
-                                );
-
-                    counter++;
-
-                    TString leglabel = getLegendLabel(myBkgTitle,opt); 
-                    TString legstyle = "l";
-                    if(opt.find("-fillbkg")!=string::npos) legstyle = "f";
-                    if(i==0 && leg) leg->AddEntry(frame->findObject(myBkgName),leglabel,legstyle);
+                    if( count > bb ) break;
+                    count++;
+                    curBkg.add(*arg);
+                    myBkgName = arg->GetName();
+                    myBkgTitle = arg->GetTitle();
                 }
+
+                if(opt.find("-fillbkg")!=string::npos)
+                    model->plotOn(frame, Components(curBkg), DrawOption("F"),
+                            FillColor(colors[counter]),
+                            FillStyle(1001),
+                            LineWidth(0.),
+                            LineStyle(0),
+                            LineColor(colors[counter]),
+                            Name(myBkgName),
+                            MoveToBack(), range_model //, norm_range
+                            );
+                else
+                    model->plotOn(frame, Components(curBkg), DrawOption("L"),
+                            LineColor(colors[counter]),
+                            LineStyle(styles[counter]),
+                            Name(myBkgName),
+                            MoveToBack(), range_model, norm_range
+                            );
+
+                counter++;
+
+                TString leglabel = getLegendLabel(myBkgTitle,opt); 
+                TString legstyle = "l";
+                if(opt.find("-fillbkg")!=string::npos) legstyle = "f";
+                if(leg) leg->AddEntry(frame->findObject(myBkgName),leglabel,legstyle);
             }
         }
     }
@@ -784,7 +775,7 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
         TPaveText * paramBox = createParamBox(model,var,opt);
         frame->addObject(paramBox);
     }
-    
+
     if(opt.find("-min")!=string::npos)
     {
         size_t pos = opt.find("-min");
@@ -813,22 +804,22 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
 }
 
 RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt, 
-        unsigned bins, vector<string> regStr, TString Xtitle, TString Ytitle, 
+        unsigned bins, vector<string> regStr,  map<string,vector<double>> reg, TString Xtitle, TString Ytitle, 
         TLegend * leg, vector <Color_t>custom_colors)
 {
-    return getFrame(var, data, model, opt, bins, regStr, Xtitle, Ytitle, leg, custom_colors);
+    return getFrame(var, data, model, opt, bins, regStr, reg, Xtitle, Ytitle, leg, custom_colors);
 }
 
 RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt,
         unsigned bins, TString Xtitle, TString Ytitle, TLegend * leg, vector <Color_t>custom_colors)
 {
-    return getFrame(var, data, model, opt, bins, vector<string>(1,"PlotRange"), Xtitle, Ytitle, leg, custom_colors);
+    return getFrame(var, data, model, opt, bins, vector<string>(1,"PlotRange"), map<string,vector<double>>(), Xtitle, Ytitle, leg, custom_colors);
 }
 
 RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt,
         unsigned bins, TString Xtitle, TString Ytitle, TLegend * leg, vector <Color_t>custom_colors)
 {
-    return getFrame(var, data, model, opt, bins, vector<string>(1,"PlotRange"), Xtitle, Ytitle, leg, custom_colors);
+    return getFrame(var, data, model, opt, bins, vector<string>(1,"PlotRange"), map<string,vector<double>>(), Xtitle, Ytitle, leg, custom_colors);
 }
 
 

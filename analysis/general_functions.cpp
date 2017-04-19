@@ -230,13 +230,13 @@ double residual( double datum, double pdf )
 // Makes the RooHist of the residual.
 TH1D* residualHist( const RooHist* rhist, const RooCurve* curve, float * range, string opt )
 {
-    int     n = rhist->GetN();
-    double* x = rhist->GetX();
-    double* y = rhist->GetY();
+    int      n = rhist->GetN();
+    double * x = rhist->GetX();
+    double * y = rhist->GetY();
     float binWidth = (x[n-1] - x[0])/n;
 
-    double xMin = x[ 0     ];
-    double xMax = x[ n - 1 ];
+    double xMin = x[ 0     ] - binWidth;
+    double xMax = x[ n - 1 ] + binWidth;
     TH1D* residuals_temp = new TH1D( "r", "", n, xMin, xMax );
     double datum = 0.;
     double pdf   = 0.;
@@ -268,10 +268,10 @@ TH1D* residualHist( const RooHist* rhist, const RooCurve* curve, float * range, 
 }
 
 
-TH1 * getPulls(RooPlot * pl, float * range, string opt)
+TH1 * getPulls(RooPlot * pl, float * range, string opt, string data, string model)
 {
-    RooHist* histogram = pl->getHist("data");
-    RooCurve* curve = pl->getCurve("model");
+    RooHist* histogram = pl->getHist(data.c_str());
+    RooCurve* curve = pl->getCurve(model.c_str());
     if(!(histogram && curve)) return NULL;
     return residualHist(histogram,curve,range,opt);
 }

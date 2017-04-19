@@ -19,10 +19,10 @@ void MultiAnalysis::AddCategory(TString nameCat, RooRealVar * var, string opt)
 	samples->defineType(nameCat);
 	categories.push_back(nameCat);
 	
-        if(vars->getSize()==0) vars->add(*var);
-        else if(!vars->find(var->GetName())) vars->add(*var);
+    if(vars->getSize()==0) vars->add(*var);
+    else if(!vars->find(var->GetName())) vars->add(*var);
         
-        if(opt=="setana")
+    if(opt=="setana")
 	{
 	    Analysis * newana = new Analysis(nameCat,var);
 	    ana.push_back(newana);

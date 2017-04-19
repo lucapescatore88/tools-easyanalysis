@@ -82,7 +82,8 @@ class Analysis : public ModelBuilder {
 	TCut * m_cuts;
 	double * m_chi2;
 	vector <double> m_regions;
-	vector <string> m_regStr;
+    vector <string> m_regStr;
+	map <string,vector<double>> m_reg;
 	bool m_init;
 	string m_unit;
 	static string m_pmode;
