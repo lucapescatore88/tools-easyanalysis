@@ -4,5 +4,6 @@ build:
   script:
     - export USER=TestUser
     - source /cvmfs/lhcb.cern.ch/group_login.sh --no-userarea
+    - lb-run Urania/v6r1 bash
     - source setup.sh
     - make
