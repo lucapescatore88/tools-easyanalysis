@@ -4,6 +4,6 @@ build:
   script:
     - export USER=TestUser
     - source /cvmfs/lhcb.cern.ch/group_login.sh --no-userarea
-    - source SetupProject.sh DaVinci v41r3
+    - lb-run Urania/v6r1
     - source setup.sh
     - make
