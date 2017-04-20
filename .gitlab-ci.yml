@@ -4,6 +4,4 @@ build:
   script:
     - export USER=TestUser
     - source /cvmfs/lhcb.cern.ch/group_login.sh --no-userarea
-    - lb-run DaVinci/v42r1 bash
-    - source setup.sh
-    - make
+    - lb-run DaVinci/v42r1 'source setup.sh && make'
