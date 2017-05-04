@@ -52,7 +52,7 @@ bool Analysis::Initialize(string option, double frac)
             string bandname = Form("band_%i",r/2);
             if (r % 2 == 0) bandname = Form("sig_%i",r/2);
             m_var->setRange(bandname.c_str(), allregions[r-1], allregions[r]);
-            
+
             m_regStr.push_back(bandname);
             m_reg[bandname] = {allregions[r-1], allregions[r]};
         }
@@ -66,7 +66,7 @@ bool Analysis::Initialize(string option, double frac)
 
     if (m_data) m_init = true;
     else if (!m_reducedTree) cout << "WARNING: No data available!!" << endl;
-    
+
     bool result = ModelBuilder::Initialize(option);
     if(m_bkg_components.empty()) ((RooRealVar*)m_nsig)->setVal(m_data->numEntries());
     if (m_pmode == "v")
@@ -74,7 +74,7 @@ bool Analysis::Initialize(string option, double frac)
         cout << endl << m_name << ": PrintParams" << endl << endl;
         ModelBuilder::PrintParams(option);
     }
-    
+
     return result;
 }
 
@@ -341,7 +341,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         RooCmdArg isExtended = Extended(kTRUE);
         if ( (low_opt.find("-noextended") != string::npos) || (m_bkg_components.size() < 1) )
             isExtended = Extended(kFALSE);
-        
+
         // Prepare Likelihood (normalise and add constraints)
 
         //RooAbsReal * nll = CreateLogL(isExtended)
@@ -357,7 +357,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
             RooProduct * nll_constr = new RooProduct("nll_constrained","nll_constrained",list_for_product);
             nll_toFit = nll_constr;
         }
-        
+
         // Actual fit
 
         RooMinuit m(*nll_toFit);
@@ -371,17 +371,17 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         int i(0);
         while (m_fitRes == NULL || m_fitRes->covQual() < 3) // loop until convergence
         { 
-             m.migrad() ;
-             m.hesse() ;
-             if (low_opt.find("-minos") != string::npos) m.minos();
-             m_fitRes = m.save();
-             
-             ++i; if (i>20) break; // exit after 20 iterations
+            m.migrad() ;
+            m.hesse() ;
+            if (low_opt.find("-minos") != string::npos) m.minos();
+            m_fitRes = m.save();
+
+            ++i; if (i>20) break; // exit after 20 iterations
         }
 
         if (low_opt.find("-quiet") == string::npos)
             cout << m_name << " :  CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << endl;
-         
+
     }
     else { cout << "NO DATA!!" << endl; return NULL; }
 
@@ -406,7 +406,7 @@ RooWorkspace * Analysis::SaveToRooWorkspace(string option)
     if(m_data)
     {
         ws->import(*m_data);
-       if (m_pmode == "v") cout << "m_data: " << m_data->GetName() << endl;
+        if (m_pmode == "v") cout << "m_data: " << m_data->GetName() << endl;
     }
 
     return ws;
@@ -424,10 +424,10 @@ void Analysis::ImportModel(RooWorkspace * ws)
     while( (arg=(TObject *)it->Next()) )
     {
         string name = arg->GetName();
-        
+
         if(name.find("m_model")!=string::npos)
             m_model = (RooAbsPdf*)arg;
-    
+
         else if (name.find("totsig")!=string::npos)
             m_sig = (RooAbsPdf*)arg;
         else if (name.find("totbkg")!=string::npos)
@@ -713,7 +713,7 @@ RooPlot* Analysis::Print(bool dom_model, RooAbsData * _data, string option, unsi
     unsigned posX = option.find("-x");
     if(posX < 1e4) Xtitle = option.substr(posX+2,option.find("-",posX+2) - posX - 2);
     if(m_unit!="") Xtitle += " ["+ m_unit +"]";
-    
+
     if(!myvar) myvar = m_var;
 
     TString Ytitle = "";
@@ -847,7 +847,7 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
     transform(option.begin(), option.end(), option.begin(), ::tolower);
     cout << fixed << setprecision(3);
     if(m_pmode=="v") cout << endl << m_name << ": Generating " << nsigevt << " signal events and " << nbkgevt << " bkg events (" << option << ")" << endl;
-    
+
     if(m_sig && m_bkg)
     {
         RooArgSet varList("varList_"+m_name);
@@ -881,9 +881,9 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
             RooAbsPdf * tot = new RooAddPdf("total_pdf","total_pdf",RooArgSet(*m_sig, *m_bkg), RooArgSet(*f_sig));
             cout << "Generating nsig/ntot = " << f_sig->getVal() << endl;
             m_data = tot->generate(varList,ntot,ext);
-        
+
             cout << m_name << ": " << " Generated events = " << m_data->numEntries() << endl;
-            
+
             return NULL; 
         }
     }
@@ -959,7 +959,7 @@ RooDataSet * Analysis::CalcSWeightRooFit(unsigned nbins, bool unbinned, string o
     gStyle->SetOptStat(0);
 
     m_reducedTree->Draw(sweights[0].GetName()+(TString)">>hSWeights_"+sweights[0].GetName());
-  
+
     c->Print((TString) m_name + "_sWeights.pdf");
 
     m_reducedTree->Draw(m_var->GetName()+(TString)">>hHisto_"+sweights[0].GetName());

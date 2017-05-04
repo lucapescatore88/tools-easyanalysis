@@ -73,7 +73,7 @@ typedef  Long64_t (*FUNC_PTR)(TreeReader *, vector< Long64_t >);
 /** \class Analysis
  *  \brief Allows to handle data starting from TTree or TH1
  *  allows to make cuts and check for multiple candidates.
- *  Then using the ModelBuilder class it allows to create a m_model
+ *  Then using the ModelBuilder class it allows to create a model
  *  and finally you can Fit it to the dataset with advanced options.
  * */
 
@@ -236,7 +236,7 @@ class Analysis : public ModelBuilder {
 	bool isValid() { return m_init; }
 
 	/** Function to unitialize the Analysis object before fitting
-	 *	<br> Runs ModelBuilder::Initialize() to initialize the m_model
+	 *	<br> Runs ModelBuilder::Initialize() to initialize the model
 	 *	<br> Runs CreatedataSet() to initialize the data
 	 **/
 	bool Initialize(string _usesig = "-exp", double frac = -1.);
@@ -273,7 +273,7 @@ class Analysis : public ModelBuilder {
     RooArgSet * GetConstraints() { return m_constr; }
 
 /** \brief Adds a blinded region.
- If you have to add more than one region you must add them in order from low to high and the must not overlap. If you set one or more regions parameters will be hidden and m_model and data will not be plotted in those regions.
+ If you have to add more than one region you must add them in order from low to high and the must not overlap. If you set one or more regions parameters will be hidden and model and data will not be plotted in those regions.
  **/
 	void SetBlindRegion(double min, double max);
 	void Reset() 
@@ -283,15 +283,15 @@ class Analysis : public ModelBuilder {
         m_chi2[0] = m_chi2[1] = -1; m_sig = NULL, m_bkg = NULL; m_init = false; 
     }
 
-	/** \brief Generates events using the m_model internally set and a specific number of total events
-	 * @param nevt: Number of events to generate (N.B.: this is Nsig+Nbkg and the fraction between is supposed to be right in the m_model)
+	/** \brief Generates events using the model internally set and a specific number of total events
+	 * @param nevt: Number of events to generate (N.B.: this is Nsig+Nbkg and the fraction between is supposed to be right in the model)
 	 * @param opt: Options:
 	 * <br> "-seed(n)":  To set a specific seed
 	 * <br> "-smear(r)": "r" is a double interpreted as resolution. The generated events will be gaussian smeared by this resolution.
 	 **/
 	TTree * Generate(int nevt, string opt = "-subtree");
 
-/** \brief Generate events using the m_model inetrnally set and a specific number of signal and background events
+/** \brief Generate events using the model inetrnally set and a specific number of signal and background events
 	 * @param nsigevt: Number of signal events to generate
 	 * @param nbkgevt: Number of background events to generate      
  	 * @param opt: Options:
@@ -330,15 +330,15 @@ class Analysis : public ModelBuilder {
     TTree * GetSingles(vector<FUNC_PTR> choose, vector <TString> namevars)
     {
         if(choose.size()!=namevars.size()) {
-            cout << "ATTENTION: The vector of choose functions and their names must have the same size" << endl; return NULL; }
+            cout << "*** WARNING: The vector of choose functions and their names must have the same size" << endl; return NULL; }
         for(size_t cf = 0; cf < choose.size(); cf++)
             GetSingleTree(choose[cf],namevars[cf],true);
         return m_reducedTree;
     }
 
     
-/** \brief Fits the "reducedTree" with the "m_model"
- * Data and m_model must be previourly set and initialized.
+/** \brief Fits the "reducedTree" with the "model"
+ * Data and model must be previourly set and initialized.
   <br>One can set the fit range and number of bins for chi2. If not set the variable range is used.
   @param min, max: fitting interval, if min => max all available is used 
   @param nbins: n of bins to use (if unbinned this is only for display)
@@ -356,8 +356,8 @@ class Analysis : public ModelBuilder {
 	RooPlot * Fit(unsigned nbins = 50, bool unbinned = false, string print = "-range-log", TCut mycuts = "");
     RooPlot * Fit(string option, TCut extracuts);
 
-/** \brief Makes nice plots of data and m_models including blinded plots
-  @param m_model: if true plots m_model on data
+/** \brief Makes nice plots of data and models including blinded plots
+  @param do_model: if true plots model on data
   @param opt: options string. Options available are:
   <br>"-fillSig"  -> signal is filled with color instead of dashed line
   <br>"-fillBkg"  -> bkg is filled with color instead of dashed line
@@ -441,7 +441,7 @@ class Analysis : public ModelBuilder {
 		return ModelBuilder::GetParamsVariations(nvariations,m_fitRes);
 	}
 
-	/** \brief Calculates S-weight for the data and m_model set
+	/** \brief Calculates S-weight for the data and model set
   		The function will perform a fit but it could help to Fit first anyway.
 	 	@param min,max: Calculates S-weight only in [min,max]
 		@param nbins:   Number of bins (just for display if unbinned fit)

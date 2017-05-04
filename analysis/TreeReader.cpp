@@ -17,16 +17,16 @@ void TreeReader::AddChain(TChain *chain)
     {
         if (pmode=="v") cout << endl << "Adding chain" << endl << endl;
 
-	TObjArray *fileElements = chain->GetListOfFiles();
-	TIter next(fileElements);
-	TChainElement *chEl = 0;
-	string fileName;
-	while ((chEl = (TChainElement*) next()))
-	{
-	    AddFile(chEl->GetTitle());
-	}
+        TObjArray *fileElements = chain->GetListOfFiles();
+        TIter next(fileElements);
+        TChainElement *chEl = 0;
+        string fileName;
+        while ((chEl = (TChainElement*) next()))
+        {
+            AddFile(chEl->GetTitle());
+        }
 
-	Initialize();
+        Initialize();
     }
 }
 
@@ -37,16 +37,16 @@ void TreeReader::AddFile(const char *fileName, const char* treeName, Long64_t ma
     if (fChain)
     {
         if (!TFile::Open(fileName)) return;
-	/*
-        if ( maxEntries > 0 )
-        {
-	    fChain->AddFile(fileName,maxEntries,treeName);
-            cout << "Max chain entries set to " << maxEntries << " per file" << endl;
-        }
-        else 
-	*/
-	fChain->AddFile(fileName,maxEntries,treeName);
-	if (pmode=="v") cout << "Adding file: " << fileName << " " << treeName << endl;
+        /*
+           if ( maxEntries > 0 )
+           {
+           fChain->AddFile(fileName,maxEntries,treeName);
+           cout << "Max chain entries set to " << maxEntries << " per file" << endl;
+           }
+           else 
+           */
+        fChain->AddFile(fileName,maxEntries,treeName);
+        if (pmode=="v") cout << "Adding file: " << fileName << " " << treeName << endl;
     }
 }
 
@@ -58,9 +58,9 @@ void TreeReader::AddFriend(const char *fileName, const char* treeName)
     {
         if (!TFile::Open(fileName)) return;
 
-	if (pmode=="v") cout << endl << "Adding friend: " << treeName << endl << endl;
+        if (pmode=="v") cout << endl << "Adding friend: " << treeName << endl << endl;
 
-	fChain->AddFriend(treeName, fileName);
+        fChain->AddFriend(treeName, fileName);
     }
 }
 
@@ -137,7 +137,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
         int id = TypeDB::getType(curtype.c_str());
         int arreysize = 1;
         string title = leaf->GetTitle();
-        
+
         // Find out whether we have array by inspecting leaf title
         if ( title.find("[")!=std::string::npos )
         {
@@ -149,7 +149,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
         if (id >= 0)
         {
             bool addVar = true;
-	    if (curtype.find("vector")!=std::string::npos) addVar = false;
+            if (curtype.find("vector")!=std::string::npos) addVar = false;
 
             if (br.size()>0)
             {
@@ -196,8 +196,8 @@ bool TreeReader::Initialize(vector <string> br, string opt)
     if ((init) && (pmode=="v"))
     {
         cout << endl << "Number of trees in chain: " << fChain->GetNtrees() << endl;
-	cout << endl << "Set up " << varList.size() << " / " << nBranches << " branches" << endl;
-	cout << endl << "Read in " << fChain->GetEntries() << " events" << endl << endl;
+        cout << endl << "Set up " << varList.size() << " / " << nBranches << " branches" << endl;
+        cout << endl << "Read in " << fChain->GetEntries() << " events" << endl << endl;
     }
 
     return true;
@@ -274,7 +274,7 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
            if (pmode == "v") cout << "N Pas = " << fixed << setprecision(0) << nPas << " (" << fixed << setprecision(6) << (double) nPas / (double) nTot * 100 << "%)" << endl;
 
            if (nTot == nPas) cut = "";
-	*/
+           */
     }
 
     if (frac == -1)
@@ -339,18 +339,18 @@ void TreeReader::PrintListOfFiles()
     {
         TObjArray *fileElements = fChain->GetListOfFiles();
 
-	if (fileElements) {
+        if (fileElements) {
             TIter next(fileElements);
-	    TChainElement *chEl = 0;
+            TChainElement *chEl = 0;
 
-	    cout << endl;
-	    cout << "List of files" << endl;
-	    while ((chEl = (TChainElement*) next()))
-	    {
-		cout << chEl->GetTitle() << endl;
-	    }
-	    cout << endl;
-	}
+            cout << endl;
+            cout << "List of files" << endl;
+            while ((chEl = (TChainElement*) next()))
+            {
+                cout << chEl->GetTitle() << endl;
+            }
+            cout << endl;
+        }
     }
 
     return;
@@ -370,15 +370,15 @@ void TreeReader::PrintListOfVariables()
     {
         vector<variable*> varList = GetVarList();
 
-	cout << endl;
-	cout << endl << "Set up " << varList.size() << " branches" << endl;
+        cout << endl;
+        cout << endl << "Set up " << varList.size() << " branches" << endl;
 
-	cout << endl;
-	for (unsigned i = 0; i < varList.size(); ++i)
-	{
-	    cout << varList[i]->name << " " << varList[i]->bname << " " << varList[i]->title << endl;
-	}
-	cout << endl;
+        cout << endl;
+        for (unsigned i = 0; i < varList.size(); ++i)
+        {
+            cout << varList[i]->name << " " << varList[i]->bname << " " << varList[i]->title << endl;
+        }
+        cout << endl;
     }
 
     return;

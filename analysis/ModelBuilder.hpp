@@ -45,7 +45,7 @@ class ModelBuilder {
 
     void ForceValid() { m_isvalid = true; }
 
-    /// \brief Wrapper for the external function stringToPdf() which returns a m_model from a string
+    /// \brief Wrapper for the external function stringToPdf() which returns a model from a string
 
     RooAbsPdf * StringToPdf(const char * typepdf, const char * namepdf, Str2VarMap mypars, RooRealVar * myvar = NULL, TString _title = "")
     {
@@ -63,7 +63,7 @@ class ModelBuilder {
      *
      * @param _base:  Object to start with to create the PDF
      * @param _name:  Name to give to the newly created PDF
-     * @param myvars: This works only if the given type is a string. While creating the m_model it looks if its parameters are already in "myvars". And if it finds them it uses them to create the new PDF. Does nothing if myvars contains no parameters or wrong parameters or if the given type is not "string".
+     * @param myvars: This works only if the given type is a string. While creating the model it looks if its parameters are already in "myvars". And if it finds them it uses them to create the new PDF. Does nothing if myvars contains no parameters or wrong parameters or if the given type is not "string".
      * @param weight: In case the starting object is a TTree distributions are created considering the variable "weight" as an event-by-event weight.
      * @param opt:    Options:
      *                This is important because every parameter name must be unique in RooFit.
@@ -159,7 +159,25 @@ class ModelBuilder {
                 res->plotOn(keysplot);
                 keysplot->SetTitle(_name);
                 keysplot->Draw();
-                c->Print("rooKeysModel_"+((TString)_name).ReplaceAll("__noprint__","")+".pdf");
+                TString name_ = _name;
+                name_.ReplaceAll("__noprint__", "");
+                name_.ReplaceAll(" ", "_");
+                name_.ReplaceAll("#", "_");
+                name_.ReplaceAll("^", "_");
+                name_.ReplaceAll("{", "_");
+                name_.ReplaceAll("}", "_");
+                name_.ReplaceAll("(", "_");
+                name_.ReplaceAll(")", "_");
+                name_.ReplaceAll(":", "_");
+                name_.ReplaceAll("/", "_");
+                name_.ReplaceAll("+", "_");
+                name_.ReplaceAll("-", "_");
+                name_.ReplaceAll("*", "_");
+                name_.ReplaceAll(",", "_");
+                name_.ReplaceAll(".", "_");
+                name_.ReplaceAll("__", "_");
+                name_.ReplaceAll("_for", "__for");
+                c->Print("rooKeysModel_"+name_+".pdf");
                 delete c;
                 delete keysplot;
             }
@@ -238,7 +256,7 @@ class ModelBuilder {
      *  */
     template <class T> RooAbsPdf * AddBkgComponent(const char * _name, T * _comp, RooAbsReal * _frac, string opt = "", Str2VarMap myvars = Str2VarMap(), string weight = "")
     {
-        if(!m_sig) { cout << "ATTENTION: Signal not set! Set the signal before any background!" << endl; return NULL; }
+        if(!m_sig) { cout << "*** WARNING: Signal not set! Set the signal before any background!" << endl; return NULL; }
 
         TString nstr = "bkg_"+(TString)_name;
         string lowopt = opt;
@@ -281,7 +299,7 @@ class ModelBuilder {
     template <class T> RooAbsPdf * AddBkgComponent(const char * _name, T * _comp, double _frac = 0, string opt = "", Str2VarMap myvars = Str2VarMap(), string weight = "")
     {
 
-        if(!m_sig) { cout << "ATTENTION: Signal not set! Set the signal before any background!" << endl; return NULL; }
+        if(!m_sig) { cout << "*** WARNING: Signal not set! Set the signal before any background!" << endl; return NULL; }
 
         TString nstr = "bkg_"+(TString)_name;
         RooAbsReal * frac = NULL;

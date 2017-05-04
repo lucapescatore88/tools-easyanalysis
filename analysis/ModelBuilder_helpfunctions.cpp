@@ -446,7 +446,7 @@ RooArgSet * copyFreePars(RooAbsPdf * pdf, RooArgSet vars)
 {
     RooArgSet * out = new RooArgSet();
     RooArgSet * params = pdf->getParameters(RooDataSet("v","",vars));
-    TIterator *it = params->createIterator();
+    TIterator * it = params->createIterator();
     RooRealVar * arg;
     while( (arg=(RooRealVar*)it->Next()) ) 
     {
@@ -779,14 +779,8 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
     if(opt.find("-min")!=string::npos)
     {
         size_t pos = opt.find("-min");
-        if(opt.find("-minlog")!=string::npos) {
-            TString strMin = opt.substr(pos+7,string::npos);
-            frame->SetMinimum(strMin.Atof());
-        }
-        else {
-            TString strMin = opt.substr(pos+4,string::npos);
-            frame->SetMinimum(strMin.Atof());
-        }
+        TString strMin = opt.substr(pos+4,string::npos);
+        frame->SetMinimum(strMin.Atof());
     }
     else if(opt.find("-log")!=string::npos) frame->SetMinimum(min * 0.1);
     else frame->SetMinimum(0.);

@@ -345,7 +345,7 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
     {
         pdf = new RooGamma(namepdf,namepdf,*var,*p["g"],*p["b"],*p["m"]);
     }
-    else if(typepdf_.find("apollonios")!=string::npos)
+    else if(typepdf_.find("Apollonios")!=string::npos)
     {
         pdf = new RooApollonios(namepdf,namepdf,*var,*p["m"],*p["s"],*p["b"],*p["a"],*p["n"]);
     }
