@@ -1,0 +1,8 @@
+build:
+  tags:
+    - cvmfs
+  script:
+    - export USER=TestUser
+    - source /cvmfs/lhcb.cern.ch/group_login.sh --no-userarea
+    - source setup.sh
+    - lb-run Urania/v6r1 make
