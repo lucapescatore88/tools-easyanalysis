@@ -15,7 +15,8 @@ ROOFITDIC   = $(patsubst $(TOOLSDIR)/roofit/%.cpp,     $(TOOLSDIR)/roofit/dic/%.
 ROOFITOBJ   = $(patsubst $(TOOLSDIR)/roofit/dic/%.cpp, $(TOOLSDIR)/roofit/lib/%.o,   $(ROOFITDIC))
 LIBS        = $(patsubst $(TOOLSDIR)/%.cpp,            $(TOOLSDIR)/lib/%.a,          $(TOOLS))
 EXE         = $(ROOFITDIC) $(ROOFITOBJ) $(ANALYSISOBJ) $(TOOLSDIR)/lib/roofit.a $(TOOLSDIR)/lib/analysis.a $(LIBS)
-#EXE         = $(ANALYSISOBJ) $(TOOLSDIR)/lib/analysis.a $(LIBS)
+
+
 
 all: $(EXE)
 

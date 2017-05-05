@@ -136,7 +136,8 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
             varList.add(*m_weight);
             m_data = new RooDataSet("data_" + m_name, "data" + m_name, varList, Import(*m_reducedTree), WeightVar(m_weight->GetName()));
         }
-        else m_data = new RooDataSet("data_" + m_name, "data" + m_name, m_reducedTree, varList);
+        //else m_data = new RooDataSet("data_" + m_name, "data" + m_name, m_reducedTree, varList);
+	else m_data = new RooDataSet("data_" + m_name, "data" + m_name, varList, Import(*m_reducedTree));
 
         CreateHisto("-usedataset");
 
@@ -536,25 +537,6 @@ TTree * Analysis::applyCuts(TCut _cuts, bool substtree, void (*addFunc)(TreeRead
 
    randomKill() is a standard function for random killing of multiple candidates.
    */
-
-
-Long64_t bestPID(TreeReader * reader, vector< Long64_t > entry)
-{
-    int best = 0;
-    double bestpid = -1e9;
-    for (size_t e = 0; e < entry.size(); e++)
-    {
-        reader->GetEntry(entry[e]);
-        double pid = reader->GetValue("Pi_ProbNNpi") * reader->GetValue("K_ProbNNk");
-        if(pid > bestpid)
-        {
-            bestpid = pid;
-            best = e;
-        }
-    }
-
-    return entry[best];
-}
 
 
 Long64_t randomKill(TreeReader * reader, vector< Long64_t > entry)
