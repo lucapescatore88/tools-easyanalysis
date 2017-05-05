@@ -32,13 +32,13 @@ that the tools are in the same folder.
 ```makefile
 ROOTCFLAGS = $(shell root-config --cflags --glibs)
 
+## This is the folder where you have the tools
+## If not set it will assume they are in the same folder.
+
 TOOLSDIR   = $(PWD)
 ifneq ($(TOOLSSYS),)
     TOOLSDIR   = $(TOOLSSYS) 
 endif
-
-## This is the folder where you have the tools
-## If not set it will assume they are in the same folder.
 
 CXX        = g++
 CXXFLAGS   = -g -fPIC -Wall -Wno-write-strings -Wunused-variable -O2 $(ROOTCFLAGS) -lTMVA -lRooFit -lRooStats -I$(TOOLSDIR) -I$(TOOLSDIR)/analysis -I$(DBDIR) -I/usr/include/boost/property_tree/detail -L$(TOOLSDIR)/lib
