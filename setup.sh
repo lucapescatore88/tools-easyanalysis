@@ -6,7 +6,6 @@ echo
 echo "Setup tools-easyanalysis"
 echo
 echo "TOOLS  $TOOLSSYS"
-echo "LCGDIR $LCGDIR"
 echo
 #printenv
-echo
+#echo
