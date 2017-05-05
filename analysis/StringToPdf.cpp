@@ -22,7 +22,6 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
     {
         if( par=="a2os" ) parMapName = isParInMap( "a2", myvars, dist_name );
         else parMapName = isParInMap( par, myvars, dist_name );
-        cout << par << " --> name in map "  << parMapName << "    --> parameter name ";
         if(parMapName!="") cout << myvars[parMapName]->GetName() << endl;
         else cout << " (WRONG!!)" << endl;
     }
@@ -54,7 +53,7 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
 }
 
 
-TString getPrintParName(string typepdf_, TString namepdf_)
+TString getPrintParName(TString namepdf_)
 {
     namepdf_ = namepdf_.ReplaceAll("__noprint__",""); 
     size_t pos_ = ((string)namepdf_).find("_");
@@ -77,7 +76,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     double sc = val->getVal()/5000.;
     namepdf_ = namepdf_.ReplaceAll("__noprint__","");
     if(title == "") title = namepdf_;
-    TString pstrname = getPrintParName(typepdf_, title);
+    TString pstrname = getPrintParName(title);
     
     stval_list["m"]     = new RooRealVar("m_"+namepdf_,  "m"+pstrname,        val->getVal(),val->getMin(),val->getMax());
     stval_list["mg"]    = new RooRealVar("mg_"+namepdf_, "m_{gauss}"+pstrname,val->getVal(),val->getVal()*0.5,val->getVal()*2.);
@@ -315,7 +314,7 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
             maxs.push_back(max);
         }
         RooArgList * parList = new RooArgList("parList");
-        TString pstrname = getPrintParName(typepdf_, title);
+        TString pstrname = getPrintParName(title);
         for(int i = 0; i < npar; i++)
         {
             RooRealVar * v = new RooRealVar(Form("c%i_",i)+namepdf_,Form("c_%i"+pstrname,i),pvals[i],mins[i],maxs[i]);
