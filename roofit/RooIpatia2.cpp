@@ -16,7 +16,7 @@
 #include "TMath.h" 
 #include "Math/SpecFunc.h"
 #include "Math/IFunction.h"
-#include "gsl/gsl_sf_bessel.h"
+#include <gsl/gsl_sf_bessel.h>
 #include "TSystem.h"
 
 const Double_t sq2pi = TMath::Sqrt(2.*TMath::ACos(-1.));

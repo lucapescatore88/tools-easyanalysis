@@ -16,7 +16,7 @@
 #include "TMath.h" 
 #include "Math/SpecFunc.h"
 #include "Math/IFunction.h"
-#include "gsl/gsl_sf_bessel.h"
+#include <gsl/gsl_sf_bessel.h>
 
 const Double_t sq2pi = sqrt(2*acos(-1.0));
 const Double_t sq2pi_inv = 1./sq2pi;
