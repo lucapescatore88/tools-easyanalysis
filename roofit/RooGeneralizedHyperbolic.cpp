@@ -16,7 +16,7 @@
 #include "TMath.h" 
 #include "Math/SpecFunc.h"
 #include "Math/IFunction.h"
-#include <gsl/gsl_sf_bessel.h>
+#include "gsl/gsl_sf_bessel.h"
 
 
 Double_t RooGeneralizedHyperbolic__low_x_BK(Double_t nu,Double_t x){
