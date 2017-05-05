@@ -14,5 +14,5 @@ echo
 echo "TOOLS  $TOOLSSYS"
 echo "LCGDIR $LCGDIR"
 echo
-printenv
+#printenv
 echo

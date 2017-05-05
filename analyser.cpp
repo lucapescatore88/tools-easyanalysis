@@ -720,8 +720,7 @@ RooPlot* Analysis::Print(bool dom_model, RooAbsData * _data, string option, unsi
     {
         if(option.find("-linlog")!=string::npos)
         {   
-            string optLog = option;
-            optLog.replace(optLog.find("lin"), 3, "");
+            string optLog = option.replace(option.find("lin"), 3, "");
             ModelBuilder::Print(title, Xtitle, optLog, _data, bins, m_regStr, m_reg, m_fitRes,Ytitle, myvar);
         }
         return ModelBuilder::Print(title, Xtitle, option, _data, bins, m_regStr, m_reg, m_fitRes, Ytitle, myvar);
