@@ -3,15 +3,15 @@ TOOLSDIR    = $(TOOLSSYS)
 ROOTCFLAGS  = $(shell root-config --cflags --glibs)
 ROOTCINT    = rootcint
 
+LCGDIR      = /cvmfs/lhcb.cern.ch/lib/lcg
+GSLDIR      = $(LCGDIR)/external/GSL/1.10/x86_64-slc6-gcc48-opt/include
+
 CXX         = g++
-CXXFLAGS    = -std=c++0x -g -fPIC -Wall -O2 $(ROOTCFLAGS) -lTMVA -lRooFit -lRooStats -lMathMore -I$(TOOLSDIR) -I$(TOOLSDIR)/analysis -I$(TOOLSDIR)/roofit -L$(TOOLSDIR)/lib
+CXXFLAGS    = -std=c++0x -g -fPIC -Wall -O2 $(ROOTCFLAGS) -lTMVA -lRooFit -lRooStats -lMathMore -I$(TOOLSDIR) -I$(TOOLSDIR)/analysis -I$(GSLDIR) -I$(TOOLSDIR)/roofit -L$(TOOLSDIR)/lib
 
 ANALYSIS    = $(wildcard $(TOOLSDIR)/analysis/*.cpp)
 ROOFIT      = $(wildcard $(TOOLSDIR)/roofit/*.cpp)
 TOOLS       = $(wildcard $(TOOLSDIR)/*.cpp)
-
-LCGDIR      = /cvmfs/lhcb.cern.ch/lib/lcg
-GSLDIR      = $(LCGDIR)/external/GSL/1.10/x86_64-slc6-gcc48-opt/include
 
 ANALYSISOBJ = $(patsubst $(TOOLSDIR)/analysis/%.cpp,   $(TOOLSDIR)/analysis/lib/%.o, $(ANALYSIS))
 ROOFITDIC   = $(patsubst $(TOOLSDIR)/roofit/%.cpp,     $(TOOLSDIR)/roofit/dic/%.cpp, $(ROOFIT))
