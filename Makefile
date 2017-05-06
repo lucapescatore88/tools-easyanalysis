@@ -1,10 +1,13 @@
+TOOLSDIR    = $(TOOLSSYS)
+
 ROOTCFLAGS  = $(shell root-config --cflags --glibs)
 ROOTCINT    = rootcint
 
-TOOLSDIR    = $(TOOLSSYS)
+LCGDIR      = /cvmfs/lhcb.cern.ch/lib/lcg
+GSLDIR      = $(LCGDIR)/external/GSL/1.10/x86_64-slc6-gcc48-opt/include
 
 CXX         = g++
-CXXFLAGS    = -std=c++0x -g -fPIC -Wall -O2 $(ROOTCFLAGS) -lTMVA -lRooFit -lRooStats -lMathMore -I$(TOOLSDIR) -I$(TOOLSDIR)/analysis -I$(TOOLSDIR)/roofit -L$(TOOLSDIR)/lib
+CXXFLAGS    = -std=c++0x -g -fPIC -Wall -O2 $(ROOTCFLAGS) -lTMVA -lRooFit -lRooStats -lMathMore -I$(TOOLSDIR) -I$(TOOLSDIR)/analysis -I$(GSLDIR) -I$(TOOLSDIR)/roofit -L$(TOOLSDIR)/lib
 
 ANALYSIS    = $(wildcard $(TOOLSDIR)/analysis/*.cpp)
 ROOFIT      = $(wildcard $(TOOLSDIR)/roofit/*.cpp)
@@ -23,7 +26,7 @@ all: $(EXE)
 $(TOOLSDIR)/roofit/dic/%.cpp: $(TOOLSDIR)/roofit/%.cpp
 	@echo
 	@echo "Generating dictionary $(@) ..."
-	$(ROOTCINT) -l -f $@ -c -p $^
+	$(ROOTCINT) -l -f $@ -c -p -I$(GSLDIR) $^
 
 $(TOOLSDIR)/roofit/lib/%.o: $(TOOLSDIR)/roofit/dic/%.cpp
 	@echo
