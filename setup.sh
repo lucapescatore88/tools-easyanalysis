@@ -14,5 +14,7 @@ echo
 echo "TOOLS  $TOOLSSYS"
 echo "LCGDIR $LCGDIR"
 echo
-#printenv
+if [ "$1" = "print" ]; then
+    printenv
+fi
 echo
