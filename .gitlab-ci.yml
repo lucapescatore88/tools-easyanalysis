@@ -6,3 +6,11 @@ build:
     - source /cvmfs/lhcb.cern.ch/group_login.sh --no-userarea
     - source setup.sh
     - lb-run Urania/v6r1 make
+
+build2:
+  tags:
+    - cvmfs
+  script:
+    - source ./scripts/setup.sh
+    - make print
+    - make
