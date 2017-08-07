@@ -2,7 +2,9 @@
 
 shopt -s expand_aliases
 
-export REPOSYS="$( cd . "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ ! -n "${REPOSYS+x}" ]; then
+    export REPOSYS="$( cd . "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+fi
 
 if [ ! -n "${TOOLSSYS+x}" ]; then
     export TOOLSSYS=$REPOSYS

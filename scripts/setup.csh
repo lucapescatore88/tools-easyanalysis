@@ -1,9 +1,9 @@
 #!/bin/tcsh
 
 set EXE = `echo $0 | sed s:"-"::`
-setenv REPOSYS `readlink -f "$EXE"`
+if ( ! ($?REPOSYS) ) setenv REPOSYS `readlink -f "$EXE"`
 set EXE = `echo $EXE | sed s:"."::`
-setenv REPOSYS `echo $REPOSYS | sed s:"$EXE"::`
+if ( ! ($?REPOSYS) ) setenv REPOSYS `echo $REPOSYS | sed s:"$EXE"::`
 
 if ( ! ($?TOOLSSYS) ) setenv TOOLSSYS $REPOSYS
 #if ( ! ($?CPLUS_INCLUDE_PATH) ) setenv CPLUS_INCLUDE_PATH
