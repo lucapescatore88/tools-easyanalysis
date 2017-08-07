@@ -3,7 +3,7 @@
 
 #include "RooAmorosoPdf.h"
 #include "RooApollonios.h"
-//#include "RooExpAndGauss.h"
+#include "RooExpAndGauss.h"
 #include "RooGeneralizedHyperbolic.h"
 #include "RooIpatia.h"
 #include "RooIpatia2.h"

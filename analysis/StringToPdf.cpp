@@ -324,10 +324,10 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
         if(typepdf_.find("Poly")!=string::npos) pdf = new RooPolynomial(namepdf,namepdf, *var, *parList);
         else pdf = new RooChebychev(namepdf,namepdf, *var, *parList);
     }
-//    else if(typepdf_.find("ExpAGauss")!=string::npos)
-//    {
-//        pdf = new RooExpAndGauss(namepdf,namepdf,*var,*p["m"],*p["s"],*p["b"]);
-//    }
+    else if(typepdf_.find("ExpAGauss")!=string::npos)
+    {
+        pdf = new RooExpAndGauss(namepdf,namepdf,*var,*p["m"],*p["s"],*p["b"]);
+    }
     else if(typepdf_.find("ExpCGauss")!=string::npos)
     {
         pdf = new RooGExpModel(namepdf,namepdf,*var,*p["s"],*p["b"]);
