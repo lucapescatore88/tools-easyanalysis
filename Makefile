@@ -74,6 +74,7 @@ print:
 	@echo
 
 clean:
+	@echo
 	@echo "Cleaning ..."
 	@rm -f $(LIBS)
 
@@ -84,5 +85,6 @@ cleanall: clean
 veryclean: cleanall
 
 purge:
+	@echo
 	@echo "Purging ..."
-	@rm -f *~ */*~
+	@rm -f *~ */*~ */*/*~
