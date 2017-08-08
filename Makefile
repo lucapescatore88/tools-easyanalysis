@@ -1,88 +1,90 @@
-TOOLSDIR    = $(TOOLSSYS)
-INCFLAGS    = -I$(TOOLSDIR) -I$(TOOLSDIR)/analysis -I$(TOOLSDIR)/roofit
+TOOLSDIR  = $(TOOLSSYS)/tools
+INCFLAGS  = -I$(TOOLSSYS) -I$(TOOLSDIR)
 
-GSLDIR      = $(GSLSYS)
-INCFLAGS    += -I$(GSLDIR)/include
+TOOLS     = $(wildcard $(TOOLSDIR)/*.cpp)
+TOOLSOBJ  = $(patsubst $(TOOLSDIR)/%.cpp, $(TOOLSDIR)/obj/%.o, $(TOOLS))
 
-ROOTCINT    = rootcint
-ROOTFLAGS   = $(shell root-config --cflags --glibs)
+ROOFITDIR = $(TOOLSSYS)/roofit
+INCFLAGS  += -I$(ROOFITDIR)
 
-CXX         = g++
-CXXFLAGS    = -g -fPIC -Wall -O2 -lTMVA -lRooFit -lRooStats -lMathMore $(ROOTFLAGS) $(INCFLAGS)
+GSLDIR    = $(GSLSYS)
+INCFLAGS  += -I$(GSLDIR)/include
 
-ANALYSIS    = $(wildcard $(TOOLSDIR)/analysis/*.cpp)
-ROOFIT      = $(wildcard $(TOOLSDIR)/roofit/*.cpp)
-TOOLS       = $(wildcard $(TOOLSDIR)/*.cpp)
+ROOTCINT  = rootcint
+ROOFIT    = $(wildcard $(ROOFITDIR)/*.cpp)
+ROOFITDIC = $(patsubst $(ROOFITDIR)/%.cpp,     $(ROOFITDIR)/dic/%.cpp, $(ROOFIT))
+ROOFITOBJ = $(patsubst $(ROOFITDIR)/dic/%.cpp, $(ROOFITDIR)/obj/%.o,   $(ROOFITDIC))
 
-ANALYSISOBJ = $(patsubst $(TOOLSDIR)/analysis/%.cpp,   $(TOOLSDIR)/analysis/lib/%.o, $(ANALYSIS))
-ROOFITDIC   = $(patsubst $(TOOLSDIR)/roofit/%.cpp,     $(TOOLSDIR)/roofit/dic/%.cpp, $(ROOFIT))
-ROOFITOBJ   = $(patsubst $(TOOLSDIR)/roofit/dic/%.cpp, $(TOOLSDIR)/roofit/lib/%.o,   $(ROOFITDIC))
-LIBS        = $(patsubst $(TOOLSDIR)/%.cpp,            $(TOOLSDIR)/lib/%.a,          $(TOOLS))
+ROOTFLAGS = $(shell root-config --cflags --glibs)
 
-MAKES       = $(ROOFITDIC) $(ROOFITOBJ) $(ANALYSISOBJ) $(TOOLSDIR)/lib/roofit.a $(TOOLSDIR)/lib/analysis.a $(LIBS)
+CXX       = g++
+CXXFLAGS  = -g -fPIC -Wall -O2 -lTMVA -lRooFit -lRooStats -lMathMore $(ROOTFLAGS) $(INCFLAGS)
+
+LIBDIR    = $(TOOLSSYS)/lib
+LIBS      = $(LIBDIR)/roofit.a $(LIBDIR)/tools.a
+
+MAKES     = $(ROOFITDIC) $(ROOFITOBJ) $(TOOLSOBJ) $(LIBS)
 
 
 all: $(MAKES)
 
-$(TOOLSDIR)/roofit/dic/%.cpp: $(TOOLSDIR)/roofit/%.cpp
+$(TOOLSDIR)/obj/%.o: $(TOOLSDIR)/%.cpp
+	@echo
+	@echo "Making $(@) ..."
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
+
+$(LIBDIR)/tools.a: $(TOOLSOBJ)
+	@echo
+	@echo "Archiving $(@) ..."
+	ar rcs $@ $^;
+
+$(ROOFITDIR)/dic/%.cpp: $(ROOFITDIR)/%.cpp
 	@echo
 	@echo "Generating dictionary $(@) ..."
 	$(ROOTCINT) -l -f $@ -c -p -I$(GSLDIR)/include $^
 
-$(TOOLSDIR)/roofit/lib/%.o: $(TOOLSDIR)/roofit/dic/%.cpp
+$(ROOFITDIR)/obj/%.o: $(ROOFITDIR)/dic/%.cpp
 	@echo
 	@echo "Making $(@) ..."
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
-$(TOOLSDIR)/analysis/lib/%.o: $(TOOLSDIR)/analysis/%.cpp
-	@echo
-	@echo "Making $(@) ..."
-	$(CXX) -c $< -o $@ $(CXXFLAGS)
-
-$(TOOLSDIR)/lib/roofit.a: $(ROOFITOBJ)
+$(LIBDIR)/roofit.a: $(ROOFITOBJ)
 	@echo
 	@echo "Archiving $(@) ..."
 	ar rcs $@ $^;
-
-$(TOOLSDIR)/lib/analysis.a: $(ANALYSISOBJ)
-	@echo
-	@echo "Archiving $(@) ..."
-	ar rcs $@ $^;
-
-$(TOOLSDIR)/lib/%.a: $(TOOLSDIR)/%.cpp $(TOOLS)
-	@echo
-	@echo "Making $(@) ..."
-	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
 print:
 	@echo
 	@echo "Sources"
-	@echo $(ROOFIT)
-	@echo $(ANALYSIS)
 	@echo $(TOOLS)
+	@echo $(ROOFIT)
 	@echo
 	@echo "Dictionaries"
 	@echo $(ROOFITDIC)
 	@echo
 	@echo "Libraries"
+	@echo $(TOOLSOBJ)
 	@echo $(ROOFITOBJ)
-	@echo $(ANALYSISOBJ)
-	@echo $(LIBS)
-	@echo $(EXE)
 	@echo
 	@echo "Flags"
 	@echo $(CXXFLAGS)
 	@echo
+	@echo "Outputs"
+	@echo $(LIBS)
+	@echo
 
 clean:
+	@echo
 	@echo "Cleaning ..."
-	@rm -f $(TOOLSDIR)/lib/*.a
+	@rm -f $(LIBS)
 
 cleanall: clean
 	@rm -f $(MAKES)
+	@rm -f @$(ROOFITDIR)/dic/*.pcm
 
 veryclean: cleanall
 
 purge:
+	@echo
 	@echo "Purging ..."
-	@rm -f *~ */*~
+	@rm -f *~ */*~ */*/*~
