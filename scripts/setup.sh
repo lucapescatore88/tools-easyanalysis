@@ -9,8 +9,8 @@ fi
 if [ ! -n "${TOOLSSYS+x}" ]; then
     export TOOLSSYS=$REPOSYS
 fi
-#if [ ! -n "${CPLUS_LIBRARY_PATH+x}" ]; then
-#    export CPLUS_LIBRARY_PATH
+#if [ ! -n "${CPLUS_INCLUDE_PATH+x}" ]; then
+#    export CPLUS_INCLUDE_PATH
 #fi
 if [ ! -n "${LD_LIBRARY_PATH+x}" ]; then
     export LD_LIBRARY_PATH
@@ -78,7 +78,7 @@ if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
     VER=$VER/$ARCH
     if [ -d $SYS/$VER ]; then
 	export GSLSYS=$SYS/$VER
-	export CPLUS_INCLUDE_PATH=$GSLSYS/include:$CPLUS_INCLUDE_PATH
+	#export CPLUS_INCLUDE_PATH=$GSLSYS/include:$CPLUS_INCLUDE_PATH
         export LD_LIBRARY_PATH=$GSLSYS/lib:$LD_LIBRARY_PATH
         export LD_INCLUDE_PATH=$GSLSYS/include:$LD_INCLUDE_PATH
 

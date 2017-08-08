@@ -88,7 +88,7 @@ if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
     set VER = $VER/$ARCH
     if ( -d $SYS/$VER ) then
 	setenv GSLSYS $SYS/$VER
-	setenv CPLUS_INCLUDE_PATH $GSLSYS/include:$CPLUS_INCLUDE_PATH
+	#setenv CPLUS_INCLUDE_PATH $GSLSYS/include:$CPLUS_INCLUDE_PATH
         setenv LD_LIBRARY_PATH $GSLSYS/lib:$LD_LIBRARY_PATH
         setenv LD_INCLUDE_PATH $GSLSYS/include:$LD_INCLUDE_PATH
 
