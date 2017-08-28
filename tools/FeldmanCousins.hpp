@@ -1,5 +1,5 @@
-#ifndef FELDMAN_COUSINS_HPP
-#define FELDMAN_COUSINS_HPP
+#ifndef MY_FELDMAN_COUSINS_HPP
+#define MY_FELDMAN_COUSINS_HPP
 
 #include <string>
 #include <sstream>
@@ -47,22 +47,22 @@
 
 using namespace RooFit;
 
-typedef bool (*FUNC_PTR)( Str2VarMap );
+// typedef bool (*FUNC_PTR)( Str2VarMap );
 typedef bool (*ISVALIDF_PTR)( RooAbsPdf * );
 typedef RooFitResult * (*FITFUNC_PTR)( RooAbsPdf *, RooDataSet *, Str2VarMap, ISVALIDF_PTR isValid, string opt, int nfree, RooArgSet *, RooAbsReal * );
 
 //vector<double> extractLimits(TGraph * gr, double central, double CL);
 
 /// \brief Default function for fitting
-/// You can set your custom one using FeldmanCousins::SetFitFunc 
+/// You can set your custom one using myFeldmanCousins::SetFitFunc 
 RooFitResult * defFit(RooAbsPdf * pdf, RooDataSet * data, Str2VarMap p, ISVALIDF_PTR isValid = NULL, string opt = "", int nfree = -1, RooArgSet * cons = NULL, RooAbsReal * mynll = NULL);
 
 
-/** \class FeldmanCousins
+/** \class myFeldmanCousins
  *  \brief Implements the extraction of a pvalues grid usig the Feldman-Cousins plug-in method
  *  */
 
-class FeldmanCousins
+class myFeldmanCousins
 {
 	TString name;
 	vector<RooDataSet *> datas;
@@ -107,7 +107,7 @@ class FeldmanCousins
 	void InitializeAndFit();
 
 	/// \brief Construtor for multiple samples and PoIs (most general)
-	FeldmanCousins(TString _name, vector<TString> _categories, vector <RooDataSet *> _datas, vector <RooAbsPdf *> _pdfs, RooRealVar * _obs, Str2VarMap _PoIs, TString _weight = ""):
+	myFeldmanCousins(TString _name, vector<TString> _categories, vector <RooDataSet *> _datas, vector <RooAbsPdf *> _pdfs, RooRealVar * _obs, Str2VarMap _PoIs, TString _weight = ""):
 		name(_name), PoIs(_PoIs), weight(_weight), npoints(11), nexp(100), nfree(-1), cons(NULL), origPars(NULL), nll(NULL), isValid(NULL), dataratio(-1)
 	{
 		obs = new RooArgSet(*_obs);
@@ -128,7 +128,7 @@ class FeldmanCousins
 	};
 
 	/// \brief Construtor for multiple samples and just one PoI
-	FeldmanCousins(TString _name, vector<TString> _categories, vector <RooDataSet *> _datas, vector <RooAbsPdf *> _pdfs, RooRealVar * _obs, RooRealVar * _PoI, TString _weight = ""):
+	myFeldmanCousins(TString _name, vector<TString> _categories, vector <RooDataSet *> _datas, vector <RooAbsPdf *> _pdfs, RooRealVar * _obs, RooRealVar * _PoI, TString _weight = ""):
 		name(_name), PoI(_PoI), PoI2(NULL), weight(_weight), npoints(11), nexp(100), nfree(-1), cons(NULL), origPars(NULL), nll(NULL), isValid(NULL), dataratio(-1)
 	{
 		obs = new RooArgSet(*_obs);
@@ -141,7 +141,7 @@ class FeldmanCousins
 	};
 
 	/// \brief Construtor for just one sample and one PoI
-	FeldmanCousins(TString _name, RooDataSet * _data, RooAbsPdf * _pdf, RooRealVar * _obs, RooRealVar * _PoI, TString _weight = ""):
+	myFeldmanCousins(TString _name, RooDataSet * _data, RooAbsPdf * _pdf, RooRealVar * _obs, RooRealVar * _PoI, TString _weight = ""):
 		name(_name), PoI(_PoI), PoI2(NULL), weight(_weight), npoints(11), nexp(100), nfree(-1), cons(NULL), origPars(NULL), nll(NULL), isValid(NULL), dataratio(-1)
 	{
 		obs = new RooArgSet(*_obs);
