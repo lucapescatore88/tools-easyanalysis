@@ -16,11 +16,6 @@ ROOFIT    = $(wildcard $(ROOFITDIR)/*.cpp)
 ROOFITDIC = $(patsubst $(ROOFITDIR)/%.cpp,     $(ROOFITDIR)/dic/%.cpp, $(ROOFIT))
 ROOFITOBJ = $(patsubst $(ROOFITDIR)/dic/%.cpp, $(ROOFITDIR)/obj/%.o,   $(ROOFITDIC))
 
-PACKAGE = tools
-CINTFILE  = $(TOOLSDIR)/$(PACKAGE)_Dict.cc
-CINTOBJ   = $(TOOLSDIR)/$(PACKAGE)_Dict.o
-LIBFILE   = $(LIBDIR)/lib$(PACKAGE).a
-SHLIBFILE = $(LIBDIR)/lib$(PACKAGE).so
 
 ROOTFLAGS = $(shell root-config --cflags --glibs)
 
@@ -29,6 +24,12 @@ CXXFLAGS  = -g -fPIC -Wall -O2 -lTMVA -lRooFit -lRooStats -lMathMore $(ROOTFLAGS
 
 LIBDIR    = $(TOOLSSYS)/lib
 LIBS      = $(LIBDIR)/roofit.a $(LIBDIR)/tools.a
+
+PACKAGE = tools
+CINTFILE  = $(TOOLSDIR)/$(PACKAGE)_Dict.cc
+CINTOBJ   = $(TOOLSDIR)/$(PACKAGE)_Dict.o
+LIBFILE   = $(LIBDIR)/lib$(PACKAGE).a
+SHLIBFILE = $(LIBDIR)/lib$(PACKAGE).so
 
 MAKES     = $(ROOFITDIC) $(ROOFITOBJ) $(TOOLSOBJ) $(LIBS) $(SHLIBFILE)
 
