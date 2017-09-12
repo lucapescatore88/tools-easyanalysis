@@ -14,7 +14,7 @@ RooFitResult * defFit(RooAbsPdf * pdf, RooDataSet * data, Str2VarMap p, ISVALIDF
 	return pdf->fitTo(*data,PrintLevel(-1),Save());
 }
 
-void FeldmanCousins::DrawLogL()
+void myFeldmanCousins::DrawLogL()
 {
 	TCanvas * c = new TCanvas();
 	RooAbsReal * nll = combPdf->createNLL(*combData,RooFit::CloneData(false));
@@ -33,7 +33,7 @@ void FeldmanCousins::DrawLogL()
 	c->Print("LogL_vs_"+(TString)PoI2->GetName()+"_"+name+".pdf");
 }
 
-void FeldmanCousins::Initialize()
+void myFeldmanCousins::Initialize()
 {
 	if(categories.size()==0) { combData = datas[0]; combPdf = pdfs[0]; }
 	else
@@ -62,7 +62,7 @@ void FeldmanCousins::Initialize()
 }
 
 
-void FeldmanCousins::InitializeAndFit()
+void myFeldmanCousins::InitializeAndFit()
 {
 	Initialize();
 
@@ -78,7 +78,7 @@ void FeldmanCousins::InitializeAndFit()
 
 
 
-double FeldmanCousins::generateToys(double testVal, double testVal2, TH1 * h, string opt )
+double myFeldmanCousins::generateToys(double testVal, double testVal2, TH1 * h, string opt )
 {
 	double npass = 0, nfailed = 0;
 	for(unsigned e = 0; e < nexp; e++)
@@ -131,7 +131,7 @@ double FeldmanCousins::generateToys(double testVal, double testVal2, TH1 * h, st
 }
 
 
-vector< vector < double > > FeldmanCousins::ExtractLimits(vector< vector < double > > points, RooArgSet * _origPars, TGraph ** point, string opt, ISVALIDF_PTR g_isValid, double nll_val)
+vector< vector < double > > myFeldmanCousins::ExtractLimits(vector< vector < double > > points, RooArgSet * _origPars, TGraph ** point, string opt, ISVALIDF_PTR g_isValid, double nll_val)
 {
 	isValid = g_isValid;
 	if(_origPars) origPars = _origPars;
@@ -272,7 +272,7 @@ vector<double> extractLimits(TGraph * gr, double CL)
 
 
 
-TH2F * FeldmanCousins::ExtractLimits(double min, double max, double min2, double max2, RooArgSet *origPars, FUNC_PTR isValid, TGraph * point, string opt )
+TH2F * myFeldmanCousins::ExtractLimits(double min, double max, double min2, double max2, RooArgSet *origPars, FUNC_PTR isValid, TGraph * point, string opt )
 {
 	TCanvas * c = new TCanvas();
 
@@ -390,7 +390,7 @@ TH2F * FeldmanCousins::ExtractLimits(double min, double max, double min2, double
 
 
 
-vector <double> FeldmanCousins::ExtractLimits(double min, double max, RooArgSet *origPars, FUNC_PTR isValid, string opt)
+vector <double> myFeldmanCousins::ExtractLimits(double min, double max, RooArgSet *origPars, FUNC_PTR isValid, string opt)
 {
 	TCanvas * c = new TCanvas();
 	if(!origPars) origPars = copyFreePars(combPdf,*obs);
@@ -450,7 +450,7 @@ vector <double> FeldmanCousins::ExtractLimits(double min, double max, RooArgSet 
 }
 
 
-TH2F * FeldmanCousins::ExtractLimits(Str2VarMap params, RooArgSet *origPars, double min, double max, double min2, double max2, FUNC_PTR isValid, TGraph * point, string opt )
+TH2F * myFeldmanCousins::ExtractLimits(Str2VarMap params, RooArgSet *origPars, double min, double max, double min2, double max2, FUNC_PTR isValid, TGraph * point, string opt )
 {
 	TCanvas * c = new TCanvas();
 
@@ -555,7 +555,7 @@ TH2F * FeldmanCousins::ExtractLimits(Str2VarMap params, RooArgSet *origPars, dou
 
 
 
-vector <double> FeldmanCousins::ExtractLimits(Str2VarMap params, RooArgSet *origPars, double min, double max, FUNC_PTR isValid, string opt)
+vector <double> myFeldmanCousins::ExtractLimits(Str2VarMap params, RooArgSet *origPars, double min, double max, FUNC_PTR isValid, string opt)
 {
 	TCanvas * c = new TCanvas();
 	if(origPars) fixParam(combPdf,obs,origPars);

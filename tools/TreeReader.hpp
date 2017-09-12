@@ -299,7 +299,7 @@ class TreeReader {
 
 	/// \brief Constructor with the name of a tree (then you can add many filesusing AddFile(namefile) )
 
-	TreeReader(const char *treeName = NULL):
+	TreeReader(const char *treeName):
 		fChain(new TChain()), nGets(0), continueSorting(true), init(false), selected(false)
 	{
 		if(treeName) fChain->SetName(treeName);
