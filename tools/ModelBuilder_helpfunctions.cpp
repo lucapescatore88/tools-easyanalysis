@@ -561,8 +561,8 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
     if(opt.find("-t")==string::npos) frame->SetTitle("");
     else
     {
-        unsigned pos1 = opt.find("-t");
-        unsigned pos2 = opt.find("-",pos1+1);
+        size_t pos1 = opt.find("-t");
+        size_t pos2 = opt.find("-",pos1+1);
         if(pos2==string::npos) frame->SetTitle((opt.substr(pos1+2,string::npos)).c_str());
         else if((pos2-pos1)>1) frame->SetTitle((opt.substr(pos1+2,pos2-pos1-2)).c_str());
     }

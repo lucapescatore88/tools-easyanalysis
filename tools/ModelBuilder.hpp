@@ -214,18 +214,20 @@ class ModelBuilder {
 
     ~ModelBuilder()
     {
-        delete m_var;
+        /*delete m_var;
         delete m_model;
         delete m_sig;
         delete m_bkg;
         delete m_nsig;
         delete m_nbkg;
 
+        /*
         for(unsigned i = 0; i < m_bkg_components.size(); i++)
         {
             delete m_bkg_components[i];
             delete m_bkg_fractions[i];
         }
+        */
     }
 
 
@@ -381,6 +383,11 @@ class ModelBuilder {
      * The only difference is the nsig, is set as signal yield. If given as a double it can be only > 1 (starting value)
      * or < -1 (starting value fixed in the fit).
      * */
+
+    RooAbsPdf * SetSignal(char * _sig, double _nsig, string opt, Str2VarMap myvars = Str2VarMap(), string weight = "")
+    {
+        return SetSignal(_sig, _nsig, opt, myvars, weight);
+    }
 
     template <class T> RooAbsPdf * SetSignal(T * _sig, RooAbsReal * _nsig, string opt = "", Str2VarMap myvars = Str2VarMap(), string weight = "")
     {

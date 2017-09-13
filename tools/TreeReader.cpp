@@ -290,7 +290,7 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
     Long64_t nTot_ = nTot;
     if (frac == 0)
     {
-        cut == "";
+        cut = "";
         nTot = 0;
     }
     if ((frac > 0) && (frac < 1))    nTot *= frac;
