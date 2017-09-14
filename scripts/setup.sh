@@ -60,6 +60,7 @@ if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
     if [ -d $SYS/$VER ]; then
 	export PYTHONSYS=$SYS/$VER
 	export LD_LIBRARY_PATH=$PYTHONSYS/lib:$LD_LIBRARY_PATH
+	export PYTHONPATH=$TOOLSSYS/python:$PYTHONPATH
 	export PYTHONPATH=/usr/lib64/python2.6/site-packages:$PYTHONPATH
 	export PYTHONPATH=/usr/lib/python2.6/site-packages:$PYTHONPATH
 

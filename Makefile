@@ -1,8 +1,10 @@
-TOOLSDIR  = $(TOOLSSYS)/tools
+NAME      = tools
+
+TOOLSDIR  = $(TOOLSSYS)/$(NAME)
 INCFLAGS  = -I$(TOOLSSYS) -I$(TOOLSDIR)
 
 TOOLS     = $(wildcard $(TOOLSDIR)/*.cpp)
-TOOLSHPP  = $(wildcard $(TOOLSDIR)/*.hpp)
+TOOLSINC  = $(wildcard $(TOOLSDIR)/*.hpp)
 TOOLSOBJ  = $(patsubst $(TOOLSDIR)/%.cpp, $(TOOLSDIR)/obj/%.o, $(TOOLS))
 
 ROOFITDIR = $(TOOLSSYS)/roofit
@@ -13,6 +15,7 @@ INCFLAGS  += -I$(GSLDIR)/include
 
 ROOTCINT  = rootcint
 ROOFIT    = $(wildcard $(ROOFITDIR)/*.cpp)
+ROOFITINC = $(wildcard $(ROOFITDIR)/*.hpp)
 ROOFITDIC = $(patsubst $(ROOFITDIR)/%.cpp,     $(ROOFITDIR)/dic/%.cpp, $(ROOFIT))
 ROOFITOBJ = $(patsubst $(ROOFITDIR)/dic/%.cpp, $(ROOFITDIR)/obj/%.o,   $(ROOFITDIC))
 
@@ -23,15 +26,15 @@ CXX       = g++
 CXXFLAGS  = -g -fPIC -Wall -O2 -lTMVA -lRooFit -lRooStats -lMathMore $(ROOTFLAGS) $(INCFLAGS)
 
 LIBDIR    = $(TOOLSSYS)/lib
-LIBS      = $(LIBDIR)/roofit.a $(LIBDIR)/tools.a
+LIBS      = $(LIBDIR)/roofit.a $(LIBDIR)/$(NAME).a
 
-PACKAGE = tools
-CINTFILE  = $(TOOLSDIR)/$(PACKAGE)_Dict.cc
-CINTOBJ   = $(TOOLSDIR)/$(PACKAGE)_Dict.o
-LIBFILE   = $(LIBDIR)/lib$(PACKAGE).a
-SHLIBFILE = $(LIBDIR)/lib$(PACKAGE).so
+ROOTCLING = rootcling
+CINTFILE  = $(TOOLSDIR)/$(NAME)_Dict.cc
+CINTOBJ   = $(TOOLSDIR)/$(NAME)_Dict.o
+#LIBFILE   = $(LIBDIR)/lib$(NAME).a
+SHLIB     = $(LIBDIR)/lib$(NAME).so
 
-MAKES     = $(ROOFITDIC) $(ROOFITOBJ) $(TOOLSOBJ) $(LIBS) $(SHLIBFILE)
+MAKES     = $(ROOFITDIC) $(ROOFITOBJ) $(TOOLSOBJ) $(LIBS) $(SHLIB)
 
 
 all: $(MAKES)
@@ -61,17 +64,19 @@ $(LIBDIR)/roofit.a: $(ROOFITOBJ)
 	@echo "Archiving $(@) ..."
 	ar rcs $@ $^;
 
-$(CINTOBJ): $(TOOLS) $(TOOLHPP) LinkDef.h
+$(CINTOBJ): $(TOOLS) $(TOOLINC) LinkDef.h
 	@echo
 	@echo "Making Root dictionary $(@) ..."
-	rootcling -rootbuild -f $(CINTFILE) -s $(SHLIBFILE) -rmf lib$(PACKAGE).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSHPP) tools.hpp LinkDef.h
-	@echo "Compiling $(CINTFILE)"
+	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf lib$(PACKAGE).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSINC) LinkDef.h
+#	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf lib$(PACKAGE).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSINC) $(ROOFIT) $(ROOFITINC) LinkDef.h
+	@echo
+	@echo "Compiling $(CINTFILE) ..."
 	$(CXX) -c $(CXXFLAGS) -fPIC -o $(CINTOBJ) $(CINTFILE)
 
-$(SHLIBFILE): $(CINTOBJ)
+$(SHLIB): $(CINTOBJ)
 	@echo
-	@echo "Making shared library"
-	$(CXX) -shared $(CXXFLAGS) $(CINTOBJ) -o $(SHLIBFILE)
+	@echo "Making shared library $(CINTOBJ) ..."
+	$(CXX) -shared $(CXXFLAGS) $(CINTOBJ) -o $(SHLIB)
 
 print:
 	@echo
@@ -91,21 +96,20 @@ print:
 	@echo
 	@echo "Outputs"
 	@echo $(LIBS)
+	@echo $(SHLIB)
 	@echo
 
 clean:
-	@echo
 	@echo "Cleaning ..."
-	@rm -f $(LIBS) $(CINTFILE) $(CINTOBJ) $(SHLIBFILE)
+	@rm -f $(LIBS) $(CINTFILE) $(CINTOBJ) $(SHLIB)
 
 cleanall: clean
-	@rm -f $(LIBS) $(CINTFILE) $(CINTOBJ) $(SHLIBFILE)
 	@rm -f $(MAKES)
-	@rm -f @$(ROOFITDIR)/dic/*.pcm
+	@rm -f $(ROOFITDIR)/dic/*.pcm
+	@rm -f $(LIBDIR)/*.pcm
 
 veryclean: cleanall
 
 purge:
-	@echo
 	@echo "Purging ..."
 	@rm -f *~ */*~ */*/*~
