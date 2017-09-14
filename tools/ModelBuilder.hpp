@@ -214,14 +214,14 @@ class ModelBuilder {
 
     ~ModelBuilder()
     {
-        /*delete m_var;
+        /*
+        delete m_var;
         delete m_model;
         delete m_sig;
         delete m_bkg;
         delete m_nsig;
         delete m_nbkg;
 
-        /*
         for(unsigned i = 0; i < m_bkg_components.size(); i++)
         {
             delete m_bkg_components[i];

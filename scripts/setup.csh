@@ -70,6 +70,7 @@ if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
     if ( -d $SYS/$VER ) then
 	setenv PYTHONSYS $SYS/$VER
 	setenv LD_LIBRARY_PATH $PYTHONSYS/lib:$LD_LIBRARY_PATH
+        setenv PYTHONPATH $TOOLSSYS/python:$PYTHONPATH
 	setenv PYTHONPATH /usr/lib64/python2.6/site-packages:$PYTHONPATH
 	setenv PYTHONPATH /usr/lib/python2.6/site-packages:$PYTHONPATH
 
