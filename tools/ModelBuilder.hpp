@@ -214,7 +214,8 @@ class ModelBuilder {
 
     ~ModelBuilder()
     {
-        /*delete m_var;
+        /*
+        delete m_var;
         delete m_model;
         delete m_sig;
         delete m_bkg;
