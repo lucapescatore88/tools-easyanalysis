@@ -202,9 +202,9 @@ class Analysis : public ModelBuilder {
 
 	~Analysis()
 	{
-		if(m_dataReader) delete m_dataReader;
-		if(m_cuts) delete m_cuts;
-		if(m_reducedTree) delete m_reducedTree;
+		//if(m_dataReader) delete m_dataReader;
+		//if(m_cuts) delete m_cuts;
+		//if(m_reducedTree) delete m_reducedTree;
         //if(m_dataHist) delete m_dataHist;
 	};
 

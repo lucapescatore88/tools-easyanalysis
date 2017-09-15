@@ -796,6 +796,7 @@ TTree * Analysis::Generate(int nevt, string option)
         RooArgSet varList("varList_"+m_name);
         for(auto vv : m_vars) varList.add(*vv);
 
+        /*
         if(option.find("-useroofit")==string::npos)
         {   
             TTree * newTree = generate(&varList,m_model,nevt,option);
@@ -806,6 +807,7 @@ TTree * Analysis::Generate(int nevt, string option)
         }
         else
         {
+        */
             cout << "Generating toys with roofit function" << endl;
             size_t posseed = option.find("-seed");
             if(posseed!=string::npos)
@@ -817,8 +819,9 @@ TTree * Analysis::Generate(int nevt, string option)
             if(option.find("-genextended")!=string::npos) ext = Extended(); 
             m_data = m_model->generate(varList,nevt,ext);
             cout << m_name << ": " << " Generated events = " << m_data->numEntries() << endl;
+            m_data->Print();
             return NULL;
-        }
+        //}
     }
     else return NULL;
 }
@@ -834,6 +837,7 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
         RooArgSet varList("varList_"+m_name);
         for(auto vv : m_vars) varList.add(*vv);
 
+        /*
         if(option.find("-useroofit")==string::npos) {
 
             TTree * newTree = generate(&varList,m_sig,nsigevt,m_bkg,nbkgevt,option);
@@ -844,6 +848,7 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
         }
         else
         {
+        */
             cout << "Generating toys with roofit function" << endl;
             size_t posseed = option.find("-seed");
             if(posseed!=string::npos)
@@ -866,7 +871,7 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
             cout << m_name << ": " << " Generated events = " << m_data->numEntries() << endl;
 
             return NULL; 
-        }
+        //}
     }
     else return NULL;
 }
