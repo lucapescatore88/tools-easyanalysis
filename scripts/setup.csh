@@ -64,19 +64,43 @@ endif
 
 # PYTHON
 set SYS = $LCGDIR/releases/Python
+set SYSPYTOOLS = $LCGDIR/releases/pytools
+set SYSPYANALYSIS = $LCGDIR/releases/pyanalysis
 if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
     set VER = 2.7.6-31787
-    set VER = $VER/$ARCH
+    setenv PYTHONSYS $SYS/$VER
     if ( -d $SYS/$VER ) then
-	setenv PYTHONSYS $SYS/$VER
+	setenv PATH $PYTHONSYS/bin:$PATH
 	setenv LD_LIBRARY_PATH $PYTHONSYS/lib:$LD_LIBRARY_PATH
-	setenv PYTHONPATH /usr/lib64/python2.6/site-packages:$PYTHONPATH
-	setenv PYTHONPATH /usr/lib/python2.6/site-packages:$PYTHONPATH
-
 	echo "Configuring PYTHON from $PYTHONSYS"
     else
 	echo
 	echo "PYTHON $PYTHONSYS not available"
+	echo
+    endif
+endif
+if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYSPYTOOLS"` == 0 ) then
+    set VER = 2.0-93db0
+    setenv PYTOOLSSYS $SYSPYTOOLS/$VER/$ARCH
+    if ( -d $PYTOOLSSYS ) then
+	setenv PATH $PYTOOLSSYS/bin:$PATH
+	setenv PYTHONPATH $PYTOOLSSYS/lib/python2.7/site-packages/:$PYTHONPATH
+	echo "Configuring PYTHON TOOLS from $PYTOOLSSYS"
+    else
+	echo
+	echo "PYTHON TOOLS $PYTOOLSSYS not available"
+	echo
+    endif
+endif
+if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYSPYANALYSIS"` == 0 ) then
+    set VER = 2.0-32412
+    setenv PYANALYSISSYS $SYSPYANALYSIS/$VER/$ARCH
+    if ( -d $PYANALYSISSYS ) then	
+	setenv PYTHONPATH $PYANALYSISSYS/lib/python2.7/site-packages/:$PYTHONPATH
+	echo "Configuring PYTHON ANALYSIS from $PYANALYSISSYS"
+    else
+	echo
+	echo "PYTHON ANALYSIS $PYANALYSISSYS not available"
 	echo
     endif
 endif
