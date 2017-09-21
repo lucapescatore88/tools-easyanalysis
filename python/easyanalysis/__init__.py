@@ -10,7 +10,6 @@ __importables__ = [
     'TreeReader',
     'CutOptimizer',
     'ModelBuilder',
-    'CutOptimizer',
     'EffComp',
     'CutFlow',
     'Scaler',
