@@ -54,19 +54,43 @@ fi
 
 # PYTHON
 SYS=$LCGDIR/releases/Python
+SYSPYTOOLS=$LCGDIR/releases/pytools
+SYSPYANALYSIS=$LCGDIR/releases/pyanalysis
 if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-    VER=2.7.6-31787
-    VER=$VER/$ARCH
-    if [ -d $SYS/$VER ]; then
-	export PYTHONSYS=$SYS/$VER
+    VER=2.7.10-8dd46
+    export PYTHONSYS=$SYS/$VER/$ARCH
+    if [ -d $PYTHONSYS ]; then
+	export PATH=$PYTHONSYS/bin:$PATH
 	export LD_LIBRARY_PATH=$PYTHONSYS/lib:$LD_LIBRARY_PATH
-	export PYTHONPATH=/usr/lib64/python2.6/site-packages:$PYTHONPATH
-	export PYTHONPATH=/usr/lib/python2.6/site-packages:$PYTHONPATH
-
 	echo "Configuring PYTHON from $PYTHONSYS"
     else
 	echo
 	echo "PYTHON $PYTHONSYS not available"
+	echo
+    fi
+fi
+if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYSPYTOOLS"` == 0 ]; then
+    VER=2.0-93db0
+    export PYTOOLSSYS=$SYSPYTOOLS/$VER/$ARCH
+    if [ -d $PYTOOLSSYS ]; then
+	export PATH=$PYTOOLSSYS/bin:$PATH
+	export PYTHONPATH=$PYTOOLSSYS/lib/python2.7/site-packages/:$PYTHONPATH
+	echo "Configuring PYTHON TOOLS from $PYTOOLSSYS"
+    else
+	echo
+	echo "PYTHON TOOLS $PYTOOLSSYS not available"
+	echo
+    fi
+fi
+if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYSPYANALYSIS"` == 0 ]; then
+    VER=2.0-32412
+    export PYANALYSISSYS=$SYSPYANALYSIS/$VER/$ARCH
+    if [ -d $PYANALYSISSYS ]; then	
+	export PYTHONPATH=$PYANALYSISSYS/lib/python2.7/site-packages/:$PYTHONPATH
+	echo "Configuring PYTHON ANALYSIS from $PYANALYSISSYS"
+    else
+	echo
+	echo "PYTHON ANALYSIS $PYANALYSISSYS not available"
 	echo
     fi
 fi
