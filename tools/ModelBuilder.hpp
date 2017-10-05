@@ -494,7 +494,7 @@ class ModelBuilder {
     void SetVariable(RooRealVar * _var) 
     {
         _var->SetTitle( ((TString)_var->GetTitle()).ReplaceAll("__var__","")+"__var__" );
-        _var->SetName( ((TString)_var->GetName()).ReplaceAll("__var__","")+"__var__" );
+        //_var->SetName( ((TString)_var->GetName()).ReplaceAll("__var__","")+"__var__" );
         m_var = _var;
         m_tmpvar = new RooRealVar(*_var);
     }
