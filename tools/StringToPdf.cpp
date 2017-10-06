@@ -53,16 +53,19 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
 }
 
 
-TString getPrintParName(TString namepdf_)
+TString getPrintParName(TString namepdf_, string opt)
 {
     namepdf_ = namepdf_.ReplaceAll("__noprint__",""); 
     size_t pos_ = ((string)namepdf_).find("_");
-    TString namepar = (TString)(((string)namepdf_).substr(0,pos_));
+    TString namepdf = (TString)(((string)namepdf_).substr(0,pos_));
     TString nameana = (TString)((string)namepdf_).substr(pos_+1,string::npos);
     size_t pos__ = ((string)nameana).find("__");
     nameana = (TString)((string)nameana).substr(0,pos__);
-    TString pstrname = "_{"+namepar+"}^{"+nameana+"}";
-    if(((string)namepdf_).find("sig")!=string::npos) pstrname = "^{"+nameana+"}";
+    
+    if(((string)namepdf_).find("sig")!=string::npos) return "^{"+nameana+"}";
+
+    TString pstrname = "_{"+namepdf+"}";
+    if(opt.find("-anaparlab")!=string::npos) pstrname += "^{"+nameana+"}";
     return pstrname;
 }
 
@@ -76,7 +79,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     double sc = val->getVal()/5000.;
     namepdf_ = namepdf_.ReplaceAll("__noprint__","");
     if(title == "") title = namepdf_;
-    TString pstrname = getPrintParName(title);
+    TString pstrname = getPrintParName(title,opt);
     
     stval_list["m"]     = new RooRealVar("m_"+namepdf_,  "m"+pstrname,        val->getVal(),val->getMin(),val->getMax());
     stval_list["mg"]    = new RooRealVar("mg_"+namepdf_, "m_{gauss}"+pstrname,val->getVal(),val->getVal()*0.5,val->getVal()*2.);
@@ -314,7 +317,7 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
             maxs.push_back(max);
         }
         RooArgList * parList = new RooArgList("parList");
-        TString pstrname = getPrintParName(title);
+        TString pstrname = getPrintParName(title, opt);
         for(int i = 0; i < npar; i++)
         {
             RooRealVar * v = new RooRealVar(Form("c%i_",i)+namepdf_,Form("c_%i"+pstrname,i),pvals[i],mins[i],maxs[i]);
