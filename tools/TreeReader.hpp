@@ -280,6 +280,7 @@ class TreeReader {
 	TreeReader(TTree *tree):
 		nGets(0), continueSorting(true), init(true), selected(false)
 	{
+        if(!tree) { cout << "Attention your TTree is NULL" << endl; return; }
 		fChain = (TChain*) tree;
 		SetPrintFileLevel("");
 		Initialize();
@@ -291,6 +292,7 @@ class TreeReader {
 	TreeReader(TChain *chain):
 		nGets(0), continueSorting(true), init(true), selected(false)
 	{
+        if(!chain) { cout << "Attention your TChain is NULL" << endl; return; }
 		fChain = chain;
 		SetPrintFileLevel("");
 		Initialize();

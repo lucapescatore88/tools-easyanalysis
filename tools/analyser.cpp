@@ -94,7 +94,7 @@ void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
     if (option.find("-docuts") != string::npos)
         m_reducedTree = (TTree*) m_dataReader->CopyTree(doCuts, frac, (string) ("reduced_" + m_name));
     else if (!m_reducedTree)
-        m_reducedTree = (TTree*) m_dataReader->GetChain()->Clone("reduced_" + m_name);
+        m_reducedTree = (TTree*) m_dataReader->GetChain();//->Clone("reduced_" + m_name);
 
     if( scale!=1 && !m_dataReader->HasVar( ((string)m_var->GetName()+"_unscaled").c_str() ) )
     {
@@ -136,8 +136,7 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
             varList.add(*m_weight);
             m_data = new RooDataSet("data_" + m_name, "data" + m_name, varList, Import(*m_reducedTree), WeightVar(m_weight->GetName()));
         }
-        //else m_data = new RooDataSet("data_" + m_name, "data" + m_name, m_reducedTree, varList);
-	else m_data = new RooDataSet("data_" + m_name, "data" + m_name, varList, Import(*m_reducedTree));
+        else m_data = new RooDataSet("data_" + m_name, "data" + m_name, varList, Import(*m_reducedTree));
 
         CreateHisto("-usedataset");
 

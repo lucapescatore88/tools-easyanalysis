@@ -108,96 +108,68 @@ class Analysis : public ModelBuilder {
 
 	public:
 
-	Analysis( TString _name, RooRealVar * _var, RooAbsPdf * pdf = NULL, int ngen = 1000, string opt = "-subtree"):
-		ModelBuilder(_name,_var), m_cuts(NULL), m_chi2(new double[2]), m_init(false), m_unit(""),
+    Analysis( TString _name, TString _title, RooRealVar * _var, string opt = "-subtree", string _w = "", TCut * _cuts = NULL):
+		ModelBuilder(_name,_var,_title), m_cuts(_cuts), m_chi2(new double[2]), m_init(false), m_unit(""),
 		m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
 		m_dataReader(NULL), m_reducedTree(NULL), m_dataHist(NULL), scale(1)
 	{
-		m_constr = new RooArgSet("constraints_"+m_name);
+        m_constr = new RooArgSet("constraints_"+m_name);
+        if(!m_var) SetVariable(new RooRealVar("x","",0));
+        m_datavars.push_back(m_var);
+        if(_w != "") SetWeight( (TString)_w );
+    };
 
-		if(pdf)
+	Analysis( TString _name, RooRealVar * _var, RooAbsPdf * _pdf = NULL, int _ngen = 1000, string _opt = "-subtree"):
+		Analysis(_name,_name,_var,_opt)
+	{
+		if(_pdf)
 		{
-			SetModel(pdf);
-			Generate(ngen,opt);
+			SetModel(_pdf);
+			Generate(_ngen,_opt);
 			m_init = true;
 			ForceValid();
 		}
 	};	
 
 	Analysis( TString _name, TString _title, TreeReader * reader, TCut * _cuts, RooRealVar * _var = NULL, string _w = ""):
-		ModelBuilder(_name,_var,_title), m_cuts(_cuts), m_chi2(new double[2]), m_init(false), m_unit(""),
-		m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
-		m_dataReader(reader), m_reducedTree(NULL), m_dataHist(NULL), scale(1)
-	{
-		if(!m_var) SetVariable(new RooRealVar("x","",0));
-		m_datavars.push_back(m_var);
-		m_constr = new RooArgSet("constraints_"+m_name);
-		if(_w != "") SetWeight( (TString)_w );
-        
-		if(!reader) cout << "Attention!! Your TreeReader is NULL, this is going to break..." << endl;
-		if(!reader->isValid()) reader->Initialize();
-		//m_reducedTree = (TTree *)reader->GetChain()->Clone("reduced_"+m_name);
+		Analysis(_name,_title,_var,"-subtree",_w,_cuts)
+	{   
+        m_dataReader = reader;
+		if(!m_dataReader) cout << "Attention!! Your TreeReader is NULL, this is going to break..." << endl;
+		if(!m_dataReader->isValid()) m_dataReader->Initialize();
+		m_reducedTree = (TTree *)m_dataReader->GetChain();
 	};
 
 	Analysis( TString _name, TString _title, TTree * tree, TCut * _cuts, RooRealVar * _var = NULL, string _w = ""):
-		ModelBuilder(_name,_var,_title), m_cuts(_cuts), m_chi2(new double[2]), m_init(false), m_unit(""),
-		m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
-		m_dataReader(NULL), m_reducedTree(tree), m_dataHist(NULL), scale(1)
-	{
-		if(!m_var) SetVariable(new RooRealVar("x","",0));
-		m_datavars.push_back(m_var);
-		m_constr = new RooArgSet("constraints_"+m_name);
-		if(_w != "") SetWeight( (TString)_w );
-        
-		if(!tree) cout << "Attention!! Your Tree is NULL, this is going to break..." << endl;
-	        m_dataReader = new TreeReader(tree);
-		if(!m_dataReader->isValid()) m_dataReader->Initialize();
-		//m_reducedTree = (TTree *)reader->GetChain()->Clone("reduced_"+m_name);
-	};
+	    Analysis( _name, _title, new TreeReader(tree), _cuts, _var, _w)
+	{};
+
+    Analysis( TString _name, TString _title, TChain * tchain, TCut * _cuts, RooRealVar * _var = NULL, string _w = ""):
+		Analysis( _name, _title, new TreeReader(tchain), _cuts, _var, _w)
+    {};
 
 	Analysis( TString _name, TString _title, string treename, string filename, RooRealVar * _var = NULL, TCut * _cuts = NULL, string _w = ""):
-		ModelBuilder(_name,_var,_title), m_cuts(_cuts), m_chi2(new double[2]), m_init(false), m_unit(""),
-		m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
-		m_reducedTree(NULL), m_dataHist(NULL), scale(1)
-	{
-		if(!m_var) SetVariable(new RooRealVar("x","",0));
-		m_datavars.push_back(m_var);
-		m_constr = new RooArgSet("constraints_"+m_name);
-		if(_w != "") SetWeight( (TString)_w );
-
-		TreeReader * reader = new TreeReader(treename.c_str());
-		reader->AddFile(filename.c_str());
-		reader->Initialize();
-		m_dataReader = reader;
-		//m_reducedTree = (TTree *)reader->GetChain()->Clone("reduced_"+m_name);
-	};
-
+		Analysis( _name, _title, new TreeReader(treename.c_str(),filename.c_str()), _cuts, _var, _w)
+	{};
 
 	/// \brief Special constructor for single quick fit
 	template <typename T = RooAbsPdf *, typename D = RooDataSet *> Analysis( TString _name, TString _title, D * dd, 
-    RooRealVar * _var, T * _sig = (RooAbsPdf*)NULL, string _w = "", string opt = ""):
-		ModelBuilder(_name,_var,_title), m_cuts(NULL), m_chi2(new double[2]), m_init(false), m_unit(""),
-		m_weight(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
-		m_dataReader(NULL), m_reducedTree(NULL), m_dataHist(NULL), scale(1)
+    RooRealVar * _var, T * _sig = (RooAbsPdf*)NULL, string _w = "", string _opt = ""):
+		Analysis(_name,_title,_var,_opt,_w)
 	{
-		if(!m_var) SetVariable(new RooRealVar("x","",0));
-		m_datavars.push_back(m_var);
-		m_constr = new RooArgSet("constraints_"+m_name);
-		if(_w != "") SetWeight( (TString)_w );		
-
 		string tdata = typeid(D).name();
 		if(tdata.find("RooDataSet")!=string::npos) m_data = (RooDataSet *)dd;
 		else if(tdata.find("TTree")!=string::npos) 
         { 
 	        m_dataReader = new TreeReader((TTree *)dd);
-		m_dataReader->Initialize();
-		m_reducedTree = (TTree *)dd; 
-		CreateDataSet(); 
+		    m_dataReader->Initialize();
+		    m_reducedTree = (TTree *)dd; 
+		    CreateDataSet(); 
         }
 		else if(tdata.find("TH1")!=string::npos) { m_dataHist = (TH1 *)dd; CreateDataSet(); }
 		else cout << "Type '" << tdata << "' not supported!" << endl;
 
-		if(_sig) { SetSignal(_sig,1.e4,opt); Initialize(""); }
+		if(_sig) { SetSignal(_sig,1.e4,_opt); Initialize(""); }
 	};
 
 	~Analysis()
@@ -271,8 +243,7 @@ class Analysis : public ModelBuilder {
     void ImportModel(RooWorkspace * ws);
     void ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg);
     void ImportData(RooWorkspace * ws);
-
-   
+ 
     RooDataSet * GetDataSet( string opt = "" )
     {
 	   if(opt.find("-recalc")!=string::npos || !m_data) return CreateDataSet(opt);
@@ -320,7 +291,7 @@ class Analysis : public ModelBuilder {
   <br> N.B.: addFunc is called once before the loop and here you should set static addresses.
  @param frac: uses only the fraction "frac" of the available entries  
  **/
-	TTree * applyCuts(TCut _cuts = NULL, bool substtree = true, void (*addFunc)(TreeReader *, TTree *, bool) = NULL, double frac = 1);
+    TTree * applyCuts(TCut _cuts = NULL, bool substtree = true, void (*addFunc)(TreeReader *, TTree *, bool) = NULL, double frac = 1);
 	TTree * applyFunc(void (*addFunc)(TreeReader *, TTree *, bool), double frac = 1);
 
 
@@ -368,7 +339,7 @@ class Analysis : public ModelBuilder {
   @param cuts: cuts to make before fitting
  **/
 	RooPlot * Fit(unsigned nbins = 50, bool unbinned = false, string print = "-range-log", TCut mycuts = "");
-    RooPlot * Fit(string option, TCut extracuts);
+    RooPlot * Fit(string option, TCut extracuts = TCut(""));
 
 /** \brief Makes nice plots of data and models including blinded plots
   @param do_model: if true plots model on data
