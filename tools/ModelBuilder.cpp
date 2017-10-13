@@ -68,7 +68,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
 
     bool noBkg = (optstr.find("-nobkg") != string::npos);
     bool doExp = (optstr.find("-exp") != string::npos);
-    if( doExp ) AddBkgComponent("exp","Exp",1.e4,"-ibegin");
+    if( doExp ) AddBkgComponent("exp","Exp",1.e4,Str2VarMap(),"-ibegin");
     if( m_totBkgMode ) m_bkg_fractions.clear();
 
     for(unsigned i = 0; i < m_bkg_components.size(); i++)

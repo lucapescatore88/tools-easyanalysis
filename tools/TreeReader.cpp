@@ -15,7 +15,7 @@ void TreeReader::AddChain(TChain *chain)
 {
     if (fChain)
     {
-        if (pmode=="v") cout << endl << "Adding chain" << endl << endl;
+        if (pmode=="v") cout << endl << "TreeReader - " << "Adding chain" << endl << endl;
 
         TObjArray *fileElements = chain->GetListOfFiles();
         TIter next(fileElements);
@@ -37,16 +37,8 @@ void TreeReader::AddFile(const char *fileName, const char* treeName, Long64_t ma
     if (fChain)
     {
         if (!TFile::Open(fileName)) return;
-        /*
-           if ( maxEntries > 0 )
-           {
-           fChain->AddFile(fileName,maxEntries,treeName);
-           cout << "Max chain entries set to " << maxEntries << " per file" << endl;
-           }
-           else 
-           */
         fChain->AddFile(fileName,maxEntries,treeName);
-        if (pmode=="v") cout << "Adding file: " << fileName << " " << treeName << endl;
+        if (pmode=="v") cout << endl << "TreeReader - " << "Adding file: " << fileName << " " << treeName << endl;
     }
 }
 
@@ -72,7 +64,7 @@ void TreeReader::AddList(const char *fileName)
     {
         if (!ifstream(fileName).good())
         {
-            if (pmode=="v") cout << fileName << " : No such file or directory" << endl;
+            if (pmode=="v") cout << "TreeReader - " << fileName << " : No such file or directory" << endl;
             return;
         }
 
@@ -83,8 +75,7 @@ void TreeReader::AddList(const char *fileName)
         {
             char file[256];
             listfile.getline(file, 256);
-            if ((TString) file == "")
-                break;
+            if ((TString) file == "") break;
             AddFile(file);
         }
         listfile.close();
@@ -101,7 +92,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
         if ( !fChain )
         {
             cout << endl;
-            cout << "No tree to initialize" << endl;
+            cout << "TreeReader - No tree to initialize" << endl;
             cout << endl;
             return false;
         }
@@ -110,7 +101,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
         if ( !fileElements || ( fileElements->GetEntries() == 0 ))
         {
             cout << endl;
-            cout << "No file(s) to initialize" << endl;
+            cout << "TreeReader - No file(s) to initialize" << endl;
             cout << endl;
             return false;
         }
@@ -164,7 +155,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
                     {
                         if ((string(brname)).find(br[b])!=string::npos) { addVar = true; break;}
                     }
-                    else if (opt.find("except")==string::npos) cout << "Option " << opt << " not found" << endl;
+                    else if (opt.find("except")==string::npos) cout << "TreeReader - Option " << opt << " not found" << endl;
                 }
 
                 if (opt.find("except")!=string::npos) addVar = !addVar;
@@ -184,7 +175,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
         }
         else
         {
-            cout << curtype << ": type not found" << endl;
+            cout << "TreeReader - " << curtype << ": type not found" << endl;
             exit(1);
             return false;
         }
@@ -249,42 +240,24 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
 {
     if (!init)
     {
-        cout << "*** WARNING: tree " << fChain->GetName() << " not initialized" << endl;
+        cout << "TreeReader - *** WARNING: tree " << fChain->GetName() << " not initialized" << endl;
         return NULL;
     }
 
     if (cut == "1") cut = "";
 
-    if (pmode == "v") cout << endl << "CopyTree" << endl;
+    //if (pmode == "v") cout << endl << "CopyTree" << endl;
 
     Long64_t nTot = fChain->GetEntries();
 
     if (pmode == "v") cout << "N Tot = " << nTot << endl;
+    if ((nTot != 0) && (frac != 0.) && (cut != "") && pmode == "v") cut.Print();
 
-    if ((nTot != 0) && (frac != 0.) && (cut != ""))
+    if (frac == -1 && cut == "")
     {
-        if (pmode == "v") 
-        {
-            cout << "TCut " << endl;
-            cut.Print();
-        }
-        /*
-           Long64_t nPas = fChain->GetEntries(cut);
-
-           if (pmode == "v") cout << "N Pas = " << fixed << setprecision(0) << nPas << " (" << fixed << setprecision(6) << (double) nPas / (double) nTot * 100 << "%)" << endl;
-
-           if (nTot == nPas) cut = "";
-           */
-    }
-
-    if (frac == -1)
-    {
-        if (cut == "")
-        {
-            cout << "Frac  = " << frac << endl;
-            if (name != "") fChain->SetName(name.c_str());
-            return (TTree*) fChain;
-        }
+        cout << "Frac  = " << frac << endl;
+        if (name != "") fChain->SetName(name.c_str());
+        return (TTree*) fChain;
     }
 
     Long64_t nTot_ = nTot;
@@ -315,8 +288,7 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
     if (nTot != 0) if (pmode == "v")
     {
         Long64_t nPas = tTree->GetEntries();
-        cout << "N Pas = " << fixed << setprecision(0) << nPas << " (" << fixed << setprecision(6) << (double) nPas / (double) nTot_ * 100 << "%)" << endl;
-        cout << endl;
+        cout << "N Pas = " << fixed << setprecision(0) << nPas << " (" << fixed << setprecision(6) << (double) nPas / (double) nTot_ * 100 << "%)" << endl << endl;
     }
 
     return tTree;
@@ -343,8 +315,7 @@ void TreeReader::PrintListOfFiles()
             TIter next(fileElements);
             TChainElement *chEl = 0;
 
-            cout << endl;
-            cout << "List of files" << endl;
+            cout << endl << "List of files" << endl;
             while ((chEl = (TChainElement*) next()))
             {
                 cout << chEl->GetTitle() << endl;
@@ -370,10 +341,8 @@ void TreeReader::PrintListOfVariables()
     {
         vector<variable*> varList = GetVarList();
 
-        cout << endl;
-        cout << endl << "Set up " << varList.size() << " branches" << endl;
+        cout << endl << endl << "Set up " << varList.size() << " branches" << endl << endl;
 
-        cout << endl;
         for (unsigned i = 0; i < varList.size(); ++i)
         {
             cout << varList[i]->name << " " << varList[i]->bname << " " << varList[i]->title << endl;

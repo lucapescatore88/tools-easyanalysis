@@ -22,8 +22,8 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
     {
         if( par=="a2os" ) parMapName = isParInMap( "a2", myvars, dist_name );
         else parMapName = isParInMap( par, myvars, dist_name );
-        if(parMapName!="") cout << myvars[parMapName]->GetName() << endl;
-        else cout << " (WRONG!!)" << endl;
+        
+        if(parMapName=="") cout << parMapName << " (WRONG!!)" << endl;
     }
     if(parMapName!="") curpar = (RooRealVar *)myvars[parMapName];
     else if(par=="a2os" && myvars.find("a2")!=myvars.end()) curpar = (RooRealVar *)myvars["a2"];
@@ -207,6 +207,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
 
 RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar * var, Str2VarMap myvars, string opt, TString title)
 {
+    //cout << "Building Pdf" << endl;
     RooAbsPdf * pdf = NULL;
     string typepdf_ = (string)typepdf;
     TString namepdf_ = ((TString)namepdf).ReplaceAll("bkg_","");

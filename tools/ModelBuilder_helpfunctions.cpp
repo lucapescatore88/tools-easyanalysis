@@ -482,7 +482,6 @@ Str2VarMap setConstant(Str2VarMap * pars, vector<string> names, string opt)
         if(opt.find("except")!=string::npos) found = !found;
         bool setconst = kTRUE;
         if(opt.find("-free")!=string::npos) setconst = kFALSE;
-        //cout << cname << "  " << found << "  " << setconst << endl;
         if( names.empty() || found ) ((RooRealVar*)iter->second)->setConstant(setconst);
     }
     return *pars;
@@ -506,14 +505,15 @@ TString getLegendLabel( TString title, string opt )
 {
     TString leglabel = title.ReplaceAll("_print","");
     bool isbkg = leglabel.Contains("bkg_");
-    leglabel = leglabel.ReplaceAll("bkg_","");
+    leglabel = leglabel.ReplaceAll("bkg_",""); 
     if(isbkg) leglabel = "Bkg. " + leglabel;
     leglabel.ReplaceAll("totsig_","Sig. ");
 
     if(opt.find("-origlegnames")==string::npos)
     {
         size_t pos_ = ((string)leglabel).find("_");
-        while(true) {
+        while(true) 
+        {
             if(((TString)leglabel)(pos_+1,1)=="{")
                 pos_ = ((string)leglabel).find("_",pos_+1);
             else break;
@@ -539,8 +539,6 @@ TString getLegendLabel( TString title, string opt )
    "-sumW2err"   -> if weighted data errors shown reflect statistics of initial sample
    "-plotSigComp"-> prints signal components and not only total signal function
    "-range"      -> plots only the fitted range, otherwise all available is plot
-   "-min(num)"   -> sets the minimum to "num"
-   "-max(num)"   -> sets the maximum to "num"
    @param bins: number of bins to use for data
    @param regions: number of regions to plot is blinded plot, if regions = 0 plots everything 
    @param Xtitle: X axis label

@@ -12,7 +12,7 @@ string Analysis::m_pmode = "v";
 
 void Analysis::AddAllVariables()
 {
-    vector<variable * > myvars;
+    vector< variable * > myvars;
     if(m_dataReader) myvars = m_dataReader->GetVarList();
     else if(m_reducedTree)
     {
@@ -68,7 +68,7 @@ bool Analysis::Initialize(string option, double frac)
     else if (!m_reducedTree) cout << "WARNING: No data available!!" << endl;
 
     bool result = ModelBuilder::Initialize(option);
-    if(m_bkg_components.empty()) ((RooRealVar*)m_nsig)->setVal(m_data->numEntries());
+    if(m_bkg_components.empty() && m_data) ((RooRealVar*)m_nsig)->setVal(m_data->numEntries());
     if (m_pmode == "v")
     {
         cout << endl << m_name << ": PrintParams" << endl << endl;
@@ -687,9 +687,9 @@ RooPlot* Analysis::Print(RooRealVar * myvar, string option, unsigned bins, TStri
     return Print(dom_model, mydata, option, bins, Xtitle, title, myvar);
 }
 
-RooPlot* Analysis::Print(bool dom_model, RooAbsData * _data, string option, unsigned bins, TString Xtitle, TString title, RooRealVar * myvar)
+RooPlot* Analysis::Print(bool domodel, RooAbsData * _data, string option, unsigned bins, TString Xtitle, TString title, RooRealVar * myvar)
 {
-    if(!_data) { cout << "WARNING!: No data available." << endl; dom_model = true; }
+    if(!_data) { cout << "WARNING!: No data available." << endl; domodel = true; }
 
     unsigned posX = option.find("-x");
     if(posX < 1e4) Xtitle = option.substr(posX+2,option.find("-",posX+2) - posX - 2);
@@ -715,11 +715,12 @@ RooPlot* Analysis::Print(bool dom_model, RooAbsData * _data, string option, unsi
         return ple;
     }
 
-    if(dom_model)
+    if(domodel)
     {
         if(option.find("-linlog")!=string::npos)
         {   
-            string optLog = option.replace(option.find("lin"), 3, "");
+            string optLog = option;
+            optLog.replace(option.find("lin"), 3, "");
             ModelBuilder::Print(title, Xtitle, optLog, _data, bins, m_regStr, m_reg, m_fitRes,Ytitle, myvar);
         }
         return ModelBuilder::Print(title, Xtitle, option, _data, bins, m_regStr, m_reg, m_fitRes, Ytitle, myvar);
@@ -727,7 +728,7 @@ RooPlot* Analysis::Print(bool dom_model, RooAbsData * _data, string option, unsi
     else
     {
         TCanvas * myc = new TCanvas();  
-        if(option.find("-log")!=string::npos)  myc->SetLogy();
+        if(option.find("-log")!=string::npos || option.find("-linlog")!=string::npos)  myc->SetLogy();
         RooPlot * frame = getFrame(myvar, _data, NULL, option, bins, m_regStr, m_reg, Xtitle, Ytitle, NULL, vector<Color_t>());
         if(option.find("-bw")!=string::npos) myc->SetGrayscale();
         frame->Draw();
@@ -735,6 +736,7 @@ RooPlot* Analysis::Print(bool dom_model, RooAbsData * _data, string option, unsi
         else myc->Print(title);
         if(option.find("-linlog")!=string::npos)
         {
+            myc->SetLogy(0);
             getFrame(myvar, _data, NULL, option, bins, m_regStr, m_reg, Xtitle, Ytitle, NULL, vector<Color_t>())->Draw();
             if(title=="") myc->Print("data_"+m_name+".pdf");
             else myc->Print(title);
