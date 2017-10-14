@@ -35,7 +35,7 @@ using namespace std;
 
 typedef enum
 {
-  BOOL, INT, UINT, FLOAT, DOUBLE, LONG64, ULONG64, CHAR, UCHAR, SHORT, USHORT, VDOUBLE
+	BOOL, INT, UINT, FLOAT, DOUBLE, LONG64, ULONG64, CHAR, UCHAR, SHORT, USHORT
 } TypeVAR;
 
 
@@ -51,7 +51,7 @@ class TypeDB {
 	static vector<string> branchIDs;
 	static bool init;
 
-	public:
+public:
 
 	static void getInstance()
 	{
@@ -87,10 +87,10 @@ class TypeDB {
 		init = true;
 	}
 
-        static inline string getTypeName( unsigned int id )
-        {
-	  if(id < names.size()) return names[id];
-	  else return (string)"";
+	static inline string getTypeName( unsigned int id )
+	{
+		if(id < names.size()) return names[id];
+		else return (string)"";
 	}
 
 	static inline int getType(const char *name)
@@ -128,25 +128,24 @@ class variable {
 	{
 		switch(type)
 		{
-			case BOOL:    { value.myBool = new Bool_t[arraySize]; break; }
-			case INT:     { value.myInt = new Int_t[arraySize];  break; }
-			case UINT:    { value.myUint = new unsigned int[arraySize];  break; }
-			case FLOAT:   { value.myFloat = new Float_t[arraySize];  break; }
-			case DOUBLE:  { value.myDouble = new Double_t[arraySize]; break; }
-			case LONG64:  { value.myLong = new Long64_t[arraySize];  break; }
-			case ULONG64: { value.myULong = new ULong64_t[arraySize];  break; }
-			case CHAR:    { value.myChar = new Char_t[arraySize];  break; }
-			case UCHAR:   { value.myUChar = new UChar_t[arraySize];  break; }
-			case SHORT:   { value.myShort = new Short_t[arraySize];  break; }
-			case USHORT:  { value.myUShort = new UShort_t[arraySize];  break; }
-			//case VDOUBLE: { value.myVDouble = new vector<double>[arraySize]; break; }
+			case BOOL:    { value.myBool   = new Bool_t[arraySize];       break; }
+			case INT:     { value.myInt    = new Int_t[arraySize];        break; }
+			case UINT:    { value.myUint   = new unsigned int[arraySize]; break; }
+			case FLOAT:   { value.myFloat  = new Float_t[arraySize];      break; }
+			case DOUBLE:  { value.myDouble = new Double_t[arraySize];     break; }
+			case LONG64:  { value.myLong   = new Long64_t[arraySize];     break; }
+			case ULONG64: { value.myULong  = new ULong64_t[arraySize];    break; }
+			case CHAR:    { value.myChar   = new Char_t[arraySize];       break; }
+			case UCHAR:   { value.myUChar  = new UChar_t[arraySize];      break; }
+			case SHORT:   { value.myShort  = new Short_t[arraySize];      break; }
+			case USHORT:  { value.myUShort = new UShort_t[arraySize];     break; }
 			default: return false;
 		}
 
 		return true;
 	}
 
-	public:
+public:
 
 	TString name;  ///Variable name
 	TString bname; ///Variable branch name
@@ -166,19 +165,18 @@ class variable {
 		UChar_t   *myUChar;
 		Short_t   *myShort;
 		UShort_t  *myUShort;
-	  //vector<double> *myVDouble;
-	        void      *address;
+		void      *address;
 	} value;
 
 
 	variable(const char *_type, int _arraysize = 1):
-		arraySize(_arraysize), nGets(0)
+	arraySize(_arraysize), nGets(0)
 	{
 		type = TypeDB::getType(_type);
 		setVariable();
 	}
 	variable( int _type, int _arraysize = 1):
-		type(_type), arraySize(_arraysize), nGets(0)
+	type(_type), arraySize(_arraysize), nGets(0)
 	{
 		setVariable();
 	}
@@ -188,23 +186,22 @@ class variable {
 	void SetType(unsigned _type) { type = _type; }
 	unsigned GetArraySize() { return arraySize; }
 	unsigned GetType() { return type; }
-        string GetTypeName() { return TypeDB::getTypeName(type); }
+	string GetTypeName() { return TypeDB::getTypeName(type); }
 	template <typename T = double> T GetValue(int iValue)
 	{
-        switch (type)
+		switch (type)
 		{
-			case BOOL:    { return value.myBool[iValue];    break; }
-			case INT:     { return value.myInt[iValue];     break; }
-			case UINT:    { return value.myUint[iValue];    break; }
-			case FLOAT:   { return value.myFloat[iValue];   break; }
-			case DOUBLE:  { return value.myDouble[iValue];  break; }
-			case LONG64:  { return value.myLong[iValue];    break; }
-			case ULONG64: { return value.myULong[iValue];   break; }
-			case CHAR:    { return value.myChar[iValue];    break; }
-			case UCHAR:   { return value.myUChar[iValue];   break; }
-			case SHORT:   { return value.myShort[iValue];   break; }
-			case USHORT:  { return value.myUShort[iValue];  break; }
-			//case VDOUBLE: { return value.myVDouble[iValue]; break; }
+			case BOOL:    { return value.myBool[iValue];   break; }
+			case INT:     { return value.myInt[iValue];    break; }
+			case UINT:    { return value.myUint[iValue];   break; }
+			case FLOAT:   { return value.myFloat[iValue];  break; }
+			case DOUBLE:  { return value.myDouble[iValue]; break; }
+			case LONG64:  { return value.myLong[iValue];   break; }
+			case ULONG64: { return value.myULong[iValue];  break; }
+			case CHAR:    { return value.myChar[iValue];   break; }
+			case UCHAR:   { return value.myUChar[iValue];  break; }
+			case SHORT:   { return value.myShort[iValue];  break; }
+			case USHORT:  { return value.myUShort[iValue]; break; }
 			default: return -999;
 		}
 	}
@@ -213,18 +210,17 @@ class variable {
 	{
 		switch (type)
 		{
-			case BOOL:    { return reinterpret_cast<T*>(value.myBool);    break; }
-			case INT:     { return reinterpret_cast<T*>(value.myInt);     break; }
-			case UINT:    { return reinterpret_cast<T*>(value.myUint);    break; }
-			case FLOAT:   { return reinterpret_cast<T*>(value.myFloat);   break; }
-			case DOUBLE:  { return reinterpret_cast<T*>(value.myDouble);  break; }
-			case LONG64:  { return reinterpret_cast<T*>(value.myLong);    break; }
-			case ULONG64: { return reinterpret_cast<T*>(value.myULong);   break; }
-			case CHAR:    { return reinterpret_cast<T*>(value.myChar);    break; }
-			case UCHAR:   { return reinterpret_cast<T*>(value.myUChar);   break; }
-			case SHORT:   { return reinterpret_cast<T*>(value.myShort);   break; }
-			case USHORT:  { return reinterpret_cast<T*>(value.myUShort);  break; }
-			//case VDOUBLE: { return reinterpret_cast<T*>(value.myVDouble); break; }
+			case BOOL:    { return reinterpret_cast<T*>(value.myBool);   break; }
+			case INT:     { return reinterpret_cast<T*>(value.myInt);    break; }
+			case UINT:    { return reinterpret_cast<T*>(value.myUint);   break; }
+			case FLOAT:   { return reinterpret_cast<T*>(value.myFloat);  break; }
+			case DOUBLE:  { return reinterpret_cast<T*>(value.myDouble); break; }
+			case LONG64:  { return reinterpret_cast<T*>(value.myLong);   break; }
+			case ULONG64: { return reinterpret_cast<T*>(value.myULong);  break; }
+			case CHAR:    { return reinterpret_cast<T*>(value.myChar);   break; }
+			case UCHAR:   { return reinterpret_cast<T*>(value.myUChar);  break; }
+			case SHORT:   { return reinterpret_cast<T*>(value.myShort);  break; }
+			case USHORT:  { return reinterpret_cast<T*>(value.myUShort); break; }
 			default: { cout << "*** WARNING: Type not available!" << endl; return NULL; }
 		}
 	}	
@@ -235,7 +231,7 @@ class variable {
 class varEq : public std::unary_function<variable*, bool>
 {
 	string s;
-	public:
+public:
 	explicit varEq(const char *&ss): s(ss) {}
 	inline bool operator() (const variable *c) const
 	{ return s.compare(c->name) ?  false : true; }
@@ -263,24 +259,24 @@ class TreeReader {
 	static string pmode;
 	static string pfile;
 
-	public:
+public:
 
 
 	/// \brief Empty onstructor
 	
 	TreeReader():
-		nGets(0), continueSorting(true), init(true), selected(false)
+	nGets(0), continueSorting(true), init(true), selected(false)
 	{
-	    fChain = new TChain();
+		fChain = new TChain();
 		return;
 	}
 
 	/// \brief Constructor with an existing TTree
 	
 	TreeReader(TTree *tree):
-		nGets(0), continueSorting(true), init(true), selected(false)
+	nGets(0), continueSorting(true), init(true), selected(false)
 	{
-        if(!tree) { cout << "Attention your TTree is NULL" << endl; return; }
+		if(!tree) { cout << "Attention your TTree is NULL" << endl; return; }
 		fChain = (TChain*) tree;
 		SetPrintFileLevel("");
 		Initialize();
@@ -290,9 +286,9 @@ class TreeReader {
 	/// \brief Constructor with an existing TChain
 	
 	TreeReader(TChain *chain):
-		nGets(0), continueSorting(true), init(true), selected(false)
+	nGets(0), continueSorting(true), init(true), selected(false)
 	{
-        if(!chain) { cout << "Attention your TChain is NULL" << endl; return; }
+		if(!chain) { cout << "Attention your TChain is NULL" << endl; return; }
 		fChain = chain;
 		SetPrintFileLevel("");
 		Initialize();
@@ -302,7 +298,7 @@ class TreeReader {
 	/// \brief Constructor with the name of a tree (then you can add many filesusing AddFile(namefile) )
 
 	TreeReader(const char *treeName):
-		fChain(new TChain()), nGets(0), continueSorting(true), init(false), selected(false)
+	fChain(new TChain()), nGets(0), continueSorting(true), init(false), selected(false)
 	{
 		if(treeName) fChain->SetName(treeName);
 	}
@@ -310,7 +306,7 @@ class TreeReader {
 	/// \brief Constructor with the name of a TTree "treeName" contained in one single file "fileName"
 	
 	TreeReader(const char *treeName, const char *fileName):
-		fChain(new TChain()), nGets(0), continueSorting(true), init(false), selected(false)
+	fChain(new TChain()), nGets(0), continueSorting(true), init(false), selected(false)
 	{
 		fChain->SetName(treeName);
 		AddFile(fileName);
@@ -320,7 +316,7 @@ class TreeReader {
 	~TreeReader()
 	{
 	        //if(fChain) delete fChain;
-	        varList.clear();
+		varList.clear();
 	}
 
 	///Sets the flag to enable verbose mode "v" or silent mode "s"
@@ -336,17 +332,17 @@ class TreeReader {
 	 *
 	 *	*/
 
-    void AddChain(TChain *chain);
+	void AddChain(TChain *chain);
 
 	/** \brief Function to add a chain to the internal TChain
 	 *	*/
 
-    void AddFile(const char *fileName, const char *treeName = "", Long64_t maxEntries = -1);
+	void AddFile(const char *fileName, const char *treeName = "", Long64_t maxEntries = -1);
 
 	/** \brief Function to add a friend to the internal TChain
 	 *	*/
 
-    void AddFriend(const char *fileName, const char *treeName = "");
+	void AddFriend(const char *fileName, const char *treeName = "");
 
 	/** \brief Function to add a list of files to the internal TChain
 	 *
@@ -373,6 +369,30 @@ class TreeReader {
 		return GetEntry(chainEntry);
 	}
 
+	/**  \brief Creates and fills a new tree
+	 *  @param cuts:    Fills only entries with pass "cuts"
+	 *  @param frac:    Keeps only a fraction "frac" of the total events
+	 *  @param name:    Name given to the new tree
+	 *  */
+	
+	TTree *CopyTree(TCut cuts = "", double frac = -1., string name = "");
+	
+	/** \brief Adds to "tree" all branches of the stored tree (and sets addresses) */
+	
+	TTree *CloneTree(string name = "") { return CopyTree("", 0., name); }
+
+	/// \brief Print the list of files linked by the internal TChain object
+	
+	void PrintListOfFiles();
+
+	/// \brief Print the list of variables in the internal TChain object
+
+	void PrintListOfVariables();
+
+	/// \brief Set the branch status to Process or DoNotProcess for the internal TChain object
+
+	void SetBranchStatus(vector<string> branches, bool status = true, string opt = "");
+
 	/** \brief Reads the tree and stores information on variables
 	 *
 	 * @param br:  Contains a list of branch name (also partial names)
@@ -398,22 +418,6 @@ class TreeReader {
 	 * */
 	void FillNewTree(TTree *tree, TCut cuts = "", double frac = -1, void (*addFunc)(TreeReader *, TTree *, bool) = NULL);
 	
-	/**  \brief Creates and fills a new tree
-	 *  @param cuts:    Fills only entries with pass "cuts"
-	 *  @param frac:    Keeps only a fraction "frac" of the total events
-	 *  @param name:    Name given to the new tree
-	 *  */
-	
-	TTree *CopyTree(TCut cuts = "", double frac = -1., string name = "");
-	
-	/** \brief Adds to "tree" all branches of the stored tree (and sets addresses) */
-	
-	TTree *CloneTree(string name = "") { return CopyTree("", 0., name); }
-
-	/// \brief Print the list of files linked by the internal TChain object
-	
-	void PrintListOfFiles();
-	void PrintListOfVariables();
 
 	/// \brief Returns the internal TChain object
 
@@ -426,19 +430,19 @@ class TreeReader {
 	* */
 	
 	template <typename T = double> T GetValue(const char *name, int iValue = 0)
-    {
-        if(!init) { cout << "*** WARNING: tree " << fChain->GetName() << " not initialized" << endl; return 0; }
-	    if(!selected) { cout << "*** WARNING: no entry selected" << endl; return 0; }
+	{
+		if(!init) { cout << "*** WARNING: tree " << fChain->GetName() << " not initialized" << endl; return 0; }
+		if(!selected) { cout << "*** WARNING: no entry selected" << endl; return 0; }
 
-	    ++nGets;
-	    if( continueSorting && (nGets % 1000 == 0) ) continueSorting = partialSort();
+		++nGets;
+		if( continueSorting && (nGets % 1000 == 0) ) continueSorting = partialSort();
 
-	    variable *myVar = GetVariable(name);
-	    if(!myVar) return -999;
-	    ++(myVar->nGets);
+		variable *myVar = GetVariable(name);
+		if(!myVar) return -999;
+		++(myVar->nGets);
 
-	    return (T)myVar->GetValue<T>(iValue);
-    }
+		return (T)myVar->GetValue<T>(iValue);
+	}
 	
 	/** \brief Sets the value of the zero component of the variable "name" to "value".
 	* It requires that an entry is selected first using "GetEntry()"
@@ -450,7 +454,7 @@ class TreeReader {
 	{
 		T *ptr = GetVariable(name)->GetPtr<T>();
 		if(ptr) ptr[0] = value;
-        else cout << "No pointer available for variable " << name << endl;
+		else cout << "No pointer available for variable " << name << endl;
 	}
 
 	/// \brief Checks is the variable "namevar" is stored in the reader
@@ -460,13 +464,13 @@ class TreeReader {
 	{
 		bool res = true; 
 		for(auto v : vars) res *= HasVar(v.c_str());
-		return res;  
+			return res;  
 	}
 	bool HasVars(vector<RooRealVar*>vars) 
 	{
 		bool res = true; 
 		for(auto v : vars) res *= HasVar(v->GetName());
-		return res;  
+			return res;  
 	}
 	inline bool isValid() { return init; }
 	
@@ -485,10 +489,10 @@ class TreeReader {
 		else return *it;
 	}
 
-    inline string GetVariableType(const char *name)
-    {
-        return GetVariable(name)->GetTypeName();
-    }
+	inline string GetVariableType(const char *name)
+	{
+		return GetVariable(name)->GetTypeName();
+	}
 
 	void ShowNGets() { for (unsigned i = 0; i < varList.size(); ++i) cout << varList[i]->nGets/(double)nGets << endl; }
 	
@@ -497,31 +501,5 @@ class TreeReader {
 	void SetEntryList(TEntryList *list) { fChain->SetEntryList(list); }
 	void GetNfiles() { fChain->GetNtrees(); }
 };
-
-
-
-/*
-	typedef TTree * (*FUNC)(TreeReader *, TTree *, int, string);  	
-	TTree * Loop(FUNC func, string opt = "", TEntryList * list = NULL)
-	{
-		if(!func || !init) return NULL;
-
-		TTree * newTree = new TTree("newTree","");
-		BranchNewTree(newTree);
-		for(int i = 0; i < GetEntries(); i++)
-		{
-			GetEntry(i,list);
-			func(this,newTree,i,opt);
-			newTree->Fill();
-		}
-
-		return newTree;
-	}
-	TTree * Loop(TEntryList * list)
-	{
-		return Loop(NULL,"",list);
-	} 
-*/
-
 
 #endif

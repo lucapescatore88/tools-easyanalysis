@@ -98,7 +98,7 @@ class myFeldmanCousins
 	 * */ 
 	double generateToys(double testVal, double testVal2, TH1 * h = NULL, string opt = "");
 
-	public:
+public:
 
 	/// \brief Builts the combined PDF and model
 	void Initialize();
@@ -108,7 +108,7 @@ class myFeldmanCousins
 
 	/// \brief Construtor for multiple samples and PoIs (most general)
 	myFeldmanCousins(TString _name, vector<TString> _categories, vector <RooDataSet *> _datas, vector <RooAbsPdf *> _pdfs, RooRealVar * _obs, Str2VarMap _PoIs, TString _weight = ""):
-		name(_name), PoIs(_PoIs), weight(_weight), npoints(11), nexp(100), nfree(-1), cons(NULL), origPars(NULL), nll(NULL), isValid(NULL), dataratio(-1)
+	name(_name), PoIs(_PoIs), weight(_weight), npoints(11), nexp(100), nfree(-1), cons(NULL), origPars(NULL), nll(NULL), isValid(NULL), dataratio(-1)
 	{
 		obs = new RooArgSet(*_obs);
 		if(PoIs.size() < 1) cout << "ATTENTION: You must set at least one PoI!" << endl;
@@ -129,7 +129,7 @@ class myFeldmanCousins
 
 	/// \brief Construtor for multiple samples and just one PoI
 	myFeldmanCousins(TString _name, vector<TString> _categories, vector <RooDataSet *> _datas, vector <RooAbsPdf *> _pdfs, RooRealVar * _obs, RooRealVar * _PoI, TString _weight = ""):
-		name(_name), PoI(_PoI), PoI2(NULL), weight(_weight), npoints(11), nexp(100), nfree(-1), cons(NULL), origPars(NULL), nll(NULL), isValid(NULL), dataratio(-1)
+	name(_name), PoI(_PoI), PoI2(NULL), weight(_weight), npoints(11), nexp(100), nfree(-1), cons(NULL), origPars(NULL), nll(NULL), isValid(NULL), dataratio(-1)
 	{
 		obs = new RooArgSet(*_obs);
 		PoIs[PoI->GetName()] = PoI;
@@ -142,7 +142,7 @@ class myFeldmanCousins
 
 	/// \brief Construtor for just one sample and one PoI
 	myFeldmanCousins(TString _name, RooDataSet * _data, RooAbsPdf * _pdf, RooRealVar * _obs, RooRealVar * _PoI, TString _weight = ""):
-		name(_name), PoI(_PoI), PoI2(NULL), weight(_weight), npoints(11), nexp(100), nfree(-1), cons(NULL), origPars(NULL), nll(NULL), isValid(NULL), dataratio(-1)
+	name(_name), PoI(_PoI), PoI2(NULL), weight(_weight), npoints(11), nexp(100), nfree(-1), cons(NULL), origPars(NULL), nll(NULL), isValid(NULL), dataratio(-1)
 	{
 		obs = new RooArgSet(*_obs);
 		PoIs[PoI->GetName()] = PoI;

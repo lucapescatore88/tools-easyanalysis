@@ -21,7 +21,7 @@ class ModelBuilder {
     bool m_isvalid;
     bool m_doNegSig, m_doNegBkg;
 
-    protected:
+protected:
 
     static string m_pmode;
     TString m_name;
@@ -333,13 +333,13 @@ class ModelBuilder {
 
 
 
-    public:
+public:
 
     //Constructors
 
     ModelBuilder(TString _name, RooRealVar * _var, TString _title = ""):
-        m_isvalid(false), m_doNegSig(false), m_doNegBkg(false), m_name(_name), m_title(_title), 
-        m_sig(NULL), m_bkg(NULL), m_totBkgMode(false), m_colors(vector<Color_t>())
+    m_isvalid(false), m_doNegSig(false), m_doNegBkg(false), m_name(_name), m_title(_title), 
+    m_sig(NULL), m_bkg(NULL), m_totBkgMode(false), m_colors(vector<Color_t>())
     {
         SetVariable(_var);
         m_vars.push_back(_var);
@@ -546,105 +546,105 @@ class ModelBuilder {
     {
         cout << endl << m_name << ": AllowNegativeYield";
         if (option.find("sig") != string::npos)
-	    {
-	        m_doNegSig = cond;
-	        if (m_doNegSig) cout << " - Signal";
-	    }
-        if (option.find("bkg") != string::npos)
-	    {
-	        m_doNegBkg = cond;
-	        if (m_doNegBkg) cout << " - Backgrounds";
-	    }
-        cout << endl << endl;
-        return;
-    }
+        {
+           m_doNegSig = cond;
+           if (m_doNegSig) cout << " - Signal";
+       }
+       if (option.find("bkg") != string::npos)
+       {
+           m_doNegBkg = cond;
+           if (m_doNegBkg) cout << " - Backgrounds";
+       }
+       cout << endl << endl;
+       return;
+   }
 
-    void SetLastBkgColor(Color_t color) 
-    {
-        if(m_colors.size() == m_bkg_components.size()) m_colors[m_colors.size()-1] = color;
-        else m_colors.push_back(color); 
-    }
-    vector <Color_t> GetColors() { return m_colors; }
+   void SetLastBkgColor(Color_t color) 
+   {
+    if(m_colors.size() == m_bkg_components.size()) m_colors[m_colors.size()-1] = color;
+    else m_colors.push_back(color); 
+}
+vector <Color_t> GetColors() { return m_colors; }
 
-    void SetTitle(TString _title) { m_title = _title; }
+void SetTitle(TString _title) { m_title = _title; }
 
     /** \brief Sets the variable to fit "var".
      * It also creates a copy of the initial variable "m_tmpvar". In fact when fitting the varible is modified and
      * if you want to fit again or change the model and refit you need to reset the variable as it was.
      * */
-    void SetVariable(RooRealVar * _var) 
-    {
-        _var->SetTitle( ((TString)_var->GetTitle()).ReplaceAll("__var__","")+"__var__" );
+void SetVariable(RooRealVar * _var) 
+{
+    _var->SetTitle( ((TString)_var->GetTitle()).ReplaceAll("__var__","")+"__var__" );
         //_var->SetName( ((TString)_var->GetName()).ReplaceAll("__var__","")+"__var__" );
-        m_var = _var;
-        m_tmpvar = new RooRealVar(*_var);
-    }
+    m_var = _var;
+    m_tmpvar = new RooRealVar(*_var);
+}
 
     /** \brief Sets the background mode
      * Normally the model is built as model = nsig*sig + nbkg1*bkg1 + nbkg2*bkg2 * ...
      * If the m_totBkgModel is set to "tot" the model is built as model = nsig*sig + nTotbkg*(fracBkg1*bkg1 + fracBkg2*bkg2 + ...)
      * */
-    void SetBkgMode( bool mode ) { m_totBkgMode = mode; }
-    void SetSig(RooAbsPdf * _sig) { m_sig = _sig; }
+void SetBkgMode( bool mode ) { m_totBkgMode = mode; }
+void SetSig(RooAbsPdf * _sig) { m_sig = _sig; }
     ///\brief Forces a model
-    void SetModel(RooAbsPdf * _model);
-    void SetNSig(RooAbsReal * _nsig) { m_nsig = _nsig; }
-    void SetBkg(RooAbsPdf * _bkg) { m_bkg = _bkg; }
-    void SetBkg(vector<RooAbsPdf *> _bkg_comp) { m_bkg_components = _bkg_comp; }
-    void SetName(const char * newname) { m_name = newname; }
-    void ClearBkgList() { m_bkg_components.clear(); m_bkg_fractions.clear(); }
-    void ResetVariable() { m_var->setVal(m_tmpvar->getVal()); m_var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax()); };
+void SetModel(RooAbsPdf * _model);
+void SetNSig(RooAbsReal * _nsig) { m_nsig = _nsig; }
+void SetBkg(RooAbsPdf * _bkg) { m_bkg = _bkg; }
+void SetBkg(vector<RooAbsPdf *> _bkg_comp) { m_bkg_components = _bkg_comp; }
+void SetName(const char * newname) { m_name = newname; }
+void ClearBkgList() { m_bkg_components.clear(); m_bkg_fractions.clear(); }
+void ResetVariable() { m_var->setVal(m_tmpvar->getVal()); m_var->setRange(m_tmpvar->getMin(),m_tmpvar->getMax()); };
 
-    RooAbsPdf * GetParamsGaussian(RooFitResult * fitRes);
-    RooDataSet * GetParamsVariations(int nvariations = 10000, RooFitResult * fitRes = NULL);
+RooAbsPdf * GetParamsGaussian(RooFitResult * fitRes);
+RooDataSet * GetParamsVariations(int nvariations = 10000, RooFitResult * fitRes = NULL);
 
     ////\brief Return true if the model was correctly built and initialized
-    bool isValid() { return m_isvalid; }
+bool isValid() { return m_isvalid; }
     //bool isExtended() { return extended; }
-    TString GetName() { return m_name; }
+TString GetName() { return m_name; }
     ///\brief Return the variable to fit
-    RooRealVar * GetVariable() { return m_var; }
+RooRealVar * GetVariable() { return m_var; }
     ///\brief Returns the model pdf
-    RooAbsPdf * GetModel() { return m_model; }
+RooAbsPdf * GetModel() { return m_model; }
     ///\brief Returns the signal pdf
-    RooAbsPdf * GetSig() { return m_sig; }
+RooAbsPdf * GetSig() { return m_sig; }
     ///\brief Returns a pdf corresponding to the sum of all bkg PDFs
-    RooAbsPdf * GetTotBkg() { return m_bkg; }
+RooAbsPdf * GetTotBkg() { return m_bkg; }
     ///\brief Returns the number of bkg events integrating the bkg pdf in [min,max] (Returns nbkg * (int [min,max] of bkg) )
     /// If "fitRes" is passed stores the error in "valerr"
-    double GetNBkgVal(double min = 0, double max = 0, double * valerr = NULL, RooFitResult * fitRes = NULL);
+double GetNBkgVal(double min = 0, double max = 0, double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Returns the number of sig events integrating the sig pdf in [min,max] (Returns nsig * (int [min,max] of sig) )
     /// If "fitRes" is passed stores the error in "valerr"
-    double GetNSigVal(double min = 0, double max = 0, double * valerr = NULL, RooFitResult * fitRes = NULL);
+double GetNSigVal(double min = 0, double max = 0, double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Return S/B integrating sig and bkg in [min,max]
-    double GetSOverB(float min, float max, double * valerr = NULL, RooFitResult * fitRes = NULL);
+double GetSOverB(float min, float max, double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Return S/(S+B) integrating sig and bkg in [min,max]
-    double GetSigFraction(float min, float max, double * valerr = NULL, RooFitResult * fitRes = NULL);
+double GetSigFraction(float min, float max, double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Returns the full list of bkg PDFs
-    vector<RooAbsPdf *> GetBkgComponents() { return m_bkg_components; }
+vector<RooAbsPdf *> GetBkgComponents() { return m_bkg_components; }
     ///\brief Prints to screen the composition e.g signal = NSIG / NTOT, bkg1 = NBKG1/NTOT, etc
-    void PrintComposition(float min = 0., float max = 0., RooFitResult * fitRes = NULL);
+void PrintComposition(float min = 0., float max = 0., RooFitResult * fitRes = NULL);
     ///\brief Returns the full list of bkg yields variables
-    vector<RooAbsReal *> GetBkgFractions() { return m_bkg_fractions; }
+vector<RooAbsReal *> GetBkgFractions() { return m_bkg_fractions; }
     ///\brief Returns the number of sig events in the full range. Same as GetNSigVal(0,0)
-    double GetSigVal(double * valerr = NULL, RooFitResult * fitRes = NULL);
+double GetSigVal(double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Returns the number of sig events in the full range. And can also return its asymmetric error
-    double GetSigVal(double * errHi, double * errLo); 
-    bool CheckModel() { return checkModel(m_model); };
-    RooArgSet * GetParamsArgSet();
+double GetSigVal(double * errHi, double * errLo); 
+bool CheckModel() { return checkModel(m_model); };
+RooArgSet * GetParamsArgSet();
 
     /** \brief Returns the number of total bkg evens
      * Returns a RooAbsReal variable which is a RooFormulaVar built as the sum of all bkg yields.
      */
-    RooAbsReal * GetTotNBkg();
-    RooAbsPdf * CalcTotBkg();
-    RooAbsReal * GetNSigPtr() { return m_nsig; }
+RooAbsReal * GetTotNBkg();
+RooAbsPdf * CalcTotBkg();
+RooAbsReal * GetNSigPtr() { return m_nsig; }
     ///\brief Returns a Str2VarMap object containing all paramters only of the signal PDF 
-    Str2VarMap GetSigParams(string opt = "");
+Str2VarMap GetSigParams(string opt = "");
     ///\brief Returns a Str2VarMap object containing all paramters of the entire model PDF, inclusing yields
-    Str2VarMap GetParams(string opt = "");
+Str2VarMap GetParams(string opt = "");
 
-    static void SetPrintLevel(string mode) { m_pmode = mode; }
+static void SetPrintLevel(string mode) { m_pmode = mode; }
 
     /** \brief Prints a plots with the model on it using the GetFrame() function.
      * @param title:  Title for the plot
@@ -662,26 +662,26 @@ class ModelBuilder {
      * <br> - "-pulls"          -> Produces a separate hitogram with pulls vs variable
      * <br> - "-andpulls"       -> Produced an histogram with pulls and puts it below the main plot
      * */
-    RooPlot * Print(TString title = "", TString Xtitle = "", string opt = "", RooAbsData* data = NULL, int bins = 50, 
-            vector<string> regStr = vector<string>(), map<string,vector<double>> reg = map<string,vector<double>>(), 
-            RooFitResult * fitRes = NULL, TString Ytitle = "", RooRealVar * myvar = NULL);
-    void Print(TString title = "", TString Xtitle = "", string opt = "", RooAbsData* data = NULL, int bins = 50, 
-            RooFitResult * fitRes = NULL, TString Ytitle = "", vector<RooRealVar *> myvar = vector<RooRealVar *>());
+RooPlot * Print(TString title = "", TString Xtitle = "", string opt = "", RooAbsData* data = NULL, int bins = 50, 
+    vector<string> regStr = vector<string>(), map<string,vector<double>> reg = map<string,vector<double>>(), 
+    RooFitResult * fitRes = NULL, TString Ytitle = "", RooRealVar * myvar = NULL);
+void Print(TString title = "", TString Xtitle = "", string opt = "", RooAbsData* data = NULL, int bins = 50, 
+    RooFitResult * fitRes = NULL, TString Ytitle = "", vector<RooRealVar *> myvar = vector<RooRealVar *>());
 
 
     ///\brief Prints all the paramters to screen in RooFit format (opt="-nocost" skips constants)
-    void PrintParams(string opt = "") { PrintPars(GetParams("-orignames"), opt); }
+void PrintParams(string opt = "") { PrintPars(GetParams("-orignames"), opt); }
     ///\brief Prints the sgnal pdf paramters to screen in RooFit format (opt="-nocost" skips constants)
-    void PrintSigParams(string opt = "") { PrintPars(GetSigParams("-orignames"), opt); }
+void PrintSigParams(string opt = "") { PrintPars(GetSigParams("-orignames"), opt); }
     ///\brief Prints all the paramters to screen in latex table format (opt="-nocost" skips constants)
-    void PrintParamsTable(string opt = "") { PrintPars(GetParams("-orignames"),"-latex"+opt); }
+void PrintParamsTable(string opt = "") { PrintPars(GetParams("-orignames"),"-latex"+opt); }
     ///\brief Prints all sigal PDF paramters to screen in latex table format (opt="-nocost" skips constants)
-    void PrintSigParamsTable(string opt = "") { PrintPars(GetSigParams("-orignames"),"-latex"+opt); }
+void PrintSigParamsTable(string opt = "") { PrintPars(GetSigParams("-orignames"),"-latex"+opt); }
 
     ///\brief Returns the value of S(x)/(S(x)+B(x)) for x = value. It corresponds to a naive S-weight.
-    float GetReducedSWeight(float value);
+float GetReducedSWeight(float value);
 
-    RooWorkspace * SaveToRooWorkspace(string option);
+RooWorkspace * SaveToRooWorkspace(string option);
 
 };
 

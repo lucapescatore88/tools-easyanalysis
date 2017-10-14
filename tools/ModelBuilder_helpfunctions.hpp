@@ -151,15 +151,15 @@ bool checkModel(RooAbsPdf * model);
 
 
 RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model = NULL, string opt = "", 
-        unsigned bins = 50, vector<string> regStr = vector<string>(1,"PlotRange"), map<string,vector<double>> reg = map<string,vector<double>>(), 
-        TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
+  unsigned bins = 50, vector<string> regStr = vector<string>(1,"PlotRange"), map<string,vector<double>> reg = map<string,vector<double>>(), 
+  TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
 RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data = NULL, string opt = "", 
-        unsigned bins = 50, vector<string> regStr = vector<string>(1,"PlotRange"), map<string,vector<double>> reg = map<string,vector<double>>(), 
-        TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
+  unsigned bins = 50, vector<string> regStr = vector<string>(1,"PlotRange"), map<string,vector<double>> reg = map<string,vector<double>>(), 
+  TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
 RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt, 
-        unsigned bins, TString Xtitle, TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
+  unsigned bins, TString Xtitle, TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
 RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt,
-        unsigned bins, TString Xtitle, TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
+  unsigned bins, TString Xtitle, TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
 
 /** Set the paramteres with names in the "names" list to constants
  * opt == "-except" -> set contrants all but the ones with name in the list

@@ -152,33 +152,33 @@ inline double showPercentage(int ientry, int nentries, time_t start = 0, int nti
         {		
             cout << barcolor << "[";
             for(int p = 0; p < perc*20; p++) cout << ">";
-            for(int p = 0; p < (1-perc)*20; p++) cout << "_";
-            cout << "]" << normalcolor << "  ";
-        }
+                for(int p = 0; p < (1-perc)*20; p++) cout << "_";
+                    cout << "]" << normalcolor << "  ";
+            }
 
 
-        if(doentry) cout << "Entry #" << ientry + 1;
-        if(start != 0)
-        {
-            time_t end = time(NULL);
-            double dt = difftime(end,start);
-            cout << "  (";
+            if(doentry) cout << "Entry #" << ientry + 1;
+            if(start != 0)
+            {
+                time_t end = time(NULL);
+                double dt = difftime(end,start);
+                cout << "  (";
 
-            double t_left = ((double)nentries/ientry - 1.)*dt;
+                double t_left = ((double)nentries/ientry - 1.)*dt;
 
-            cout << "~" << timecolor;
-            if(t_left > 60.) cout << t_left/60. << normalcolor << " min to the end)";
-            else cout << t_left << normalcolor << " s to the end)";
-            cout << flush;
+                cout << "~" << timecolor;
+                if(t_left > 60.) cout << t_left/60. << normalcolor << " min to the end)";
+                else cout << t_left << normalcolor << " s to the end)";
+                cout << flush;
+            }
+
+            if( ientry == (nentries-1) ) cout << endl;
+            return perc;
         }
 
         if( ientry == (nentries-1) ) cout << endl;
-        return perc;
+        return 100.;
     }
-
-    if( ientry == (nentries-1) ) cout << endl;
-    return 100.;
-}
 
 
 

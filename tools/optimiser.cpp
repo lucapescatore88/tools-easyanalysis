@@ -116,7 +116,7 @@ void buildComb(const vector< double > &elms, vector<vector<double> > &result, st
 {
     vector < vector < double > > allVecs;
     for (auto e : elms) allVecs.push_back(vector<double>(1,e));
-    buildComb(allVecs,result,0,vector<double>(),opt);
+        buildComb(allVecs,result,0,vector<double>(),opt);
 }
 
 /**
@@ -134,7 +134,7 @@ void buildComb(int min, int max, int k, vector<vector<double> > &result, string 
     {
         vector < double > myv;
         for (int i = min; i <= max; i++) myv.push_back((double)i);
-        allVecs.push_back(myv);
+            allVecs.push_back(myv);
     }
     buildComb(allVecs,result,0,vector<double>(),opt);
 }
@@ -183,9 +183,9 @@ TGraph * reorderTGraph(TGraph * gr)
     }
 
     sort(pts.begin(), pts.end(),
-            [](const vector<double>& a, const vector<double>& b) {
+        [](const vector<double>& a, const vector<double>& b) {
             return a[1] < b[1];
-            });
+        });
 
     TGraph * grout = new TGraph();
     for(size_t p = 0; p < pts.size(); p++)
@@ -240,24 +240,24 @@ double get_background(TTree * tree, TString plot, TString cut, TString weight, d
 
 
 CutOptimizer::CutOptimizer(TString _analysis, TTree *_treeSig, TTree *_treeBkg,
-        vector<RooRealVar *> _vars, TString _mycut, TCut _sigCut, TCut _sideBandCut, TCut _baseCut, 
-        double _sigNorm, double _bkgNorm,
-        TString _MCweight, int _nSteps,
-        string _fmerit, bool _print):
-    analysis(_analysis),
-    treeSig(_treeSig),
-    treeBkg(_treeBkg),
-    baseCut(_baseCut),
-    sigCut(_sigCut),
-    sideBandCut(_sideBandCut),
-    sigNorm(_sigNorm),
-    bkgNorm(_bkgNorm),
-    MCweight(_MCweight),
-    nSteps(_nSteps),
-    vars(_vars),
-    cut_to_optimize(_mycut),
-    fmerit(_fmerit),
-    print(_print)
+    vector<RooRealVar *> _vars, TString _mycut, TCut _sigCut, TCut _sideBandCut, TCut _baseCut, 
+    double _sigNorm, double _bkgNorm,
+    TString _MCweight, int _nSteps,
+    string _fmerit, bool _print):
+analysis(_analysis),
+treeSig(_treeSig),
+treeBkg(_treeBkg),
+baseCut(_baseCut),
+sigCut(_sigCut),
+sideBandCut(_sideBandCut),
+sigNorm(_sigNorm),
+bkgNorm(_bkgNorm),
+MCweight(_MCweight),
+nSteps(_nSteps),
+vars(_vars),
+cut_to_optimize(_mycut),
+fmerit(_fmerit),
+print(_print)
 {
     cout << endl;
     cout << analysis << ": Optimize " << cut_to_optimize << " (FoM = " << fmerit << ", steps = " << nSteps << ")" << endl;
@@ -344,7 +344,7 @@ void CutOptimizer::scan_points(string option)
     vector <TString> varnames;
     for(auto v : vars) varnames.push_back(v->GetName());
 
-    size_t n_pts = pts_to_scan.size(); 
+        size_t n_pts = pts_to_scan.size(); 
     for (size_t i = 0; i < n_pts; i++)
     {
         if(option.find("-noperc")==string::npos) showPercentage(i, n_pts, 0, n_pts);
@@ -406,7 +406,7 @@ vector <double>  CutOptimizer::optimise(string option)
     vector <TString> varnames;
     for(auto v : vars) varnames.push_back(v->GetName());
 
-    cout << "Optimizing..." << endl;
+        cout << "Optimizing..." << endl;
 
     scan_points("-optimise"+option);
 
@@ -572,13 +572,13 @@ void CutOptimizer::ClosePrintAndSave(string option)
         gEP->GetXaxis()->SetRangeUser(v->getMin(), v->getMax());
         gFOM->GetXaxis()->SetRangeUser(v->getMin(), v->getMax());
         gEff->GetXaxis()->SetRangeUser(v->getMin(), v->getMax());
-	gROC->GetXaxis()->SetRangeUser(0, 1.1);
+        gROC->GetXaxis()->SetRangeUser(0, 1.1);
 
-	gEff->GetYaxis()->SetRangeUser(0, 1.1);
-	gRej->GetYaxis()->SetRangeUser(0, 1.1);
-	gPur->GetYaxis()->SetRangeUser(0, 1.1);
-	gEP->GetYaxis()->SetRangeUser(0, 1.1);
-	gROC->GetYaxis()->SetRangeUser(0, 1.1);
+        gEff->GetYaxis()->SetRangeUser(0, 1.1);
+        gRej->GetYaxis()->SetRangeUser(0, 1.1);
+        gPur->GetYaxis()->SetRangeUser(0, 1.1);
+        gEP->GetYaxis()->SetRangeUser(0, 1.1);
+        gROC->GetYaxis()->SetRangeUser(0, 1.1);
 
         gSig->SetLineColor(kBlue);
         gBkg->SetLineColor(kRed);
@@ -645,7 +645,7 @@ void CutOptimizer::ClosePrintAndSave(string option)
         legend->AddEntry(gPur, "N_{S}/(N_{tot})", "l");
         legend->AddEntry(gEP,  "#varepsilon_{S} #times N_{S}/(N_{tot})", "l");
         legend->AddEntry(gFOM, "N_{S}/#sqrt{N_{S}+N_{B}}", "l");
-	
+        
         TPad *pad = new TPad("pad", "", 0, 0, 1, 1);
         pad->SetFillColor(0);
         pad->SetGrid();
@@ -717,7 +717,7 @@ void CutOptimizer::ClosePrintAndSave(string option)
         delete gSig;
         delete gBkg;
         delete gRej;
-	delete gEP;
+        delete gEP;
 
         delete oFrame;
         delete pad;

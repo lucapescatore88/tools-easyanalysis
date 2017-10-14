@@ -72,61 +72,61 @@ bool MultiAnalysis::Initialize(string opt)
             if( !nomodel ) combModel->addPdf(*(ana[i]->GetModel()),categories[i]);
         }
 
-    if( !nodata ) combData = new RooDataSet("combData","combined datas",*vars,Index(*samples),Import(mymap));
+        if( !nodata ) combData = new RooDataSet("combData","combined datas",*vars,Index(*samples),Import(mymap));
 
-    if((string)ana[0]->GetPrintLevel() == "v") if(combData)  combData->Print();
-    if((string)ana[0]->GetPrintLevel() == "v") if(combModel) combModel->Print();
+        if((string)ana[0]->GetPrintLevel() == "v") if(combData)  combData->Print();
+        if((string)ana[0]->GetPrintLevel() == "v") if(combModel) combModel->Print();
     //if((string)ana[0]->GetPrintLevel() == "v") if(combModel) printParams(combModel, *vars);
     //if((string)ana[0]->GetPrintLevel() == "v") if(combModel) printParams(combModel);
 
-    cout << "Object MultiAna " << name << " initialized correctly." << endl;
+        cout << "Object MultiAna " << name << " initialized correctly." << endl;
 
-    init = true;
-    return init;
-}
-
-map < string, RooPlot * > MultiAnalysis::SimultaneousFit(double min, double max, unsigned nbins, string opt)
-{
-    if(!init) Initialize(opt);
-    if((string)ana[0]->GetPrintLevel() == "v") cout << "--------------- FITTING --------------- " << endl;
-
-    if (opt.find("-toy") != string::npos) isToy = true;
-    RooCmdArg isExtended = Extended(kTRUE);
-    if (opt.find("-noextended") != string::npos) isExtended = Extended(kFALSE);
-    RooCmdArg isQuiet = PrintLevel(2);
-    if(opt.find("-quiet")!=string::npos) isQuiet = PrintLevel(-1);
-    RooCmdArg useMinos = Minos(kFALSE);
-    if(opt.find("-minos")!=string::npos) useMinos = Minos(kTRUE);
-    RooCmdArg initialHesse = InitialHesse(kFALSE);
-    if(opt.find("-initialhesse")!=string::npos) initialHesse = InitialHesse(kTRUE);
-    RooCmdArg hesse = Hesse(kTRUE);
-    if(opt.find("-nohesse")!=string::npos) hesse = Hesse(kFALSE);
-
-    if(!combModel || !combData) { cout << "Model or data not set" << endl; return map < string, RooPlot * >(); }
-
-    if(min==max) fitResult = combModel->fitTo(*combData,Save(),isExtended,isQuiet,useMinos,ExternalConstraints(*constr),hesse,initialHesse);
-    else
-    {
-        for(unsigned i = 0; i < categories.size(); i++)
-            ana[i]->GetVariable()->setRange("FitRange",min,max);
-
-        fitResult = combModel->fitTo(*combData,Save(),isExtended,
-                isQuiet,useMinos,ExternalConstraints(*constr), hesse, initialHesse);
+        init = true;
+        return init;
     }
 
-    if (opt.find("-quiet") == string::npos)
-        cout << name << " :  CovQual = " << fitResult->covQual() << ",   Status = " << fitResult->status() << ",   EDM = " << fitResult->edm() << endl;        
-
-    map < string, RooPlot * > plots;
-    if( opt.find("-noplot")==string::npos ) 
+    map < string, RooPlot * > MultiAnalysis::SimultaneousFit(double min, double max, unsigned nbins, string opt)
     {
-        if (isToy) PlotCategories();
+        if(!init) Initialize(opt);
+        if((string)ana[0]->GetPrintLevel() == "v") cout << "--------------- FITTING --------------- " << endl;
+
+        if (opt.find("-toy") != string::npos) isToy = true;
+        RooCmdArg isExtended = Extended(kTRUE);
+        if (opt.find("-noextended") != string::npos) isExtended = Extended(kFALSE);
+        RooCmdArg isQuiet = PrintLevel(2);
+        if(opt.find("-quiet")!=string::npos) isQuiet = PrintLevel(-1);
+        RooCmdArg useMinos = Minos(kFALSE);
+        if(opt.find("-minos")!=string::npos) useMinos = Minos(kTRUE);
+        RooCmdArg initialHesse = InitialHesse(kFALSE);
+        if(opt.find("-initialhesse")!=string::npos) initialHesse = InitialHesse(kTRUE);
+        RooCmdArg hesse = Hesse(kTRUE);
+        if(opt.find("-nohesse")!=string::npos) hesse = Hesse(kFALSE);
+
+        if(!combModel || !combData) { cout << "Model or data not set" << endl; return map < string, RooPlot * >(); }
+
+        if(min==max) fitResult = combModel->fitTo(*combData,Save(),isExtended,isQuiet,useMinos,ExternalConstraints(*constr),hesse,initialHesse);
         else
         {
             for(unsigned i = 0; i < categories.size(); i++)
+                ana[i]->GetVariable()->setRange("FitRange",min,max);
+
+            fitResult = combModel->fitTo(*combData,Save(),isExtended,
+                isQuiet,useMinos,ExternalConstraints(*constr), hesse, initialHesse);
+        }
+
+        if (opt.find("-quiet") == string::npos)
+            cout << name << " :  CovQual = " << fitResult->covQual() << ",   Status = " << fitResult->status() << ",   EDM = " << fitResult->edm() << endl;        
+
+        map < string, RooPlot * > plots;
+        if( opt.find("-noplot")==string::npos ) 
+        {
+            if (isToy) PlotCategories();
+            else
             {
-                RooRealVar * var = ana[i]->GetVariable();
-                if(opt.find("-noinitmodel")==string::npos && opt.find("-noinitdata")==string::npos)
+                for(unsigned i = 0; i < categories.size(); i++)
+                {
+                    RooRealVar * var = ana[i]->GetVariable();
+                    if(opt.find("-noinitmodel")==string::npos && opt.find("-noinitdata")==string::npos)
                     plots[(string)categories[i]] = ana[i]->Print(opt+"-nochi2", nbins);//+"-t"+(string)categories[i]);
                 else
                 {
@@ -145,7 +145,7 @@ map < string, RooPlot * > MultiAnalysis::SimultaneousFit(double min, double max,
 
     for(auto a : ana) a->SetFitRes(fitResult);
 
-    double logL = combModel->createNLL(*combData)->getVal();
+        double logL = combModel->createNLL(*combData)->getVal();
     cout << "\n" << name << ": LogL = " << logL << endl;
 
     if(opt.find("-corr") != string::npos)
@@ -174,7 +174,7 @@ void MultiAnalysis::EnlargeYieldRanges(double factor)
     {
         string varname = (string)arg->GetName();
         if(varname.find("nsig") != string::npos ||
-                varname.find("nbkg") != string::npos )
+            varname.find("nbkg") != string::npos )
         {
             cout << "Scaling" << endl;
             double val = ((RooRealVar*)arg)->getVal();
@@ -472,10 +472,10 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
     if(option.find("-nototsigplot")==string::npos)
     {
         sumsigPdf->plotOn(pl,
-                LineStyle(kDashed),
-                LineColor(kBlack),
-                Normalization(sumNsig,RooAbsReal::NumEvent),
-                Name("sumSigPdf"));
+            LineStyle(kDashed),
+            LineColor(kBlack),
+            Normalization(sumNsig,RooAbsReal::NumEvent),
+            Name("sumSigPdf"));
         leg->AddEntry(pl->findObject("sumSigPdf"),siglabel,"l");  
     }
 
@@ -505,25 +505,25 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
             if(option.find("-fillbkg")!=string::npos)
             {
                 curSumBkgPdf->plotOn(pl,
-                        FillColor(colors[counter]),
-                        FillStyle(1001),
-                        FillStyle(1001),
-                        LineWidth(0.),
-                        LineStyle(0),
-                        LineColor(colors[counter]),
-                        DrawOption("F"),
-                        Normalization(curSum,RooAbsReal::NumEvent),
-                        MoveToBack(), 
-                        Name("sumBkgPdf_"+(TString)bname));  
+                    FillColor(colors[counter]),
+                    FillStyle(1001),
+                    FillStyle(1001),
+                    LineWidth(0.),
+                    LineStyle(0),
+                    LineColor(colors[counter]),
+                    DrawOption("F"),
+                    Normalization(curSum,RooAbsReal::NumEvent),
+                    MoveToBack(), 
+                    Name("sumBkgPdf_"+(TString)bname));  
                 leg->AddEntry(pl->findObject("sumBkgPdf_"+(TString)bname),leglabel,"f");
             }
             else
             {
                 curSumBkgPdf->plotOn(pl,
-                        LineStyle(styles[counter]),
-                        LineColor(colors[counter]),
-                        Normalization(curSum,RooAbsReal::NumEvent),
-                        Name("sumBkgPdf_"+(TString)bname));
+                    LineStyle(styles[counter]),
+                    LineColor(colors[counter]),
+                    Normalization(curSum,RooAbsReal::NumEvent),
+                    Name("sumBkgPdf_"+(TString)bname));
                 leg->AddEntry(pl->findObject("sumBkgPdf_"+(TString)bname),leglabel,"l");
             }
             counter++;
@@ -536,10 +536,10 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
             string bname = bnames[bb];
             RooAddPdf * curSumBkgPdf = new RooAddPdf("sumBkgPdf_"+(TString)bname,"",bkgpdfs[bname],bkgfracs[bname]);
             curSumBkgPdf->plotOn(pl,
-                    LineStyle(styles[counter]),
-                    LineColor(colors[counter]),
-                    Normalization(sumNbkg[bname],RooAbsReal::NumEvent),
-                    Name("sumBkgPdf_"+(TString)bname));
+                LineStyle(styles[counter]),
+                LineColor(colors[counter]),
+                Normalization(sumNbkg[bname],RooAbsReal::NumEvent),
+                Name("sumBkgPdf_"+(TString)bname));
             TString leglabel = getLegendLabel(ana[k]->GetBkgComponents()[bb]->GetTitle(),option);
             leg->AddEntry(pl->findObject("sumBkgPdf_"+(TString)bname),leglabel,"l");
             counter++;
@@ -568,18 +568,18 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
         }
 
         TPaveText * tbox = new TPaveText(gStyle->GetPadLeftMargin() + x1,
-                y1 - gStyle->GetPadTopMargin(),
-                gStyle->GetPadLeftMargin() + x2,
-                y2 - gStyle->GetPadTopMargin(),
-                "BRNDC");
+            y1 - gStyle->GetPadTopMargin(),
+            gStyle->GetPadLeftMargin() + x2,
+            y2 - gStyle->GetPadTopMargin(),
+            "BRNDC");
 
         if(option.find("-lhcbdx")!=string::npos)
         { 
             tbox = new TPaveText(gStyle->GetPadRightMargin() + 0.63,
-                    0.85 - gStyle->GetPadTopMargin(),
-                    gStyle->GetPadRightMargin() + 0.83,
-                    0.97 - gStyle->GetPadTopMargin(),
-                    "BRNDC");
+                0.85 - gStyle->GetPadTopMargin(),
+                gStyle->GetPadRightMargin() + 0.83,
+                0.97 - gStyle->GetPadTopMargin(),
+                "BRNDC");
         }
 
         tbox->AddText("LHCb");

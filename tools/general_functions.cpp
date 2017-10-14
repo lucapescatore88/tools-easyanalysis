@@ -129,7 +129,7 @@ double luminosity( vector<TString > namefile, string doerr )
 
     TreeReader * reader = new TreeReader("GetIntegratedLuminosity/LumiTuple");
     for ( unsigned k = 0; k < namefile.size(); ++k ) reader->AddFile(namefile[k]);
-    reader->Initialize();
+        reader->Initialize();
 
     int ntot = reader->GetEntries();
 
@@ -714,7 +714,7 @@ TH1F *rebinHisto(TH1 &histo, TH1 &tamplateHisto, char* title, bool media)
     float init = tamplateHisto.GetBinLowEdge(1);
     for(int tmpBin = 1; tmpBin < tamplateHisto.GetNbinsX()+1; tmpBin++) sizes.push_back(tamplateHisto.GetBinWidth(tmpBin));
 
-    TH1F* RebinnedHisto = rebinHisto(histo, init, sizes, title, media);
+        TH1F* RebinnedHisto = rebinHisto(histo, init, sizes, title, media);
 
     return RebinnedHisto;
 }
@@ -754,7 +754,7 @@ TH1F *rebinHisto(TH1 &histo, float error, char* title, bool media)
 
     for(size_t j = 1; j != edges.size(); j++) sizes.push_back(edges[j] - edges[j-1]);
 
-    TH1F* RebinnedHisto = rebinHisto(histo, init, sizes, title, media);
+        TH1F* RebinnedHisto = rebinHisto(histo, init, sizes, title, media);
 
     return RebinnedHisto;
 }
@@ -785,7 +785,7 @@ vector <double> scalarProd(vector<double> v, double c)
     vector<double> res = v;
     for(unsigned n = 0; n < v.size(); n++) res[n] *= c;
 
-    return res;
+        return res;
 }
 
 
@@ -815,24 +815,24 @@ double * decodeBinning(string str, int * _nbins, string opt)
         res = new double[nbins+1];
         for(int i = 0; i <= nbins; i++) res[i] = min + i*(max-min)/(double)nbins;
     }
-    else 
+else 
+{
+    vector < string > v;
+    unsigned pos = 0;
+    while(true)
     {
-        vector < string > v;
-        unsigned pos = 0;
-        while(true)
-        {
-            unsigned pos2 = str.find(",",pos+1);
-            v.push_back(str.substr(pos+1,pos2-pos));
-            if(pos2 > 1.e9) break;
-            pos = pos2;
-        }
-
-        if(_nbins) *_nbins = v.size()-1;
-        res = new double[v.size()];
-        for(unsigned i = 0; i < v.size(); i++) res[i] = ((TString)v[i]).Atof(); 
+        unsigned pos2 = str.find(",",pos+1);
+        v.push_back(str.substr(pos+1,pos2-pos));
+        if(pos2 > 1.e9) break;
+        pos = pos2;
     }
 
-    return res;
+    if(_nbins) *_nbins = v.size()-1;
+    res = new double[v.size()];
+    for(unsigned i = 0; i < v.size(); i++) res[i] = ((TString)v[i]).Atof(); 
+}
+
+return res;
 }
 
 

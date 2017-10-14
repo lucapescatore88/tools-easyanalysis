@@ -97,10 +97,10 @@ class CutOptimizer {
     public :
 
     CutOptimizer(TString _analysis, TTree *_treeSig, TTree *_treeBkg,
-            vector<RooRealVar *> _vars, TString _mycut, TCut _sigCut, TCut _sideBandCut, TCut _baseCut = "", 
-            double _sigNorm = 1., double _bkgNorm = 1.,
-            TString _MCweight = "", int _nSteps = 4,
-            string _fmerit = "significance", bool _print = 0);
+        vector<RooRealVar *> _vars, TString _mycut, TCut _sigCut, TCut _sideBandCut, TCut _baseCut = "", 
+        double _sigNorm = 1., double _bkgNorm = 1.,
+        TString _MCweight = "", int _nSteps = 4,
+        string _fmerit = "significance", bool _print = 0);
 
     TString GetOptimalCut() 
     {
@@ -109,7 +109,7 @@ class CutOptimizer {
         {            
             vector <TString> varnames;
             for(auto v : vars) varnames.push_back(v->GetName());
-            return subStrings(cut_to_optimize,varnames,optimalW);
+                return subStrings(cut_to_optimize,varnames,optimalW);
         }
     }
 

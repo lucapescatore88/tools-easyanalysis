@@ -27,8 +27,8 @@ RooArgSet * ModelBuilder::GetParamsArgSet()
 RooAbsPdf * ModelBuilder::GetParamsGaussian(RooFitResult * fitRes)
 {
     return (RooAbsPdf *)(new RooMultiVarGaussian(
-                m_name+"_multivar_gauss",m_name+"_multivar_gauss",
-                *GetParamsArgSet(),fitRes->covarianceMatrix()));
+        m_name+"_multivar_gauss",m_name+"_multivar_gauss",
+        *GetParamsArgSet(),fitRes->covarianceMatrix()));
 }
 
 
@@ -43,8 +43,8 @@ RooDataSet * ModelBuilder::GetParamsVariations(int nvariations, RooFitResult * f
     cout << "End matrix" << endl;
 
     RooMultiVarGaussian * gauss = new RooMultiVarGaussian(
-            m_name+"_multivar_gauss",m_name+"_multivar_gauss",
-            *params,fitRes->covarianceMatrix());
+        m_name+"_multivar_gauss",m_name+"_multivar_gauss",
+        *params,fitRes->covarianceMatrix());
     gauss->Print();
     RooDataSet * variations = gauss->generate(*params,nvariations);
     return variations;
@@ -150,7 +150,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
    */
 
 void ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsData * data, int bins, 
-        RooFitResult * fitRes, TString Ytitle, vector< RooRealVar *> myvars)
+    RooFitResult * fitRes, TString Ytitle, vector< RooRealVar *> myvars)
 {
     for(auto v : myvars)
     {
@@ -160,7 +160,7 @@ void ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsData *
 
 
 RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsData * data, int bins,
-        vector<string> regStr, map<string,vector<double>> reg, RooFitResult * fitRes, TString Ytitle, RooRealVar * myvar)
+    vector<string> regStr, map<string,vector<double>> reg, RooFitResult * fitRes, TString Ytitle, RooRealVar * myvar)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
     RooPlot* frame = NULL;
@@ -212,7 +212,7 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
         if(pullopt=="p") resH = new TH1D( "rH"+m_name, "Pulls distribution", 15, -6, 6 );
         else resH = new TH1D( "rH", "", 15, -3, 3 );
         for(int i = 0; i < residuals->GetNbinsX(); i++) resH->Fill(residuals->GetBinContent(i));
-        gStyle->SetOptStat(0);
+            gStyle->SetOptStat(0);
         gStyle->SetOptFit(1011);
         resH->GetXaxis()->SetTitle("Pulls");
         resH->GetYaxis()->SetTitle("Bins");
@@ -338,18 +338,18 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
         }
 
         TPaveText * tbox = new TPaveText(gStyle->GetPadLeftMargin() + x1,
-                y1 - gStyle->GetPadTopMargin(),
-                gStyle->GetPadLeftMargin() + x2,
-                y2 - gStyle->GetPadTopMargin(),
-                "BRNDC");
+            y1 - gStyle->GetPadTopMargin(),
+            gStyle->GetPadLeftMargin() + x2,
+            y2 - gStyle->GetPadTopMargin(),
+            "BRNDC");
 
         if(opt.find("-lhcbdx")!=string::npos)
         { 
             tbox = new TPaveText(gStyle->GetPadRightMargin() + 0.63,
-                    0.80 - gStyle->GetPadTopMargin(),
-                    gStyle->GetPadRightMargin() + 0.83,
-                    0.97 - gStyle->GetPadTopMargin(),
-                    "BRNDC");
+                0.80 - gStyle->GetPadTopMargin(),
+                gStyle->GetPadRightMargin() + 0.83,
+                0.97 - gStyle->GetPadTopMargin(),
+                "BRNDC");
         }
         tbox->AddText("LHCb");
         tbox->SetFillStyle(0);
@@ -447,9 +447,9 @@ double ModelBuilder::GetNSigVal(double min, double max, double * valerr, RooFitR
     double res = sigval*integ->getVal();
     
     RooFormulaVar * nsigval = new RooFormulaVar("nsigval",
-            "nsigval",(TString)m_nsig->GetName() + " * " + (TString)integ->GetName(),
-            RooArgSet(*m_nsig,*integ));
-   
+        "nsigval",(TString)m_nsig->GetName() + " * " + (TString)integ->GetName(),
+        RooArgSet(*m_nsig,*integ));
+    
     /*
     m_var->setRange("myfitrange",min,max);
     fit_integ = m_sig->createIntegral(*m_var,NormSet(*m_var),Range("myfitrange"));
@@ -593,27 +593,27 @@ RooWorkspace * ModelBuilder::SaveToRooWorkspace(string option)
 
 
     if(option == "")
-    if(m_model)
-    {
-       ws->import(*m_model);
-       if (m_pmode == "v") cout << "m_model: " << m_model->GetName() << endl;
-    }
+        if(m_model)
+        {
+         ws->import(*m_model);
+         if (m_pmode == "v") cout << "m_model: " << m_model->GetName() << endl;
+     }
 
-    if(option == "sig")
-    if(m_sig)
-    {
-        ws->import(*m_sig);
-       if (m_pmode == "v") cout << "signal: " << m_sig->GetName() << endl;
-    }
+     if(option == "sig")
+        if(m_sig)
+        {
+            ws->import(*m_sig);
+            if (m_pmode == "v") cout << "signal: " << m_sig->GetName() << endl;
+        }
 
-    if(option == "bkg")
-    if(m_bkg)
-    {
-        ws->import(*m_bkg);
-       if (m_pmode == "v") cout << "background: " << m_bkg->GetName() << endl;
-    }
+        if(option == "bkg")
+            if(m_bkg)
+            {
+                ws->import(*m_bkg);
+                if (m_pmode == "v") cout << "background: " << m_bkg->GetName() << endl;
+            }
 
-    return ws;
-}
+            return ws;
+        }
 
 

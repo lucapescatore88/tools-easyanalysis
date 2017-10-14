@@ -24,7 +24,7 @@ double get_integral_after_cut(TString name, TString plot, TTree * tree, TCut cut
 }
 
 double get_eff_one(TString name, TString plot, TChain * tree, TCut cuts,
-        TChain * downTree, TCut downCuts, TString weight, TString downWeight, double *efferr, TEfficiency ** heff)
+    TChain * downTree, TCut downCuts, TString weight, TString downWeight, double *efferr, TEfficiency ** heff)
 {
     (*efferr) = 0.;
     return 1.;
@@ -38,9 +38,9 @@ TEfficiency * get_TEfficiency(TH1 * hpass, TH1* htot)
     int nbins = htot->GetNbinsX();
     if(hpass->GetNbinsX()!=htot->GetNbinsX()) { cout << "Histograms have different numbers of bins" << endl; return NULL; }
     if(hpass->GetBinLowEdge(1)!=htot->GetBinLowEdge(1) ||
-            hpass->GetBinLowEdge(nbins+1)!=htot->GetBinLowEdge(nbins+1)) { cout << "Histograms have different ranges" << endl; return NULL; }
+        hpass->GetBinLowEdge(nbins+1)!=htot->GetBinLowEdge(nbins+1)) { cout << "Histograms have different ranges" << endl; return NULL; }
 
-    static unsigned id = 0;
+        static unsigned id = 0;
     TH1I * myhpass = new TH1I(Form("myhpass_%i",id),"myhpass",nbins,hpass->GetBinLowEdge(1),hpass->GetBinLowEdge(nbins+1));
     TH1I * myhtot = new TH1I(Form("myhtot_%i",id),"myhtot",nbins,hpass->GetBinLowEdge(1),hpass->GetBinLowEdge(nbins+1));
     for(int b = 1; b <= nbins; b++)
@@ -55,7 +55,7 @@ TEfficiency * get_TEfficiency(TH1 * hpass, TH1* htot)
 
 
 double get_efficiency_default(TString name, TString plot, TChain * tree, TCut cuts,
-        TChain * downTree, TCut downCuts, TString weight, TString downWeight, double *efferr, TEfficiency ** heff)
+    TChain * downTree, TCut downCuts, TString weight, TString downWeight, double *efferr, TEfficiency ** heff)
 {
     TH1 * hnom = NULL, * hdenom = NULL;
     double nNom = get_integral_after_cut(name+"nom", plot, tree, cuts, weight, &hnom);
@@ -71,10 +71,10 @@ double get_efficiency_default(TString name, TString plot, TChain * tree, TCut cu
 
 
 EffComp::EffComp(TString name, vector<TCut> cuts, vector <TString> samples, 
-        vector <TChain * > trees, vector <TChain * > tot_trees,
-        vector <TCut> basecuts,
-        vector <TString > weights, vector <TString > tot_weights
-        ) : mName (name)
+    vector <TChain * > trees, vector <TChain * > tot_trees,
+    vector <TCut> basecuts,
+    vector <TString > weights, vector <TString > tot_weights
+    ) : mName (name)
 {
     size_t size = samples.size();
     if(cuts.size()!=size) { cout << "Number of formulas different than number of samples" << endl; }
@@ -102,7 +102,7 @@ map<TString, double> EffComp::CalcEfficiencies(vector<TString> plot, string opti
 {
     map<TString, double> res;
     for(auto p : plot) res = CalcEfficiencies(p,option,ofile);
-    return res;
+        return res;
 }
 
 map<TString, double> EffComp::CalcEfficiencies(TString plot, string option, TFile * ofile)
@@ -121,203 +121,203 @@ map<TString, double> EffComp::CalcEfficiencies(TString plot, string option, TFil
             if(mTot_tree[cursample] && mCut_tree[cursample]) {
                 cout << "Nominator tree   : " << mCut_tree[cursample]->GetName() << endl;
                 cout << "Denominator tree : " << mTot_tree[cursample]->GetName() << endl; } 
-            cout << "Weight : " << mWeights[cursample] << endl;
-            cout << "Function : " << mFuncs[cursample] << endl;
-            cout << "Working... " << endl;
-        }
+                cout << "Weight : " << mWeights[cursample] << endl;
+                cout << "Function : " << mFuncs[cursample] << endl;
+                cout << "Working... " << endl;
+            }
 
-        if(option.find("-sameweight")!=string::npos) mTot_weights[cursample] = mWeights[cursample];
+            if(option.find("-sameweight")!=string::npos) mTot_weights[cursample] = mWeights[cursample];
 
-        TEfficiency * heff = NULL;
-        double err;
-        TCut upcut = mCuts[cursample];
-        if(option.find("-join")!=string::npos) upcut += mBaseCuts[cursample];
-        mValues[cursample] = mFuncs[cursample](mName + "_" + cursample, plot,
+            TEfficiency * heff = NULL;
+            double err;
+            TCut upcut = mCuts[cursample];
+            if(option.find("-join")!=string::npos) upcut += mBaseCuts[cursample];
+            mValues[cursample] = mFuncs[cursample](mName + "_" + cursample, plot,
                 mCut_tree[cursample], upcut,
                 mTot_tree[cursample], mCuts[cursample],
                 mWeights[cursample],mTot_weights[cursample],&err,&heff);
-        mErrors[cursample] = err;
+            mErrors[cursample] = err;
 
-        if(heff && ofile) 
-        { 
-            ofile->cd("histos");
-            heff->Draw("AL");
-            TGraphAsymmErrors *gr = (TGraphAsymmErrors*) heff->CreateGraph();
-            if(gr) gr->Write("eff_"+mName+"_vs_"+plot); 
-            heff->Write("hist_eff_"+mName+"_vs_"+plot);
-            ofile->cd(); 
+            if(heff && ofile) 
+            { 
+                ofile->cd("histos");
+                heff->Draw("AL");
+                TGraphAsymmErrors *gr = (TGraphAsymmErrors*) heff->CreateGraph();
+                if(gr) gr->Write("eff_"+mName+"_vs_"+plot); 
+                heff->Write("hist_eff_"+mName+"_vs_"+plot);
+                ofile->cd(); 
+            }
+
+            if(mVerbose) cout << "Efficiency = " << mValues[cursample] << " +/- " << mErrors[cursample] << endl;
         }
 
-        if(mVerbose) cout << "Efficiency = " << mValues[cursample] << " +/- " << mErrors[cursample] << endl;
+        return mValues;
     }
 
-    return mValues;
-}
-
-double EffComp::CalcEffRatios(TString up, TString down)
-{
-    if(mCuts.find(up)!=mCuts.end() && mCuts.find(down)!=mCuts.end())
+    double EffComp::CalcEffRatios(TString up, TString down)
     {
-        mValues["__ratio__"+up+"_over_"+down] = mValues[up] / mValues[down];
-        mErrors["__ratio__"+up+"_over_"+down] = mValues[up] / mValues[down] * TMath::Sqrt( TMath::Power(mErrors[up]/mValues[up],2) + TMath::Power(mErrors[down]/mValues[down],2));
-
-        return mValues["__ratio__"+up+"_over_"+down];
-    }
-    else { cout << "ATTENTION: One of the samples is non exsisting" << endl; return 0.; }
-}
-
-
-
-void EffComp::Print()
-{
-    cout << "\n\n\n-------------------------------------------------" << endl;
-    cout << "Cut : " << mName << endl;
-    cout << "-------------------------------------------------" << endl;
-
-    for(auto c : mCuts)
-    {
-        TString cursample = c.first;
-        cout << "-------------------------------------------------" << endl;
-        cout << "Applied on sample : " << cursample << endl;
-        cout << "Cut under test : ";
-        mCuts[cursample].Print();
-        cout << "Base cut : ";
-        mBaseCuts[cursample].Print();
-        if(mTot_tree[cursample] && mCut_tree[cursample])
+        if(mCuts.find(up)!=mCuts.end() && mCuts.find(down)!=mCuts.end())
         {
-            cout << "Nominator tree : " << mCut_tree[cursample]->GetName() << endl;
-            cout << "Denominator tree : " << mTot_tree[cursample]->GetName() << endl; 
+            mValues["__ratio__"+up+"_over_"+down] = mValues[up] / mValues[down];
+            mErrors["__ratio__"+up+"_over_"+down] = mValues[up] / mValues[down] * TMath::Sqrt( TMath::Power(mErrors[up]/mValues[up],2) + TMath::Power(mErrors[down]/mValues[down],2));
+
+            return mValues["__ratio__"+up+"_over_"+down];
         }
-        else cout << "No trees set for this cut and sample" << endl;
-        cout << "Weight : " << mWeights[cursample] << endl;
-        cout << "BaseWeight : " << mTot_weights[cursample] << endl; 
-        cout << "Efficiency : " << mValues[cursample] << " +/- " << mErrors[cursample] << endl;
+        else { cout << "ATTENTION: One of the samples is non exsisting" << endl; return 0.; }
     }
-}
+
+
+
+    void EffComp::Print()
+    {
+        cout << "\n\n\n-------------------------------------------------" << endl;
+        cout << "Cut : " << mName << endl;
+        cout << "-------------------------------------------------" << endl;
+
+        for(auto c : mCuts)
+        {
+            TString cursample = c.first;
+            cout << "-------------------------------------------------" << endl;
+            cout << "Applied on sample : " << cursample << endl;
+            cout << "Cut under test : ";
+            mCuts[cursample].Print();
+            cout << "Base cut : ";
+            mBaseCuts[cursample].Print();
+            if(mTot_tree[cursample] && mCut_tree[cursample])
+            {
+                cout << "Nominator tree : " << mCut_tree[cursample]->GetName() << endl;
+                cout << "Denominator tree : " << mTot_tree[cursample]->GetName() << endl; 
+            }
+            else cout << "No trees set for this cut and sample" << endl;
+            cout << "Weight : " << mWeights[cursample] << endl;
+            cout << "BaseWeight : " << mTot_weights[cursample] << endl; 
+            cout << "Efficiency : " << mValues[cursample] << " +/- " << mErrors[cursample] << endl;
+        }
+    }
 
 
 
 
 
 
-bool CutFlow::HasCut(TString name)
-{
-    if(mEffs.find(name) != mEffs.end()) return true;
-    return false;
-}
+    bool CutFlow::HasCut(TString name)
+    {
+        if(mEffs.find(name) != mEffs.end()) return true;
+        return false;
+    }
 
-void CutFlow::AddCut(TString name, vector<TCut> cuts, vector <TString> samples, 
+    void CutFlow::AddCut(TString name, vector<TCut> cuts, vector <TString> samples, 
         vector <TChain * > trees, vector <TCut> basecuts, vector <TChain * > tot_trees,
         vector <TString > weights, vector <TString > tot_weights)
-{
-    map<TString,double> myvalues, myerrors;
-    map<TString,TCut> mycuts, mybasecuts;
-    map<TString,TChain*> mytrees, mytot_trees;
-    map<TString,TString> myweights, mytot_weights;
-    size_t size = samples.size();
-    EffComp * prev_cut = NULL;
-    if(mEffs.size()>0) prev_cut = mEffs[mEffs_order.back()];
-
-    for(size_t ss = 0; ss < size; ss++) 
     {
-        TString s = samples[ss];
+        map<TString,double> myvalues, myerrors;
+        map<TString,TCut> mycuts, mybasecuts;
+        map<TString,TChain*> mytrees, mytot_trees;
+        map<TString,TString> myweights, mytot_weights;
+        size_t size = samples.size();
+        EffComp * prev_cut = NULL;
+        if(mEffs.size()>0) prev_cut = mEffs[mEffs_order.back()];
 
-        mycuts[s] = (cuts.size() == size) ?  cuts[ss] : (TCut)"";
+        for(size_t ss = 0; ss < size; ss++) 
+        {
+            TString s = samples[ss];
 
-        if(basecuts.size() == size) mybasecuts[s] = basecuts[ss];
-        else mybasecuts[s] = prev_cut ? (prev_cut->mCuts[s] + prev_cut->mBaseCuts[s]) : (TCut)"";
+            mycuts[s] = (cuts.size() == size) ?  cuts[ss] : (TCut)"";
 
-        if(trees.size() == size) mytrees[s] = trees[ss];
-        else mytrees[s] = prev_cut ? prev_cut->mCut_tree[s] : (TChain*)NULL;
+            if(basecuts.size() == size) mybasecuts[s] = basecuts[ss];
+            else mybasecuts[s] = prev_cut ? (prev_cut->mCuts[s] + prev_cut->mBaseCuts[s]) : (TCut)"";
 
-        if(tot_trees.size() == size) mytot_trees[s] = tot_trees[ss];
-        else mytot_trees[s] = prev_cut ? prev_cut->mCut_tree[s] : (TChain*)NULL;
+            if(trees.size() == size) mytrees[s] = trees[ss];
+            else mytrees[s] = prev_cut ? prev_cut->mCut_tree[s] : (TChain*)NULL;
 
-        if(weights.size() == size) myweights[s] = weights[ss];
-        else myweights[s] = prev_cut ? prev_cut->mWeights[s] : "";
+            if(tot_trees.size() == size) mytot_trees[s] = tot_trees[ss];
+            else mytot_trees[s] = prev_cut ? prev_cut->mCut_tree[s] : (TChain*)NULL;
 
-        if(tot_weights.size() == size) mytot_weights[s] = tot_weights[ss];
-        else mytot_weights[s] = prev_cut ? prev_cut->mTot_weights[s] : "";
+            if(weights.size() == size) myweights[s] = weights[ss];
+            else myweights[s] = prev_cut ? prev_cut->mWeights[s] : "";
+
+            if(tot_weights.size() == size) mytot_weights[s] = tot_weights[ss];
+            else mytot_weights[s] = prev_cut ? prev_cut->mTot_weights[s] : "";
+        }
+
+        AddCut(name,mycuts,mybasecuts,myweights,mytot_weights,mytrees,mytot_trees);
     }
 
-    AddCut(name,mycuts,mybasecuts,myweights,mytot_weights,mytrees,mytot_trees);
-}
-
-void CutFlow::AddCut(TString name, map<TString,TCut> cuts, map<TString,TCut> basecuts,  
+    void CutFlow::AddCut(TString name, map<TString,TCut> cuts, map<TString,TCut> basecuts,  
         map<TString,TString> weights,  map<TString,TString> tot_weights, 
         map<TString,TChain * > trees,  map<TString,TChain*> downtrees)
-{
-    for(auto s : mSamples)
     {
-        if(cuts.find(s)==cuts.end()) cuts[s] = "";
-        if(basecuts.find(s)==basecuts.end()) basecuts[s] = "";
-        if(weights.find(s)==weights.end()) weights[s] = "";
-        if(tot_weights.find(s)==tot_weights.end()) tot_weights[s] = "";
-        if(trees.find(s)==trees.end()) trees[s] = NULL;
-        if(downtrees.find(s)==downtrees.end()) downtrees[s] = NULL;
-    }
-
-    mEffs[name] = new EffComp(name,cuts,basecuts,trees,downtrees,weights,tot_weights);   
-    if(name!="__Total") mEffs_order.push_back(name);
-}    
-
-void CutFlow::AddCut(TString name, map<TString,TCut> cuts, TCut baseCut, TString weight, TChain * tree, TChain * downTree)
-{
-    map<TString,TCut> prev_cut;
-    map<TString,TChain*> trees, tot_trees;
-    map<TString,TString> weights, tot_weights;
-
-    if(mEffs.size()) 
-    {
-        for (auto c : cuts)
+        for(auto s : mSamples)
         {
-            TString s = c.first;
-            EffComp * prev_eff = mEffs[mEffs_order.back()];
-
-            prev_cut[s] = (baseCut!="") ? baseCut : (TCut)(prev_eff->mCuts[s] + prev_eff->mBaseCuts[s]);
-            trees[s] = (tree) ? tree : prev_eff->mCut_tree[s];
-            tot_trees[s] = (downTree) ? downTree : prev_eff->mCut_tree[s];
-            weights[s] = weight;
-            tot_weights[s] = weight;
+            if(cuts.find(s)==cuts.end()) cuts[s] = "";
+            if(basecuts.find(s)==basecuts.end()) basecuts[s] = "";
+            if(weights.find(s)==weights.end()) weights[s] = "";
+            if(tot_weights.find(s)==tot_weights.end()) tot_weights[s] = "";
+            if(trees.find(s)==trees.end()) trees[s] = NULL;
+            if(downtrees.find(s)==downtrees.end()) downtrees[s] = NULL;
         }
-    }
-    else for (auto c : cuts) prev_cut[c.first] = baseCut;
 
-    AddCut(name,cuts,prev_cut,weights,tot_weights,trees,tot_trees);
-}
+        mEffs[name] = new EffComp(name,cuts,basecuts,trees,downtrees,weights,tot_weights);   
+        if(name!="__Total") mEffs_order.push_back(name);
+    }    
 
-
-void CutFlow::AddCut(TString name, TCut formula, vector <TString> samples,
-        TChain * tree, TString weight, TChain * downTree, TCut baseCut) 
-{ 
-    if(samples.size()==0) samples = mSamples;
-
-    map<TString, TCut> cuts;
-    for (auto s : samples) cuts[s] = formula;
-
-    AddCut(name,cuts,baseCut,weight,tree,downTree);
-}
-
-void CutFlow::SetTrees(TString nameeff, TString fileup, TString nameup, TString filedown, TString namedown)
-{
-    if(filedown=="") filedown = fileup;
-    SetTrees(nameeff,vector<TString>(1,fileup),nameup,vector<TString>(1,filedown), namedown);
-}
-
-void CutFlow::SetTrees(TString nameeff, vector<TString> fileup, TString nameup, vector<TString> filedown, TString namedown)
-{
-    if(namedown=="") namedown = nameup;
-    if(filedown.size()==0) filedown = fileup;
-    if(!HasCut(nameeff)) return;
-
-    for(auto s : mEffs[nameeff]->mCuts)
+    void CutFlow::AddCut(TString name, map<TString,TCut> cuts, TCut baseCut, TString weight, TChain * tree, TChain * downTree)
     {
-        mEffs[nameeff]->mCut_tree[s.first] = new TChain(nameup);
-        for(auto f : fileup) mEffs[nameeff]->mCut_tree[s.first]->AddFile(f);
+        map<TString,TCut> prev_cut;
+        map<TString,TChain*> trees, tot_trees;
+        map<TString,TString> weights, tot_weights;
 
-        mEffs[nameeff]->mTot_tree[s.first] = new TChain(namedown);
-        for(auto f : filedown) mEffs[nameeff]->mTot_tree[s.first]->AddFile(f);
+        if(mEffs.size()) 
+        {
+            for (auto c : cuts)
+            {
+                TString s = c.first;
+                EffComp * prev_eff = mEffs[mEffs_order.back()];
+
+                prev_cut[s] = (baseCut!="") ? baseCut : (TCut)(prev_eff->mCuts[s] + prev_eff->mBaseCuts[s]);
+                trees[s] = (tree) ? tree : prev_eff->mCut_tree[s];
+                tot_trees[s] = (downTree) ? downTree : prev_eff->mCut_tree[s];
+                weights[s] = weight;
+                tot_weights[s] = weight;
+            }
+        }
+        else for (auto c : cuts) prev_cut[c.first] = baseCut;
+
+        AddCut(name,cuts,prev_cut,weights,tot_weights,trees,tot_trees);
     }
+
+
+    void CutFlow::AddCut(TString name, TCut formula, vector <TString> samples,
+        TChain * tree, TString weight, TChain * downTree, TCut baseCut) 
+    { 
+        if(samples.size()==0) samples = mSamples;
+
+        map<TString, TCut> cuts;
+        for (auto s : samples) cuts[s] = formula;
+
+            AddCut(name,cuts,baseCut,weight,tree,downTree);
+    }
+
+    void CutFlow::SetTrees(TString nameeff, TString fileup, TString nameup, TString filedown, TString namedown)
+    {
+        if(filedown=="") filedown = fileup;
+        SetTrees(nameeff,vector<TString>(1,fileup),nameup,vector<TString>(1,filedown), namedown);
+    }
+
+    void CutFlow::SetTrees(TString nameeff, vector<TString> fileup, TString nameup, vector<TString> filedown, TString namedown)
+    {
+        if(namedown=="") namedown = nameup;
+        if(filedown.size()==0) filedown = fileup;
+        if(!HasCut(nameeff)) return;
+
+        for(auto s : mEffs[nameeff]->mCuts)
+        {
+            mEffs[nameeff]->mCut_tree[s.first] = new TChain(nameup);
+            for(auto f : fileup) mEffs[nameeff]->mCut_tree[s.first]->AddFile(f);
+
+                mEffs[nameeff]->mTot_tree[s.first] = new TChain(namedown);
+            for(auto f : filedown) mEffs[nameeff]->mTot_tree[s.first]->AddFile(f);
+        }
 }
 
 void CutFlow::SetFunction(TString nameeff, FUNC_CALC_EFF myfunc)
@@ -435,8 +435,8 @@ void CutFlow::LoadFromFile(TString filename, string option)
             first = false;
             AddCut(name, cuts, basecuts, weights, tot_weights);
             for(auto s : mSamples) (*GetEffValues(name))[s] = values[s];
-            for(auto s : mSamples) (*GetEffErrors(name))[s] = errors[s];
-        }
+                for(auto s : mSamples) (*GetEffErrors(name))[s] = errors[s];
+            }
     }
 
     cout << "CutFlow fully loaded! Enjoy!" << endl;
@@ -463,8 +463,8 @@ void CutFlow::CalcTotals()
 
     mEffs["__Total"] = new EffComp("__Total",vector<TCut>(mSamples.size(),"Total efficiency"),mSamples);
     for(auto s : mSamples) mEffs["__Total"]->mValues[s] = values[s];
-    for(auto s : mSamples) mEffs["__Total"]->mErrors[s] = errors[s];
-}
+        for(auto s : mSamples) mEffs["__Total"]->mErrors[s] = errors[s];
+    }
 
 
 double CutFlow::GetEff(TString eff, TString sample, double * err)         
@@ -495,7 +495,7 @@ double CutFlow::GetEffRatio(TString eff, TString sup, TString sdown, double * er
             }
         }
 
-    cout << "No ratio (" << sup << " / " << sdown << ") found.";
-    cout << " Try CalcRatios("<< sup << "," << sdown <<") or check settings." << endl; 
-    return 0.;
-}
+        cout << "No ratio (" << sup << " / " << sdown << ") found.";
+        cout << " Try CalcRatios("<< sup << "," << sdown <<") or check settings." << endl; 
+        return 0.;
+    }

@@ -84,7 +84,7 @@ double myFeldmanCousins::generateToys(double testVal, double testVal2, TH1 * h, 
 	for(unsigned e = 0; e < nexp; e++)
 	{
 		showPercentage(e,nexp);
-	
+		
 		RooDataSet * toyData = NULL;
 		if(categories.size()==0) { toyData = pdfs[0]->generate(*obs,datas[0]->numEntries()); }
 		else
@@ -113,7 +113,7 @@ double myFeldmanCousins::generateToys(double testVal, double testVal2, TH1 * h, 
 		else
 		{
 			//if((nfree>1 && !PoI2) || nfree>2)
-				myfit(copyPdf,toyData,PoIs,isValid,opt,nfree,cons,toynll);
+			myfit(copyPdf,toyData,PoIs,isValid,opt,nfree,cons,toynll);
 			double nll_fix_val = toynll->getVal(); 
 
 			double MCratio = nll_fix_val/nll_val;
@@ -173,55 +173,55 @@ vector< vector < double > > myFeldmanCousins::ExtractLimits(vector< vector < dou
 			double step = (PoI->getMax() - PoI->getMin()) / npoints;
 			for(int a = PoI->getMin(); a < PoI->getMax(); a+=step ) points.push_back(vector<double>(1,a));
 		}
-	}
-	if(points.size() < PoIs.size()) { cout << " NO POINTS SET FOR ALL POIs!!! " << endl; return vector< vector < double > >(); }
-	npoints = points[0].size();
-	for(unsigned i = 0; i < npoints; i++)
+}
+if(points.size() < PoIs.size()) { cout << " NO POINTS SET FOR ALL POIs!!! " << endl; return vector< vector < double > >(); }
+npoints = points[0].size();
+for(unsigned i = 0; i < npoints; i++)
+{
+	double curTestVal = points[0][i];
+	double curTestVal2 = 0;
+	if(PoI2) curTestVal2 = points[1][i];
+	
+	fixParam(combPdf,obs,origPars);
+	PoI->setVal(curTestVal);
+	PoI->setConstant(kTRUE);
+	if(PoI2) PoI2->setVal(curTestVal2);
+	if(PoI2) PoI2->setConstant(kTRUE);
+
+	if(isValid && !isValid(combPdf))
 	{
-		double curTestVal = points[0][i];
-		double curTestVal2 = 0;
-		if(PoI2) curTestVal2 = points[1][i];
-		
-		fixParam(combPdf,obs,origPars);
-		PoI->setVal(curTestVal);
-		PoI->setConstant(kTRUE);
-		if(PoI2) PoI2->setVal(curTestVal2);
-		if(PoI2) PoI2->setConstant(kTRUE);
-
-		if(isValid && !isValid(combPdf))
-		{
-			cout << fixed << setprecision(2);
-			if(PoI2) cout << "(" << PoI->GetName() << "," << PoI2->GetName() << ") = (" << curTestVal << "," << curTestVal2 << ")"; 
-			else cout << PoI->GetName() << " = " << curTestVal;
-			cout << " -> Invalid point: SKIPPING!!!" << endl; 
-			continue;
-		}
-
-		myfit(combPdf,combData,PoIs,isValid,opt,nfree,cons,nll);
-		double nll_fix_val = nll->getVal(); 
-		dataratio = nll_fix_val/nll_val;
-
-		double pvalue = generateToys(curTestVal,curTestVal2,NULL,opt);
-		vector < double > res(1,curTestVal);
-		res.push_back(curTestVal2);
-		res.push_back(pvalue);
-		gr.push_back(res);
-
-		if(PoI2)
-		{
-			cout << fixed << setprecision(3) << "(" << PoI->GetName() << "," << PoI2->GetName();
-			cout << ") = (" << curTestVal << "," << curTestVal2 << ")";
-		}
-		else 
-		{
-			cout << fixed << setprecision(3) << PoI->GetName();
-			cout << " = " << curTestVal;
-		}	
-		cout << " -> logL_fix / logL_free = " << fixed << setprecision(6) << nll_fix_val/nll_val;
-		cout << " -> pvalue = " << pvalue << endl;
+		cout << fixed << setprecision(2);
+		if(PoI2) cout << "(" << PoI->GetName() << "," << PoI2->GetName() << ") = (" << curTestVal << "," << curTestVal2 << ")"; 
+		else cout << PoI->GetName() << " = " << curTestVal;
+		cout << " -> Invalid point: SKIPPING!!!" << endl; 
+		continue;
 	}
 
-	return gr;
+	myfit(combPdf,combData,PoIs,isValid,opt,nfree,cons,nll);
+	double nll_fix_val = nll->getVal(); 
+	dataratio = nll_fix_val/nll_val;
+
+	double pvalue = generateToys(curTestVal,curTestVal2,NULL,opt);
+	vector < double > res(1,curTestVal);
+	res.push_back(curTestVal2);
+	res.push_back(pvalue);
+	gr.push_back(res);
+
+	if(PoI2)
+	{
+		cout << fixed << setprecision(3) << "(" << PoI->GetName() << "," << PoI2->GetName();
+		cout << ") = (" << curTestVal << "," << curTestVal2 << ")";
+	}
+	else 
+	{
+		cout << fixed << setprecision(3) << PoI->GetName();
+		cout << " = " << curTestVal;
+	}	
+	cout << " -> logL_fix / logL_free = " << fixed << setprecision(6) << nll_fix_val/nll_val;
+	cout << " -> pvalue = " << pvalue << endl;
+}
+
+return gr;
 }
 
 

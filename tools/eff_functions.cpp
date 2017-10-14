@@ -81,7 +81,7 @@ vector< vector< double > > getEvtsAfterCuts(TString name, TString plot, TTree * 
  **/
 double getEff(TString name, TString plot, TTree * tree, TCut cuts, TTree * downTree, TCut downCuts, TString weight, double *efferr, TTree * relTree, TCut relCuts, TTree * relDownTree, TCut relDownCuts, TString relWeight)
 {
-    double nNom = getEvtN(name+"nom", plot, tree, cuts, weight);
+	double nNom = getEvtN(name+"nom", plot, tree, cuts, weight);
 	if(!downTree) downTree = tree;
 	double entries, relentries;
 	double nDenom = getEvtN(name+"denom", plot, downTree, downCuts, weight, &entries);
@@ -209,93 +209,93 @@ TH2F * getEff(TString name, TString plot, TString xvar, TString yvar, int xnbins
 					res->SetBinError(i,j,(cureff/releff) * TMath::Sqrt( TMath::Power(curerr/cureff,2) + TMath::Power(relerr/releff,2) ));
 					res->SetBinContent(i,j,cureff/releff);
 				}
-		}
-		res->SetMaximum(2.);
-	}	
-	else { res = eff; res->SetMaximum(1.); }
-	res->SetMinimum(0.);
-	res->GetXaxis()->SetTitle(xvar);
-	res->GetYaxis()->SetTitle(yvar);
-	
-	return res;
-}
-
-
-TH2F * getEff(TString name, TString plot, TString xvar, TString yvar, int xnbins, double * xbins, int ynbins, double * ybins, TTree * tree, TCut cuts, TCut downCuts, TString weight, TTree * relTree, TCut relCuts, TCut relDownCuts, TString relWeight, string opt)
-{
-	return getEff(name, plot, xvar, yvar, xnbins, xbins, ynbins, ybins, tree, cuts, tree, downCuts, weight, relTree, relCuts, relTree, relDownCuts, relWeight, opt);
-}
-
-
-
-TH1F * getEff(TString name, TString xvar, int xnbins, double * xbins, TTree * tree, TCut cuts, TTree * downTree, TCut downCuts, TString weight, TTree * relTree, TCut relCuts, TTree * relDownTree, TCut relDownCuts, TString relWeight, string opt)
-{
-	TH1::SetDefaultSumw2();	
-	TH1F * res = NULL;
-
-	double factor = 1.;
-	size_t factorpos = opt.find("-f");
-	if(factorpos!=string::npos && relTree == NULL)
-	{
-		TString s = opt.substr(factorpos+2,string::npos);
-		factor = s.Atof();
+			}
+			res->SetMaximum(2.);
+		}	
+		else { res = eff; res->SetMaximum(1.); }
+		res->SetMinimum(0.);
+		res->GetXaxis()->SetTitle(xvar);
+		res->GetYaxis()->SetTitle(yvar);
+		
+		return res;
 	}
 
-	int relXnbins = 1;
-	double relXbins_tmp[] = { xbins[0], xbins[xnbins] };
-	double * relXbins = &relXbins_tmp[0];
-	if(opt.find("-binXrel")!=string::npos) { relXbins = xbins; relXnbins = xnbins; }
-	
-	TString upselect = buildSelectStr(cuts,weight);
-	TString downselect = buildSelectStr(downCuts,weight);
-	TString rupselect = buildSelectStr(relCuts,relWeight);
-	TString rdownselect = buildSelectStr(relDownCuts,relWeight);
 
-	TH1F * relup = new TH1F("relup"+name,"relup"+name,relXnbins,relXbins);
-	TH1F * reldown = new TH1F("reldown"+name,"reldown"+name,relXnbins,relXbins);
-	TH1F * up = new TH1F("up"+name,"up"+name,xnbins,xbins);
-	TH1F * down = new TH1F("down"+name,"down"+name,xnbins,xbins);
-	tree->Draw(xvar+">>+up"+name,upselect,"E");
-	downTree->Draw(xvar+">>+down"+name,downselect,"E");
-	TH1F * eff = new TH1F("eff_"+name,name,xnbins,xbins);
-	eff->Divide(up,down,1.,1.,"B");
-	eff->Scale(factor); 
-	
-	if(relTree)
+	TH2F * getEff(TString name, TString plot, TString xvar, TString yvar, int xnbins, double * xbins, int ynbins, double * ybins, TTree * tree, TCut cuts, TCut downCuts, TString weight, TTree * relTree, TCut relCuts, TCut relDownCuts, TString relWeight, string opt)
 	{
-		TH1F * effrel = new TH1F("releff_"+name,"releff_"+name,relXnbins,relXbins);
-		relTree->Draw(xvar+">>+relup"+name,rupselect,"E");
-		relDownTree->Draw(xvar+">>+reldown"+name,rdownselect,"E");	
-		effrel->Divide(relup,reldown,1.,1.,"B");
-		effrel->Scale(factor);
+		return getEff(name, plot, xvar, yvar, xnbins, xbins, ynbins, ybins, tree, cuts, tree, downCuts, weight, relTree, relCuts, relTree, relDownCuts, relWeight, opt);
+	}
 
-		res = (TH1F *)eff->Clone("releff");
-		if(relXnbins != 1) res->Divide(eff,effrel);
-		else
+
+
+	TH1F * getEff(TString name, TString xvar, int xnbins, double * xbins, TTree * tree, TCut cuts, TTree * downTree, TCut downCuts, TString weight, TTree * relTree, TCut relCuts, TTree * relDownTree, TCut relDownCuts, TString relWeight, string opt)
+	{
+		TH1::SetDefaultSumw2();	
+		TH1F * res = NULL;
+
+		double factor = 1.;
+		size_t factorpos = opt.find("-f");
+		if(factorpos!=string::npos && relTree == NULL)
 		{
-			double releff = effrel->GetBinContent(1);
-			double relerr = effrel->GetBinError(1);
-		
-			for(int i = 1; i <= res->GetNbinsX(); i++)
-			{
-				double cureff = eff->GetBinContent(i);
-				double curerr = eff->GetBinError(i);
-				res->SetBinContent(i,cureff/releff);
-				res->SetBinError(i,(cureff/releff)*TMath::Sqrt( TMath::Power(curerr/cureff,2) + TMath::Power(relerr/releff,2) ));
-			}
+			TString s = opt.substr(factorpos+2,string::npos);
+			factor = s.Atof();
 		}
-		res->SetMaximum(2.);
-	}	
-	else { res = eff; res->SetMaximum(1.); }
-	res->SetMinimum(0.);
-	res->GetXaxis()->SetTitle(xvar);
 
-	return res;
-}
+		int relXnbins = 1;
+		double relXbins_tmp[] = { xbins[0], xbins[xnbins] };
+		double * relXbins = &relXbins_tmp[0];
+		if(opt.find("-binXrel")!=string::npos) { relXbins = xbins; relXnbins = xnbins; }
+		
+		TString upselect = buildSelectStr(cuts,weight);
+		TString downselect = buildSelectStr(downCuts,weight);
+		TString rupselect = buildSelectStr(relCuts,relWeight);
+		TString rdownselect = buildSelectStr(relDownCuts,relWeight);
+
+		TH1F * relup = new TH1F("relup"+name,"relup"+name,relXnbins,relXbins);
+		TH1F * reldown = new TH1F("reldown"+name,"reldown"+name,relXnbins,relXbins);
+		TH1F * up = new TH1F("up"+name,"up"+name,xnbins,xbins);
+		TH1F * down = new TH1F("down"+name,"down"+name,xnbins,xbins);
+		tree->Draw(xvar+">>+up"+name,upselect,"E");
+		downTree->Draw(xvar+">>+down"+name,downselect,"E");
+		TH1F * eff = new TH1F("eff_"+name,name,xnbins,xbins);
+		eff->Divide(up,down,1.,1.,"B");
+		eff->Scale(factor); 
+		
+		if(relTree)
+		{
+			TH1F * effrel = new TH1F("releff_"+name,"releff_"+name,relXnbins,relXbins);
+			relTree->Draw(xvar+">>+relup"+name,rupselect,"E");
+			relDownTree->Draw(xvar+">>+reldown"+name,rdownselect,"E");	
+			effrel->Divide(relup,reldown,1.,1.,"B");
+			effrel->Scale(factor);
+
+			res = (TH1F *)eff->Clone("releff");
+			if(relXnbins != 1) res->Divide(eff,effrel);
+			else
+			{
+				double releff = effrel->GetBinContent(1);
+				double relerr = effrel->GetBinError(1);
+				
+				for(int i = 1; i <= res->GetNbinsX(); i++)
+				{
+					double cureff = eff->GetBinContent(i);
+					double curerr = eff->GetBinError(i);
+					res->SetBinContent(i,cureff/releff);
+					res->SetBinError(i,(cureff/releff)*TMath::Sqrt( TMath::Power(curerr/cureff,2) + TMath::Power(relerr/releff,2) ));
+				}
+			}
+			res->SetMaximum(2.);
+		}	
+		else { res = eff; res->SetMaximum(1.); }
+		res->SetMinimum(0.);
+		res->GetXaxis()->SetTitle(xvar);
+
+		return res;
+	}
 
 
 
-TH1F * getEff(TString name, TString xvar, int xnbins, double * xbins, TTree * tree, TCut cuts, TCut downCuts, TString weight, TTree * relTree, TCut relCuts, TCut relDownCuts, TString relWeight, string opt)
-{
-	return getEff(name, xvar, xnbins, xbins, tree, cuts, tree, downCuts, weight, relTree, relCuts, relTree, relDownCuts, relWeight, opt);
-}
+	TH1F * getEff(TString name, TString xvar, int xnbins, double * xbins, TTree * tree, TCut cuts, TCut downCuts, TString weight, TTree * relTree, TCut relCuts, TCut relDownCuts, TString relWeight, string opt)
+	{
+		return getEff(name, xvar, xnbins, xbins, tree, cuts, tree, downCuts, weight, relTree, relCuts, relTree, relDownCuts, relWeight, opt);
+	}
