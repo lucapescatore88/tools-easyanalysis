@@ -94,5 +94,4 @@ RooAbsPdf * stringToPdf(RooAbsPdf * pdf1, const char * typepdf, const char * nam
 RooAbsPdf * get2DRooKeys(string name, TTree * tree, RooRealVar * v1, RooRealVar * v2, string opt = "");
 RooAbsPdf * get2DRooKeys(TTree * tree, RooRealVar * v1, RooRealVar * v2, string opt = "");
 
-
 #endif

@@ -103,18 +103,17 @@ template <class T> vector<T *> getHistosFromFile(vector<string> nameHistos, stri
     TFile * file = new TFile(nameFile.c_str());
     vector<T *> histos;
 
-    for(size_t i = 0; i < nameHistos.size(); i++)
+    for (size_t i = 0; i < nameHistos.size(); i++)
     {
-        if(path != "") {file->cd(path.c_str()); cout << path.c_str() << endl;}
+        if (path != "") {file->cd(path.c_str()); cout << path.c_str() << endl;}
 
         TH1 * h = (T *)gDirectory->Get(nameHistos[i].c_str());
-        if(h == 0) {cout << "ERROR at " << nameHistos[i].c_str() << endl; continue;}
+        if (h == 0) {cout << "ERROR at " << nameHistos[i].c_str() << endl; continue;}
         else histos.push_back(h);
     }
 
     return histos;
 }
-
 
 
 
@@ -133,53 +132,51 @@ inline double showPercentage(int ientry, int nentries, time_t start = 0, int nti
     static string timecolor = "\033[1;31m";
     static int first_entry = ientry;
 
-    static int div = (nentries - first_entry)/ntimes;
-    if( div < 1. ) div = 1;
+    static int div = (nentries - first_entry) / ntimes;
+    if ( div < 1. ) div = 1;
 
     int myentry = ientry - first_entry;
-    if( ((int)(myentry)%div)==0 || myentry==0 )
+    if ( ((int)(myentry) % div) == 0 || myentry == 0 )
     {
         //static int i = 0;
         //if(i > 3) i = 0;
         //char c[] = {'|','/','-','\\'};
         //cout << "\r" << c[++i];
 
-        double perc = (double)ientry/(nentries-1.);
+        double perc = (double)ientry / (nentries - 1.);
 
-        cout << "\r| Working... " << title << " | " << fixed << setprecision(1) << perc*100. << "% ";
+        cout << "\r| Working... " << title << " | " << fixed << setprecision(1) << perc * 100. << "% ";
 
-        if(dobar)
-        {		
+        if (dobar)
+        {
             cout << barcolor << "[";
-            for(int p = 0; p < perc*20; p++) cout << ">";
-                for(int p = 0; p < (1-perc)*20; p++) cout << "_";
-                    cout << "]" << normalcolor << "  ";
-            }
-
-
-            if(doentry) cout << "Entry #" << ientry + 1;
-            if(start != 0)
-            {
-                time_t end = time(NULL);
-                double dt = difftime(end,start);
-                cout << "  (";
-
-                double t_left = ((double)nentries/ientry - 1.)*dt;
-
-                cout << "~" << timecolor;
-                if(t_left > 60.) cout << t_left/60. << normalcolor << " min to the end)";
-                else cout << t_left << normalcolor << " s to the end)";
-                cout << flush;
-            }
-
-            if( ientry == (nentries-1) ) cout << endl;
-            return perc;
+            for (int p = 0; p < perc * 20; p++) cout << ">";
+            for (int p = 0; p < (1 - perc) * 20; p++) cout << "_";
+            cout << "]" << normalcolor << "  ";
         }
 
-        if( ientry == (nentries-1) ) cout << endl;
-        return 100.;
+
+        if (doentry) cout << "Entry #" << ientry + 1;
+        if (start != 0)
+        {
+            time_t end = time(NULL);
+            double dt = difftime(end, start);
+            cout << "  (";
+
+            double t_left = ((double)nentries / ientry - 1.) * dt;
+
+            cout << "~" << timecolor;
+            if (t_left > 60.) cout << t_left / 60. << normalcolor << " min to the end)";
+            else cout << t_left << normalcolor << " s to the end)";
+            cout << flush;
+        }
+
+        if ( ientry == (nentries - 1) ) cout << endl;
+        return perc;
     }
 
-
+    if ( ientry == (nentries - 1) ) cout << endl;
+    return 100.;
+}
 
 #endif

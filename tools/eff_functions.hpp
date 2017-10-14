@@ -53,7 +53,7 @@ vector< vector < double > > getEff(TString name, TString part, TTree * tree, TCu
 TH2F * getEff(TString name, TString plot,  TString xvar, TString yvar, int xnbins, double * xbins, int ynbins, double * ybins, TTree * tree, TCut cuts, TTree * downTree, TCut downCuts, TString weight = "", TTree * relTree = NULL, TCut relCuts = "", TTree * relDownTree = NULL, TCut relDownCuts = "", TString relWeight = "", string opt = "");
 TH2F * getEff(TString name, TString plot, TString xvar, TString yvar, int xnbins, double * xbins, int ynbins, double * ybins, TTree * tree, TCut cuts, TCut downCuts, TString weight = "", TTree * relTree = NULL, TCut relCuts = "", TCut relDownCuts = "", TString relWeight = "", string opt = "");
 
-TH1F * getEff(TString name, TString xvar, int xnbins, double * xbins, TTree * tree, TCut cuts, TTree * downTree, TCut downCuts, TString weight = "", TTree * relTree = NULL, TCut relCuts = "", TTree * relDownTree=NULL, TCut relDownCuts = "", TString relWeight = "", string opt = "");
+TH1F * getEff(TString name, TString xvar, int xnbins, double * xbins, TTree * tree, TCut cuts, TTree * downTree, TCut downCuts, TString weight = "", TTree * relTree = NULL, TCut relCuts = "", TTree * relDownTree = NULL, TCut relDownCuts = "", TString relWeight = "", string opt = "");
 TH1F * getEff(TString name,  TString xvar, int xnbins, double * xbins, TTree * tree, TCut cuts, TCut downCuts, TString weight = "", TTree * relTree = NULL, TCut relCuts = "", TCut relDownCuts = "", TString relWeight = "", string opt = "");
 
 #endif

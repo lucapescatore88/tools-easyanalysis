@@ -15,7 +15,7 @@ void TreeReader::AddChain(TChain *chain)
 {
     if (fChain)
     {
-        if (pmode=="v") cout << endl << "TreeReader - Adding chain" << endl << endl;
+        if (pmode == "v") cout << endl << "TreeReader - Adding chain" << endl << endl;
 
         TObjArray *fileElements = chain->GetListOfFiles();
         TIter next(fileElements);
@@ -37,8 +37,8 @@ void TreeReader::AddFile(const char *fileName, const char* treeName, Long64_t ma
     if (fChain)
     {
         if (!TFile::Open(fileName)) return;
-        fChain->AddFile(fileName,maxEntries,treeName);
-        if (pmode=="v") cout << endl << "TreeReader - Adding file: " << fileName << " " << treeName << endl;
+        fChain->AddFile(fileName, maxEntries, treeName);
+        if (pmode == "v") cout << endl << "TreeReader - Adding file: " << fileName << " " << treeName << endl;
     }
 }
 
@@ -50,7 +50,7 @@ void TreeReader::AddFriend(const char *fileName, const char* treeName)
     {
         if (!TFile::Open(fileName)) return;
 
-        if (pmode=="v") cout << endl << "TreeReader - Adding friend: " << treeName << endl << endl;
+        if (pmode == "v") cout << endl << "TreeReader - Adding friend: " << treeName << endl << endl;
 
         fChain->AddFriend(treeName, fileName);
     }
@@ -64,14 +64,14 @@ void TreeReader::AddList(const char *fileName)
     {
         if (!ifstream(fileName).good())
         {
-            if (pmode=="v") cout << "TreeReader - No such file or directory: " << fileName << endl;
+            if (pmode == "v") cout << "TreeReader - No such file or directory: " << fileName << endl;
             return;
         }
 
         ifstream listfile;
         listfile.open(fileName, ifstream::in);
 
-        while(listfile.good())
+        while (listfile.good())
         {
             char file[256];
             listfile.getline(file, 256);
@@ -132,10 +132,10 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
     if (name != "") tTree->SetName(name.c_str());
 
     if (nTot != 0) if (pmode == "v")
-    {
-        Long64_t nPas = tTree->GetEntries();
-        cout << "N Pas = " << fixed << setprecision(0) << nPas << " (" << fixed << setprecision(6) << (double) nPas / (double) nTot_ * 100 << "%)" << endl << endl;
-    }
+        {
+            Long64_t nPas = tTree->GetEntries();
+            cout << "N Pas = " << fixed << setprecision(0) << nPas << " (" << fixed << setprecision(6) << (double) nPas / (double) nTot_ * 100 << "%)" << endl << endl;
+        }
 
     return tTree;
 }
@@ -152,7 +152,7 @@ void TreeReader::PrintListOfFiles()
         return;
     }
 
-    if (pmode=="v")
+    if (pmode == "v")
     {
         TObjArray *fileElements = fChain->GetListOfFiles();
 
@@ -180,7 +180,7 @@ void TreeReader::PrintListOfVariables()
         return;
     }
 
-    if (pmode=="v")
+    if (pmode == "v")
     {
         vector<variable*> varList = GetVarList();
 
@@ -195,6 +195,7 @@ void TreeReader::PrintListOfVariables()
 }
 
 
+
 void TreeReader::SetBranchStatus(vector<string> branches, bool status, string opt)
 {
     if (!init)
@@ -203,14 +204,14 @@ void TreeReader::SetBranchStatus(vector<string> branches, bool status, string op
         return;
     }
 
-    if (opt.find("all")!=string::npos)
+    if (opt.find("all") != string::npos)
     {
-        if (pmode=="v") cout << endl << "SetBranchStatus " << status << ": ALL" << endl;
+        if (pmode == "v") cout << endl << "SetBranchStatus " << status << ": ALL" << endl;
         fChain->SetBranchStatus("*", status);
     }
 
     if (branches.size() != 0) {
-        if (pmode=="v") cout << endl << "SetBranchStatus " << status << ": " << fChain->GetName() << " (" << branches.size() << ")" << endl;
+        if (pmode == "v") cout << endl << "SetBranchStatus " << status << ": " << fChain->GetName() << " (" << branches.size() << ")" << endl;
 
         TObjArray *list = fChain->GetListOfBranches();
 
@@ -227,10 +228,11 @@ void TreeReader::SetBranchStatus(vector<string> branches, bool status, string op
                 }
             }
 
-            if (pmode=="v") cout << "SetBranchStatus " << status << ": " << fChain->GetName() << " (" << nbranches << ")" << endl << endl;
+            if (pmode == "v") cout << "SetBranchStatus " << status << ": " << fChain->GetName() << " (" << nbranches << ")" << endl << endl;
         }
     }
 }
+
 
 
 bool TreeReader::Initialize(vector <string> br, string opt)
@@ -274,7 +276,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
         string title = leaf->GetTitle();
 
         // Find out whether we have array by inspecting leaf title
-        if ( title.find("[")!=std::string::npos )
+        if ( title.find("[") != std::string::npos )
         {
             TLeaf * nelem = leaf->GetLeafCounter(arreysize);
             if (arreysize == 1 && nelem != NULL) arreysize = nelem->GetMaximum() + 1; //search for maximum value of the lenght
@@ -284,37 +286,37 @@ bool TreeReader::Initialize(vector <string> br, string opt)
         if (id >= 0)
         {
             bool addVar = true;
-            if (curtype.find("vector")!=std::string::npos) addVar = false;
+            if (curtype.find("vector") != std::string::npos) addVar = false;
 
-            if (br.size()>0)
+            if (br.size() > 0)
             {
                 addVar = false;
-                for(unsigned b = 0; b < br.size(); b++)
+                for (unsigned b = 0; b < br.size(); b++)
                 {
                     if (opt == "names" || opt == "except")
                     {
                         if (br[b] == brname) { addVar = true; break;}
                     }
-                    else if (opt.find("contains")!=string::npos)
+                    else if (opt.find("contains") != string::npos)
                     {
-                        if ((string(brname)).find(br[b])!=string::npos) { addVar = true; break;}
+                        if ((string(brname)).find(br[b]) != string::npos) { addVar = true; break;}
                     }
-                    else if (opt.find("except")==string::npos) cout << "TreeReader - Option not found: " << opt << endl;
+                    else if (opt.find("except") == string::npos) cout << "TreeReader - Option not found: " << opt << endl;
                 }
 
-                if (opt.find("except")!=string::npos) addVar = !addVar;
+                if (opt.find("except") != string::npos) addVar = !addVar;
             }
 
             if (addVar)
             {
-                variable * tmpVar = new variable(id,arreysize);
+                variable * tmpVar = new variable(id, arreysize);
 
                 tmpVar->name = leaf->GetName();
                 tmpVar->bname = branch->GetName();
                 tmpVar->title = title;
 
                 varList.push_back(tmpVar);
-                fChain->SetBranchAddress(tmpVar->bname,tmpVar->value.address);
+                fChain->SetBranchAddress(tmpVar->bname, tmpVar->value.address);
             }
         }
         else
@@ -328,7 +330,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
     init = true;
     continueSorting = true;
 
-    if ((init) && (pmode=="v"))
+    if ((init) && (pmode == "v"))
     {
         cout << endl << "Number of trees in chain: " << fChain->GetNtrees() << endl;
         cout << endl << "Set up " << varList.size() << " / " << nBranches << " branches" << endl;
@@ -346,7 +348,7 @@ void TreeReader::BranchNewTree(TTree* tree)
     {
         variable *var = varList[it];
         string branchID = TypeDB::branchID(var->GetType());
-        tree->Branch(var->name,var->value.address,var->title+"/"+branchID);
+        tree->Branch(var->name, var->value.address, var->title + "/" + branchID);
     }
 }
 
@@ -361,16 +363,16 @@ void TreeReader::FillNewTree(TTree* tree, TCut cuts, double frac, void (*addFunc
     SetEntryList(skim);
 
     BranchNewTree(tree);
-    if (addFunc) addFunc(this,tree,true);
+    if (addFunc) addFunc(this, tree, true);
 
-    if (pmode=="v") cout << "N candidates = " << nEntries << endl;
-    if (frac > 0 && frac < 1) { nEntries *= frac; if (pmode=="v") cout << "Using only " << 100*frac << "% of the entries" << endl; }
-    else if (frac > 1) { nEntries = frac; if (pmode=="v") cout << "Using only " << frac << " entries" << endl; }
+    if (pmode == "v") cout << "N candidates = " << nEntries << endl;
+    if (frac > 0 && frac < 1) { nEntries *= frac; if (pmode == "v") cout << "Using only " << 100 * frac << "% of the entries" << endl; }
+    else if (frac > 1) { nEntries = frac; if (pmode == "v") cout << "Using only " << frac << " entries" << endl; }
 
-    for(Long64_t i = 0 ; i < nEntries ; i++)
+    for (Long64_t i = 0 ; i < nEntries ; i++)
     {
-        GetEntry(i,skim);
-        if (addFunc) addFunc(this,tree,false);
+        GetEntry(i, skim);
+        if (addFunc) addFunc(this, tree, false);
         tree->Fill();
     }
 
@@ -380,10 +382,9 @@ void TreeReader::FillNewTree(TTree* tree, TCut cuts, double frac, void (*addFunc
 
 
 
-
 /**
  * Keep statistics of which variables are accessed often
- * and once in a while swap those to early positions in list 
+ * and once in a while swap those to early positions in list
  * to get faster finding performances.
  */
 
@@ -395,7 +396,7 @@ bool TreeReader::partialSort()
     {
         int varGets = varList[i]->nGets;
 
-        if ( varGets/nGets >= 0.01 )  // Care only about variables used more often
+        if ( varGets / nGets >= 0.01 ) // Care only about variables used more often
         {
             for (unsigned j = 0; j < i; ++j)  // Makes sense to swap only to earlier place
             {
