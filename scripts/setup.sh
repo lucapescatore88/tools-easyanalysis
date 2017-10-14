@@ -78,7 +78,7 @@ fi
 if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYSPYANALYSIS"` == 0 ]; then
     VER=2.0-32412
     export PYANALYSISSYS=$SYSPYANALYSIS/$VER/$ARCH
-    if [ -d $PYANALYSISSYS ]; then	
+    if [ -d $PYANALYSISSYS ]; then  
         export PYTHONPATH=$PYANALYSISSYS/lib/python2.7/site-packages/:$PYTHONPATH
         echo "Configuring PYTHON ANALYSIS from $PYANALYSISSYS"
     else

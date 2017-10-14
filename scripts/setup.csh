@@ -98,7 +98,7 @@ endif
 if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYSPYANALYSIS"` == 0 ) then
     set VER = 2.0-32412
     setenv PYANALYSISSYS $SYSPYANALYSIS/$VER/$ARCH
-    if ( -d $PYANALYSISSYS ) then	
+    if ( -d $PYANALYSISSYS ) then   
         setenv PYTHONPATH $PYANALYSISSYS/lib/python2.7/site-packages/:$PYTHONPATH
         echo "Configuring PYTHON ANALYSIS from $PYANALYSISSYS"
     else
