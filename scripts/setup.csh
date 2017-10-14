@@ -6,10 +6,7 @@ if ( ! ($?TOOLSSYS) ) then
     set EXE = `basename $EXE`
 
     setenv TOOLSSYS `readlink -f "$EXE"`
-    set STRINGS = "$EXE"
-    foreach STRING ( $STRINGS )
-        setenv TOOLSSYS `echo $TOOLSSYS | sed s:"/$STRING"::`
-    end
+    setenv TOOLSSYS `echo $TOOLSSYS | sed s:"/$EXE"::`
 endif
 
 if ( ! ($?LD_LIBRARY_PATH) ) setenv LD_LIBRARY_PATH
