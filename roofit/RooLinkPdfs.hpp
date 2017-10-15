@@ -6,9 +6,9 @@
 
 
 #pragma link C++ class RooAmorosoPdf+;
-#pragma link C++ class RooExpAndGauss;
-#pragma link C++ class RooIpatia;
-#pragma link C++ class RooJohnson;
+#pragma link C++ class RooExpAndGauss+;
+#pragma link C++ class RooIpatia+;
+#pragma link C++ class RooJohnson+;
 #pragma link C++ class RooApollonios+
 #pragma link C++ class RooGeneralizedHyperbolic+;
 #pragma link C++ class RooIpatia2+;
