@@ -74,46 +74,49 @@ Str2VarMap getParamList(RooAbsPdf * pdf, RooAbsReal * var, string opt)
 
 Str2VarMap getParamList(RooAbsPdf * pdf, RooArgSet obs, string opt)
 {
-    return getParams( pdf, obs, vector < string >() , opt);
+    return getParams(pdf, obs, vector < string >() , opt);
 }
 
 Str2VarMap getParamList(RooAbsPdf * pdf, vector<RooRealVar *> vars, string opt)
 {
     RooArgSet obs("Observables");
     for (auto v : vars) obs.add(*v);
-    return getParams( pdf, obs, vector < string >() , opt);
+    return getParams(pdf, obs, vector < string >() , opt);
 }
 
 void getParam(RooFitResult *fRes, string name, double &par, double &parE, string type)
 {
-    RooArgList cPars = fRes->constPars();
-    RooArgList fPars = fRes->floatParsFinal();
-
-    TIterator *it = NULL;
-    if (type == "c") it = cPars.createIterator();
-    else it = fPars.createIterator();
-
-    if (!it)
+    if (fRes)
     {
-        cout << "\nEmpty Pars\n" << endl;
-        exit(EXIT_FAILURE);
-    }
+        RooArgList cPars = fRes->constPars();
+        RooArgList fPars = fRes->floatParsFinal();
 
-    par  = 0;
-    parE = 0;
+        TIterator *it = NULL;
+        if (type == "c") it = cPars.createIterator();
+        else it = fPars.createIterator();
 
-    RooRealVar *arg;
-    while ((arg = (RooRealVar*) it->Next())) {
-        if (arg->GetName() == name) {
-            par  = arg->getVal();
-            parE = arg->getError();
-            break;
+        if (!it)
+        {
+            cout << "\nEmpty Pars\n" << endl;
+            exit(EXIT_FAILURE);
         }
-    }
 
-    if ((par == 0) && (parE == 0)) {
-        cout << "\nPar " << name << " not available\n" << endl;
-        exit(EXIT_FAILURE);
+        par  = 0;
+        parE = 0;
+
+        RooRealVar *arg;
+        while ((arg = (RooRealVar*) it->Next())) {
+            if (arg->GetName() == name) {
+                par  = arg->getVal();
+                parE = arg->getError();
+                break;
+            }
+        }
+
+        if ((par == 0) && (parE == 0)) {
+            cout << "\nPar " << name << " not available\n" << endl;
+            exit(EXIT_FAILURE);
+        }
     }
 
     return;

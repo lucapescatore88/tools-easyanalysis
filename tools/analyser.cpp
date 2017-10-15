@@ -487,9 +487,16 @@ void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
         }
     }
 
-    m_init = true;
-    if (wsSig)
+    if (wsSig && wsBkg)
+    {
+        m_init = true;
         ForceValid();
+    }
+    if (m_pmode == "v")
+    {
+        cout << m_name << ": PrintParams" << endl << endl;
+        ModelBuilder::PrintParams();
+    }
 }
 
 void Analysis::ImportData(RooWorkspace * ws)
