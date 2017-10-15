@@ -486,17 +486,13 @@ void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
             if (name.find("totbkg") != string::npos) m_bkg = (RooAbsPdf*)argBkg;
         }
     }
-
+/*
     if (wsSig && wsBkg)
     {
         m_init = true;
         ForceValid();
     }
-    if (m_pmode == "v")
-    {
-        cout << m_name << ": PrintParams" << endl << endl;
-        ModelBuilder::PrintParams();
-    }
+*/
 }
 
 void Analysis::ImportData(RooWorkspace * ws)
