@@ -461,26 +461,35 @@ void Analysis::ImportModel(RooWorkspace * ws)
 
 void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
 {
-    if (m_pmode == "v") cout << endl << m_name << ": ImportModel" << endl << endl;
-
-    TIterator * itSig = wsSig->componentIterator();
-    TObject * argSig;
-    while ( (argSig = (TObject *)itSig->Next()) )
+    if (wsSig)
     {
-        string name = argSig->GetName();
-        if (name.find("totsig") != string::npos) m_sig = (RooAbsPdf*)argSig;
+        if (m_pmode == "v") cout << endl << m_name << ": ImportModel - Signal" << endl << endl;
+
+        TIterator * itSig = wsSig->componentIterator();
+        TObject * argSig;
+        while ( (argSig = (TObject *)itSig->Next()) )
+        {
+            string name = argSig->GetName();
+            if (name.find("totsig") != string::npos) m_sig = (RooAbsPdf*)argSig;
+        }
     }
 
-    TIterator * itBkg = wsBkg->componentIterator();
-    TObject * argBkg;
-    while ( (argBkg = (TObject *)itBkg->Next()) )
+    if (wsBkg)
     {
-        string name = argBkg->GetName();
-        if (name.find("totbkg") != string::npos) m_bkg = (RooAbsPdf*)argBkg;
+        if (m_pmode == "v") cout << endl << m_name << ": ImportModel - Background" << endl << endl;
+
+        TIterator * itBkg = wsBkg->componentIterator();
+        TObject * argBkg;
+        while ( (argBkg = (TObject *)itBkg->Next()) )
+        {
+            string name = argBkg->GetName();
+            if (name.find("totbkg") != string::npos) m_bkg = (RooAbsPdf*)argBkg;
+        }
     }
 
     m_init = true;
-    ForceValid();
+    if (wsSig)
+        ForceValid();
 }
 
 void Analysis::ImportData(RooWorkspace * ws)

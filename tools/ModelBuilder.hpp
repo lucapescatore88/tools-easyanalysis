@@ -131,8 +131,11 @@ protected:
                 size_t pos = opt.find("-w[") + 2;
                 size_t posend = opt.find("]", pos);
                 TString wname = (TString)opt.substr(pos + 1, posend - pos - 1);
-                vars->add(*(new RooRealVar(wname, wname, 0.)));
-                sigDataSet = new RooDataSet((TString)_name + "_DataSet_" + m_name, "", (TTree*)_base, *vars, 0, wname);
+                if ((wname != "") && (wname != "1"))
+                {
+                    vars->add(*(new RooRealVar(wname, wname, 0.)));
+                    sigDataSet = new RooDataSet((TString)_name + "_DataSet_" + m_name, "", (TTree*)_base, *vars, 0, wname);
+                }
             }
             else sigDataSet = new RooDataSet((TString)_name + "_DataSet_" + m_name, "", (TTree*)_base, *vars);
 

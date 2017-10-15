@@ -2,134 +2,208 @@
 
 shopt -s expand_aliases
 
-if [ ! -n "${TOOLSSYS+x}" ]; then
-    export TOOLSSYS="$( cd . "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# LIBS
+export CVMFS=/cvmfs/lhcb.cern.ch
+export LCGSYS=$CVMFS/lib/lcg
+export ARCH=x86_64-slc6-gcc49-opt
+
+if [ ! -d $LCGSYS ]; then
+    echo
+    echo "Cannot access $LCGSYS"
+    echo
+    return
 fi
 
-if [ ! -n "${LD_LIBRARY_PATH+x}" ]; then
-    export LD_LIBRARY_PATH
-fi
 if [ ! -n "${LD_INCLUDE_PATH+x}" ]; then
     export LD_INCLUDE_PATH
+fi
+if [ ! -n "${LD_LIBRARY_PATH+x}" ]; then
+    export LD_LIBRARY_PATH
 fi
 if [ ! -n "${PYTHONPATH+x}" ]; then
     export PYTHONPATH
 fi
 
-export LD_LIBRARY_PATH=$TOOLSSYS/roofit/dic:$LD_LIBRARY_PATH
+if [ ! -n "${TOOLSSYS+x}" ]; then
+    export TOOLSSYS="$( cd . "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-echo
-echo "Setup tools-easyanalysis"
-echo
-echo "Configuring TOOLSSYS to $TOOLSSYS"
-echo
+    export LD_LIBRARY_PATH=$TOOLSSYS/roofit/dic:$LD_LIBRARY_PATH
 
-# LIBS
-LCGDIR=/cvmfs/lhcb.cern.ch/lib/lcg
-ARCH=x86_64-slc6-gcc49-opt
+    echo
+    echo "Setup tools-easyanalysis"
+    echo
+    echo "Configuring TOOLSSYS to $TOOLSSYS"
+    echo
 
-# GCC
-SYS=$LCGDIR/releases/gcc
-if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-    VER=4.9.3
-    VER=$VER/x86_64-slc6
-    if [ -f $SYS/$VER/setup.sh ]; then
-        export GCCSYS=$SYS/$VER
-        source $GCCSYS/setup.sh $LCGDIR/external
+    source $TOOLSSYS/scripts/setup.sh gcc
+    source $TOOLSSYS/scripts/setup.sh python
+    source $TOOLSSYS/scripts/setup.sh gsl
+    source $TOOLSSYS/scripts/setup.sh root
 
-        echo "Configuring GCC    from $GCCSYS"
-    else
-        echo
-        echo "GCC $GCCSYS not available"
-        echo
-    fi
+    source $TOOLSSYS/scripts/setup.sh env
+    echo
 fi
 
-# PYTHON
-SYS=$LCGDIR/releases/Python
-SYSPYTOOLS=$LCGDIR/releases/pytools
-SYSPYANALYSIS=$LCGDIR/releases/pyanalysis
-if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-    VER=2.7.10-8dd46
-    export PYTHONSYS=$SYS/$VER/$ARCH
-    if [ -d $PYTHONSYS ]; then
-        export PATH=$PYTHONSYS/bin:$PATH
-        export LD_LIBRARY_PATH=$PYTHONSYS/lib:$LD_LIBRARY_PATH
-        echo "Configuring PYTHON from $PYTHONSYS"
-    else
-        echo
-        echo "PYTHON $PYTHONSYS not available"
-        echo
-    fi
-fi
-if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYSPYTOOLS"` == 0 ]; then
-    VER=2.0-93db0
-    export PYTOOLSSYS=$SYSPYTOOLS/$VER/$ARCH
-    if [ -d $PYTOOLSSYS ]; then
-        export PATH=$PYTOOLSSYS/bin:$PATH
-        export PYTHONPATH=$PYTOOLSSYS/lib/python2.7/site-packages/:$PYTHONPATH
-        echo "Configuring PYTHON TOOLS from $PYTOOLSSYS"
-    else
-        echo
-        echo "PYTHON TOOLS $PYTOOLSSYS not available"
-        echo
-    fi
-fi
-if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYSPYANALYSIS"` == 0 ]; then
-    VER=2.0-32412
-    export PYANALYSISSYS=$SYSPYANALYSIS/$VER/$ARCH
-    if [ -d $PYANALYSISSYS ]; then  
-        export PYTHONPATH=$PYANALYSISSYS/lib/python2.7/site-packages/:$PYTHONPATH
-        echo "Configuring PYTHON ANALYSIS from $PYANALYSISSYS"
-    else
-        echo
-        echo "PYTHON ANALYSIS $PYANALYSISSYS not available"
-        echo
-    fi
-fi
-export PYTHONPATH=$TOOLSSYS/python:$PYTHONPATH
+# CASES
+case "$1" in
 
-# GSL
-SYS=$LCGDIR/releases/GSL
-if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-    VER=2.1-36ee5
-    VER=$VER/$ARCH
-    if [ -d $SYS/$VER ]; then
-        export GSLSYS=$SYS/$VER
-        export LD_LIBRARY_PATH=$GSLSYS/lib:$LD_LIBRARY_PATH
-        export LD_INCLUDE_PATH=$GSLSYS/include:$LD_INCLUDE_PATH
-
-        echo "Configuring GSL    from $GSLSYS"
-    else
+    env)
         echo
-        echo "GSL $GSLSYS not available"
+        echo "Configuring PATH            to $PATH"
+        echo "Configuring LD_LIBRARY_PATH to $LD_LIBRARY_PATH"
+        echo "Configuring LD_INCLUDE_PATH to $LD_INCLUDE_PATH"
+        echo "Configuring PYTHONPATH      to $PYTHONPATH"
         echo
-    fi
-fi
 
-# ROOT
-SYS=$LCGDIR/releases/ROOT
-if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-    VER=6.08.06-c8fb4
-    VER=$VER/$ARCH
-    if [ -d $SYS/$VER ]; then
-        export ROOTSYS=$SYS/$VER
-        export PATH=$ROOTSYS/bin:${PATH}
-        export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
-        export LD_INCLUDE_PATH=$ROOTSYS/include:$LD_INCLUDE_PATH
-        export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH
+        ;;
 
-        echo "Configuring ROOT   from $ROOTSYS"
-    else
-        echo
-        echo "ROOT $ROOTSYS not available"
-        echo
-    fi
-fi
+    cmake)
+        SYS=$CVMFS/lib/contrib/CMake
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
+            VER=3.9.2
+            VER=$VER/Linux-x86_64
+            if [ -d $SYS/$VER ]; then
+                export CMAKESYS=$SYS/$VER
+                export PATH=$CMAKESYS/bin:$PATH
 
-echo
-echo "Configuring PATH               to $PATH"
-echo "Configuring LD_LIBRARY_PATH    to $LD_LIBRARY_PATH"
-echo "Configuring LD_INCLUDE_PATH    to $LD_INCLUDE_PATH"
-echo "Configuring PYTHONPATH         to $PYTHONPATH"
-echo
+                echo "Configuring CMAKE      from $CMAKESYS"
+            else
+                echo
+                echo "CMAKE $SYS/$VER not available"
+                echo
+            fi
+        fi
+
+        ;;
+
+    gcc)
+        SYS=$LCGSYS/releases/gcc
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
+            VER=4.9.3
+            VER=$VER/x86_64-slc6
+            if [ -f $SYS/$VER/setup.sh ]; then
+                export GCCSYS=$SYS/$VER
+                source $GCCSYS/setup.sh $LCGSYS/external
+
+                echo "Configuring GCC        from $GCCSYS"
+            else
+                echo
+                echo "GCC $SYS/$VER not available"
+                echo
+            fi
+        fi
+
+        ;;
+
+    python)
+        SYS=$LCGSYS/releases/Python
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
+            VER=2.7.13-597a5
+            VER=$VER/$ARCH
+            if [ -d $SYS/$VER ]; then
+                export PYTHONSYS=$SYS/$VER
+                export PATH=$PYTHONSYS/bin:$PATH
+                export LD_LIBRARY_PATH=$PYTHONSYS/lib:$LD_LIBRARY_PATH
+                export LD_INCLUDE_PATH=$PYTHONSYS/lib:$LD_INCLUDE_PATH
+                export PYTHONSTARTUP=$HOME/.pythonstartup.py
+
+                echo "Configuring PYTHON     from $PYTHONSYS"
+
+                source $TOOLSSYS/scripts/setup.sh pyanalysis
+                source $TOOLSSYS/scripts/setup.sh pytools
+            else
+                echo
+                echo "PYTHON $SYS/$VER not available"
+                echo
+            fi
+        fi
+
+        ;;
+
+    pyanalysis)
+        SYS=$LCGSYS/releases/pyanalysis
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
+            VER=2.0-32412
+            VER=$VER/$ARCH
+            if [ -d $SYS/$VER ]; then
+                export PYANALYSISSYS=$SYS/$VER
+                export PATH=$PYANALYSISSYS/bin:$PATH
+                export LD_LIBRARY_PATH=$PYANALYSISSYS/lib:$LD_LIBRARY_PATH
+                export LD_INCLUDE_PATH=$PYANALYSISSYS/lib:$LD_INCLUDE_PATH
+                export PYTHONPATH=$PYANALYSISSYS/lib/python2.7/site-packages:$PYTHONPATH
+
+                echo "Configuring PYANALYSIS from $PYANALYSISSYS"
+            else
+                echo
+                echo "PYANALYSIS $SYS/$VER not available"
+                echo
+            fi
+        fi
+
+        ;;
+
+    pytools)
+        SYS=$LCGSYS/releases/pytools
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
+            VER=2.0-93db0
+            VER=$VER/$ARCH
+            if [ -d $SYS/$VER ]; then
+                export PYTOOLSSYS=$SYS/$VER
+                export PATH=$PYTOOLSSYS/bin:$PATH
+                export LD_LIBRARY_PATH=$PYTOOLSSYS/lib:$LD_LIBRARY_PATH
+                export LD_INCLUDE_PATH=$PYTOOLSSYS/lib:$LD_INCLUDE_PATH
+                export PYTHONPATH=$PYTOOLSSYS/lib/python2.7/site-packages:$PYTHONPATH
+
+                echo "Configuring PYTOOLS    from $PYTOOLSSYS"
+            else
+                echo
+                echo "PYTOOLS $SYS/$VER not available"
+                echo
+            fi
+        fi
+
+        ;;
+
+    gsl)
+        SYS=$LCGDIR/releases/GSL
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
+            VER=2.1-36ee5
+            VER=$VER/$ARCH
+            if [ -d $SYS/$VER ]; then
+                export GSLSYS=$SYS/$VER
+                export LD_LIBRARY_PATH=$GSLSYS/lib:$LD_LIBRARY_PATH
+                export LD_INCLUDE_PATH=$GSLSYS/include:$LD_INCLUDE_PATH
+
+                echo "Configuring GSL        from $GSLSYS"
+            else
+                echo
+                echo "GSL $SYS/$VER not available"
+                echo
+            fi
+        fi
+
+        ;;
+
+    root)
+        SYS=$LCGSYS/releases/ROOT
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
+            VER=6.08.06-c8fb4
+            VER=$VER/$ARCH
+            if [ -d $SYS/$VER ]; then
+                export ROOTSYS=$SYS/$VER
+                export PATH=$ROOTSYS/bin:${PATH}
+                export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
+                export LD_INCLUDE_PATH=$ROOTSYS/include:$LD_INCLUDE_PATH
+                export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH
+
+                echo "Configuring ROOT       from $ROOTSYS"
+            else
+                echo
+                echo "ROOT $SYS/$VER not available"
+                echo
+            fi
+        fi
+
+        ;;
+
+esac
