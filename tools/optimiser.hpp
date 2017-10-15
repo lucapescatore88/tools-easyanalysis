@@ -94,41 +94,41 @@ class CutOptimizer {
     double get_significance(double S, double B);
     void scan_points(string mode = "-optimise");
 
-    public :
+public :
 
     CutOptimizer(TString _analysis, TTree *_treeSig, TTree *_treeBkg,
-            vector<RooRealVar *> _vars, TString _mycut, TCut _sigCut, TCut _sideBandCut, TCut _baseCut = "", 
-            double _sigNorm = 1., double _bkgNorm = 1.,
-            TString _MCweight = "", int _nSteps = 4,
-            string _fmerit = "significance", bool _print = 0);
+                 vector<RooRealVar *> _vars, TString _mycut, TCut _sigCut, TCut _sideBandCut, TCut _baseCut = "",
+                 double _sigNorm = 1., double _bkgNorm = 1.,
+                 TString _MCweight = "", int _nSteps = 4,
+                 string _fmerit = "significance", bool _print = 0);
 
-    TString GetOptimalCut() 
+    TString GetOptimalCut()
     {
-        if(optimalW.empty()) { cout << "You have to run the otimisation first!!" << endl; return "";}
-        else 
-        {            
+        if (optimalW.empty()) { cout << "You have to run the otimisation first!!" << endl; return "";}
+        else
+        {
             vector <TString> varnames;
-            for(auto v : vars) varnames.push_back(v->GetName());
-            return subStrings(cut_to_optimize,varnames,optimalW);
+            for (auto v : vars) varnames.push_back(v->GetName());
+            return subStrings(cut_to_optimize, varnames, optimalW);
         }
     }
 
     vector <double> GetOptimalPoint() { return optimalW; }
     vector <double> GetStepSizes() { return step_sizes; }
 
-    void SetControlVariable(TString var) { vplot = var; } 
+    void SetControlVariable(TString var) { vplot = var; }
     void SetNSteps(int nsteps) { ResetSteps(nsteps); }
     void SetFoM(TString myfmerit) { fmerit = myfmerit; }
     void SetBkgFunction(FUNC_GETN_PTR my_get_bkg)
     {
         get_bkg = my_get_bkg;
-        totB = get_bkg(treeBkg,vplot,(TString) (baseBkgCut),"",bkgNorm);
+        totB = get_bkg(treeBkg, vplot, (TString) (baseBkgCut), "", bkgNorm);
     }
 
     void SetSigFunction(FUNC_GETN_PTR my_get_sig)
     {
         get_sig = my_get_sig;
-        totS = get_sig(treeSig,vplot,(TString) (baseSigCut),MCweight,sigNorm);
+        totS = get_sig(treeSig, vplot, (TString) (baseSigCut), MCweight, sigNorm);
     }
 
     void ResetSteps(unsigned nsteps);
@@ -138,10 +138,5 @@ class CutOptimizer {
 
     void ClosePrintAndSave(string option = "");
 };
-
-
-
-
-
 
 #endif
