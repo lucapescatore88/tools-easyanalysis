@@ -165,7 +165,7 @@ case "$1" in
         ;;
 
     gsl)
-        SYS=$LCGDIR/releases/GSL
+        SYS=$LCGSYS/releases/GSL
         if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
             VER=2.1-36ee5
             VER=$VER/$ARCH

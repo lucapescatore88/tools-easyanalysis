@@ -183,7 +183,7 @@ switch ( "$1" )
         breaksw
 
     case gsl:
-        set SYS = $LCGDIR/releases/GSL
+        set SYS = $LCGSYS/releases/GSL
         if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
             set VER = 2.1-36ee5
             set VER = $VER/$ARCH
