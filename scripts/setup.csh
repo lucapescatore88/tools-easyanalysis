@@ -32,6 +32,7 @@ if ( ! ($?TOOLSSYS) ) then
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
 
+    source $TOOLSSYS/scripts/setup.csh cmake
     source $TOOLSSYS/scripts/setup.csh gcc
     source $TOOLSSYS/scripts/setup.csh python
     source $TOOLSSYS/scripts/setup.csh gsl
