@@ -25,6 +25,7 @@ if ( ! ($?TOOLSSYS) ) then
     setenv TOOLSSYS `echo $TOOLSSYS | sed s:"/$EXE"::`
 
     setenv LD_LIBRARY_PATH $TOOLSSYS/roofit/dic:$LD_LIBRARY_PATH
+    setenv LD_LIBRARY_PATH $TOOLSSYS/build/tools:$TOOLSSYS/build/roofit:$LD_LIBRARY_PATH
     setenv LD_LIBRARY_PATH $TOOLSSYS/lib:$LD_LIBRARY_PATH
 
     echo
