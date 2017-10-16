@@ -57,7 +57,7 @@ switch ( "$1" )
     case cmake:
         set SYS = $CVMFS/lib/contrib/CMake
         if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
-            set VER = 3.9.2
+            set VER = 3.7.2
             set VER = $VER/Linux-x86_64
         if ( -d $SYS/$VER ) then
             setenv CMAKESYS $SYS/$VER
