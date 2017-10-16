@@ -17,7 +17,8 @@ set(EASYTOOLS_TOOLSPATH ${PROJECT_SYS}/tools)
 
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SYS}/lib)
-set(DIRECTORY_GSL /cvmfs/lhcb.cern.ch/lib/lcg/releases/GSL/2.1-36ee5/x86_64-slc6-gcc49-opt/include)
+set(DIRECTORY_GSL $ENV{GSLSYS}/include)
+
 message("EasyTools PROJECT_SYS is set to" ${PROJECT_SYS})
 include_directories(${PROJECT_SYS} ${ROOT_INCLUDE_DIRS} ${DIRECTORY_GSL})
 add_definitions(${ROOT_CXX_FLAGS})
