@@ -41,7 +41,6 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     source $TOOLSSYS/scripts/setup.sh root
 
     source $TOOLSSYS/scripts/setup.sh env
-    echo
 fi
 
 # CASES

@@ -38,7 +38,6 @@ if ( ! ($?TOOLSSYS) ) then
     source $TOOLSSYS/scripts/setup.csh root
 
     source $TOOLSSYS/scripts/setup.csh env
-    echo
 endif
 
 # CASES

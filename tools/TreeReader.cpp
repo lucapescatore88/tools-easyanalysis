@@ -15,7 +15,7 @@ void TreeReader::AddChain(TChain *chain)
 {
     if (fChain)
     {
-        if (pmode == "v") cout << endl << "TreeReader - Adding chain" << endl << endl;
+        if (pmode == "v") cout << "TreeReader - Adding chain" << endl << endl;
 
         TObjArray *fileElements = chain->GetListOfFiles();
         TIter next(fileElements);
@@ -38,7 +38,7 @@ void TreeReader::AddFile(const char *fileName, const char* treeName, Long64_t ma
     {
         if (!TFile::Open(fileName)) return;
         fChain->AddFile(fileName, maxEntries, treeName);
-        if (pmode == "v") cout << endl << "TreeReader - Adding file: " << fileName << " " << treeName << endl;
+        if (pmode == "v") cout << "TreeReader - Adding file: " << fileName << " " << treeName << endl;
     }
 }
 
@@ -50,7 +50,7 @@ void TreeReader::AddFriend(const char *fileName, const char* treeName)
     {
         if (!TFile::Open(fileName)) return;
 
-        if (pmode == "v") cout << endl << "TreeReader - Adding friend: " << treeName << endl << endl;
+        if (pmode == "v") cout << "TreeReader - Adding friend: " << treeName << endl << endl;
 
         fChain->AddFriend(treeName, fileName);
     }
@@ -88,7 +88,7 @@ TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
 {
     if (!init)
     {
-        cout << "TreeReader - *** WARNING *** tree " << fChain->GetName() << " not initialized" << endl;
+        cout << endl << "TreeReader - *** WARNING *** tree " << fChain->GetName() << " not initialized" << endl;
         return NULL;
     }
 
@@ -148,7 +148,7 @@ void TreeReader::PrintListOfFiles()
 
     if (!init)
     {
-        cout << "TreeReader - *** WARNING *** tree " << fChain->GetName() << " not initialized" << endl;
+        cout << endl << "TreeReader - *** WARNING *** tree " << fChain->GetName() << " not initialized" << endl;
         return;
     }
 
@@ -176,7 +176,7 @@ void TreeReader::PrintListOfVariables()
 {
     if (!init)
     {
-        cout << "TreeReader - *** WARNING *** tree " << fChain->GetName() << " not initialized" << endl;
+        cout << endl << "TreeReader - *** WARNING *** tree " << fChain->GetName() << " not initialized" << endl;
         return;
     }
 
@@ -200,18 +200,18 @@ void TreeReader::SetBranchStatus(vector<string> branches, bool status, string op
 {
     if (!init)
     {
-        cout << "TreeReader - *** WARNING *** tree " << fChain->GetName() << " not initialized" << endl;
+        cout << endl << "TreeReader - *** WARNING *** tree " << fChain->GetName() << " not initialized" << endl;
         return;
     }
 
     if (opt.find("all") != string::npos)
     {
-        if (pmode == "v") cout << endl << "SetBranchStatus " << status << ": ALL" << endl;
+        if (pmode == "v") cout << "TreeReader - SetBranchStatus " << status << ": ALL" << endl;
         fChain->SetBranchStatus("*", status);
     }
 
     if (branches.size() != 0) {
-        if (pmode == "v") cout << endl << "SetBranchStatus " << status << ": " << fChain->GetName() << " (" << branches.size() << ")" << endl;
+        if (pmode == "v") cout << "TreeReader - SetBranchStatus " << status << ": " << fChain->GetName() << " (" << branches.size() << ")" << endl;
 
         TObjArray *list = fChain->GetListOfBranches();
 
@@ -228,7 +228,7 @@ void TreeReader::SetBranchStatus(vector<string> branches, bool status, string op
                 }
             }
 
-            if (pmode == "v") cout << "SetBranchStatus " << status << ": " << fChain->GetName() << " (" << nbranches << ")" << endl << endl;
+            if (pmode == "v") cout << "TreeReader - SetBranchStatus " << status << ": " << fChain->GetName() << " (" << nbranches << ")" << endl << endl;
         }
     }
 }
