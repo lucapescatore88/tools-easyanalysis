@@ -3,7 +3,7 @@ project(easytools_analysis)
 
 
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
-find_package(ROOT REQUIRED Cling TreePlayer Tree Rint MathMore Postscript Matrix RIO Core Foam RooStats RooFit RooFitCore Gpad Graf3d Graf Hist Net TMVA  XMLIO MLP)
+find_package(ROOT REQUIRED Cling TreePlayer Tree Rint MathMore MathCore Postscript Matrix RIO Core Foam RooStats RooFit RooFitCore Gpad Graf3d Graf Hist Net TMVA  XMLIO MLP)
 include(${ROOT_USE_FILE})
 set(PROJECT_SYS ${CMAKE_CURRENT_SOURCE_DIR})
 set(LINKDEF_TOOLS ${PROJECT_SYS}/LinkDef.h)
