@@ -48,7 +48,7 @@ def create_analysis(config) :
 
     for bkg in cont['bkgs'] :
 
-        ame = bkg.keys()[0]
+        name = bkg.keys()[0]
         if 'RooKeysPdf' in bkg[name]['pdf'] :
             ff = r.TFile.Open(bkg[name]['file'])
             tt = ff.Get(bkg[name]['tree'])
