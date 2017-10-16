@@ -73,7 +73,7 @@
 using namespace std;
 
 
-///\brief This type is supposed to contain a list of pointers to RooRealVars (parameters) collable by name 
+///\brief This type is supposed to contain a list of pointers to RooRealVars (parameters) collable by name
 
 typedef std::map <string, RooAbsReal *> Str2VarMap;
 typedef std::map <string, RooAbsReal *>::iterator Str2VarMapItr;
@@ -83,14 +83,14 @@ vector <Color_t> GetDefaultColors();
 /// \brief Returns the number of free patameters in a RooAbsPdf
 int getNFreePars(RooAbsPdf * pdf, RooArgSet vars);
 
-/// \brief Prints all paraeters of a RooAbsPdf 
+/// \brief Prints all paraeters of a RooAbsPdf
 void printParams(RooAbsPdf * pdf, RooArgSet obs = RooArgSet(), string opt = "");
 
 /** \brief Sets all parameters of a RooAbsPdf to the values of the parameters with the same name in the "set" list.
  * Does nothing if the name is not found.
  * <br> fix == "fix"  -> sets also the parameters to constants
  * <br> fix == "free" -> sets also the parameters to free
- * <br> fix == ""     -> keeps the variable as it is in "set" 
+ * <br> fix == ""     -> keeps the variable as it is in "set"
  */
 void fixParam(RooAbsPdf * pdf, RooRealVar * obs, RooArgSet * set, string fix = "");
 void fixParam(RooAbsPdf * pdf, RooRealVar * obs, string fix = "fix");
@@ -143,23 +143,23 @@ bool checkModel(RooAbsPdf * model);
   <br> "-range"      -> plots only the fitted range, otherwise all available is plot
   <br> "-min(num)"     -> sets the minimum to "num"
   @param bins: number of bins to use for data
-  @param regions: number of regions to plot is blinded plot, if regions = 0 plots everything 
+  @param regions: number of regions to plot is blinded plot, if regions = 0 plots everything
   @param Xtitle: X axis label
   @param title: title
   @param leg: A TLegend object to fill
  **/
 
 
-RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model = NULL, string opt = "", 
-        unsigned bins = 50, vector<string> regStr = vector<string>(1,"PlotRange"), map<string,vector<double>> reg = map<string,vector<double>>(), 
-        TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
-RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data = NULL, string opt = "", 
-        unsigned bins = 50, vector<string> regStr = vector<string>(1,"PlotRange"), map<string,vector<double>> reg = map<string,vector<double>>(), 
-        TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
-RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt, 
-        unsigned bins, TString Xtitle, TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
+RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model = NULL, string opt = "",
+                   unsigned bins = 50, vector<string> regStr = vector<string>(1, "PlotRange"), map<string, vector<double>> reg = map<string, vector<double>>(),
+                   TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
+RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data = NULL, string opt = "",
+                   unsigned bins = 50, vector<string> regStr = vector<string>(1, "PlotRange"), map<string, vector<double>> reg = map<string, vector<double>>(),
+                   TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
+RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, string opt,
+                   unsigned bins, TString Xtitle, TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
 RooPlot * getFrame(RooRealVar * var, RooAbsPdf * model, RooAbsData * data, string opt,
-        unsigned bins, TString Xtitle, TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
+                   unsigned bins, TString Xtitle, TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
 
 /** Set the paramteres with names in the "names" list to constants
  * opt == "-except" -> set contrants all but the ones with name in the list

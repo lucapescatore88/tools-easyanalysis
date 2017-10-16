@@ -13,17 +13,17 @@ string Analysis::m_pmode = "v";
 void Analysis::AddAllVariables()
 {
     vector< variable * > myvars;
-    if(m_dataReader) myvars = m_dataReader->GetVarList();
-    else if(m_reducedTree)
+    if (m_dataReader) myvars = m_dataReader->GetVarList();
+    else if (m_reducedTree)
     {
         TreeReader * reader = new TreeReader(m_reducedTree);
         reader->Initialize();
         myvars = reader->GetVarList();
     }
 
-    for(auto v : myvars)
+    for (auto v : myvars)
     {
-        if(v->GetArraySize() > 1) continue;
+        if (v->GetArraySize() > 1) continue;
         AddVariable(v->name);
     }
 }
@@ -42,19 +42,19 @@ bool Analysis::Initialize(string option, double frac)
 
     vector<double> allregions;
     allregions.push_back(m_var->getMin());
-    for(unsigned r = 0; r < m_regions.size(); ++r)
+    for (unsigned r = 0; r < m_regions.size(); ++r)
         allregions.push_back(m_regions[r]);
     allregions.push_back(m_var->getMax());
-    if(allregions.size()>2)
-    {   
-        for(unsigned r = 1; r < allregions.size(); ++r)
+    if (allregions.size() > 2)
+    {
+        for (unsigned r = 1; r < allregions.size(); ++r)
         {
-            string bandname = Form("band_%i",r/2);
-            if (r % 2 == 0) bandname = Form("sig_%i",r/2);
-            m_var->setRange(bandname.c_str(), allregions[r-1], allregions[r]);
+            string bandname = Form("band_%i", r / 2);
+            if (r % 2 == 0) bandname = Form("sig_%i", r / 2);
+            m_var->setRange(bandname.c_str(), allregions[r - 1], allregions[r]);
 
             m_regStr.push_back(bandname);
-            m_reg[bandname] = {allregions[r-1], allregions[r]};
+            m_reg[bandname] = {allregions[r - 1], allregions[r]};
         }
     }
 
@@ -68,7 +68,7 @@ bool Analysis::Initialize(string option, double frac)
     else if (!m_reducedTree) cout << "WARNING: No data available!!" << endl;
 
     bool result = ModelBuilder::Initialize(option);
-    if(m_bkg_components.empty() && m_data) ((RooRealVar*)m_nsig)->setVal(m_data->numEntries());
+    if (m_bkg_components.empty() && m_data) ((RooRealVar*)m_nsig)->setVal(m_data->numEntries());
     if (m_pmode == "v")
     {
         cout << endl << m_name << ": PrintParams" << endl << endl;
@@ -83,7 +83,7 @@ bool Analysis::Initialize(string option, double frac)
 void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if(m_pmode == "v") cout << endl << m_name << ": CreateReducedTree " << option << endl;
+    if (m_pmode == "v") cout << endl << m_name << ": CreateReducedTree " << option << endl;
 
     TCut doCuts = "";
     if (m_cuts) doCuts = *m_cuts;
@@ -96,12 +96,12 @@ void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
     else if (!m_reducedTree)
         m_reducedTree = (TTree*) m_dataReader->GetChain();//->Clone("reduced_" + m_name);
 
-    if( scale!=1 && !m_dataReader->HasVar( ((string)m_var->GetName()+"_unscaled").c_str() ) )
+    if ( scale != 1 && !m_dataReader->HasVar( ((string)m_var->GetName() + "_unscaled").c_str() ) )
     {
-        if(m_pmode == "v") cout << "Scaling variable... " << endl;
+        if (m_pmode == "v") cout << "Scaling variable... " << endl;
         string oldm_pmode = TreeReader::GetPrintLevel();
         TreeReader::SetPrintLevel("s");
-        Scaler::Set(scale,m_var);
+        Scaler::Set(scale, m_var);
         applyFunc(&Scaler::Scale);
         TreeReader::SetPrintLevel(oldm_pmode);
     }
@@ -112,7 +112,7 @@ void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
 
 /*
    This function converts the information in the Analysis object in a RooDataHist which can be fitted
-   */ 
+   */
 
 RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
 {
@@ -121,7 +121,7 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
 
     if (m_reducedTree && (option.find("-forcehist") == string::npos))
     {
-        if(mycuts!="" || option.find("-docuts")!=string::npos) CreateReducedTree("-docuts",-1,mycuts);
+        if (mycuts != "" || option.find("-docuts") != string::npos) CreateReducedTree("-docuts", -1, mycuts);
 
         RooArgList varList("varList_" + m_name);
         for (auto vv : m_datavars) varList.add(*vv);
@@ -130,7 +130,7 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
         if (m_dataReader && !m_dataReader->HasVars(m_datavars))
             cout << "WARNING: the tree does not contain the requested variable!" << endl;
 
-        if(m_data) m_data->reset();
+        if (m_data) m_data->reset();
         if (m_weight)
         {
             varList.add(*m_weight);
@@ -178,23 +178,23 @@ TH1 * Analysis::CreateHisto(string option)
 TH1 * Analysis::CreateHisto(double min, double max, int nbin, TCut _cuts, string _weight, string option, TH1 * htemplate)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if(gDirectory->FindObject("hist_"+m_name))
-        delete gDirectory->FindObject("hist_"+m_name);
-    if(_weight=="" && m_weight) _weight = m_weight->GetName();
-    if(m_data && option.find("-usedataset")!=string::npos)
+    if (gDirectory->FindObject("hist_" + m_name))
+        delete gDirectory->FindObject("hist_" + m_name);
+    if (_weight == "" && m_weight) _weight = m_weight->GetName();
+    if (m_data && option.find("-usedataset") != string::npos)
     {
-        if(gDirectory->FindObject("hist_"+m_name+"__"+(TString)m_var->GetName()))
-            delete gDirectory->FindObject("hist_"+m_name+"__"+(TString)m_var->GetName());
-        m_dataHist = m_data->createHistogram("hist_"+m_name,*m_var,Binning(nbin, min, max));
+        if (gDirectory->FindObject("hist_" + m_name + "__" + (TString)m_var->GetName()))
+            delete gDirectory->FindObject("hist_" + m_name + "__" + (TString)m_var->GetName());
+        m_dataHist = m_data->createHistogram("hist_" + m_name, *m_var, Binning(nbin, min, max));
     }
-    else if(m_reducedTree)
+    else if (m_reducedTree)
     {
-        TString exp((TString)m_var->GetName()+">>hist_"+m_name);
-        if(htemplate) exp = ((TString)m_var->GetName()+">>+"+htemplate->GetName());
-        if(min!=max) exp.Append(Form("(%i,%e,%e)",nbin,min,max));
-        if(m_cuts) m_reducedTree->Draw(exp,buildSelectStr(*m_cuts+_cuts, _weight),"E");
-        else m_reducedTree->Draw(exp,buildSelectStr(_cuts, _weight),"E");
-        m_dataHist = (TH1*)gPad->GetPrimitive("hist_"+m_name);
+        TString exp((TString)m_var->GetName() + ">>hist_" + m_name);
+        if (htemplate) exp = ((TString)m_var->GetName() + ">>+" + htemplate->GetName());
+        if (min != max) exp.Append(Form("(%i,%e,%e)", nbin, min, max));
+        if (m_cuts) m_reducedTree->Draw(exp, buildSelectStr(*m_cuts + _cuts, _weight), "E");
+        else m_reducedTree->Draw(exp, buildSelectStr(_cuts, _weight), "E");
+        m_dataHist = (TH1*)gPad->GetPrimitive("hist_" + m_name);
     }
 
     return m_dataHist;
@@ -208,14 +208,14 @@ void Analysis::AddGaussConstraint(TString name, double mean, double sigma)
 
 void Analysis::AddGaussConstraint(RooRealVar * par, double mean, double sigma)
 {
-    if(mean == -1e9) mean = par->getVal();
-    if(sigma == -1e9) sigma = par->getError();
-    TString name = par->GetName(); 
+    if (mean == -1e9) mean = par->getVal();
+    if (sigma == -1e9) sigma = par->getError();
+    TString name = par->GetName();
 
-    RooRealVar  *cm = new RooRealVar("cm_"+name, "mean_"+name, mean);
-    RooRealVar  *cs = new RooRealVar("cs_"+name, "error_"+name, sigma);
-    RooGaussian *constr = new RooGaussian("constr_"+name, "constr_"+name, *par, *cm, *cs);
-    if (m_pmode == "v") cout << Form("Constraint : "+name+"%s -> gauss(%f,%f)",mean,sigma) << endl;
+    RooRealVar  *cm = new RooRealVar("cm_" + name, "mean_" + name, mean);
+    RooRealVar  *cs = new RooRealVar("cs_" + name, "error_" + name, sigma);
+    RooGaussian *constr = new RooGaussian("constr_" + name, "constr_" + name, *par, *cm, *cs);
+    if (m_pmode == "v") cout << Form("Constraint : " + name + "%s -> gauss(%f,%f)", mean, sigma) << endl;
 
     AddConstraint(constr);
 }
@@ -231,14 +231,14 @@ void Analysis::AddGaussConstraint(RooRealVar * par, double mean, double sigma)
 void Analysis::SetUnits(string inUnit, string outUnit)
 {
     int nunits = 8;
-    string units[] = {"eV","keV","MeV","GeV","TeV","PeV"};
+    string units[] = {"eV", "keV", "MeV", "GeV", "TeV", "PeV"};
 
     int iIn = 0, iOut = 0;
-    while( inUnit != units[iIn] && iIn < nunits ) iIn++;
-    while( outUnit != units[iOut] && iOut < nunits ) iOut++;
+    while ( inUnit != units[iIn] && iIn < nunits ) iIn++;
+    while ( outUnit != units[iOut] && iOut < nunits ) iOut++;
 
-    if(iIn >= nunits || iOut >= nunits) { cout << "In or Out unit not found, units are not set" << endl; return; }
-    scale = TMath::Power(1000,(iIn - iOut));
+    if (iIn >= nunits || iOut >= nunits) { cout << "In or Out unit not found, units are not set" << endl; return; }
+    scale = TMath::Power(1000, (iIn - iOut));
     m_unit = units[iOut] + "/c^{2}";
 }
 
@@ -252,7 +252,7 @@ void Analysis::SetUnits(string outUnit, double scalefactor)
 /*
    Fits the "reducedTree" with the "m_model" which has to be previourly set and initialized.
    One can set the fit range and number of bins for chi2. If not set the variable range is used.
-   @param min, max: fitting interval, if min => max all available is used 
+   @param min, max: fitting interval, if min => max all available is used
    @param nbins: n of bins to use (if unbinned this does nothing)
    @param unbinned: true for unbinned fit
    @param print: Print options
@@ -291,22 +291,22 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     double maxr = m_var->getMax();
 
     //Fit range
-    if(option.find("-sidebandfit")!=string::npos)
+    if (option.find("-sidebandfit") != string::npos)
     {
         string ranges = "";
-        if(m_regStr.size()<2) cout << "WARNING: no regions set!" << endl;
+        if (m_regStr.size() < 2) cout << "WARNING: no regions set!" << endl;
         else
         {
-            for(auto r : m_regStr) if(r.find("band")!=string::npos) ranges += r+",";
+            for (auto r : m_regStr) if (r.find("band") != string::npos) ranges += r + ",";
             ranges.pop_back();
             fitRange = Range(ranges.c_str());
         }
     }
-    else if(option.find("-fitrange")!=string::npos)
+    else if (option.find("-fitrange") != string::npos)
     {
         size_t pos_fr = option.find("-fitrange[");
-        size_t pos_efr = option.find("]",pos_fr);
-        string myranges = option.substr(pos_fr+10,pos_efr-pos_fr-10);
+        size_t pos_efr = option.find("]", pos_fr);
+        string myranges = option.substr(pos_fr + 10, pos_efr - pos_fr - 10);
         fitRange = Range(myranges.c_str());
     }
 
@@ -319,14 +319,14 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     if (m_pmode == "v") cout << endl << m_name << ": Fit " << m_var->getTitle() << " (" << nbins << "," << minr << "," << maxr << ") " << option << endl;
 
     RooAbsData * mydata = m_data;
-    if(low_opt.find("-docuts")==string::npos || !m_data || extracuts != "" )
+    if (low_opt.find("-docuts") == string::npos || !m_data || extracuts != "" )
     {
-        if( (extracuts!="" || !m_data) && low_opt.find("-forcehist")==string::npos )
-            mydata = CreateDataSet(option,extracuts);
-        if( (m_reducedTree && !unbinned) || low_opt.find("-forcehist")!=string::npos )
+        if ( (extracuts != "" || !m_data) && low_opt.find("-forcehist") == string::npos )
+            mydata = CreateDataSet(option, extracuts);
+        if ( (m_reducedTree && !unbinned) || low_opt.find("-forcehist") != string::npos )
         {
             CreateHisto(minr, maxr, nbins, (TCut)"", GetWeight(), option);
-            mydata = new RooDataHist("data"+m_name,"",*m_var,m_dataHist);
+            mydata = new RooDataHist("data" + m_name, "", *m_var, m_dataHist);
         }
     }
 
@@ -336,7 +336,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     if (mydata)
     {
         if (low_opt.find("-constrainall") != string::npos)
-            m_constr = gaussianConstraints(m_model,RooArgSet(*m_var));
+            m_constr = gaussianConstraints(m_model, RooArgSet(*m_var));
 
         RooCmdArg isExtended = Extended(kTRUE);
         if ( (low_opt.find("-noextended") != string::npos) || (m_bkg_components.size() < 1) )
@@ -345,16 +345,16 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         // Prepare Likelihood (normalise and add constraints)
 
         //RooAbsReal * nll = CreateLogL(isExtended)
-        RooAbsReal * nll = m_model->createNLL(*mydata,isExtended,fitRange);
+        RooAbsReal * nll = m_model->createNLL(*mydata, isExtended, fitRange);
         double nll_init_val = nll->getVal(nll->getVariables());
-        RooFormulaVar * nll_norm = new RooFormulaVar("nll_norm",("@0-"+to_string(nll_init_val)).c_str(),*nll);
+        RooFormulaVar * nll_norm = new RooFormulaVar("nll_norm", ("@0-" + to_string(nll_init_val)).c_str(), *nll);
         RooAbsReal * nll_toFit = nll_norm;
-        if(m_constr->getSize() > 0) 
+        if (m_constr->getSize() > 0)
         {
             RooArgList list_for_product;
             list_for_product.add(*nll_norm);
             list_for_product.add(*m_constr);
-            RooProduct * nll_constr = new RooProduct("nll_constrained","nll_constrained",list_for_product);
+            RooProduct * nll_constr = new RooProduct("nll_constrained", "nll_constrained", list_for_product);
             nll_toFit = nll_constr;
         }
 
@@ -370,13 +370,13 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
 
         int i(0);
         while (m_fitRes == NULL || m_fitRes->covQual() < 3) // loop until convergence
-        { 
+        {
             m.migrad() ;
             m.hesse() ;
             if (low_opt.find("-minos") != string::npos) m.minos();
             m_fitRes = m.save();
 
-            ++i; if (i>20) break; // exit after 20 iterations
+            ++i; if (i > 20) break; // exit after 20 iterations
         }
 
         if (low_opt.find("-quiet") == string::npos)
@@ -385,14 +385,14 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     }
     else { cout << "NO DATA!!" << endl; return NULL; }
 
-    if(option.find("-hidesig") != string::npos)
+    if (option.find("-hidesig") != string::npos)
     {
         ((RooRealVar*) m_nsig)->setConstant();
         option += "-nocost";
     }
 
     //m_var->setVal(m_tmpvar->getVal());
-    if(option.find("-hidesig") != string::npos) ((RooRealVar*) m_nsig)->setConstant(0);
+    if (option.find("-hidesig") != string::npos) ((RooRealVar*) m_nsig)->setConstant(0);
     RooPlot *plot = (RooPlot*) PrintAndCalcChi2(nbins, option, mydata);
 
     return plot;
@@ -403,7 +403,7 @@ RooWorkspace * Analysis::SaveToRooWorkspace(string option)
 {
     RooWorkspace * ws = ModelBuilder::SaveToRooWorkspace(option);
 
-    if(m_data)
+    if (m_data)
     {
         ws->import(*m_data);
         if (m_pmode == "v") cout << "m_data: " << m_data->GetName() << endl;
@@ -421,32 +421,32 @@ void Analysis::ImportModel(RooWorkspace * ws)
 
     TIterator * it = ws->componentIterator();
     TObject * arg;
-    while( (arg=(TObject *)it->Next()) )
+    while ( (arg = (TObject *)it->Next()) )
     {
         string name = arg->GetName();
 
-        if(name.find("m_model")!=string::npos)
+        if (name.find("m_model") != string::npos)
             m_model = (RooAbsPdf*)arg;
 
-        else if (name.find("totsig")!=string::npos)
+        else if (name.find("totsig") != string::npos)
             m_sig = (RooAbsPdf*)arg;
-        else if (name.find("totbkg")!=string::npos)
+        else if (name.find("totbkg") != string::npos)
             m_bkg = (RooAbsPdf*)arg;
-        else if (name.find("nsig")!=string::npos)
+        else if (name.find("nsig") != string::npos)
             m_nsig = (RooAbsReal*)arg;
-        else if (name.find("nbkg")!=string::npos)
+        else if (name.find("nbkg") != string::npos)
         {
             m_bkg_fractions.push_back((RooAbsReal*)arg);
             TIterator * it2 = ws->componentIterator();
             TObject * arg2;
-            while( (arg2=(TObject *)it2->Next()) )
+            while ( (arg2 = (TObject *)it2->Next()) )
             {
-                string compname = (string)((TString)name).ReplaceAll("nbkg","bkg");
-                if( ((string)(arg2->GetName())).find(compname)!=string::npos )
-                    m_bkg_components.push_back( (RooAbsPdf*)arg2 );       
+                string compname = (string)((TString)name).ReplaceAll("nbkg", "bkg");
+                if ( ((string)(arg2->GetName())).find(compname) != string::npos )
+                    m_bkg_components.push_back( (RooAbsPdf*)arg2 );
             }
         }
-        else if (name.find("var")!=string::npos)
+        else if (name.find("var") != string::npos)
             m_var = (RooRealVar*)arg;
     }
 
@@ -461,26 +461,38 @@ void Analysis::ImportModel(RooWorkspace * ws)
 
 void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
 {
-    if (m_pmode == "v") cout << endl << m_name << ": ImportModel" << endl << endl;
-
-    TIterator * itSig = wsSig->componentIterator();
-    TObject * argSig;
-    while( (argSig=(TObject *)itSig->Next()) )
+    if (wsSig)
     {
-        string name = argSig->GetName();
-        if (name.find("totsig")!=string::npos) m_sig = (RooAbsPdf*)argSig;
+        if (m_pmode == "v") cout << endl << m_name << ": ImportModel - Signal" << endl << endl;
+
+        TIterator * itSig = wsSig->componentIterator();
+        TObject * argSig;
+        while ( (argSig = (TObject *)itSig->Next()) )
+        {
+            string name = argSig->GetName();
+            if (name.find("totsig") != string::npos) m_sig = (RooAbsPdf*)argSig;
+        }
     }
 
-    TIterator * itBkg = wsBkg->componentIterator();
-    TObject * argBkg;
-    while( (argBkg=(TObject *)itBkg->Next()) )
+    if (wsBkg)
     {
-        string name = argBkg->GetName();
-        if (name.find("totbkg")!=string::npos) m_bkg = (RooAbsPdf*)argBkg;
-    }
+        if (m_pmode == "v") cout << endl << m_name << ": ImportModel - Background" << endl << endl;
 
-    m_init = true;
-    ForceValid();
+        TIterator * itBkg = wsBkg->componentIterator();
+        TObject * argBkg;
+        while ( (argBkg = (TObject *)itBkg->Next()) )
+        {
+            string name = argBkg->GetName();
+            if (name.find("totbkg") != string::npos) m_bkg = (RooAbsPdf*)argBkg;
+        }
+    }
+/*
+    if (wsSig && wsBkg)
+    {
+        m_init = true;
+        ForceValid();
+    }
+*/
 }
 
 void Analysis::ImportData(RooWorkspace * ws)
@@ -488,13 +500,13 @@ void Analysis::ImportData(RooWorkspace * ws)
     if (m_pmode == "v") cout << endl << m_name << ": ImportData" << endl;
 
     list<RooAbsData *> mylist = ws->allData();
-    for (std::list<RooAbsData *>::iterator it=mylist.begin(); it != mylist.end(); ++it)
+    for (std::list<RooAbsData *>::iterator it = mylist.begin(); it != mylist.end(); ++it)
     {
         string name = (*it)->GetName();
-        if(name.find("data_")!=string::npos) m_data = (RooDataSet*)(*it);
+        if (name.find("data_") != string::npos) m_data = (RooDataSet*)(*it);
     }
 
-    if(!m_data) cout << "Data not found in work space" << endl;
+    if (!m_data) cout << "Data not found in work space" << endl;
     else m_init = true;
 }
 
@@ -516,14 +528,14 @@ TTree * Analysis::applyFunc(void (*addFunc)(TreeReader *,  TTree *, bool), doubl
 
 TTree * Analysis::applyCuts(TCut _cuts, bool substtree, void (*addFunc)(TreeReader *,  TTree *, bool),  double frac)
 {
-    if( !m_dataReader ) {cout << "WARNING: No tree available! Set one before applying cuts." << endl; return NULL;}
-    if( m_pmode=="v" ) cout << endl << m_name << ": Creating new tree with candidates which passed all cuts" << endl;
+    if ( !m_dataReader ) {cout << "WARNING: No tree available! Set one before applying cuts." << endl; return NULL;}
+    if ( m_pmode == "v" ) cout << endl << m_name << ": Creating new tree with candidates which passed all cuts" << endl;
 
-    if(m_cuts) _cuts += *m_cuts;
-    TTree * newTree = new TTree("cand"+m_name,"");
+    if (m_cuts) _cuts += *m_cuts;
+    TTree * newTree = new TTree("cand" + m_name, "");
     m_dataReader->FillNewTree(newTree, _cuts, frac, addFunc);
 
-    if(substtree) m_reducedTree = newTree;
+    if (substtree) m_reducedTree = newTree;
     return newTree;
 }
 
@@ -558,16 +570,16 @@ TTree * Analysis::GetSingleTree(FUNC_PTR choose, TString namevar, bool reset)
     TTree *singleTree = (TTree*) m_reducedTree->CloneTree(0);
     int isSingle, multiplicity;
     TString namesingle = "isSingle";
-    if(namevar!="") namesingle += "_"+namevar;
-    singleTree->Branch(namesingle, &isSingle, namesingle+"/I");
+    if (namevar != "") namesingle += "_" + namevar;
+    singleTree->Branch(namesingle, &isSingle, namesingle + "/I");
 
     bool has_multi = false;
     TObjArray* branches = singleTree->GetListOfBranches();
     for (int i = 0; i < branches->GetEntries(); ++i)
-        if( (string)((TBranch*)branches->At(i))->GetName() == "Multiplicity" )
+        if ( (string)((TBranch*)branches->At(i))->GetName() == "Multiplicity" )
             has_multi = true;
 
-    if(!has_multi) singleTree->Branch("Multiplicity", &multiplicity, "Multiplicity/I");
+    if (!has_multi) singleTree->Branch("Multiplicity", &multiplicity, "Multiplicity/I");
 
     TreeReader * reducedReader = new TreeReader(m_reducedTree);
     int ntot = reducedReader->GetEntries();
@@ -577,7 +589,7 @@ TTree * Analysis::GetSingleTree(FUNC_PTR choose, TString namevar, bool reset)
     entryn.push_back(0);
 
     ULong64_t lastEvtNumber = reducedReader->GetValue("eventNumber");
-    UInt_t    lastRunNumber = reducedReader->GetValue("runNumber"); 
+    UInt_t    lastRunNumber = reducedReader->GetValue("runNumber");
 
     if (m_pmode == "v") cout << endl;
 
@@ -590,15 +602,15 @@ TTree * Analysis::GetSingleTree(FUNC_PTR choose, TString namevar, bool reset)
         ULong64_t curEvtNumber = reducedReader->GetValue("eventNumber");
         UInt_t    curRunNumber = reducedReader->GetValue("runNumber");
 
-        bool changed = (curEvtNumber != lastEvtNumber || curRunNumber != lastRunNumber || i == (ntot-1));
+        bool changed = (curEvtNumber != lastEvtNumber || curRunNumber != lastRunNumber || i == (ntot - 1));
 
         if (changed)
         {
-            if (i == (ntot-1)) entryn.push_back(i);
+            if (i == (ntot - 1)) entryn.push_back(i);
             multiplicity = entryn.size();
 
             Long64_t keep = 0;
-            if(choose) keep = choose(reducedReader,entryn);
+            if (choose) keep = choose(reducedReader, entryn);
             else keep = randomKill(reducedReader, entryn);
 
             for (unsigned v = 0; v < entryn.size(); v++)
@@ -632,23 +644,23 @@ TTree * Analysis::GetSingleTree(FUNC_PTR choose, TString namevar, bool reset)
 
 double Analysis::GetChi2()
 {
-    if( m_chi2[0] < 0. ) cout << m_name << ": No valid chi2 was calculated yet!" << endl;
+    if ( m_chi2[0] < 0. ) cout << m_name << ": No valid chi2 was calculated yet!" << endl;
     return m_chi2[0];
 }
 double Analysis::GetNDF()
 {
-    if( m_chi2[1] < 0. ) cout << m_name << ": No valid chi2 was calculated yet!" << endl;
+    if ( m_chi2[1] < 0. ) cout << m_name << ": No valid chi2 was calculated yet!" << endl;
     return m_chi2[1];
 }
 void Analysis::PrintChi2()
 {
-    if( m_chi2[0] < 0. ) cout << m_name << ": No valid chi2 was calculated yet!" << endl;
-    else cout << m_name << fixed << setprecision(1) << ": Chi2/NDF = " << m_chi2[0] << " NDF = " << m_chi2[1] << " - with probability " << fixed << setprecision(3) << TMath::Prob(m_chi2[0]*m_chi2[1],m_chi2[1]) << endl;
+    if ( m_chi2[0] < 0. ) cout << m_name << ": No valid chi2 was calculated yet!" << endl;
+    else cout << m_name << fixed << setprecision(1) << ": Chi2/NDF = " << m_chi2[0] << " NDF = " << m_chi2[1] << " - with probability " << fixed << setprecision(3) << TMath::Prob(m_chi2[0]*m_chi2[1], m_chi2[1]) << endl;
 }
 double Analysis::GetProb()
 {
-    if( m_chi2[1] < 0. ) cout << m_name << ": No valid chi2 was calculated yet!" << endl;
-    return TMath::Prob(m_chi2[0]*m_chi2[1],m_chi2[1]);
+    if ( m_chi2[1] < 0. ) cout << m_name << ": No valid chi2 was calculated yet!" << endl;
+    return TMath::Prob(m_chi2[0] * m_chi2[1], m_chi2[1]);
 }
 
 
@@ -671,9 +683,9 @@ RooPlot* Analysis::Print(string option, unsigned bins, TString Xtitle, TString t
 {
     bool dom_model = true;
     RooDataSet * mydata = NULL;
-    if(!myvar) myvar = m_var;
-    if(option.find("-nom_model")!=string::npos) dom_model = false;
-    if(option.find("-nodata")==string::npos) mydata = GetDataSet(option);
+    if (!myvar) myvar = m_var;
+    if (option.find("-nom_model") != string::npos) dom_model = false;
+    if (option.find("-nodata") == string::npos) mydata = GetDataSet(option);
     return Print(dom_model, mydata, option, bins, Xtitle, title, myvar);
 }
 
@@ -681,64 +693,64 @@ RooPlot* Analysis::Print(RooRealVar * myvar, string option, unsigned bins, TStri
 {
     bool dom_model = true;
     RooDataSet * mydata = NULL;
-    if(!myvar) myvar = m_var;
-    if(option.find("-nom_model")!=string::npos) dom_model = false;
-    if(option.find("-nodata")==string::npos) mydata = GetDataSet(option);
+    if (!myvar) myvar = m_var;
+    if (option.find("-nom_model") != string::npos) dom_model = false;
+    if (option.find("-nodata") == string::npos) mydata = GetDataSet(option);
     return Print(dom_model, mydata, option, bins, Xtitle, title, myvar);
 }
 
 RooPlot* Analysis::Print(bool domodel, RooAbsData * _data, string option, unsigned bins, TString Xtitle, TString title, RooRealVar * myvar)
 {
-    if(!_data) { cout << "WARNING!: No data available." << endl; domodel = true; }
+    if (!_data) { cout << "WARNING!: No data available." << endl; domodel = true; }
 
     unsigned posX = option.find("-x");
-    if(posX < 1e4) Xtitle = option.substr(posX+2,option.find("-",posX+2) - posX - 2);
-    if(m_unit!="") Xtitle += " ["+ m_unit +"]";
+    if (posX < 1e4) Xtitle = option.substr(posX + 2, option.find("-", posX + 2) - posX - 2);
+    if (m_unit != "") Xtitle += " [" + m_unit + "]";
 
-    if(!myvar) myvar = m_var;
+    if (!myvar) myvar = m_var;
 
     TString Ytitle = "";
     double intpart = 0;
-    double width = (myvar->getMax()-myvar->getMin())/bins;
-    if(modf(width,&intpart) == 0.) Ytitle = Form("Candidates per %i",(int)width);
-    else if( modf(width/0.1,&intpart) == 0. ) Ytitle = Form("Candidates per %.1f",width);
-    else Ytitle = Form("Candidates per %.2f",width);
-    if(m_unit != "") Ytitle += ( " " + m_unit );
+    double width = (myvar->getMax() - myvar->getMin()) / bins;
+    if (modf(width, &intpart) == 0.) Ytitle = Form("Candidates per %i", (int)width);
+    else if ( modf(width / 0.1, &intpart) == 0. ) Ytitle = Form("Candidates per %.1f", width);
+    else Ytitle = Form("Candidates per %.2f", width);
+    if (m_unit != "") Ytitle += ( " " + m_unit );
 
     transform(option.begin(), option.end(), option.begin(), ::tolower);
 
-    if(option.find("-empty")!=string::npos) 
+    if (option.find("-empty") != string::npos)
     {
-        RooPlot * ple = new RooPlot(*myvar,myvar->getMin(),myvar->getMax(),bins);
+        RooPlot * ple = new RooPlot(*myvar, myvar->getMin(), myvar->getMax(), bins);
         ple->SetXTitle(Xtitle);
         ple->SetYTitle(Ytitle);
         return ple;
     }
 
-    if(domodel)
+    if (domodel)
     {
-        if(option.find("-linlog")!=string::npos)
-        {   
+        if (option.find("-linlog") != string::npos)
+        {
             string optLog = option;
             optLog.replace(option.find("lin"), 3, "");
-            ModelBuilder::Print(title, Xtitle, optLog, _data, bins, m_regStr, m_reg, m_fitRes,Ytitle, myvar);
+            ModelBuilder::Print(title, Xtitle, optLog, _data, bins, m_regStr, m_reg, m_fitRes, Ytitle, myvar);
         }
         return ModelBuilder::Print(title, Xtitle, option, _data, bins, m_regStr, m_reg, m_fitRes, Ytitle, myvar);
     }
     else
     {
-        TCanvas * myc = new TCanvas();  
-        if(option.find("-log")!=string::npos || option.find("-linlog")!=string::npos)  myc->SetLogy();
+        TCanvas * myc = new TCanvas();
+        if (option.find("-log") != string::npos || option.find("-linlog") != string::npos)  myc->SetLogy();
         RooPlot * frame = getFrame(myvar, _data, NULL, option, bins, m_regStr, m_reg, Xtitle, Ytitle, NULL, vector<Color_t>());
-        if(option.find("-bw")!=string::npos) myc->SetGrayscale();
+        if (option.find("-bw") != string::npos) myc->SetGrayscale();
         frame->Draw();
-        if(title=="") myc->Print("data_"+m_name+".pdf");
+        if (title == "") myc->Print("data_" + m_name + ".pdf");
         else myc->Print(title);
-        if(option.find("-linlog")!=string::npos)
+        if (option.find("-linlog") != string::npos)
         {
             myc->SetLogy(0);
             getFrame(myvar, _data, NULL, option, bins, m_regStr, m_reg, Xtitle, Ytitle, NULL, vector<Color_t>())->Draw();
-            if(title=="") myc->Print("data_"+m_name+".pdf");
+            if (title == "") myc->Print("data_" + m_name + ".pdf");
             else myc->Print(title);
         }
 
@@ -754,16 +766,16 @@ RooPlot * Analysis::PrintAndCalcChi2(int nbins, string option, RooAbsData * myda
     transform(low_opt.begin(), low_opt.end(), low_opt.begin(), ::tolower);
 
     RooPlot * f = NULL;
-    double rangeplot[] = {m_var->getMin(),m_var->getMax()};
+    double rangeplot[] = {m_var->getMin(), m_var->getMax()};
     f = Print(true, mydata, option, nbins);
 
-    m_chi2 = calcChi2(f, getNFreePars(m_model,RooArgSet(*m_var)), rangeplot);
+    m_chi2 = calcChi2(f, getNFreePars(m_model, RooArgSet(*m_var)), rangeplot);
     //double * chi2ndf = calcChi2(f, getNFreePars(m_model,RooArgSet(*m_var)), rangeplot);
     //m_chi2[0] = chi2ndf[0];
     //m_chi2[1] = chi2ndf[1];
-    if(option=='v') PrintChi2();
+    if (option == 'v') PrintChi2();
 
-    return f; 
+    return f;
 }
 
 
@@ -773,12 +785,12 @@ RooPlot * Analysis::PrintAndCalcChi2(int nbins, string option, RooAbsData * myda
 
 void Analysis::SetBlindRegion(double min, double max)
 {
-    if(min >= max) { cout << "Min has to be less than max" << endl; return; }
-    if(m_regions.size() > 0) if(m_regions[m_regions.size()] > min) { cout << "Blinded signal regions must not overlap and must be entered in order from low to high" << endl; return; }
-    if(min < m_var->getMin() || max > m_var->getMax()) { cout << "Blinded region bust be in variable range" << endl; return; }
+    if (min >= max) { cout << "Min has to be less than max" << endl; return; }
+    if (m_regions.size() > 0) if (m_regions[m_regions.size()] > min) { cout << "Blinded signal regions must not overlap and must be entered in order from low to high" << endl; return; }
+    if (min < m_var->getMin() || max > m_var->getMax()) { cout << "Blinded region bust be in variable range" << endl; return; }
     m_regions.push_back(min);
     m_regions.push_back(max);
-    if(m_init) cout << "Remember to reinitialzie!!!" << endl;
+    if (m_init) cout << "Remember to reinitialzie!!!" << endl;
 }
 
 
@@ -790,16 +802,16 @@ void Analysis::SetBlindRegion(double min, double max)
 TTree * Analysis::Generate(int nevt, string option)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if(m_pmode=="v") cout << endl << m_name << ": Generating " << nevt << " events (" << option << ")" << endl;
+    if (m_pmode == "v") cout << endl << m_name << ": Generating " << nevt << " events (" << option << ")" << endl;
 
-    if(m_model)
+    if (m_model)
     {
-        RooArgSet varList("varList_"+m_name);
-        for(auto vv : m_vars) varList.add(*vv);
+        RooArgSet varList("varList_" + m_name);
+        for (auto vv : m_vars) varList.add(*vv);
 
         /*
         if(option.find("-useroofit")==string::npos)
-        {   
+        {
             TTree * newTree = generate(&varList,m_model,nevt,option);
             newTree->SetName("gen_"+m_name);
             m_reducedTree = newTree;
@@ -809,19 +821,19 @@ TTree * Analysis::Generate(int nevt, string option)
         else
         {
         */
-            cout << "Generating toys with roofit function" << endl;
-            size_t posseed = option.find("-seed");
-            if(posseed!=string::npos)
-            {
-                int seed = ((TString)(option.substr(posseed+5))).Atof();
-                RooRandom::randomGenerator()->SetSeed(seed);
-            }
-            RooCmdArg ext = RooCmdArg::none();
-            if(option.find("-genextended")!=string::npos) ext = Extended(); 
-            m_data = m_model->generate(varList,nevt,ext);
-            cout << m_name << ": " << " Generated events = " << m_data->numEntries() << endl;
-            m_data->Print();
-            return NULL;
+        cout << "Generating toys with roofit function" << endl;
+        size_t posseed = option.find("-seed");
+        if (posseed != string::npos)
+        {
+            int seed = ((TString)(option.substr(posseed + 5))).Atof();
+            RooRandom::randomGenerator()->SetSeed(seed);
+        }
+        RooCmdArg ext = RooCmdArg::none();
+        if (option.find("-genextended") != string::npos) ext = Extended();
+        m_data = m_model->generate(varList, nevt, ext);
+        cout << m_name << ": " << " Generated events = " << m_data->numEntries() << endl;
+        m_data->Print();
+        return NULL;
         //}
     }
     else return NULL;
@@ -831,12 +843,12 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
     cout << fixed << setprecision(3);
-    if(m_pmode=="v") cout << endl << m_name << ": Generating " << nsigevt << " signal events and " << nbkgevt << " bkg events (" << option << ")" << endl;
+    if (m_pmode == "v") cout << endl << m_name << ": Generating " << nsigevt << " signal events and " << nbkgevt << " bkg events (" << option << ")" << endl;
 
-    if(m_sig && m_bkg)
+    if (m_sig && m_bkg)
     {
-        RooArgSet varList("varList_"+m_name);
-        for(auto vv : m_vars) varList.add(*vv);
+        RooArgSet varList("varList_" + m_name);
+        for (auto vv : m_vars) varList.add(*vv);
 
         /*
         if(option.find("-useroofit")==string::npos) {
@@ -850,28 +862,28 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
         else
         {
         */
-            cout << "Generating toys with roofit function" << endl;
-            size_t posseed = option.find("-seed");
-            if(posseed!=string::npos)
-            {
-                int seed = ((TString)(option.substr(posseed+5))).Atof();
-                RooRandom::randomGenerator()->SetSeed(seed);
-            }
-            RooCmdArg ext = RooCmdArg::none();
-            if(option.find("-genextended")!=string::npos) ext = Extended(); 
-            TString dataname = "data_"+m_name;
-            if (m_data) dataname = m_data->GetName();
+        cout << "Generating toys with roofit function" << endl;
+        size_t posseed = option.find("-seed");
+        if (posseed != string::npos)
+        {
+            int seed = ((TString)(option.substr(posseed + 5))).Atof();
+            RooRandom::randomGenerator()->SetSeed(seed);
+        }
+        RooCmdArg ext = RooCmdArg::none();
+        if (option.find("-genextended") != string::npos) ext = Extended();
+        TString dataname = "data_" + m_name;
+        if (m_data) dataname = m_data->GetName();
 
-            double ntot = nsigevt+nbkgevt;
-            double frac = nsigevt/ntot;
-            RooRealVar * f_sig = new RooRealVar("f_sig","f_sig",frac);  
-            RooAbsPdf * tot = new RooAddPdf("total_pdf","total_pdf",RooArgSet(*m_sig, *m_bkg), RooArgSet(*f_sig));
-            cout << "Generating nsig/ntot = " << f_sig->getVal() << endl;
-            m_data = tot->generate(varList,ntot,ext);
+        double ntot = nsigevt + nbkgevt;
+        double frac = nsigevt / ntot;
+        RooRealVar * f_sig = new RooRealVar("f_sig", "f_sig", frac);
+        RooAbsPdf * tot = new RooAddPdf("total_pdf", "total_pdf", RooArgSet(*m_sig, *m_bkg), RooArgSet(*f_sig));
+        cout << "Generating nsig/ntot = " << f_sig->getVal() << endl;
+        m_data = tot->generate(varList, ntot, ext);
 
-            cout << m_name << ": " << " Generated events = " << m_data->numEntries() << endl;
+        cout << m_name << ": " << " Generated events = " << m_data->numEntries() << endl;
 
-            return NULL; 
+        return NULL;
         //}
     }
     else return NULL;
@@ -894,12 +906,12 @@ RooDataSet * Analysis::CalcSWeightRooFit(unsigned nbins, bool unbinned, string o
     bool doInit = false;
     vector<string> comps = { m_nsig->GetName() };
     RooArgSet * yields = new RooArgSet(*m_nsig);
-    for(auto bfr : m_bkg_fractions)
+    for (auto bfr : m_bkg_fractions)
     {
         RooRealVar * bfrVar = (RooRealVar*)bfr;
-        if(option.find("-freeyields")!=string::npos)
+        if (option.find("-freeyields") != string::npos)
         {
-            if(((string)typeid(*bfr).name()).find("RooFormulaVar")!=string::npos)
+            if (((string)typeid(*bfr).name()).find("RooFormulaVar") != string::npos)
             {
                 cout << "Free Formula: " << bfr->GetName() << endl;
                 bfr = new RooRealVar(bfr->GetName(), bfr->GetName(), bfrVar->getVal(), bfrVar->getVal() / 2., bfrVar->getVal() * 2.);
@@ -915,15 +927,15 @@ RooDataSet * Analysis::CalcSWeightRooFit(unsigned nbins, bool unbinned, string o
         comps.push_back(bfrVar->GetName());
     }
 
-    setConstant(m_model,m_var,comps,"except-contains");
+    setConstant(m_model, m_var, comps, "except-contains");
 
-    if(doInit) ModelBuilder::Initialize("");
+    if (doInit) ModelBuilder::Initialize("");
 
     TString oldname = m_name;
-    if(option.find("-nofit")==string::npos)
+    if (option.find("-nofit") == string::npos)
     {
-        m_name+=(TString)"_sWRF";
-        Fit(nbins,unbinned,option);
+        m_name += (TString)"_sWRF";
+        Fit(nbins, unbinned, option);
     }
     m_name = oldname;
 
@@ -933,7 +945,7 @@ RooDataSet * Analysis::CalcSWeightRooFit(unsigned nbins, bool unbinned, string o
 
     yields->Print();
 
-    SPlot *sPlot = new SPlot("splot","splot",*m_data,m_model,*yields);
+    SPlot *sPlot = new SPlot("splot", "splot", *m_data, m_model, *yields);
 
     m_reducedTree = (TTree*) m_data->store()->tree();
 
@@ -945,15 +957,15 @@ RooDataSet * Analysis::CalcSWeightRooFit(unsigned nbins, bool unbinned, string o
     TCanvas *c = new TCanvas();
     gStyle->SetOptStat(0);
 
-    m_reducedTree->Draw(sweights[0].GetName()+(TString)">>hSWeights_"+sweights[0].GetName());
+    m_reducedTree->Draw(sweights[0].GetName() + (TString)">>hSWeights_" + sweights[0].GetName());
 
     c->Print((TString) m_name + "_sWeights.pdf");
 
-    m_reducedTree->Draw(m_var->GetName()+(TString)">>hHisto_"+sweights[0].GetName());
-    TH1D *hHisto = (TH1D*)gPad->GetPrimitive((TString)"hHisto_"+sweights[0].GetName());
+    m_reducedTree->Draw(m_var->GetName() + (TString)">>hHisto_" + sweights[0].GetName());
+    TH1D *hHisto = (TH1D*)gPad->GetPrimitive((TString)"hHisto_" + sweights[0].GetName());
 
-    m_reducedTree->Draw(m_var->GetName()+(TString)">>hSWHisto_"+sweights[0].GetName(),sweights[0].GetName());
-    TH1D *hSWHisto = (TH1D*)gPad->GetPrimitive((TString)"hSWHisto_"+sweights[0].GetName());
+    m_reducedTree->Draw(m_var->GetName() + (TString)">>hSWHisto_" + sweights[0].GetName(), sweights[0].GetName());
+    TH1D *hSWHisto = (TH1D*)gPad->GetPrimitive((TString)"hSWHisto_" + sweights[0].GetName());
 
     hSWHisto->SetLineColor(1);
     hHisto->SetLineColor(4);

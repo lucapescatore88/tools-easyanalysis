@@ -9,7 +9,7 @@ using namespace RooFit;
 
 /**
   \class CutOptimiser.
-  
+
   Allows to opptimise any cut in an n-dimensional space is required.
 
   */
@@ -24,16 +24,16 @@ TString subStrings(TString tmp, vector <TString> names, vector<double> values)
 
     TString outstr = tmp;
     for (size_t n = 0; n < names.size(); n++)
-        outstr = outstr.ReplaceAll(names[n],Form("%e",values[n]));          
+        outstr = outstr.ReplaceAll(names[n], Form("%e", values[n]));
 
     return outstr;
 }
 
 bool compare_vectors_double( vector<double> v1, vector<double> v2 )
 {
-    if(v1.size()!=v2.size()) return false;
-    for(size_t i = 0; i < v1.size(); i++)
-        if(v1[i]!=v2[i]) return false;
+    if (v1.size() != v2.size()) return false;
+    for (size_t i = 0; i < v1.size(); i++)
+        if (v1[i] != v2[i]) return false;
     return true;
 }
 
@@ -54,34 +54,34 @@ void buildComb(const vector<vector<double> > &allVecs, vector<vector<double> > &
 {
     if (vecIndex >= allVecs.size())
     {
-        if(vSoFar.size() > 1)
+        if (vSoFar.size() > 1)
         {
             vector <double> v_check = vSoFar;
             sort(v_check.begin(), v_check.end());
 
-            if(opt.find("-norepetition")!=string::npos)
+            if (opt.find("-norepetition") != string::npos)
             {
-                for(size_t vi = 1; vi < v_check.size(); vi++)
-                    if(v_check[vi] == v_check[vi-1]) return;
+                for (size_t vi = 1; vi < v_check.size(); vi++)
+                    if (v_check[vi] == v_check[vi - 1]) return;
             }
-            if(opt.find("-unordered")!=string::npos)
+            if (opt.find("-unordered") != string::npos)
             {
-                for(size_t vi = 0; vi < result.size(); vi++)
+                for (size_t vi = 0; vi < result.size(); vi++)
                 {
                     vector <double> cur_res = result[vi];
                     sort(cur_res.begin(), cur_res.end());
-                    if(compare_vectors_double(cur_res,v_check)) return;
+                    if (compare_vectors_double(cur_res, v_check)) return;
                 }
             }
         }
         result.push_back(vSoFar);
         return;
     }
-    for (size_t i=0; i < allVecs[vecIndex].size(); i++)
-    { 
+    for (size_t i = 0; i < allVecs[vecIndex].size(); i++)
+    {
         vector<double> tmp_v = vSoFar;
         tmp_v.push_back(allVecs[vecIndex][i]);
-        buildComb(allVecs, result, vecIndex+1, (const vector<double>) tmp_v, opt);
+        buildComb(allVecs, result, vecIndex + 1, (const vector<double>) tmp_v, opt);
     }
 }
 
@@ -92,11 +92,11 @@ void buildComb_fast(const vector<vector<double> > &allVecs, vector<vector<double
         result.push_back(vSoFar);
         return;
     }
-    for (size_t i=0; i < allVecs[vecIndex].size(); i++)
-    { 
+    for (size_t i = 0; i < allVecs[vecIndex].size(); i++)
+    {
         vector<double> tmp_v = vSoFar;
         tmp_v.push_back(allVecs[vecIndex][i]);
-        buildComb(allVecs, result, vecIndex+1, (const vector<double>) tmp_v);
+        buildComb(allVecs, result, vecIndex + 1, (const vector<double>) tmp_v);
 
     }
 }
@@ -108,15 +108,15 @@ void buildComb(const vector<vector<TString> > &allVecs, vector<TString > &result
         result.push_back(strSoFar);
         return;
     }
-    for (size_t i=0; i<allVecs[vecIndex].size(); i++)
-        buildComb(allVecs, result, vecIndex+1, strSoFar+allVecs[vecIndex][i]);
+    for (size_t i = 0; i < allVecs[vecIndex].size(); i++)
+        buildComb(allVecs, result, vecIndex + 1, strSoFar + allVecs[vecIndex][i]);
 }
 
 void buildComb(const vector< double > &elms, vector<vector<double> > &result, string opt)
 {
     vector < vector < double > > allVecs;
-    for (auto e : elms) allVecs.push_back(vector<double>(1,e));
-    buildComb(allVecs,result,0,vector<double>(),opt);
+    for (auto e : elms) allVecs.push_back(vector<double>(1, e));
+    buildComb(allVecs, result, 0, vector<double>(), opt);
 }
 
 /**
@@ -130,13 +130,13 @@ void buildComb(const vector< double > &elms, vector<vector<double> > &result, st
 void buildComb(int min, int max, int k, vector<vector<double> > &result, string opt)
 {
     vector < vector < double > > allVecs;
-    for(int kk = 0; kk < k; kk++)
+    for (int kk = 0; kk < k; kk++)
     {
         vector < double > myv;
         for (int i = min; i <= max; i++) myv.push_back((double)i);
         allVecs.push_back(myv);
     }
-    buildComb(allVecs,result,0,vector<double>(),opt);
+    buildComb(allVecs, result, 0, vector<double>(), opt);
 }
 
 /**
@@ -150,16 +150,16 @@ void buildComb(int min, int max, int k, vector<vector<double> > &result, string 
 vector <double> getSteps(double min, double max, int nsteps, string option)
 {
     vector <double> steps;
-    double vstep = (max-min)/nsteps;
-    if(option.find("-edges")!=string::npos)
+    double vstep = (max - min) / nsteps;
+    if (option.find("-edges") != string::npos)
     {
-        for(int i = 0; i <= nsteps; i++)
-            steps.push_back(min + vstep*i);
+        for (int i = 0; i <= nsteps; i++)
+            steps.push_back(min + vstep * i);
     }
     else
     {
-        for(int i = 0; i < nsteps; i++)
-            steps.push_back(min + vstep*(i+0.5));
+        for (int i = 0; i < nsteps; i++)
+            steps.push_back(min + vstep * (i + 0.5));
     }
     return steps;
 }
@@ -171,10 +171,10 @@ vector <double> getSteps(double min, double max, int nsteps, string option)
 TGraph * reorderTGraph(TGraph * gr)
 {
     vector< vector < double > > pts;
-    double x,y;
-    for(int p = 0; p < gr->GetN(); p++)
+    double x, y;
+    for (int p = 0; p < gr->GetN(); p++)
     {
-        gr->GetPoint(p,x,y);
+        gr->GetPoint(p, x, y);
         vector < double > pt;
         pt.push_back(p);
         pt.push_back(x);
@@ -183,13 +183,13 @@ TGraph * reorderTGraph(TGraph * gr)
     }
 
     sort(pts.begin(), pts.end(),
-            [](const vector<double>& a, const vector<double>& b) {
-            return a[1] < b[1];
-            });
+    [](const vector<double>& a, const vector<double>& b) {
+        return a[1] < b[1];
+    });
 
     TGraph * grout = new TGraph();
-    for(size_t p = 0; p < pts.size(); p++)
-        grout->SetPoint(p,pts[p][1],pts[p][2]);
+    for (size_t p = 0; p < pts.size(); p++)
+        grout->SetPoint(p, pts[p][1], pts[p][2]);
 
     return grout;
 }
@@ -219,11 +219,11 @@ double get_background(TTree * tree, TString plot, TString cut, TString weight, d
     tree->Draw(plot + ">>" + Form("hB_%d", iB), cut , "e");
     TH1F *hh = (TH1F*) gPad->GetPrimitive(Form("hB_%d", iB));
     iB++;
-    return norm * hh->Integral(); 
+    return norm * hh->Integral();
 }
 /**
  * \brief CutOptimier constructor
- 
+
   @param _analysis: just a name for the object
   @param _treeSig: is the signal sample of the signal
   @param _treeBkg: is the bkg sample
@@ -240,10 +240,10 @@ double get_background(TTree * tree, TString plot, TString cut, TString weight, d
 
 
 CutOptimizer::CutOptimizer(TString _analysis, TTree *_treeSig, TTree *_treeBkg,
-        vector<RooRealVar *> _vars, TString _mycut, TCut _sigCut, TCut _sideBandCut, TCut _baseCut, 
-        double _sigNorm, double _bkgNorm,
-        TString _MCweight, int _nSteps,
-        string _fmerit, bool _print):
+                           vector<RooRealVar *> _vars, TString _mycut, TCut _sigCut, TCut _sideBandCut, TCut _baseCut,
+                           double _sigNorm, double _bkgNorm,
+                           TString _MCweight, int _nSteps,
+                           string _fmerit, bool _print):
     analysis(_analysis),
     treeSig(_treeSig),
     treeBkg(_treeBkg),
@@ -267,30 +267,30 @@ CutOptimizer::CutOptimizer(TString _analysis, TTree *_treeSig, TTree *_treeBkg,
 
     maxEff = maxBkgRej = pasB = pasS = maxSig = -1;
 
-    if(nSteps < 3) nSteps = 3;
+    if (nSteps < 3) nSteps = 3;
 
     get_sig = &get_signal;
     get_bkg = &get_background;
 
-    points = new TTree("Optimisation_data","Optimisation_data");
+    points = new TTree("Optimisation_data", "Optimisation_data");
     double holder;
-    points->Branch("FoM",&holder,"FoM/D");
-    points->Branch("sig",&holder,"sig/D");
-    points->Branch("bkg",&holder,"bkg/D");
-    points->Branch("rej",&holder,"rej/D");
-    points->Branch("eff",&holder,"eff/D");
-    points->Branch("purity",&holder,"purity/D");
+    points->Branch("FoM", &holder, "FoM/D");
+    points->Branch("sig", &holder, "sig/D");
+    points->Branch("bkg", &holder, "bkg/D");
+    points->Branch("rej", &holder, "rej/D");
+    points->Branch("eff", &holder, "eff/D");
+    points->Branch("purity", &holder, "purity/D");
 
     vector < vector <double>> steps1D;
-    for(auto v : vars)
+    for (auto v : vars)
     {
-        orig_vars.push_back(new RooRealVar(v->GetName(),v->GetName(),v->getMin(),v->getMax()));
-        points->Branch(v->GetName(),&holder,(TString)v->GetName()+"/D");
-        vector <double> steps = getSteps(v->getMin(),v->getMax(),nSteps);
+        orig_vars.push_back(new RooRealVar(v->GetName(), v->GetName(), v->getMin(), v->getMax()));
+        points->Branch(v->GetName(), &holder, (TString)v->GetName() + "/D");
+        vector <double> steps = getSteps(v->getMin(), v->getMax(), nSteps);
         steps1D.push_back(steps);
-        step_sizes.push_back(TMath::Abs(steps[1]-steps[0]));
+        step_sizes.push_back(TMath::Abs(steps[1] - steps[0]));
     }
-    buildComb(steps1D,pts_to_scan);
+    buildComb(steps1D, pts_to_scan);
 
     reader = new TreeReader(points);
     reader->Initialize();
@@ -312,8 +312,8 @@ CutOptimizer::CutOptimizer(TString _analysis, TTree *_treeSig, TTree *_treeBkg,
     TBranch* branch = (TBranch*)branches->At(0);
     vplot = branch->GetName();
 
-    totS = get_sig(treeSig,vplot,(TString) (baseSigCut),MCweight,sigNorm);
-    totB = get_bkg(treeBkg,vplot,(TString) (baseBkgCut),"",bkgNorm);
+    totS = get_sig(treeSig, vplot, (TString) (baseSigCut), MCweight, sigNorm);
+    totB = get_bkg(treeBkg, vplot, (TString) (baseBkgCut), "", bkgNorm);
 
     cout << "S Tot = " << totS << endl;
     cout << "B Tot = " << totB << endl;
@@ -321,20 +321,20 @@ CutOptimizer::CutOptimizer(TString _analysis, TTree *_treeSig, TTree *_treeBkg,
 }
 
 
-void CutOptimizer::ResetSteps(unsigned nsteps) 
+void CutOptimizer::ResetSteps(unsigned nsteps)
 {
-    if(nsteps < 3) nsteps = 3;
+    if (nsteps < 3) nsteps = 3;
     nSteps = nsteps;
     pts_to_scan.clear();
     step_sizes.clear();
     vector < vector <double>> steps1D;
-    for(auto v : vars)
+    for (auto v : vars)
     {
-        vector <double> steps = getSteps(v->getMin(),v->getMax(),nSteps);
+        vector <double> steps = getSteps(v->getMin(), v->getMax(), nSteps);
         steps1D.push_back(steps);
-        step_sizes.push_back(TMath::Abs(steps[1]-steps[0]));
+        step_sizes.push_back(TMath::Abs(steps[1] - steps[0]));
     }
-    buildComb(steps1D,pts_to_scan);
+    buildComb(steps1D, pts_to_scan);
 }
 
 
@@ -342,34 +342,34 @@ void CutOptimizer::ResetSteps(unsigned nsteps)
 void CutOptimizer::scan_points(string option)
 {
     vector <TString> varnames;
-    for(auto v : vars) varnames.push_back(v->GetName());
+    for (auto v : vars) varnames.push_back(v->GetName());
 
-    size_t n_pts = pts_to_scan.size(); 
+    size_t n_pts = pts_to_scan.size();
     for (size_t i = 0; i < n_pts; i++)
     {
-        if(option.find("-noperc")==string::npos) showPercentage(i, n_pts, 0, n_pts);
-        TString select = subStrings(cut_to_optimize,varnames,pts_to_scan[i]);
+        if (option.find("-noperc") == string::npos) showPercentage(i, n_pts, 0, n_pts);
+        TString select = subStrings(cut_to_optimize, varnames, pts_to_scan[i]);
 
-        double S = get_sig(treeSig,vplot,(TString) (baseSigCut + (TCut) select),MCweight,sigNorm);
-        double B = get_bkg(treeBkg,vplot,(TString) (baseBkgCut + (TCut) select),"",bkgNorm);
+        double S = get_sig(treeSig, vplot, (TString) (baseSigCut + (TCut) select), MCweight, sigNorm);
+        double B = get_bkg(treeBkg, vplot, (TString) (baseBkgCut + (TCut) select), "", bkgNorm);
 
         double eff    = S / totS;
         double P      = S / (S + B);
         double bkgRej = (1. - B / totB);
-        double signif = get_significance(S,B);
+        double signif = get_significance(S, B);
 
-        reader->SetValue<double>("purity",P);
-        reader->SetValue<double>("sig",S);
-        reader->SetValue<double>("bkg",B);
-        reader->SetValue<double>("eff",eff);
-        reader->SetValue<double>("rej",bkgRej);
-        reader->SetValue<double>("FoM",signif);
-        for(size_t v = 0; v < vars.size(); v++)
-            reader->SetValue<double>(vars[v]->GetName(),pts_to_scan[i][v]);
+        reader->SetValue<double>("purity", P);
+        reader->SetValue<double>("sig", S);
+        reader->SetValue<double>("bkg", B);
+        reader->SetValue<double>("eff", eff);
+        reader->SetValue<double>("rej", bkgRej);
+        reader->SetValue<double>("FoM", signif);
+        for (size_t v = 0; v < vars.size(); v++)
+            reader->SetValue<double>(vars[v]->GetName(), pts_to_scan[i][v]);
 
         reader->GetChain()->Fill();
 
-        if (signif > maxSig && option.find("-optimise")!=string::npos)
+        if (signif > maxSig && option.find("-optimise") != string::npos)
         {
             pasS       = S;
             pasB       = B;
@@ -398,20 +398,20 @@ double CutOptimizer::get_significance(double S, double B)
 }
 
 /**
- * Scans a discrete grid of points (once) and finds the point with higher FoM 
+ * Scans a discrete grid of points (once) and finds the point with higher FoM
  */
 
 vector <double>  CutOptimizer::optimise(string option)
 {
     vector <TString> varnames;
-    for(auto v : vars) varnames.push_back(v->GetName());
+    for (auto v : vars) varnames.push_back(v->GetName());
 
     cout << "Optimizing..." << endl;
 
-    scan_points("-optimise"+option);
+    scan_points("-optimise" + option);
 
     cout << endl;
-    cout << "Optimal Cut    = " << subStrings(cut_to_optimize,varnames,optimalW) << endl;
+    cout << "Optimal Cut    = " << subStrings(cut_to_optimize, varnames, optimalW) << endl;
     cout << "N Sig          = " << fixed << setprecision(1) << pasS << endl;
     cout << "N Bkg          = " << fixed << setprecision(1) << pasB << endl;
     cout << "Sig Efficiency = " << fixed << setprecision(1) << maxEff * 100 << endl;
@@ -434,23 +434,23 @@ vector <double>  CutOptimizer::iterative_optimise(double precision, string optio
     cout << endl;
     cout << analysis << ": Iterative optimization (precision = " << precision << ")" << endl;
 
-    vector <double> prec_opt(vars.size(),1e9);
+    vector <double> prec_opt(vars.size(), 1e9);
     double prec = 1e6;
-    while(prec > precision)
+    while (prec > precision)
     {
-        if(prec != 1e6)
+        if (prec != 1e6)
         {
             double min, max;
-            for(size_t k = 0; k < vars.size(); k++) {
-                min = prec_opt[k]-step_sizes[k];
+            for (size_t k = 0; k < vars.size(); k++) {
+                min = prec_opt[k] - step_sizes[k];
                 if (min < orig_vars[k]->getMin())
                     min = orig_vars[k]->getMin();
 
-                max = prec_opt[k]+step_sizes[k];
+                max = prec_opt[k] + step_sizes[k];
                 if (max > orig_vars[k]->getMax())
                     max = orig_vars[k]->getMax();
 
-                vars[k]->setRange(min,max);
+                vars[k]->setRange(min, max);
             }
             ResetSteps(nSteps);
         }
@@ -458,9 +458,9 @@ vector <double>  CutOptimizer::iterative_optimise(double precision, string optio
         optimise(option);
 
         double diff = 0;
-        for(size_t vv = 0; vv < vars.size(); vv++)
+        for (size_t vv = 0; vv < vars.size(); vv++)
         {
-            diff += TMath::Power((optimalW[vv]-prec_opt[vv])/optimalW[vv],2);
+            diff += TMath::Power((optimalW[vv] - prec_opt[vv]) / optimalW[vv], 2);
         }
         prec = TMath::Sqrt(diff);
         if (prec < 10) cout << fixed << setprecision(4) << "Current precision: " << prec << endl << endl;
@@ -482,65 +482,65 @@ void CutOptimizer::ClosePrintAndSave(string option)
     ofile->cd();
     points->Write();
 
-    if(option.find("-recalc")!=string::npos)
+    if (option.find("-recalc") != string::npos)
     {
         for ( auto v : orig_vars )
         {
             cout << endl << "Scanning " << v->GetName() << "..." << endl;
 
-            vector <double> steps1D = getSteps(v->getMin(),v->getMax(),100,"-edges");
+            vector <double> steps1D = getSteps(v->getMin(), v->getMax(), 100, "-edges");
             vector < vector <double> > steps;
             for (size_t iv = 0; iv < orig_vars.size(); iv++)
             {
-                if(orig_vars[iv]->GetName()!=v->GetName()) steps.push_back(vector<double>(1,optimalW[iv]));
+                if (orig_vars[iv]->GetName() != v->GetName()) steps.push_back(vector<double>(1, optimalW[iv]));
                 else steps.push_back(steps1D);
             }
 
             pts_to_scan.clear();
-            buildComb(steps,pts_to_scan);
-            scan_points("-plotonly"+option);
+            buildComb(steps, pts_to_scan);
+            scan_points("-plotonly" + option);
         }
     }
 
-    for(auto v : orig_vars)
+    for (auto v : orig_vars)
     {
         TString select = "";
         int added = 0;
         TString vname = v->GetName();
-        for(size_t vv = 0; vv < vars.size(); vv++)
+        for (size_t vv = 0; vv < vars.size(); vv++)
         {
-            if((TString)vars[vv]->GetName() != vname)
+            if ((TString)vars[vv]->GetName() != vname)
             {
-                if( TMath::Abs( optimalW[vv] ) < 1e-6 ) select += "TMath::Abs("+(TString)vars[vv]->GetName() + " ) < 1e-6";
-                else select += "TMath::Abs("+(TString)vars[vv]->GetName() + Form(" - %e)/TMath::Abs(%e) < 1e-5", optimalW[vv], optimalW[vv]);
+                if ( TMath::Abs( optimalW[vv] ) < 1e-6 ) select += "TMath::Abs(" + (TString)vars[vv]->GetName() + " ) < 1e-6";
+                else select += "TMath::Abs(" + (TString)vars[vv]->GetName() + Form(" - %e)/TMath::Abs(%e) < 1e-5", optimalW[vv], optimalW[vv]);
                 added++;
-                if(added < ((int)optimalW.size()-1)) select += " && "; 
+                if (added < ((int)optimalW.size() - 1)) select += " && ";
             }
         }
 
-        points->Draw("rej:eff>>"+analysis+"_ROC"+vname,select);
-        TGraph * gROC = reorderTGraph(new TGraph(points->GetSelectedRows(),points->GetV2(), points->GetV1())); 
+        points->Draw("rej:eff>>" + analysis + "_ROC" + vname, select);
+        TGraph * gROC = reorderTGraph(new TGraph(points->GetSelectedRows(), points->GetV2(), points->GetV1()));
         gROC->Draw("apl");
-        points->Draw("eff:"+vname+">>"+analysis+"_eff_"+vname,select);
-        TGraph * gEff = reorderTGraph(new TGraph(points->GetSelectedRows(),points->GetV2(), points->GetV1()));
+        points->Draw("eff:" + vname + ">>" + analysis + "_eff_" + vname, select);
+        TGraph * gEff = reorderTGraph(new TGraph(points->GetSelectedRows(), points->GetV2(), points->GetV1()));
         gEff->Draw("apl");
-        points->Draw("purity:"+vname+">>"+analysis+"_purity_"+vname,select);
-        TGraph * gPur = reorderTGraph(new TGraph(points->GetSelectedRows(),points->GetV2(), points->GetV1()));
+        points->Draw("purity:" + vname + ">>" + analysis + "_purity_" + vname, select);
+        TGraph * gPur = reorderTGraph(new TGraph(points->GetSelectedRows(), points->GetV2(), points->GetV1()));
         gPur->Draw("apl");
-        points->Draw("FoM:"+vname+">>"+analysis+"_FoM_"+vname,select);
-        TGraph * gFOM = reorderTGraph(new TGraph(points->GetSelectedRows(),points->GetV2(), points->GetV1()));
+        points->Draw("FoM:" + vname + ">>" + analysis + "_FoM_" + vname, select);
+        TGraph * gFOM = reorderTGraph(new TGraph(points->GetSelectedRows(), points->GetV2(), points->GetV1()));
         gFOM->Draw("apl");
-        points->Draw("sig:"+vname+">>"+analysis+"_sig_"+vname,select);
-        TGraph * gSig = reorderTGraph(new TGraph(points->GetSelectedRows(),points->GetV2(), points->GetV1()));
+        points->Draw("sig:" + vname + ">>" + analysis + "_sig_" + vname, select);
+        TGraph * gSig = reorderTGraph(new TGraph(points->GetSelectedRows(), points->GetV2(), points->GetV1()));
         gSig->Draw("apl");
-        points->Draw("bkg:"+vname+">>"+analysis+"_bkg_"+vname,select);
-        TGraph * gBkg = reorderTGraph(new TGraph(points->GetSelectedRows(),points->GetV2(), points->GetV1()));
+        points->Draw("bkg:" + vname + ">>" + analysis + "_bkg_" + vname, select);
+        TGraph * gBkg = reorderTGraph(new TGraph(points->GetSelectedRows(), points->GetV2(), points->GetV1()));
         gBkg->Draw("apl");
-        points->Draw("rej:"+vname+">>"+analysis+"_rej_"+vname,select);
-        TGraph * gRej = reorderTGraph(new TGraph(points->GetSelectedRows(),points->GetV2(), points->GetV1()));
+        points->Draw("rej:" + vname + ">>" + analysis + "_rej_" + vname, select);
+        TGraph * gRej = reorderTGraph(new TGraph(points->GetSelectedRows(), points->GetV2(), points->GetV1()));
         gRej->Draw("apl");
-        points->Draw("eff*purity:"+vname+">>"+analysis+"_EP_"+vname,select);
-        TGraph * gEP = reorderTGraph(new TGraph(points->GetSelectedRows(),points->GetV2(), points->GetV1()));
+        points->Draw("eff*purity:" + vname + ">>" + analysis + "_EP_" + vname, select);
+        TGraph * gEP = reorderTGraph(new TGraph(points->GetSelectedRows(), points->GetV2(), points->GetV1()));
         gEP->Draw("apl");
 
         gSig->GetXaxis()->SetTitle(vname);
@@ -560,7 +560,7 @@ void CutOptimizer::ClosePrintAndSave(string option)
         gEP->GetYaxis()->SetTitle("#varepsilon_{S} #times N_{S}/(N_{S}+N_{B})");
         if (fmerit == "significance") gFOM->GetYaxis()->SetTitle("N_{S}/#sqrt{N_{S}+N_{B}}");
         else if (fmerit == "effpur") gFOM->GetYaxis()->SetTitle("#varepsilon_{S} #times N_{S}/(N_{S}+N_{B})");
-        else if (fmerit.find("punzi")!=string::npos) gFOM->GetYaxis()->SetTitle("S/(n_{#sigma}/2 + #sqrt{B})");
+        else if (fmerit.find("punzi") != string::npos) gFOM->GetYaxis()->SetTitle("S/(n_{#sigma}/2 + #sqrt{B})");
         else gFOM->GetYaxis()->SetTitle("FoM");
         gROC->GetYaxis()->SetTitle("1 - #varepsilon_{B}");
 
@@ -572,13 +572,13 @@ void CutOptimizer::ClosePrintAndSave(string option)
         gEP->GetXaxis()->SetRangeUser(v->getMin(), v->getMax());
         gFOM->GetXaxis()->SetRangeUser(v->getMin(), v->getMax());
         gEff->GetXaxis()->SetRangeUser(v->getMin(), v->getMax());
-	gROC->GetXaxis()->SetRangeUser(0, 1.1);
+        gROC->GetXaxis()->SetRangeUser(0, 1.1);
 
-	gEff->GetYaxis()->SetRangeUser(0, 1.1);
-	gRej->GetYaxis()->SetRangeUser(0, 1.1);
-	gPur->GetYaxis()->SetRangeUser(0, 1.1);
-	gEP->GetYaxis()->SetRangeUser(0, 1.1);
-	gROC->GetYaxis()->SetRangeUser(0, 1.1);
+        gEff->GetYaxis()->SetRangeUser(0, 1.1);
+        gRej->GetYaxis()->SetRangeUser(0, 1.1);
+        gPur->GetYaxis()->SetRangeUser(0, 1.1);
+        gEP->GetYaxis()->SetRangeUser(0, 1.1);
+        gROC->GetYaxis()->SetRangeUser(0, 1.1);
 
         gSig->SetLineColor(kBlue);
         gBkg->SetLineColor(kRed);
@@ -592,14 +592,14 @@ void CutOptimizer::ClosePrintAndSave(string option)
         gEP->SetLineStyle(7);
 
         ofile->cd();
-        gSig->Write("Signal_"+vname);
-        gBkg->Write("Background_"+vname);
-        gEff->Write("Efficiency_"+vname);
-        gRej->Write("Rejection_"+vname);
-        gPur->Write("Purity_"+vname);
-        gEP->Write("EfficiencyPurity"+vname);
-        gFOM->Write("FoM_"+vname);
-        gROC->Write("ROC_"+vname);
+        gSig->Write("Signal_" + vname);
+        gBkg->Write("Background_" + vname);
+        gEff->Write("Efficiency_" + vname);
+        gRej->Write("Rejection_" + vname);
+        gPur->Write("Purity_" + vname);
+        gEP->Write("EfficiencyPurity" + vname);
+        gFOM->Write("FoM_" + vname);
+        gROC->Write("ROC_" + vname);
 
         TCanvas *c0 = new TCanvas();
 
@@ -607,26 +607,26 @@ void CutOptimizer::ClosePrintAndSave(string option)
         gBkg->GetYaxis()->SetTitle("Candidates");
         gBkg->Draw("al");
         gSig->Draw("l same");
-        c0->Print(analysis + "_Candidates_"+vname+".pdf");
+        c0->Print(analysis + "_Candidates_" + vname + ".pdf");
 
         c0->SetLogy(0);
         c0->Clear();
 
         gEff->Draw("al");
-        c0->Print(analysis + "_Efficiency_"+vname+".pdf");
+        c0->Print(analysis + "_Efficiency_" + vname + ".pdf");
 
         gRej->Draw("al");
-        c0->Print(analysis + "_Rejection_"+vname+".pdf");
+        c0->Print(analysis + "_Rejection_" + vname + ".pdf");
 
         gPur->Draw("al");
-        c0->Print(analysis + "_Purity_"+vname+".pdf");
+        c0->Print(analysis + "_Purity_" + vname + ".pdf");
 
         gROC->Draw("al");
-        c0->Print(analysis + "_ROC_"+vname+".pdf");
-        c0->Print(analysis + "_ROC_"+vname+".C");
+        c0->Print(analysis + "_ROC_" + vname + ".pdf");
+        c0->Print(analysis + "_ROC_" + vname + ".C");
 
         gFOM->Draw("al");
-        c0->Print(analysis + "_FoM_"+vname+".pdf");
+        c0->Print(analysis + "_FoM_" + vname + ".pdf");
 
         delete c0;
 
@@ -645,7 +645,7 @@ void CutOptimizer::ClosePrintAndSave(string option)
         legend->AddEntry(gPur, "N_{S}/(N_{tot})", "l");
         legend->AddEntry(gEP,  "#varepsilon_{S} #times N_{S}/(N_{tot})", "l");
         legend->AddEntry(gFOM, "N_{S}/#sqrt{N_{S}+N_{B}}", "l");
-	
+
         TPad *pad = new TPad("pad", "", 0, 0, 1, 1);
         pad->SetFillColor(0);
         pad->SetGrid();
@@ -707,8 +707,8 @@ void CutOptimizer::ClosePrintAndSave(string option)
         axis->Draw();
         legend->Draw();
 
-        c0->Print(analysis + "_Optimize_"+vname+".pdf");
-        c0->Print(analysis + "_Optimize_"+vname+".C");
+        c0->Print(analysis + "_Optimize_" + vname + ".pdf");
+        c0->Print(analysis + "_Optimize_" + vname + ".C");
 
         delete gROC;
         delete gEff;
@@ -717,7 +717,7 @@ void CutOptimizer::ClosePrintAndSave(string option)
         delete gSig;
         delete gBkg;
         delete gRej;
-	delete gEP;
+        delete gEP;
 
         delete oFrame;
         delete pad;
@@ -738,7 +738,7 @@ void CutOptimizer::ClosePrintAndSave(string option)
        int added = 0;
        for(size_t vv = 0; vv < vars.size(); vv++)
        {
-       if(vv!=c[0] && vv!=c[1]) 
+       if(vv!=c[0] && vv!=c[1])
        {
        select += "TMath::Abs("+(TString)vars[vv]->GetName()+Form(" - %e)/TMath::Abs(%e) < 1e-5", optimalW[vv], optimalW[vv]);
        added++;
@@ -760,6 +760,3 @@ void CutOptimizer::ClosePrintAndSave(string option)
 
     ofile->Close();
 }
-
-
-
