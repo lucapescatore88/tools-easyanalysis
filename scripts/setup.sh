@@ -35,6 +35,7 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
 
+    source $TOOLSSYS/scripts/setup.sh cmake
     source $TOOLSSYS/scripts/setup.sh gcc
     source $TOOLSSYS/scripts/setup.sh python
     source $TOOLSSYS/scripts/setup.sh gsl
