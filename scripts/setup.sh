@@ -28,6 +28,7 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     export TOOLSSYS="$( cd . "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
     export LD_LIBRARY_PATH=$TOOLSSYS/roofit/dic:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=$TOOLSSYS/lib:$LD_LIBRARY_PATH
 
     echo
     echo "Setup tools-easyanalysis"
