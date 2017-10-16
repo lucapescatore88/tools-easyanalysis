@@ -18,7 +18,7 @@ def create_analysis(config) :
     print cont
     
     ## Check all needed keys are present
-    if set(['datafile','datatree','name','title','sigpdf','var']) > set(keys(cont)) :
+    if set(['datafile','datatree','name','title','sig','var']) > set(keys(cont)) :
         print "Some necessary keys are missing... You have to specify at least: datafile, datatree, name, title, sigpdf, var"
         return
 
@@ -35,7 +35,12 @@ def create_analysis(config) :
     if 'units' in cont.keys() : a.SetUnits(cont['units'])
 
     #signorm = None
-    a.SetSignal(cont['sigpdf'])
+    if 'RooKeysPdf' in cont['sig']['pdf'] :
+        ff = r.TFile.Open(cont['sig']['file'])
+        tt = ff.Get(cont['sig']['tree'])
+        a.SetSignal(tt) 
+    else :
+        a.SetSignal(cont['sig']['pdf'])
 
     if 'bkgs' not in keys(cont) :
         a.Initialize("")
@@ -45,7 +50,12 @@ def create_analysis(config) :
 
         print " Adding bkg"
         name = bkg.keys()[0]
-        a.AddBkgComponent(name,bkg[name])
+        if 'RooKeysPdf' in bkg[name]['pdf'] :
+            ff = r.TFile.Open(bkg[name]['file'])
+            tt = ff.Get(bkg[name]['tree'])
+            a.AddBkgComponent(name,tt)
+        else :
+            a.AddBkgComponent(name,bkg[name]['pdf'])
 
     a.Initialize("")
     print "----- CONFIGURED -----"

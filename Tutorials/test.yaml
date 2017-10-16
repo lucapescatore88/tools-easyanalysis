@@ -11,9 +11,11 @@ var :
     min  : 4500
     max  : 6000
 
-sigpdf : 'Gauss-m[5620,5550,5700]'
+sig : 
+    pdf : 'Gauss-m[5620,5550,5700]'
 
 bkgs :
-    - Comb : 'Exp-b[-0.001,-0.5,0]'
+    - Comb : 
+        pdf : 'Exp-b[-0.001,-0.5,0]'
 
  
