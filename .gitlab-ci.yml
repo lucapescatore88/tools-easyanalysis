@@ -7,7 +7,6 @@ build_cmake:
   script:
     - cd $REPOSYS
     - source ./scripts/setup.sh
-    - which cmake
     - mkdir build
     - cd build
     - cmake ..
