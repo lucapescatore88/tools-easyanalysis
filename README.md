@@ -90,3 +90,51 @@ purge:
 	@echo "Purging ..."
 	@rm -f *~ */*~ */*/*~ *.pdf *.root *.nb *.txt *.html
 ```
+
+
+Include the package as a cmake project:
+In the top dir of your "new" CMakeProject you want to git clone first the easyanalysis project
+
+You have to add these lines to the CMakeLists.txt in the top directory.
+```cmake
+
+cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
+project(YOURPROJECT_NAME)
+
+#Load the root configs to compile 
+list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
+#find the root package and add the libraries you need
+find_package(ROOT REQUIRED Cling TreePlayer Tree Rint MathMore Postscript Matrix RIO Core Foam RooStats RooFit RooFitCore Gpad Graf3d Graf Hist Net TMVA  XMLIO MLP)
+include(${ROOT_USE_FILE})
+#Define the PROJECT_SYS folder for the easytools 
+set(PROJECT_SYS ${CMAKE_CURRENT_SOURCE_DIR}/tools-easyanalysis)
+#Where to look for the ROOT linkers for tools and roofit package in tools-easyanalysis
+set(LINKDEF_TOOLS ${PROJECT_SYS}/LinkDef.h)
+set(LINKDEF_ROOFIT ${PROJECT_SYS}/Roofit_LinkDef.h)
+set(EASYTOOLS_ROOFITPATH ${PROJECT_SYS}/roofit)
+set(EASYTOOLS_TOOLSPATH ${PROJECT_SYS}/tools)
+
+#In which path you want to produce the libraries of easytools
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SYS}/lib)
+message("EasyTools PROJECT_SYS is set to" ${PROJECT_SYS})
+include_directories(${PROJECT_SYS} ${ROOT_INCLUDE_DIRS})
+add_definitions(${ROOT_CXX_FLAGS})
+#name of the tools librariaries , the compiler adds lib prefix automatically 
+set(TOOLS_LIB_NAME tools)
+set(ROOFIT_LIB_NAME roofittools)
+add_subdirectory(${EASYTOOLS_ROOFITPATH})
+add_subdirectory(${EASYTOOLS_TOOLSPATH})
+add_subdirectory(OTHERMODULES_YOU_WROTE)
+```
+In the OTHERMODULES path if you need to use the tools and roofit you simply need for a given target to add the following lines:
+
+```cmake
+add_executable(YOUREXECUTABLE Targets/YOUREXECUTABLE.cxx)
+target_link_libraries(YOUREXECUTABLE PUBLIC ${TOOLS_LIB_NAME})
+#If the OTHERMODULES is a library to be produced:
+file(GLOB SOURCESOFLIBRARY) "path_tosourcesnewlib/*.cpp path_toheadersnewlib/*.hpp"
+add_library(YOURNEWLIBRARIESNAME SHARED ${SOURCESOFLIBRARY})
+target_include_directories(YOURNEWLIBRARIESNAME PUBLIC path_toheadersnewlib)
+target_link_libraries(YOURNEWLIBRARIESNAME PUBLIC ${TOOLS_LIB_NAME})
+
+```
