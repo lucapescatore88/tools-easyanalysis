@@ -1,15 +1,6 @@
 before_script:
   - export REPOSYS=$PWD
 
-build_make:
-  tags:
-    - cvmfs
-  script:
-    - cd $REPOSYS
-    - source ./scripts/setup.sh
-    - make print
-    - make
-
 build_cmake:
   tags:
     - cvmfs
@@ -19,4 +10,13 @@ build_cmake:
     - mkdir build
     - cd build
     - cmake ..
+    - make
+
+build_make:
+  tags:
+    - cvmfs
+  script:
+    - cd $REPOSYS
+    - source ./scripts/setup.sh
+    - make print
     - make
