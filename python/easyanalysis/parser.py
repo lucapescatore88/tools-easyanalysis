@@ -60,11 +60,3 @@ def create_analysis(config) :
     print "----- CONFIGURED -----"
 
     return a
-
-
-
-
-
-
-
-

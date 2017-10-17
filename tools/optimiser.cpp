@@ -1,10 +1,4 @@
-#include "general_functions.hpp"
-#include "TGaxis.h"
-
 #include "optimiser.hpp"
-
-using namespace std;
-using namespace RooFit;
 
 
 /**
