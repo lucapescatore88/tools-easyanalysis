@@ -62,7 +62,7 @@ case "$1" in
     cmake)
         SYS=$CVMFS/lib/contrib/CMake
         if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-            VER=3.9.2
+            VER=3.7.2
             VER=$VER/Linux-x86_64
             if [ -d $SYS/$VER ]; then
                 export CMAKESYS=$SYS/$VER
