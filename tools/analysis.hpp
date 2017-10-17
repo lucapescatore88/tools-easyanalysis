@@ -5,6 +5,26 @@
 #ifndef ANALYSER_HPP
 #define ANALYSER_HPP
 
+#include <algorithm>
+#include <vector>
+#include <sstream>
+#include <iostream>
+#include <string>
+#include <time.h>
+#include <iomanip>
+#include <typeinfo>
+
+#include "TCanvas.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TH1.h"
+#include "TEntryList.h"
+#include "TCanvas.h"
+#include "TBranch.h"
+#include "TCut.h"
+#include "TMath.h"
+#include "TString.h"
+
 #include "RooMinuit.h"
 #include "RooRandom.h"
 #include "RooWorkspace.h"
@@ -38,31 +58,14 @@
 #include "RooHistPdf.h"
 #include "TRandom3.h"
 
-#include "TCanvas.h"
-#include "TFile.h"
-#include "TTree.h"
-#include "TH1.h"
-#include "TEntryList.h"
-#include "TCanvas.h"
-#include "TBranch.h"
-#include "TCut.h"
-#include "TMath.h"
-#include "TString.h"
+#include "treeReader.hpp"
+#include "modelBuilder.hpp"
+#include "generalFunctions.hpp"
 
-#include <vector>
-#include <sstream>
-#include <iostream>
-#include <string>
-#include <time.h>
-#include <iomanip>
-#include <typeinfo>
-
-#include "TreeReader.hpp"
-#include "ModelBuilder.hpp"
-#include "general_functions.hpp"
-
+using namespace std;
 using namespace RooFit;
 using namespace RooStats;
+
 
 Long64_t randomKill(TreeReader * reader, vector< Long64_t > entry);
 

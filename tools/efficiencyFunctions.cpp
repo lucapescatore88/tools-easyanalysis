@@ -1,6 +1,4 @@
-#include "eff_functions.hpp"
-
-using namespace std;
+#include "efficiencyFunctions.hpp"
 
 
 /** The following 4 functions allow to get efficiencies from TTrees **/

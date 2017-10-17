@@ -1,12 +1,5 @@
-#include "FeldmanCousins.hpp"
-#include "RooFitResult.h"
-#include "RooNLLVar.h"
-#include "RooMinuit.h"
-#include "TLine.h"
-#include "TGraph2D.h"
 
-using namespace std;
-using namespace RooFit;
+#include "feldmanCousins.hpp"
 
 
 RooFitResult * defFit(RooAbsPdf * pdf, RooDataSet * data, Str2VarMap p, ISVALIDF_PTR isValid, string opt, int nfree, RooArgSet * cons, RooAbsReal * mynll)

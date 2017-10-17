@@ -5,15 +5,14 @@
 #ifndef MULTIANALYSER_HPP
 #define MULTIANALYSER_HPP
 
-#include "RooGenericPdf.h"
-#include "RooRealVar.h"
-#include "RooDataSet.h"
-#include "RooGaussian.h"
-#include "RooConstVar.h"
-#include "RooChebychev.h"
-#include "RooAddPdf.h"
-#include "RooSimultaneous.h"
-#include "RooCategory.h"
+#include <vector>
+#include <map>
+#include <sstream>
+#include <iostream>
+#include <string>
+#include <time.h>
+#include <iomanip>
+#include <typeinfo>
 
 #include "TCanvas.h"
 #include "TFile.h"
@@ -26,23 +25,25 @@
 #include "TMath.h"
 #include "TString.h"
 
-#include <vector>
-#include <map>
-#include <sstream>
-#include <iostream>
-#include <string>
-#include <time.h>
-#include <iomanip>
-#include <typeinfo>
-
-#include "TreeReader.hpp"
-#include "ModelBuilder.hpp"
-#include "general_functions.hpp"
-#include "analyser.hpp"
+#include "RooGenericPdf.h"
+#include "RooRealVar.h"
+#include "RooDataSet.h"
+#include "RooGaussian.h"
+#include "RooConstVar.h"
+#include "RooChebychev.h"
+#include "RooAddPdf.h"
+#include "RooSimultaneous.h"
+#include "RooCategory.h"
 #include "RooMsgService.h"
+
+#include "treeReader.hpp"
+#include "modelBuilder.hpp"
+#include "generalFunctions.hpp"
+#include "analysis.hpp"
 
 using namespace RooFit;
 using namespace RooStats;
+
 
 /** \class MultiAnalysis
  *  \brief This class can be used to do simultaneous fits to more than 1 sample (in 1D)

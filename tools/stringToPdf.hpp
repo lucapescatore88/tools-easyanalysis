@@ -4,41 +4,15 @@
 #ifndef __CINT__
 #include "RooGlobalFunc.h"
 #endif
-#include "RooRealVar.h"
-#include "RooStats/SPlot.h"
-#include "RooDataSet.h"
-#include "RooRealVar.h"
 
-#include "RooGaussian.h"
-#include "RooExponential.h"
-#include "RooCBShape.h"
-#include "RooChebychev.h"
-#include "RooVoigtian.h"
-#include "RooBreitWigner.h"
-#include "RooGExpModel.h"
-#include "RooArgusBG.h"
-#include "RooGamma.h"
-#include "RooKeysPdf.h"
-#include "RooNDKeysPdf.h"
-#include "RooHistPdf.h"
-#include "RooProdPdf.h"
-#include "RooPolynomial.h"
-
-#include "RooAddPdf.h"
-#include "RooDataSet.h"
-#include "RooChi2Var.h"
-#include "RooDataHist.h"
-#include "RooAbsData.h"
-#include "RooAddition.h"
-#include "RooProduct.h"
-#include "RooAbsPdf.h"
-#include "RooFit.h"
-#include "RooFitResult.h"
-#include "RooWorkspace.h"
-#include "RooConstVar.h"
-#include "RooNumConvPdf.h"
-#include "RooFFTConvPdf.h"
-#include "RooPlot.h"
+#include <vector>
+#include <sstream>
+#include <iostream>
+#include <map>
+#include <string>
+#include <time.h>
+#include <iomanip>
+#include <algorithm>
 
 #include "TLegend.h"
 #include "TColor.h"
@@ -57,21 +31,48 @@
 #include "TAxis.h"
 #include "TGaxis.h"
 
-#include <vector>
-#include <sstream>
-#include <iostream>
-#include <map>
-#include <string>
-#include <time.h>
-#include <iomanip>
-#include <algorithm>
+#include "RooRealVar.h"
+#include "RooStats/SPlot.h"
+#include "RooDataSet.h"
+#include "RooRealVar.h"
+#include "RooGaussian.h"
+#include "RooExponential.h"
+#include "RooCBShape.h"
+#include "RooChebychev.h"
+#include "RooVoigtian.h"
+#include "RooBreitWigner.h"
+#include "RooGExpModel.h"
+#include "RooArgusBG.h"
+#include "RooGamma.h"
+#include "RooKeysPdf.h"
+#include "RooNDKeysPdf.h"
+#include "RooHistPdf.h"
+#include "RooProdPdf.h"
+#include "RooPolynomial.h"
+#include "RooAddPdf.h"
+#include "RooDataSet.h"
+#include "RooChi2Var.h"
+#include "RooDataHist.h"
+#include "RooAbsData.h"
+#include "RooAddition.h"
+#include "RooProduct.h"
+#include "RooAbsPdf.h"
+#include "RooFit.h"
+#include "RooFitResult.h"
+#include "RooWorkspace.h"
+#include "RooConstVar.h"
+#include "RooNumConvPdf.h"
+#include "RooFFTConvPdf.h"
+#include "RooPlot.h"
 
-#include "general_functions.hpp"
-#include "TreeReader.hpp"
-#include "roofit.hpp"
-#include "ModelBuilder_helpfunctions.hpp"
+#include "generalFunctions.hpp"
+#include "treeReader.hpp"
+#include "rooFit.hpp"
+#include "modelBuilderHelpFunctions.hpp"
 
 using namespace std;
+using namespace RooFit;
+
 
 /// \brief Given a parameter name return a RooRealVar pointer
 RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap myvars, string pmode = "v");

@@ -28,6 +28,8 @@
 #include "TString.h"
 #include "TAxis.h"
 #include "TPolyLine.h"
+#include "TLine.h"
+#include "TGraph2D.h"
 
 #include "RooAbsArg.h"
 #include "RooArgSet.h"
@@ -41,11 +43,16 @@
 #include "RooHist.h"
 #include "RooCategory.h"
 #include "RooSimultaneous.h"
+#include "RooFitResult.h"
+#include "RooNLLVar.h"
+#include "RooMinuit.h"
 
-#include "TreeReader.hpp"
-#include "ModelBuilder.hpp"
+#include "treeReader.hpp"
+#include "modelBuilder.hpp"
 
+using namespace std;
 using namespace RooFit;
+
 
 // typedef bool (*FUNC_PTR)( Str2VarMap );
 typedef bool (*ISVALIDF_PTR)( RooAbsPdf * );

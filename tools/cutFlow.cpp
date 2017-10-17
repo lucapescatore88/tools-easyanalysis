@@ -1,6 +1,5 @@
-#include "CutFlow.hpp"
+#include "cutFlow.hpp"
 
-using namespace std;
 
 int EffComp::mVerbose = 1;
 
