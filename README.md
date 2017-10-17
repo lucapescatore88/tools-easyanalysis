@@ -1,3 +1,5 @@
+**Status ·** [![build status](https://gitlab.cern.ch/LHCb-RD/tools-easyanalysis/badges/master/build.svg)](https://gitlab.cern.ch/LHCb-RD/tools-easyanalysis/pipelines)
+
 Easy analysis
 =============
 
