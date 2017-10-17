@@ -58,9 +58,9 @@ switch ( "$1" )
 
     case cmake:
         set SYS = $CVMFS/lib/contrib/CMake
-        if ( `echo "$PATH" | grep -ci "$SYS"` == 0 ) then
-            set VER = 3.7.2
-            set VER = $VER/Linux-x86_64
+        set VER = 3.7.2
+        set VER = $VER/Linux-x86_64
+        if ( `echo "$PATH" | grep -ci "$SYS/$VER"` == 0 ) then
 	    if ( -d $SYS/$VER ) then
 		setenv CMAKESYS $SYS/$VER
 		setenv PATH $CMAKESYS/bin:$PATH
@@ -77,9 +77,9 @@ switch ( "$1" )
 
     case gcc:
         set SYS = $LCGSYS/releases/gcc
-        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
-            set VER = 4.9.3
-            set VER = $VER/x86_64-slc6
+        set VER = 4.9.3
+        set VER = $VER/x86_64-slc6
+        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ) then
             if ( -f $SYS/$VER/setup.csh ) then
                 setenv GCCSYS $SYS/$VER
                 #source $GCCSYS/setup.csh $LCGSYS/external
@@ -117,9 +117,9 @@ switch ( "$1" )
 
     case python:
         set SYS = $LCGSYS/releases/Python
-        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
-            set VER = 2.7.13-597a5
-            set VER = $VER/$ARCH
+        set VER = 2.7.13-597a5
+        set VER = $VER/$ARCH
+        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ) then
             if ( -d $SYS/$VER ) then
                 setenv PYTHONSYS $SYS/$VER
                 setenv PATH $PYTHONSYS/bin:$PATH
@@ -142,9 +142,9 @@ switch ( "$1" )
 
     case pyanalysis:
         set SYS = $LCGSYS/releases/pyanalysis
-        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
-            set VER = 2.0-32412
-            set VER = $VER/$ARCH
+        set VER = 2.0-32412
+        set VER = $VER/$ARCH
+        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ) then
             if ( -d $SYS/$VER ) then
                 setenv PYANALYSISSYS $SYS/$VER
                 setenv PATH $PYANALYSISSYS/bin:$PATH
@@ -164,9 +164,9 @@ switch ( "$1" )
 
     case pytools:
         set SYS = $LCGSYS/releases/pytools
-        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
-            set VER = 2.0-93db0
-            set VER = $VER/$ARCH
+        set VER = 2.0-93db0
+        set VER = $VER/$ARCH
+        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ) then
             if ( -d $SYS/$VER ) then
                 setenv PYTOOLSSYS $SYS/$VER
                 setenv PATH $PYTOOLSSYS/bin:$PATH
@@ -186,9 +186,9 @@ switch ( "$1" )
 
     case gsl:
         set SYS = $LCGSYS/releases/GSL
-        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
-            set VER = 2.1-36ee5
-            set VER = $VER/$ARCH
+        set VER = 2.1-36ee5
+        set VER = $VER/$ARCH
+        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ) then
             if ( -d $SYS/$VER ) then
                 setenv GSLSYS $SYS/$VER
                 setenv LD_LIBRARY_PATH $GSLSYS/lib:$LD_LIBRARY_PATH
@@ -206,9 +206,9 @@ switch ( "$1" )
 
     case root:
         set SYS = $LCGSYS/releases/ROOT
-        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
-            set VER = 6.08.06-c8fb4
-            set VER = $VER/$ARCH
+        set VER = 6.08.06-c8fb4
+        set VER = $VER/$ARCH
+        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ) then
             if ( -d $SYS/$VER ) then
                 setenv ROOTSYS $SYS/$VER
                 setenv PATH $ROOTSYS/bin:${PATH}

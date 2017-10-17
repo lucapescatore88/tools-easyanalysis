@@ -61,9 +61,9 @@ case "$1" in
 
     cmake)
         SYS=$CVMFS/lib/contrib/CMake
-        if [ `echo "$PATH" | grep -ci "$SYS"` == 0 ]; then
-            VER=3.7.2
-            VER=$VER/Linux-x86_64
+        VER=3.7.2
+        VER=$VER/Linux-x86_64
+        if [ `echo "$PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export CMAKESYS=$SYS/$VER
                 export PATH=$CMAKESYS/bin:$PATH
@@ -80,9 +80,9 @@ case "$1" in
 
     gcc)
         SYS=$LCGSYS/releases/gcc
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-            VER=4.9.3
-            VER=$VER/x86_64-slc6
+        VER=4.9.3
+        VER=$VER/x86_64-slc6
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -f $SYS/$VER/setup.sh ]; then
                 export GCCSYS=$SYS/$VER
                 source $GCCSYS/setup.sh $LCGSYS/external
@@ -99,9 +99,9 @@ case "$1" in
 
     python)
         SYS=$LCGSYS/releases/Python
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-            VER=2.7.13-597a5
-            VER=$VER/$ARCH
+        VER=2.7.13-597a5
+        VER=$VER/$ARCH
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export PYTHONSYS=$SYS/$VER
                 export PATH=$PYTHONSYS/bin:$PATH
@@ -124,9 +124,9 @@ case "$1" in
 
     pyanalysis)
         SYS=$LCGSYS/releases/pyanalysis
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-            VER=2.0-32412
-            VER=$VER/$ARCH
+        VER=2.0-32412
+        VER=$VER/$ARCH
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export PYANALYSISSYS=$SYS/$VER
                 export PATH=$PYANALYSISSYS/bin:$PATH
@@ -146,9 +146,9 @@ case "$1" in
 
     pytools)
         SYS=$LCGSYS/releases/pytools
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-            VER=2.0-93db0
-            VER=$VER/$ARCH
+        VER=2.0-93db0
+        VER=$VER/$ARCH
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export PYTOOLSSYS=$SYS/$VER
                 export PATH=$PYTOOLSSYS/bin:$PATH
@@ -168,9 +168,9 @@ case "$1" in
 
     gsl)
         SYS=$LCGSYS/releases/GSL
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-            VER=2.1-36ee5
-            VER=$VER/$ARCH
+        VER=2.1-36ee5
+        VER=$VER/$ARCH
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export GSLSYS=$SYS/$VER
                 export LD_LIBRARY_PATH=$GSLSYS/lib:$LD_LIBRARY_PATH
@@ -188,9 +188,9 @@ case "$1" in
 
     root)
         SYS=$LCGSYS/releases/ROOT
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ]; then
-            VER=6.08.06-c8fb4
-            VER=$VER/$ARCH
+        VER=6.08.06-c8fb4
+        VER=$VER/$ARCH
+        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export ROOTSYS=$SYS/$VER
                 export PATH=$ROOTSYS/bin:${PATH}
