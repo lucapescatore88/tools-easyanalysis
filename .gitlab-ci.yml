@@ -7,10 +7,10 @@ build_cmake:
   script:
     - cd $REPOSYS
     - source ./scripts/setup.sh
-    - mkdir build
+    - mkdir -p build
     - cd build
     - cmake ..
-    - make
+    - make -j 8
 
 build_make:
   tags:
