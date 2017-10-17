@@ -58,22 +58,22 @@ switch ( "$1" )
 
     case cmake:
         set SYS = $CVMFS/lib/contrib/CMake
-        if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS"` == 0 ) then
+        if ( `echo "$PATH" | grep -ci "$SYS"` == 0 ) then
             set VER = 3.7.2
             set VER = $VER/Linux-x86_64
-        if ( -d $SYS/$VER ) then
-            setenv CMAKESYS $SYS/$VER
-            setenv PATH $CMAKESYS/bin:$PATH
+	    if ( -d $SYS/$VER ) then
+		setenv CMAKESYS $SYS/$VER
+		setenv PATH $CMAKESYS/bin:$PATH
 
-            echo "Configuring CMAKE      from $CMAKESYS"
-        else
-            echo
-            echo "CMAKE $SYS/$VER not available"
-            echo
-        endif
-    endif
+		echo "Configuring CMAKE      from $CMAKESYS"
+	    else
+		echo
+		echo "CMAKE $SYS/$VER not available"
+		echo
+	    endif
+	endif
 
-    breaksw
+	breaksw
 
     case gcc:
         set SYS = $LCGSYS/releases/gcc
