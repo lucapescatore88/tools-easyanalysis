@@ -26,12 +26,11 @@ CXX       = g++
 CXXFLAGS  = -g -fPIC -Wall -O2 -lTMVA -lRooFit -lRooStats -lMathMore $(ROOTFLAGS) $(INCFLAGS)
 
 LIBDIR    = $(TOOLSSYS)/lib
-LIBS      = $(LIBDIR)/roofit.a $(LIBDIR)/$(NAME).a
+LIBS      = $(LIBDIR)/lib$(NAME)roofit.a $(LIBDIR)/lib$(NAME).a
 
 ROOTCLING = rootcling
 CINTFILE  = $(TOOLSDIR)/$(NAME)_Dict.cc
 CINTOBJ   = $(TOOLSDIR)/$(NAME)_Dict.o
-#LIBFILE   = $(LIBDIR)/lib$(NAME).a
 SHLIB     = $(LIBDIR)/lib$(NAME).so
 
 MAKES     = $(ROOFITDIC) $(ROOFITOBJ) $(TOOLSOBJ) $(LIBS) $(SHLIB)
@@ -44,7 +43,7 @@ $(TOOLSDIR)/obj/%.o: $(TOOLSDIR)/%.cpp
 	@echo "Making $(@) ..."
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
-$(LIBDIR)/tools.a: $(TOOLSOBJ)
+$(LIBDIR)/libtools.a: $(TOOLSOBJ)
 	@echo
 	@echo "Archiving $(@) ..."
 	ar rcs $@ $^;
@@ -59,16 +58,15 @@ $(ROOFITDIR)/obj/%.o: $(ROOFITDIR)/dic/%.cpp
 	@echo "Making $(@) ..."
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
-$(LIBDIR)/roofit.a: $(ROOFITOBJ)
+$(LIBDIR)/libtoolsroofit.a: $(ROOFITOBJ)
 	@echo
 	@echo "Archiving $(@) ..."
 	ar rcs $@ $^;
 
-$(CINTOBJ): $(TOOLS) $(TOOLINC) LinkDef.h
+$(CINTOBJ): $(TOOLS) $(TOOLINC) LinkDef_$(NAME).h
 	@echo
 	@echo "Making Root dictionary $(@) ..."
-	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf lib$(PACKAGE).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSINC) LinkDef.h
-#	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf lib$(PACKAGE).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSINC) $(ROOFIT) $(ROOFITINC) LinkDef.h
+	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf lib$(PACKAGE).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSINC) LinkDef_$(NAME).h
 	@echo
 	@echo "Compiling $(CINTFILE) ..."
 	$(CXX) -c $(CXXFLAGS) -fPIC -o $(CINTOBJ) $(CINTFILE)
