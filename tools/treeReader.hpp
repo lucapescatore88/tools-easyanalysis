@@ -1,7 +1,6 @@
 #ifndef TREEREADER_HPP
 #define TREEREADER_HPP
 
-
 #include <string>
 #include <vector>
 #include <fstream>
@@ -27,10 +26,10 @@
 #include "TEntryList.h"
 //#include "TIter.h"
 #include "TChainElement.h"
+
 #include "RooRealVar.h"
 
 using namespace std;
-
 
 
 typedef enum

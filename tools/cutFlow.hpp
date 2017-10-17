@@ -1,17 +1,18 @@
 #ifndef CUTFLOW_HPP
 #define CUTFLOW_HPP
 
+#include <vector>
+#include <map>
+
 #include "TCut.h"
 #include "TString.h"
 #include "TEfficiency.h"
 
-#include <vector>
-#include <map>
-
-#include "TreeReader.hpp"
-#include "eff_functions.hpp"
+#include "treeReader.hpp"
+#include "efficiencyFunctions.hpp"
 
 using namespace std;
+
 
 typedef  double (*FUNC_CALC_EFF)(TString, TString, TChain *, TCut, TChain *, TCut, TString, TString, double *, TEfficiency **);
 

@@ -1,15 +1,15 @@
 #ifndef TOOLS_HPP
 #define TOOLS_HPP
 
-#include "roofit.hpp"
+#include "rooFit.hpp"
 
-#include "TreeReader.hpp"
-#include "ModelBuilder.hpp"
-#include "general_functions.hpp"
+#include "treeReader.hpp"
+#include "modelBuilder.hpp"
+#include "generalFunctions.hpp"
 #include "optimiser.hpp"
-#include "CutFlow.hpp"
+#include "cutFlow.hpp"
 
-#include "analyser.hpp"
-#include "multi_analyser.hpp"
+#include "analysis.hpp"
+#include "multiAnalysis.hpp"
 
 #endif

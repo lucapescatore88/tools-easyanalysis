@@ -1,13 +1,7 @@
-#include "ModelBuilder.hpp"
-#include "RooMultiVarGaussian.h"
-#include <algorithm>
-
-using namespace RooFit;
+#include "modelBuilder.hpp"
 
 
 /* ********************************************     ModelBuilder methods  *********************************************/
-
-
 
 string ModelBuilder::m_pmode = "v";
 

@@ -1,8 +1,4 @@
-#include "analyser.hpp"
-#include <algorithm>
-
-using namespace RooFit;
-using namespace RooStats;
+#include "analysis.hpp"
 
 
 RooRealVar * Scaler::_var = NULL;

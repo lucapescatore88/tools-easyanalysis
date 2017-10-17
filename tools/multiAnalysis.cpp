@@ -1,6 +1,5 @@
-#include "multi_analyser.hpp"
+#include "multiAnalysis.hpp"
 
-using namespace RooFit;
 
 void MultiAnalysis::AddCategory(Analysis * _ana, TString nameCat)
 {

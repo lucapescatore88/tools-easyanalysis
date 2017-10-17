@@ -1,6 +1,4 @@
-#include "ModelBuilder_helpfunctions.hpp"
-
-using namespace RooFit;
+#include "modelBuilderHelpFunctions.hpp"
 
 
 vector <Color_t> GetDefaultColors()

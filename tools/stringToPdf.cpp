@@ -1,6 +1,5 @@
-#include "StringToPdf.hpp"
+#include "stringToPdf.hpp"
 
-using namespace RooFit;
 
 /*
    This functions allows to choose a predefined PDF defining all its parameters together with it.

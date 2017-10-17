@@ -28,8 +28,10 @@
 #include "TString.h"
 #include "TAxis.h"
 #include "TLegend.h"
-
+#include "TLorentzVector.h"
+#include "TGaxis.h"
 #include "TGraph2D.h"
+
 #include "RooAbsArg.h"
 #include "RooArgSet.h"
 #include "RooDataSet.h"
@@ -40,10 +42,10 @@
 #include "RooPlot.h"
 #include "RooCurve.h"
 #include "RooHist.h"
-#include "TLorentzVector.h"
 
-#include "TreeReader.hpp"
-#include "eff_functions.hpp"
+#include "generalFunctions.hpp"
+#include "treeReader.hpp"
+#include "efficiencyFunctions.hpp"
 
 using namespace std;
 using namespace RooFit;

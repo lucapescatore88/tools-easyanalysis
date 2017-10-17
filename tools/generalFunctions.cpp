@@ -1,9 +1,4 @@
-#include "general_functions.hpp"
-#include "RooAddPdf.h"
-#include "TGaxis.h"
-
-using namespace std;
-using namespace RooFit;
+#include "generalFunctions.hpp"
 
 
 /**

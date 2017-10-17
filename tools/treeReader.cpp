@@ -1,6 +1,5 @@
-#include "TreeReader.hpp"
+#include "treeReader.hpp"
 
-using namespace std;
 
 vector<string> TypeDB::names = vector<string>();
 vector<string> TypeDB::branchIDs = vector<string>();
@@ -8,7 +7,6 @@ bool TypeDB::init = false;
 
 string TreeReader::pmode = "v";
 string TreeReader::pfile = "v";
-
 
 
 void TreeReader::AddChain(TChain *chain)

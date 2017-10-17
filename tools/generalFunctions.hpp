@@ -28,6 +28,8 @@
 #include "TString.h"
 #include "TAxis.h"
 #include "TLegend.h"
+#include "TLorentzVector.h"
+#include "TGaxis.h"
 
 #include "TGraph2D.h"
 #include "RooAbsArg.h"
@@ -40,13 +42,14 @@
 #include "RooPlot.h"
 #include "RooCurve.h"
 #include "RooHist.h"
-#include "TLorentzVector.h"
+#include "RooAddPdf.h"
 
-#include "TreeReader.hpp"
-#include "eff_functions.hpp"
+#include "treeReader.hpp"
+#include "efficiencyFunctions.hpp"
 
 using namespace std;
 using namespace RooFit;
+
 
 bool genRndm(RooRealVar * var, RooCurve * curve, double * xval, double ymax, TRandom3 * rdm_x = new TRandom3(0), double smear = -1);
 

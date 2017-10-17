@@ -1,12 +1,18 @@
 #ifndef MODEL_BUILDER_HPP
 #define MODEL_BUILDER_HPP
 
-#include "TreeReader.hpp"
-#include "general_functions.hpp"
-#include "ModelBuilder_helpfunctions.hpp"
-#include "StringToPdf.hpp"
+#include <algorithm>
+
+#include "RooMultiVarGaussian.h"
+
+#include "treeReader.hpp"
+#include "generalFunctions.hpp"
+#include "modelBuilderHelpFunctions.hpp"
+#include "stringToPdf.hpp"
 
 using namespace std;
+using namespace RooFit;
+
 
 /** \class ModelBuilder
  * \brief Implements a class which uses RooFit to handel the creation of fit models
