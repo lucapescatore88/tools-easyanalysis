@@ -637,6 +637,26 @@ public:
     void PrintComposition(float min = 0., float max = 0., RooFitResult * fitRes = NULL);
     ///\brief Returns the full list of bkg yields variables
     vector<RooAbsReal *> GetBkgFractions() { return m_bkg_fractions; }
+
+    int GetBkgID( string name )
+    {
+        for(size_t i = 0; i < m_bkg_components.size(); i++)
+            if(((string)m_bkg_components[i]->GetTitle()).find("bkg_"+name+"_")!=string::npos) return i;
+        return -1;
+    }
+    RooAbsReal * GetBkgFraction( string name ) 
+    { 
+        int id = GetBkgID( name );
+        if(id<0) return NULL;
+        return m_bkg_fractions[id];
+    }
+    Str2VarMap GetBkgParams( string name )
+    {
+        int id = GetBkgID( name );
+        if(id < 0) return Str2VarMap();
+        return getParams(m_bkg_components[id],RooArgSet(*m_var),vector<string>());
+    }
+    
     ///\brief Returns the number of sig events in the full range. Same as GetNSigVal(0,0)
     double GetSigVal(double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Returns the number of sig events in the full range. And can also return its asymmetric error

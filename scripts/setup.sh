@@ -31,6 +31,8 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     export LD_LIBRARY_PATH=$TOOLSSYS/build/tools:$TOOLSSYS/build/roofit:$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=$TOOLSSYS/lib:$LD_LIBRARY_PATH
 
+    export PYTHONPATH=$TOOLSSYS/python:$PYTHONPATH
+
     echo
     echo "Setup tools-easyanalysis"
     echo

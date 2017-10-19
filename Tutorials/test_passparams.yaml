@@ -1,0 +1,25 @@
+
+name: 'Test2'
+title: '#alpha#nu#alpha#lambda#upsilon#sigma#iota#sigma'
+units: 'MeV/c^{2}'
+
+datatree : 'reduced_Lb2JpsiL'
+datafile : '/eos/lhcb/user/p/pluca/Analysis/Lb2emu/Tuple/out.root' 
+
+var :
+    name : 'Lb_MM'
+    min  : 4500
+    max  : 6000
+
+sig : 
+    pdf : 'Gauss'
+    import : 'TestAna'
+    params :
+        m : 'const'
+        s : 'gauss'
+
+bkgs :
+    - Comb : 
+        pdf : 'Exp-b[-0.001,-0.5,0]'
+        norm : 'TestAna:Comb'
+ 

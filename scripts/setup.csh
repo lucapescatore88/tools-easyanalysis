@@ -28,6 +28,8 @@ if ( ! ($?TOOLSSYS) ) then
     setenv LD_LIBRARY_PATH $TOOLSSYS/build/tools:$TOOLSSYS/build/roofit:$LD_LIBRARY_PATH
     setenv LD_LIBRARY_PATH $TOOLSSYS/lib:$LD_LIBRARY_PATH
 
+    setenv PYTHONPATH $TOOLSSYS/python:$PYTHONPATH
+
     echo
     echo "Setup tools-easyanalysis"
     echo
