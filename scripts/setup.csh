@@ -12,9 +12,9 @@ if ( ! -d $LCGSYS ) then
     exit
 endif
 
-if ( ! ($?LD_INCLUDE_PATH) )   setenv LD_INCLUDE_PATH
-if ( ! ($?LD_LIBRARY_PATH) )   setenv LD_LIBRARY_PATH
-if ( ! ($?PYTHONPATH) )        setenv PYTHONPATH
+if ( ! ($?LD_INCLUDE_PATH) ) setenv LD_INCLUDE_PATH
+if ( ! ($?LD_LIBRARY_PATH) ) setenv LD_LIBRARY_PATH
+if ( ! ($?PYTHONPATH) )      setenv PYTHONPATH
 
 if ( ! ($?TOOLSSYS) ) then
     set EXE = "$0"
