@@ -58,7 +58,7 @@ $(ROOFITDIR)/obj/%.o: $(ROOFITDIR)/dic/%.cpp
 	@echo "Making $(@) ..."
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
-$(LIBDIR)/libtoolsroofit.a: $(ROOFITOBJ)
+$(LIBDIR)/libroofit.a: $(ROOFITOBJ)
 	@echo
 	@echo "Archiving $(@) ..."
 	ar rcs $@ $^;
