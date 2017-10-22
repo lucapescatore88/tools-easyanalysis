@@ -1,11 +1,18 @@
-file(GLOB RooPdfsHeaders "*.h")
-file(GLOB RooPdfsSources "*.cpp")
+file(GLOB ROOFIT_INC "*.h")
+file(GLOB ROOFIT_SRC "*.cpp")
 
-# Generate Root dictionary from roofit folder
-ROOT_GENERATE_DICTIONARY(G__${ROOFIT_LIB_NAME} ${RooPdfsHeaders} LINKDEF ${LINKDEF_ROOFIT})
+# Generate dictionary
+ROOT_GENERATE_DICTIONARY(G__${ROOFIT_NAME} ${ROOFIT_INC} LINKDEF ${LINKDEF_ROOFIT})
 
 # Create library
-add_library(${ROOFIT_LIB_NAME} STATIC ${RooPdfsSources} G__${ROOFIT_LIB_NAME}.cxx)
+add_library(${ROOFIT_NAME}-obj OBJECT ${ROOFIT_SRC} G__${ROOFIT_NAME}.cxx)
+set_property(TARGET ${ROOFIT_NAME}-obj PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+add_library(${ROOFIT_NAME}-shared SHARED $<TARGET_OBJECTS:${ROOFIT_NAME}-obj>)
+add_library(${ROOFIT_NAME}-static STATIC $<TARGET_OBJECTS:${ROOFIT_NAME}-obj>)
+
+SET_TARGET_PROPERTIES(${ROOFIT_NAME}-shared PROPERTIES OUTPUT_NAME ${ROOFIT_NAME} CLEAN_DIRECT_OUTPUT 1)
+SET_TARGET_PROPERTIES(${ROOFIT_NAME}-static PROPERTIES OUTPUT_NAME ${ROOFIT_NAME} CLEAN_DIRECT_OUTPUT 1)
 
 # Link library to ROOT
-target_link_libraries(${ROOFIT_LIB_NAME} PUBLIC ${ROOT_LIBRARIES})
+target_link_libraries(${ROOFIT_NAME}-static PUBLIC ${ROOT_LIBRARIES})

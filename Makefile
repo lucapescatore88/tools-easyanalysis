@@ -26,7 +26,7 @@ CXX       = g++
 CXXFLAGS  = -g -fPIC -Wall -O2 -lTMVA -lRooFit -lRooStats -lMathMore $(ROOTFLAGS) $(INCFLAGS)
 
 LIBDIR    = $(TOOLSSYS)/lib
-LIBS      = $(LIBDIR)/lib$(NAME)roofit.a $(LIBDIR)/lib$(NAME).a
+LIBS      = $(LIBDIR)/libroofit.a $(LIBDIR)/lib$(NAME).a
 
 ROOTCLING = rootcling
 CINTFILE  = $(TOOLSDIR)/$(NAME)_Dict.cc

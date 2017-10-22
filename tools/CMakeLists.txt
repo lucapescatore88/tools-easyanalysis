@@ -1,14 +1,21 @@
-file(GLOB ToolsHeaders "*.hpp")
-file(GLOB ToolsSources "*.cpp")
+file(GLOB TOOLS_INC "*.hpp")
+file(GLOB TOOLS_SRC "*.cpp")
 
-# You want to include the roofit folder to compile this code
-include_directories(${EASYTOOLS_ROOFITPATH})
+# Include custom RooFit PDFs
+include_directories(${ROOFIT_PATH})
 
 # Generate dictionary
-ROOT_GENERATE_DICTIONARY(G__lib${TOOLS_LIB_NAME} ${ToolsHeaders} LINKDEF ${LINKDEF_TOOLS})
+ROOT_GENERATE_DICTIONARY(G__${TOOLS_NAME} ${TOOLS_INC} LINKDEF ${LINKDEF_TOOLS})
 
 # Create library
-add_library(${TOOLS_LIB_NAME} STATIC ${ToolsSources} G__lib${TOOLS_LIB_NAME}.cxx)
+add_library(${TOOLS_NAME}-obj OBJECT ${TOOLS_SRC} G__${TOOLS_NAME}.cxx)
+set_property(TARGET ${TOOLS_NAME}-obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-# Link library to ROOFIT (auto-load dependency to ROOT)
-target_link_libraries(${TOOLS_LIB_NAME} PUBLIC ${ROOFIT_LIB_NAME})
+add_library(${TOOLS_NAME}-shared SHARED $<TARGET_OBJECTS:${TOOLS_NAME}-obj>)
+add_library(${TOOLS_NAME}-static STATIC $<TARGET_OBJECTS:${TOOLS_NAME}-obj>)
+
+SET_TARGET_PROPERTIES(${TOOLS_NAME}-shared PROPERTIES OUTPUT_NAME ${TOOLS_NAME} CLEAN_DIRECT_OUTPUT 1)
+SET_TARGET_PROPERTIES(${TOOLS_NAME}-static PROPERTIES OUTPUT_NAME ${TOOLS_NAME} CLEAN_DIRECT_OUTPUT 1)
+
+# Link library to RooFit
+target_link_libraries(${TOOLS_NAME}-static PUBLIC ${ROOFIT_NAME})
