@@ -19,7 +19,6 @@ ROOFITINC = $(wildcard $(ROOFITDIR)/*.hpp)
 ROOFITDIC = $(patsubst $(ROOFITDIR)/%.cpp,     $(ROOFITDIR)/dic/%.cpp, $(ROOFIT))
 ROOFITOBJ = $(patsubst $(ROOFITDIR)/dic/%.cpp, $(ROOFITDIR)/obj/%.o,   $(ROOFITDIC))
 
-
 ROOTFLAGS = $(shell root-config --cflags --glibs)
 
 CXX       = g++
@@ -29,8 +28,8 @@ LIBDIR    = $(TOOLSSYS)/lib
 LIBS      = $(LIBDIR)/libroofit.a $(LIBDIR)/lib$(NAME).a
 
 ROOTCLING = rootcling
-CINTFILE  = $(TOOLSDIR)/$(NAME)_Dict.cc
-CINTOBJ   = $(TOOLSDIR)/$(NAME)_Dict.o
+CINTFILE  = $(LIBDIR)/$(NAME)_Dict.cc
+CINTOBJ   = $(LIBDIR)/$(NAME)_Dict.o
 SHLIB     = $(LIBDIR)/lib$(NAME).so
 
 MAKES     = $(ROOFITDIC) $(ROOFITOBJ) $(TOOLSOBJ) $(LIBS) $(SHLIB)
@@ -103,8 +102,8 @@ clean:
 
 cleanall: clean
 	@rm -f $(MAKES)
-	@rm -f $(ROOFITDIR)/dic/*.pcm
-	@rm -f $(LIBDIR)/*.pcm
+	@rm -f $(ROOFITDIR)/dic/*
+	@rm -f $(LIBDIR)/*
 
 veryclean: cleanall
 
