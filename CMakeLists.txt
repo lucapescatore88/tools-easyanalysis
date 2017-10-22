@@ -4,31 +4,43 @@ set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1)
 
 project(easyanalysis)
 
-set(PROJECT_SYS ${CMAKE_CURRENT_SOURCE_DIR})
-
-set(ROOFIT_PATH ${PROJECT_SYS}/roofit)
-set(TOOLS_PATH  ${PROJECT_SYS}/tools)
-
-set(LINKDEF_ROOFIT ${PROJECT_SYS}/LinkDef_roofit.h)
-set(LINKDEF_TOOLS  ${PROJECT_SYS}/LinkDef_tools.h)
+set(TOOLSSYS $ENV{TOOLSSYS})
 
 set(ROOFIT_NAME roofit)
-set(TOOLS_NAME  tools)
+set(TOOLS_NAME  tools )
 
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SYS}/lib)
+set(ROOFIT_PATH ${TOOLSSYS}/${ROOFIT_NAME})
+set(TOOLS_PATH  ${TOOLSSYS}/${TOOLS_NAME} )
 
-set(DIRECTORY_GSL $ENV{GSLSYS}/include)
+set(ROOFIT_LINKDEF ${TOOLSSYS}/LinkDef_${ROOFIT_NAME}.h)
+set(TOOLS_LINKDEF  ${TOOLSSYS}/LinkDef_${TOOLS_NAME}.h)
+
+set(LIBRARY_OUTPUT_PATH ${TOOLSSYS}/lib)
+set(TOOLSLIB_PATH ${LIBRARY_OUTPUT_PATH})
+
+set(GSLSYS $ENV{GSLSYS}/include)
+
+get_directory_property(HASPARENTSCOPE PARENT_DIRECTORY)
+if(HASPARENTSCOPE)
+    set(ROOFIT_NAME roofit PARENT_SCOPE)
+    set(TOOLS_NAME  tools  PARENT_SCOPE)
+
+    set(ROOFIT_PATH ${TOOLSSYS}/${ROOFIT_NAME} PARENT_SCOPE)
+    set(TOOLS_PATH  ${TOOLSSYS}/${TOOLS_NAME}  PARENT_SCOPE)
+
+    set(TOOLSLIB_PATH ${LIBRARY_OUTPUT_PATH} PARENT_SCOPE)
+endif()
 
 message(STATUS "CMaking ${PROJECT_NAME}")
 message(STATUS "Sources ${ROOFIT_PATH}")
 message(STATUS "Sources ${TOOLS_PATH}")
-message(STATUS "Library ${LIBRARY_OUTPUT_PATH}")
+message(STATUS "Library ${TOOLSLIB_PATH}")
 
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT REQUIRED Cling TreePlayer Tree Rint MathMore MathCore Postscript Matrix RIO Core Foam RooStats RooFit RooFitCore Gpad Graf3d Graf Hist Net TMVA XMLIO MLP)
 include(${ROOT_USE_FILE})
 
-include_directories(${PROJECT_SYS} ${ROOT_INCLUDE_DIRS} ${DIRECTORY_GSL})
+include_directories(${TOOLSSYS} ${TOOLS_PATH} ${ROOFIT_PATH} ${ROOT_INCLUDE_DIRS} ${GSLSYS})
 add_definitions(${ROOT_CXX_FLAGS})
 
 add_subdirectory(${ROOFIT_PATH})

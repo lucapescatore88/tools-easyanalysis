@@ -5,7 +5,7 @@ file(GLOB TOOLS_SRC "*.cpp")
 include_directories(${ROOFIT_PATH})
 
 # Generate dictionary
-ROOT_GENERATE_DICTIONARY(G__${TOOLS_NAME} ${TOOLS_INC} LINKDEF ${LINKDEF_TOOLS})
+ROOT_GENERATE_DICTIONARY(G__${TOOLS_NAME} ${TOOLS_INC} LINKDEF ${TOOLS_LINKDEF})
 
 # Create library
 add_library(${TOOLS_NAME}-obj OBJECT ${TOOLS_SRC} G__${TOOLS_NAME}.cxx)
