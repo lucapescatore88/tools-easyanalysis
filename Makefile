@@ -6,6 +6,7 @@ INCFLAGS  = -I$(TOOLSSYS) -I$(TOOLSDIR)
 TOOLS     = $(wildcard $(TOOLSDIR)/*.cpp)
 TOOLSINC  = $(wildcard $(TOOLSDIR)/*.hpp)
 TOOLSOBJ  = $(patsubst $(TOOLSDIR)/%.cpp, $(TOOLSDIR)/obj/%.o, $(TOOLS))
+TOOLSLD   = $(TOOLSDIR)/LinkDef.h
 
 ROOFITDIR = $(TOOLSSYS)/roofit
 INCFLAGS  += -I$(ROOFITDIR)
@@ -18,6 +19,7 @@ ROOFIT    = $(wildcard $(ROOFITDIR)/*.cpp)
 ROOFITINC = $(wildcard $(ROOFITDIR)/*.hpp)
 ROOFITDIC = $(patsubst $(ROOFITDIR)/%.cpp,     $(ROOFITDIR)/dic/%.cpp, $(ROOFIT))
 ROOFITOBJ = $(patsubst $(ROOFITDIR)/dic/%.cpp, $(ROOFITDIR)/obj/%.o,   $(ROOFITDIC))
+ROOFITDF  = $(ROOFITDIR)/LinkDef.h
 
 ROOTFLAGS = $(shell root-config --cflags --glibs)
 
@@ -28,8 +30,8 @@ LIBDIR    = $(TOOLSSYS)/lib
 LIBS      = $(LIBDIR)/libroofit.a $(LIBDIR)/lib$(NAME).a
 
 ROOTCLING = rootcling
-CINTFILE  = $(LIBDIR)/$(NAME)_Dict.cc
-CINTOBJ   = $(LIBDIR)/$(NAME)_Dict.o
+CINTFILE  = $(LIBDIR)/Dict.cc
+CINTOBJ   = $(LIBDIR)/Dict.o
 SHLIB     = $(LIBDIR)/lib$(NAME).so
 
 MAKES     = $(ROOFITDIC) $(ROOFITOBJ) $(TOOLSOBJ) $(LIBS) $(SHLIB)
@@ -62,10 +64,10 @@ $(LIBDIR)/libroofit.a: $(ROOFITOBJ)
 	@echo "Archiving $(@) ..."
 	ar rcs $@ $^;
 
-$(CINTOBJ): $(TOOLS) $(TOOLINC) LinkDef_$(NAME).h
+$(CINTOBJ): $(TOOLS) $(TOOLINC) $(TOOLSLD)
 	@echo
 	@echo "Making Root dictionary $(@) ..."
-	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf lib$(PACKAGE).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSINC) LinkDef_$(NAME).h
+	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf $(LIBDIR)/lib$(NAME).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSLD)
 	@echo
 	@echo "Compiling $(CINTFILE) ..."
 	$(CXX) -c $(CXXFLAGS) -fPIC -o $(CINTOBJ) $(CINTFILE)
@@ -81,17 +83,10 @@ print:
 	@echo $(TOOLS)
 	@echo $(ROOFIT)
 	@echo
-	@echo "Dictionaries"
-	@echo $(ROOFITDIC)
-	@echo
-	@echo "Libraries"
-	@echo $(TOOLSOBJ)
-	@echo $(ROOFITOBJ)
-	@echo
 	@echo "Flags"
 	@echo $(CXXFLAGS)
 	@echo
-	@echo "Outputs"
+	@echo "Libraries"
 	@echo $(LIBS)
 	@echo $(SHLIB)
 	@echo
@@ -99,11 +94,11 @@ print:
 clean:
 	@echo "Cleaning ..."
 	@rm -f $(LIBS) $(CINTFILE) $(CINTOBJ) $(SHLIB)
+	@rm -f $(LIBDIR)/*
 
 cleanall: clean
 	@rm -f $(MAKES)
 	@rm -f $(ROOFITDIR)/dic/*
-	@rm -f $(LIBDIR)/*
 
 veryclean: cleanall
 

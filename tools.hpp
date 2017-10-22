@@ -1,7 +1,7 @@
 #ifndef TOOLS_HPP
 #define TOOLS_HPP
 
-#include "rooFit.hpp"
+#include "roofit.hpp"
 
 #include "treeReader.hpp"
 #include "modelBuilder.hpp"

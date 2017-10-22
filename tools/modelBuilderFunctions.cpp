@@ -1,4 +1,4 @@
-#include "modelBuilderHelpFunctions.hpp"
+#include "modelBuilderFunctions.hpp"
 
 
 vector <Color_t> GetDefaultColors()

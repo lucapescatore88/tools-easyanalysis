@@ -67,8 +67,8 @@
 
 #include "generalFunctions.hpp"
 #include "treeReader.hpp"
-#include "rooFit.hpp"
-#include "modelBuilderHelpFunctions.hpp"
+#include "roofit.hpp"
+#include "modelBuilderFunctions.hpp"
 
 using namespace std;
 using namespace RooFit;

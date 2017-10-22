@@ -7,7 +7,7 @@
 
 #include "treeReader.hpp"
 #include "generalFunctions.hpp"
-#include "modelBuilderHelpFunctions.hpp"
+#include "modelBuilderFunctions.hpp"
 #include "stringToPdf.hpp"
 
 using namespace std;
