@@ -1,7 +1,8 @@
-import ROOT as r
 import os
-r.gSystem.Load(os.path.expandvars('$TOOLSSYS/lib/libtools'))
+import ROOT as r
 
+r.gSystem.Load(os.path.expandvars('$TOOLSSYS/lib/libtools'))
+r.gSystem.Load(os.path.expandvars('$TOOLSSYS/lib/libroofit'))
 
 __importables__ = [
     'TypeDB',
