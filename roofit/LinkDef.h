@@ -1,3 +1,6 @@
+// Definitions for Cint and PYTHON interface
+// For info have a look at https://root.cern.ch/selecting-dictionary-entries-linkdefh
+
 #ifdef __CINT__
 
 #pragma link off all globals;

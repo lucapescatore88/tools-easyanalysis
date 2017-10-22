@@ -7,10 +7,10 @@ project(easyanalysis)
 set(TOOLSSYS $ENV{TOOLSSYS})
 
 set(ROOFIT_NAME roofit)
-set(TOOLS_NAME  tools )
+set(TOOLS_NAME  tools)
 
 set(ROOFIT_PATH ${TOOLSSYS}/${ROOFIT_NAME})
-set(TOOLS_PATH  ${TOOLSSYS}/${TOOLS_NAME} )
+set(TOOLS_PATH  ${TOOLSSYS}/${TOOLS_NAME})
 
 set(ROOFIT_LINKDEF ${ROOFIT_PATH}/LinkDef.h)
 set(TOOLS_LINKDEF  ${TOOLS_PATH}/LinkDef.h)

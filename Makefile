@@ -51,7 +51,7 @@ $(LIBDIR)/libtools.a: $(TOOLSOBJ)
 
 $(ROOFITDIR)/dic/%.cpp: $(ROOFITDIR)/%.cpp
 	@echo
-	@echo "Generating dictionary $(@) ..."
+	@echo "Making dictionary $(@) ..."
 	$(ROOTCINT) -l -f $@ -c -p -I$(GSLDIR)/include $^
 
 $(ROOFITDIR)/obj/%.o: $(ROOFITDIR)/dic/%.cpp
@@ -66,10 +66,10 @@ $(LIBDIR)/libroofit.a: $(ROOFITOBJ)
 
 $(CINTOBJ): $(TOOLS) $(TOOLINC) $(TOOLSLD)
 	@echo
-	@echo "Making Root dictionary $(@) ..."
-	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf $(LIBDIR)/lib$(NAME).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSLD)
+	@echo "Making dictionary $(@) ..."
+	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf $(LIBDIR)/lib$(NAME).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSINC) $(TOOLSLD)
 	@echo
-	@echo "Compiling $(CINTFILE) ..."
+	@echo "Making $(CINTFILE) ..."
 	$(CXX) -c $(CXXFLAGS) -fPIC -o $(CINTOBJ) $(CINTFILE)
 
 $(SHLIB): $(CINTOBJ)
