@@ -51,7 +51,7 @@ $(LIBDIR)/libtools.a: $(TOOLSOBJ)
 
 $(ROOFITDIR)/dic/%.cpp: $(ROOFITDIR)/%.cpp
 	@echo
-	@echo "Making dictionary $(@) ..."
+	@echo "Making $(@) ..."
 	$(ROOTCINT) -l -f $@ -c -p -I$(GSLDIR)/include $^
 
 $(ROOFITDIR)/obj/%.o: $(ROOFITDIR)/dic/%.cpp
