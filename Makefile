@@ -67,7 +67,7 @@ $(LIBDIR)/libroofit.a: $(ROOFITOBJ)
 $(CINTOBJ): $(TOOLS) $(TOOLINC) $(TOOLSLD)
 	@echo
 	@echo "Making dictionary $(@) ..."
-	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf $(LIBDIR)/lib$(NAME).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSINC) $(TOOLSLD)
+	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf $(LIBDIR)/lib$(NAME).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSLD)
 	@echo
 	@echo "Making $(CINTFILE) ..."
 	$(CXX) -c $(CXXFLAGS) -fPIC -o $(CINTOBJ) $(CINTFILE)
