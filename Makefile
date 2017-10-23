@@ -64,18 +64,16 @@ $(LIBDIR)/libroofit.a: $(ROOFITOBJ)
 	@echo "Archiving $(@) ..."
 	ar rcs $@ $^;
 
-$(CINTOBJ): $(TOOLS) $(TOOLINC) $(TOOLSLD)
-	@echo
-	@echo "Making dictionary $(@) ..."
-	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf $(LIBDIR)/lib$(NAME).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSLD)
+$(SHLIB): $(LIBS) $(TOOLSLD)
 	@echo
 	@echo "Making $(CINTFILE) ..."
-	$(CXX) -c $(CXXFLAGS) -fPIC -o $(CINTOBJ) $(CINTFILE)
-
-$(SHLIB): $(CINTOBJ)
+	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf $(LIBDIR)/lib$(NAME).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSLD)
 	@echo
-	@echo "Making shared library $(CINTOBJ) ..."
-	$(CXX) -shared $(CXXFLAGS) $(CINTOBJ) -o $(SHLIB)
+	@echo "Making $(CINTOBJ) ..."
+	$(CXX) -c $(CINTFILE) -o $(CINTOBJ) $(CXXFLAGS)
+	@echo
+	@echo "Making $(SHLIB) ..."
+	$(CXX) -shared $(CINTOBJ) -o $(SHLIB) $(CXXFLAGS)
 
 print:
 	@echo
