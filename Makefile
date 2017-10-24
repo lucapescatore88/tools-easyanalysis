@@ -37,7 +37,9 @@ ROOTINC    = $(shell root-config --incdir)
 CXX        = g++
 CXXFLAGS   = -g -fPIC -Wall -O2 -lTMVA -lRooFit -lRooStats -lMathMore $(ROOTFLAGS) $(INCFLAGS)
 
-MAKES      = $(ROOFITDIC) $(ROOFITDICO) $(ROOFITLIB) $(TOOLSOBJ) $(TOOLSLIB) $(TOOLSLIBSO)
+MAKES      = $(ROOFITDIC) $(ROOFITDICO) $(ROOFITLIB) $(TOOLSOBJ) $(TOOLSLIB)
+#MAKES      = $(ROOFITDIC) $(ROOFITDICO) $(ROOFITLIB) $(TOOLSOBJ) $(TOOLSLIB) $(TOOLSLIBSO)
+
 
 
 all: $(MAKES)
@@ -77,7 +79,7 @@ $(ROOFITLIB): $(ROOFITDICO)
 	@echo "Making static library $(@) ..."
 	ar rcs $@ $^;
 
-$(TOOLSDIC): $(LIB)
+$(TOOLSDIC):
 	@echo
 	@echo "Making dictionary $(@) ..."
 	cd $(NAME) ; $(ROOTCLING) -rootbuild -f $(TOOLSDIC) -s $(TOOLSLIBSO) -rmf $(TOOLSLIBRM) -I$(ROOTINC) $(INCFLAGS) $(TOOLSSRC) $(TOOLSINC) $(TOOLSLD)
@@ -87,7 +89,8 @@ $(TOOLSDICO): $(TOOLSDIC)
 	@echo "Making dictionary object $(@) ..."
 	$(CXX) -c $(TOOLSDIC) -o $(TOOLSDICO) $(CXXFLAGS)
 
-$(TOOLSLIBSO): $(TOOLSDICO)
+shared: all $(TOOLSDICO)
+#$(TOOLSLIBSO): all $(TOOLSDICO)
 	@echo
 	@echo "Making shared library $(@) ..."
 	$(CXX) -shared $(TOOLSDICO) -o $(TOOLSLIBSO) $(CXXFLAGS)
