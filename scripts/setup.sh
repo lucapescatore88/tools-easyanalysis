@@ -31,6 +31,8 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     export LD_LIBRARY_PATH=$TOOLSSYS/build/tools:$TOOLSSYS/build/roofit:$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=$TOOLSSYS/lib:$LD_LIBRARY_PATH
 
+    export LD_INCLUDE_PATH=$TOOLSSYS:$TOOLSSYS/tools:$TOOLSSYS/roofit:$LD_INCLUDE_PATH
+
     export PYTHONPATH=$TOOLSSYS/python:$PYTHONPATH
 
     echo
@@ -107,9 +109,10 @@ case "$1" in
             if [ -d $SYS/$VER ]; then
                 export PYTHONSYS=$SYS/$VER
                 export PATH=$PYTHONSYS/bin:$PATH
-                export LD_LIBRARY_PATH=$PYTHONSYS/lib:$LD_LIBRARY_PATH
-                export LD_INCLUDE_PATH=$PYTHONSYS/lib:$LD_INCLUDE_PATH
-                export PYTHONSTARTUP=$HOME/.pythonstartup.py
+                export LD_LIBRARY_PATH=$PYTHONSYS/lib/python2.7:$LD_LIBRARY_PATH
+                export LD_INCLUDE_PATH=$PYTHONSYS/include/python2.7:$LD_INCLUDE_PATH
+                export PYTHONPATH=$PYTHONSYS/lib/python2.7:$PYTHONPATH
+		export PYTHONSTARTUP=$HOME/.pythonstartup.py
 
                 echo "Configuring PYTHON     from $PYTHONSYS"
 
@@ -132,8 +135,7 @@ case "$1" in
             if [ -d $SYS/$VER ]; then
                 export PYANALYSISSYS=$SYS/$VER
                 export PATH=$PYANALYSISSYS/bin:$PATH
-                export LD_LIBRARY_PATH=$PYANALYSISSYS/lib:$LD_LIBRARY_PATH
-                export LD_INCLUDE_PATH=$PYANALYSISSYS/lib:$LD_INCLUDE_PATH
+                export LD_LIBRARY_PATH=$PYANALYSISSYS/lib/python2.7/site-packages:$LD_LIBRARY_PATH
                 export PYTHONPATH=$PYANALYSISSYS/lib/python2.7/site-packages:$PYTHONPATH
 
                 echo "Configuring PYANALYSIS from $PYANALYSISSYS"
@@ -154,8 +156,7 @@ case "$1" in
             if [ -d $SYS/$VER ]; then
                 export PYTOOLSSYS=$SYS/$VER
                 export PATH=$PYTOOLSSYS/bin:$PATH
-                export LD_LIBRARY_PATH=$PYTOOLSSYS/lib:$LD_LIBRARY_PATH
-                export LD_INCLUDE_PATH=$PYTOOLSSYS/lib:$LD_INCLUDE_PATH
+                export LD_LIBRARY_PATH=$PYTOOLSSYS/lib/python2.7/site-packages:$LD_LIBRARY_PATH
                 export PYTHONPATH=$PYTOOLSSYS/lib/python2.7/site-packages:$PYTHONPATH
 
                 echo "Configuring PYTOOLS    from $PYTOOLSSYS"

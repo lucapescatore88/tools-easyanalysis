@@ -28,6 +28,8 @@ if ( ! ($?TOOLSSYS) ) then
     setenv LD_LIBRARY_PATH $TOOLSSYS/build/tools:$TOOLSSYS/build/roofit:$LD_LIBRARY_PATH
     setenv LD_LIBRARY_PATH $TOOLSSYS/lib:$LD_LIBRARY_PATH
 
+    setenv LD_INCLUDE_PATH $TOOLSSYS/tools:$TOOLSSYS/roofit:$LD_INCLUDE_PATH
+
     setenv PYTHONPATH $TOOLSSYS/python:$PYTHONPATH
 
     echo
@@ -125,9 +127,10 @@ switch ( "$1" )
             if ( -d $SYS/$VER ) then
                 setenv PYTHONSYS $SYS/$VER
                 setenv PATH $PYTHONSYS/bin:$PATH
-                setenv LD_LIBRARY_PATH $PYTHONSYS/lib:$LD_LIBRARY_PATH
-                setenv LD_INCLUDE_PATH $PYTHONSYS/lib:$LD_INCLUDE_PATH
-                setenv PYTHONSTARTUP $HOME/.pythonstartup.py
+                setenv LD_LIBRARY_PATH $PYTHONSYS/lib/python2.7:$LD_LIBRARY_PATH
+                setenv LD_INCLUDE_PATH $PYTHONSYS/include/python2.7:$LD_INCLUDE_PATH
+		setenv PYTHONPATH $PYTHONSYS/lib/python2.7:$PYTHONPATH
+		setenv PYTHONSTARTUP $HOME/.pythonstartup.py
 
                 echo "Configuring PYTHON     from $PYTHONSYS"
 
@@ -150,8 +153,7 @@ switch ( "$1" )
             if ( -d $SYS/$VER ) then
                 setenv PYANALYSISSYS $SYS/$VER
                 setenv PATH $PYANALYSISSYS/bin:$PATH
-                setenv LD_LIBRARY_PATH $PYANALYSISSYS/lib:$LD_LIBRARY_PATH
-                setenv LD_INCLUDE_PATH $PYANALYSISSYS/lib:$LD_INCLUDE_PATH
+                setenv LD_LIBRARY_PATH $PYANALYSISSYS/lib/python2.7/site-packages:$LD_LIBRARY_PATH
                 setenv PYTHONPATH $PYANALYSISSYS/lib/python2.7/site-packages:$PYTHONPATH
 
                 echo "Configuring PYANALYSIS from $PYANALYSISSYS"
@@ -172,8 +174,7 @@ switch ( "$1" )
             if ( -d $SYS/$VER ) then
                 setenv PYTOOLSSYS $SYS/$VER
                 setenv PATH $PYTOOLSSYS/bin:$PATH
-                setenv LD_LIBRARY_PATH $PYTOOLSSYS/lib:$LD_LIBRARY_PATH
-                setenv LD_INCLUDE_PATH $PYTOOLSSYS/lib:$LD_INCLUDE_PATH
+                setenv LD_LIBRARY_PATH $PYTOOLSSYS/lib/python2.7/site-packages:$LD_LIBRARY_PATH
                 setenv PYTHONPATH $PYTOOLSSYS/lib/python2.7/site-packages:$PYTHONPATH
 
                 echo "Configuring PYTOOLS    from $PYTOOLSSYS"
