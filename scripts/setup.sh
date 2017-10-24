@@ -20,6 +20,9 @@ fi
 if [ ! -n "${LD_LIBRARY_PATH+x}" ]; then
     export LD_LIBRARY_PATH
 fi
+if [ ! -n "${ROOT_INCLUDE_PATH+x}" ]; then
+    export ROOT_INCLUDE_PATH
+fi
 if [ ! -n "${PYTHONPATH+x}" ]; then
     export PYTHONPATH
 fi
@@ -32,6 +35,8 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     export LD_LIBRARY_PATH=$TOOLSSYS/lib:$LD_LIBRARY_PATH
 
     export LD_INCLUDE_PATH=$TOOLSSYS:$TOOLSSYS/tools:$TOOLSSYS/roofit:$LD_INCLUDE_PATH
+
+    export ROOT_INCLUDE_PATH=$TOOLSSYS:$TOOLSSYS/tools:$TOOLSSYS/roofit:$ROOT_INCLUDE_PATH
 
     export PYTHONPATH=$TOOLSSYS/python:$PYTHONPATH
 
@@ -55,10 +60,11 @@ case "$1" in
 
     env)
         echo
-        echo "Configuring PATH            to $PATH"
-        echo "Configuring LD_LIBRARY_PATH to $LD_LIBRARY_PATH"
-        echo "Configuring LD_INCLUDE_PATH to $LD_INCLUDE_PATH"
-        echo "Configuring PYTHONPATH      to $PYTHONPATH"
+        echo "Configuring PATH              to $PATH"
+        echo "Configuring LD_LIBRARY_PATH   to $LD_LIBRARY_PATH"
+        echo "Configuring LD_INCLUDE_PATH   to $LD_INCLUDE_PATH"
+        echo "Configuring ROOT_INCLUDE_PATH to $ROOT_INCLUDE_PATH"
+        echo "Configuring PYTHONPATH        to $PYTHONPATH"
         echo
 
         ;;

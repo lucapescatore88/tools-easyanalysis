@@ -14,6 +14,7 @@ endif
 
 if ( ! ($?LD_INCLUDE_PATH) ) setenv LD_INCLUDE_PATH
 if ( ! ($?LD_LIBRARY_PATH) ) setenv LD_LIBRARY_PATH
+if ( ! ($?ROOT_INCLUDE_PATH) ) setenv ROOT_INCLUDE_PATH
 if ( ! ($?PYTHONPATH) )      setenv PYTHONPATH
 
 if ( ! ($?TOOLSSYS) ) then
@@ -29,6 +30,8 @@ if ( ! ($?TOOLSSYS) ) then
     setenv LD_LIBRARY_PATH $TOOLSSYS/lib:$LD_LIBRARY_PATH
 
     setenv LD_INCLUDE_PATH $TOOLSSYS/tools:$TOOLSSYS/roofit:$LD_INCLUDE_PATH
+
+    setenv ROOT_INCLUDE_PATH $TOOLSSYS:$TOOLSSYS/tools:$TOOLSSYS/roofit:$ROOT_INCLUDE_PATH
 
     setenv PYTHONPATH $TOOLSSYS/python:$PYTHONPATH
 
@@ -52,10 +55,11 @@ switch ( "$1" )
 
     case env:
         echo
-        echo "Configuring PATH            to $PATH"
-        echo "Configuring LD_LIBRARY_PATH to $LD_LIBRARY_PATH"
-        echo "Configuring LD_INCLUDE_PATH to $LD_INCLUDE_PATH"
-        echo "Configuring PYTHONPATH      to $PYTHONPATH"
+        echo "Configuring PATH              to $PATH"
+        echo "Configuring LD_LIBRARY_PATH   to $LD_LIBRARY_PATH"
+        echo "Configuring LD_INCLUDE_PATH   to $LD_INCLUDE_PATH"
+        echo "Configuring ROOT_INCLUDE_PATH to $ROOT_INCLUDE_PATH"
+        echo "Configuring PYTHONPATH        to $PYTHONPATH"
         echo
 
         breaksw
