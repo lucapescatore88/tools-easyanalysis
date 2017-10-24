@@ -1,5 +1,6 @@
 *.a
 *.so
 *.pcm
+*.rootmap
 *.cc
 *.o

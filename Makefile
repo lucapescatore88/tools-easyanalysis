@@ -1,101 +1,118 @@
-NAME      = tools
+NAME       = tools
 
-TOOLSDIR  = $(TOOLSSYS)/$(NAME)
-INCFLAGS  = -I$(TOOLSSYS) -I$(TOOLSDIR)
+LIBDIR     = $(TOOLSSYS)/lib
 
-TOOLS     = $(wildcard $(TOOLSDIR)/*.cpp)
-TOOLSINC  = $(wildcard $(TOOLSDIR)/*.hpp)
-TOOLSOBJ  = $(patsubst $(TOOLSDIR)/%.cpp, $(TOOLSDIR)/obj/%.o, $(TOOLS))
-TOOLSLD   = $(TOOLSDIR)/LinkDef.h
+TOOLSDIR   = $(TOOLSSYS)/$(NAME)
+INCFLAGS   = -I$(TOOLSSYS) -I$(TOOLSDIR)
+TOOLSSRC   = $(wildcard $(TOOLSDIR)/*.cpp)
+TOOLSINC   = $(wildcard $(TOOLSDIR)/*.hpp)
+TOOLSOBJ   = $(patsubst $(TOOLSDIR)/%.cpp, $(TOOLSDIR)/obj/%.o, $(TOOLSSRC))
+TOOLSLD    = $(TOOLSDIR)/LinkDef.h
+TOOLSLIB   = $(LIBDIR)/lib$(NAME).a
 
-ROOFITDIR = $(TOOLSSYS)/roofit
-INCFLAGS  += -I$(ROOFITDIR)
+ROOTCLING  = rootcling
+TOOLSDIC   = $(LIBDIR)/Dict.cc
+TOOLSDICO  = $(LIBDIR)/Dict.o
+TOOLSLIBSO = $(LIBDIR)/lib$(NAME).so
+TOOLSLIBRO = $(LIBDIR)/lib$(NAME).rootmap
 
-GSLDIR    = $(GSLSYS)
+ROOFIT     = roofit
+ROOFITDIR  = $(TOOLSSYS)/$(ROOFIT)
+INCFLAGS   += -I$(ROOFITDIR)
+ROOFITLIB  = $(LIBDIR)/lib$(ROOFIT).a
+
+ROOTCINT   = rootcint
+ROOFITSRC  = $(wildcard $(ROOFITDIR)/*.cpp)
+ROOFITINC  = $(wildcard $(ROOFITDIR)/*.hpp)
+ROOFITDIC  = $(patsubst $(ROOFITDIR)/%.cpp,     $(ROOFITDIR)/dic/%.cpp, $(ROOFITSRC))
+ROOFITDICO = $(patsubst $(ROOFITDIR)/dic/%.cpp, $(ROOFITDIR)/obj/%.o,   $(ROOFITDIC))
+ROOFITDF   = $(ROOFITDIR)/LinkDef.h
+
+GSLDIR     = $(GSLSYS)
 INCFLAGS  += -I$(GSLDIR)/include
 
-ROOTCINT  = rootcint
-ROOFIT    = $(wildcard $(ROOFITDIR)/*.cpp)
-ROOFITINC = $(wildcard $(ROOFITDIR)/*.hpp)
-ROOFITDIC = $(patsubst $(ROOFITDIR)/%.cpp,     $(ROOFITDIR)/dic/%.cpp, $(ROOFIT))
-ROOFITOBJ = $(patsubst $(ROOFITDIR)/dic/%.cpp, $(ROOFITDIR)/obj/%.o,   $(ROOFITDIC))
-ROOFITDF  = $(ROOFITDIR)/LinkDef.h
+ROOTFLAGS  = $(shell root-config --cflags --glibs)
+ROOTINC    = $(shell root-config --incdir)
 
-ROOTFLAGS = $(shell root-config --cflags --glibs)
+CXX        = g++
+CXXFLAGS   = -g -fPIC -Wall -O2 -lTMVA -lRooFit -lRooStats -lMathMore $(ROOTFLAGS) $(INCFLAGS)
 
-CXX       = g++
-CXXFLAGS  = -g -fPIC -Wall -O2 -lTMVA -lRooFit -lRooStats -lMathMore $(ROOTFLAGS) $(INCFLAGS)
-
-LIBDIR    = $(TOOLSSYS)/lib
-LIBS      = $(LIBDIR)/libroofit.a $(LIBDIR)/lib$(NAME).a
-
-ROOTCLING = rootcling
-CINTFILE  = $(LIBDIR)/Dict.cc
-CINTOBJ   = $(LIBDIR)/Dict.o
-SHLIB     = $(LIBDIR)/lib$(NAME).so
-
-MAKES     = $(ROOFITDIC) $(ROOFITOBJ) $(TOOLSOBJ) $(LIBS) $(SHLIB)
+MAKES      = $(ROOFITDIC) $(ROOFITDICO) $(ROOFITLIB) $(TOOLSOBJ) $(TOOLSLIB) $(TOOLSLIBSO)
 
 
 all: $(MAKES)
 
 $(TOOLSDIR)/obj/%.o: $(TOOLSDIR)/%.cpp
 	@echo
-	@echo "Making $(@) ..."
+	@echo "Making object $(@) ..."
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
-$(LIBDIR)/libtools.a: $(TOOLSOBJ)
+$(TOOLSLIB): $(TOOLSOBJ)
 	@echo
-	@echo "Archiving $(@) ..."
+	@echo "Making static library $(@) ..."
 	ar rcs $@ $^;
 
 $(ROOFITDIR)/dic/%.cpp: $(ROOFITDIR)/%.cpp
 	@echo
-	@echo "Making $(@) ..."
+	@echo "Making dictionary $(@) ..."
 	$(ROOTCINT) -l -f $@ -c -p -I$(GSLDIR)/include $^
 
 $(ROOFITDIR)/obj/%.o: $(ROOFITDIR)/dic/%.cpp
 	@echo
-	@echo "Making $(@) ..."
+	@echo "Making dictionary object $(@) ..."
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
-$(LIBDIR)/libroofit.a: $(ROOFITOBJ)
+$(ROOFITLIB): $(ROOFITDICO)
 	@echo
-	@echo "Archiving $(@) ..."
+	@echo "Making static library $(@) ..."
 	ar rcs $@ $^;
 
-$(SHLIB): $(LIBS) $(TOOLSLD)
+$(TOOLSDIC): $(LIB)
 	@echo
-	@echo "Making $(CINTFILE) ..."
-	$(ROOTCLING) -rootbuild -f $(CINTFILE) -s $(SHLIB) -rmf $(LIBDIR)/lib$(NAME).rootmap $(INCFLAGS) -I`root-config --incdir` $(TOOLS) $(TOOLSINC) $(TOOLSLD)
+	@echo "Making dictionary $(@) ..."
+	cd $(NAME) ; $(ROOTCLING) -rootbuild -f $(TOOLSDIC) -s $(TOOLSLIBSO) -rmf $(TOOLSLIBRO) -I$(ROOTINC) $(INCFLAGS) $(TOOLSSRC) $(TOOLSINC) $(TOOLSLD)
+
+$(TOOLSDICO): $(TOOLSDIC)
 	@echo
-	@echo "Making $(CINTOBJ) ..."
-	$(CXX) -c $(CINTFILE) -o $(CINTOBJ) $(CXXFLAGS)
+	@echo "Making dictionary object $(@) ..."
+	$(CXX) -c $(TOOLSDIC) -o $(TOOLSDICO) $(CXXFLAGS)
+
+$(TOOLSLIBSO): $(TOOLSDICO)
 	@echo
-	@echo "Making $(SHLIB) ..."
-	$(CXX) -shared $(CINTOBJ) -o $(SHLIB) $(CXXFLAGS)
+	@echo "Making shared library $(@) ..."
+	$(CXX) -shared $(TOOLSDICO) -o $(TOOLSLIBSO) $(CXXFLAGS)
 
 print:
 	@echo
 	@echo "Sources"
-	@echo $(TOOLS)
-	@echo $(ROOFIT)
+	@echo $(TOOLSSRC)
+	@echo $(ROOFITSRC)
+	@echo
+	@echo "Includes"
+	@echo $(TOOLSINC)
+	@echo $(ROOFITINC)
+	@echo
+	@echo "Dictionaries"
+	@echo $(TOOLSDIC)
+	@echo $(ROOFITDIC)
 	@echo
 	@echo "Flags"
+	@echo $(INCFLAGS)
 	@echo $(CXXFLAGS)
 	@echo
 	@echo "Libraries"
-	@echo $(LIBS)
-	@echo $(SHLIB)
+	@echo $(TOOLSLIB)
+	@echo $(TOOLSLIBSO)
+	@echo $(ROOFITLIB)
 	@echo
 
 clean:
 	@echo "Cleaning ..."
-	@rm -f $(LIBS) $(CINTFILE) $(CINTOBJ) $(SHLIB)
-	@rm -f $(LIBDIR)/*
+	@rm -f $(TOOLSLIB) $(TOOLSLIBSO) $(ROOFITLIB) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBSO) $(TOOLSLIBRO)
 
 cleanall: clean
 	@rm -f $(MAKES)
+	@rm -f $(LIBDIR)/*
 	@rm -f $(ROOFITDIR)/dic/*
 
 veryclean: cleanall
