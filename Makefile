@@ -14,7 +14,7 @@ ROOTCLING  = rootcling
 TOOLSDIC   = $(LIBDIR)/Dict.cc
 TOOLSDICO  = $(LIBDIR)/Dict.o
 TOOLSLIBSO = $(LIBDIR)/lib$(NAME).so
-TOOLSLIBRO = $(LIBDIR)/lib$(NAME).rootmap
+TOOLSLIBRM = $(LIBDIR)/lib$(NAME).rootmap
 
 ROOFIT     = roofit
 ROOFITDIR  = $(TOOLSSYS)/$(ROOFIT)
@@ -70,7 +70,7 @@ $(ROOFITLIB): $(ROOFITDICO)
 $(TOOLSDIC): $(LIB)
 	@echo
 	@echo "Making dictionary $(@) ..."
-	cd $(NAME) ; $(ROOTCLING) -rootbuild -f $(TOOLSDIC) -s $(TOOLSLIBSO) -rmf $(TOOLSLIBRO) -I$(ROOTINC) $(INCFLAGS) $(TOOLSSRC) $(TOOLSINC) $(TOOLSLD)
+	cd $(NAME) ; $(ROOTCLING) -rootbuild -f $(TOOLSDIC) -s $(TOOLSLIBSO) -rmf $(TOOLSLIBRM) -I$(ROOTINC) $(INCFLAGS) $(TOOLSSRC) $(TOOLSINC) $(TOOLSLD)
 
 $(TOOLSDICO): $(TOOLSDIC)
 	@echo
@@ -108,7 +108,7 @@ print:
 
 clean:
 	@echo "Cleaning ..."
-	@rm -f $(TOOLSLIB) $(TOOLSLIBSO) $(ROOFITLIB) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBSO) $(TOOLSLIBRO)
+	@rm -f $(TOOLSLIB) $(TOOLSLIBSO) $(ROOFITLIB) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBSO) $(TOOLSLIBRM)
 
 cleanall: clean
 	@rm -f $(MAKES)
