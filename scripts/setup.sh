@@ -115,9 +115,8 @@ case "$1" in
             if [ -d $SYS/$VER ]; then
                 export PYTHONSYS=$SYS/$VER
                 export PATH=$PYTHONSYS/bin:$PATH
-                export LD_LIBRARY_PATH=$PYTHONSYS/lib/python2.7:$LD_LIBRARY_PATH
-                export LD_INCLUDE_PATH=$PYTHONSYS/include/python2.7:$LD_INCLUDE_PATH
-                export PYTHONPATH=$PYTHONSYS/lib/python2.7:$PYTHONPATH
+                export LD_LIBRARY_PATH=$PYTHONSYS/lib:$LD_LIBRARY_PATH
+                #export PYTHONPATH=$PYTHONSYS/lib/python2.7:$PYTHONPATH
 		export PYTHONSTARTUP=$HOME/.pythonstartup.py
 
                 echo "Configuring PYTHON     from $PYTHONSYS"

@@ -131,9 +131,8 @@ switch ( "$1" )
             if ( -d $SYS/$VER ) then
                 setenv PYTHONSYS $SYS/$VER
                 setenv PATH $PYTHONSYS/bin:$PATH
-                setenv LD_LIBRARY_PATH $PYTHONSYS/lib/python2.7:$LD_LIBRARY_PATH
-                setenv LD_INCLUDE_PATH $PYTHONSYS/include/python2.7:$LD_INCLUDE_PATH
-		setenv PYTHONPATH $PYTHONSYS/lib/python2.7:$PYTHONPATH
+                setenv LD_LIBRARY_PATH $PYTHONSYS/lib:$LD_LIBRARY_PATH
+		#setenv PYTHONPATH $PYTHONSYS/lib/python2.7:$PYTHONPATH
 		setenv PYTHONSTARTUP $HOME/.pythonstartup.py
 
                 echo "Configuring PYTHON     from $PYTHONSYS"
