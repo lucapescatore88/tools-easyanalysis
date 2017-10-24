@@ -47,12 +47,22 @@ $(TOOLSDIR)/obj/%.o: $(TOOLSDIR)/%.cpp
 	@echo "Making object $(@) ..."
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
+$(TOOLSDIR)/obj/%.o: $(TOOLSDIR)/%.cpp $(TOOLSDIR)/%.hpp
+	@echo
+	@echo "Making object $(@) ..."
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
+
 $(TOOLSLIB): $(TOOLSOBJ)
 	@echo
 	@echo "Making static library $(@) ..."
 	ar rcs $@ $^;
 
 $(ROOFITDIR)/dic/%.cpp: $(ROOFITDIR)/%.cpp
+	@echo
+	@echo "Making dictionary $(@) ..."
+	$(ROOTCINT) -l -f $@ -c -p -I$(GSLDIR)/include $^
+
+$(ROOFITDIR)/dic/%.cpp: $(ROOFITDIR)/%.cpp $(ROOFITDIR)/%.hpp
 	@echo
 	@echo "Making dictionary $(@) ..."
 	$(ROOTCINT) -l -f $@ -c -p -I$(GSLDIR)/include $^
