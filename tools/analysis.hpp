@@ -375,10 +375,10 @@ public:
         if (!m_init || !m_fitRes) return -1;
         return ModelBuilder::GetNBkgVal(min, max, valerr, m_fitRes);
     }
-    double GetNBkgErr()
+  double GetNBkgErr(double min = 0, double max = 0)
     {
         double valerr = 0;
-        GetNBkgVal(0, 0, &valerr);
+        GetNBkgVal(min, max, &valerr);
         return valerr;
     }
     double GetNSigVal(double min = 0, double max = 0, double * valerr = NULL)
@@ -386,10 +386,10 @@ public:
         if (!m_init || !m_fitRes) return -1;
         return ModelBuilder::GetNSigVal(min, max, valerr, m_fitRes);
     }
-    double GetNSigErr()
+  double GetNSigErr(double min = 0, double max = 0)
     {
         double valerr = 0;
-        GetNSigVal(0, 0, &valerr);
+        GetNSigVal(min, max, &valerr);
         return valerr;
     }
     double GetSOverB(float min, float max, double * valerr = NULL)
