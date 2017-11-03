@@ -47,6 +47,11 @@ MAKES      = $(ROOFITDIC) $(ROOFITDICO) $(ROOFITLIB) $(TOOLSOBJ) $(TOOLSLIB)
 
 all: $(MAKES)
 
+$(TOOLSDIR)/obj/%.o: $(TOOLSDIR)/%.cpp
+	@echo
+	@echo "Making object $(@) ..."
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
+
 $(TOOLSDIR)/obj/%.o: $(TOOLSDIR)/%.cpp $(TOOLSDIR)/%.hpp
 	@echo
 	@echo "Making object $(@) ..."
@@ -56,6 +61,11 @@ $(TOOLSLIB): $(TOOLSOBJ)
 	@echo
 	@echo "Making static library $(@) ..."
 	ar rcs $@ $^;
+
+$(ROOFITDIR)/dic/%.cpp: $(ROOFITDIR)/%.cpp
+	@echo
+	@echo "Making dictionary $(@) ..."
+	$(ROOTCINT) -l -f $@ -c -p -I$(GSLDIR)/include $^
 
 $(ROOFITDIR)/dic/%.cpp: $(ROOFITDIR)/%.cpp $(ROOFITDIR)/%.hpp
 	@echo
@@ -82,7 +92,7 @@ $(TOOLSDICO): $(TOOLSDIC)
 	@echo "Making dictionary object $(@) ..."
 	$(CXX) -c $(TOOLSDIC) -o $(TOOLSDICO) $(CXXFLAGS)
 
-$(TOOLSLIBSO): all $(TOOLSDICO)
+$(TOOLSLIBSO): $(TOOLSDICO)
 	@echo
 	@echo "Making shared library $(@) ..."
 	$(CXX) -shared $(TOOLSDICO) -o $(TOOLSLIBSO) $(CXXFLAGS)
@@ -97,12 +107,12 @@ $(RFDICO): $(RFDIC)
 	@echo "Making dictionary object $(@) ..."
 	$(CXX) -c $(RFDIC) -o $(RFDICO) $(CXXFLAGS)
 
-$(ROOFITLIBSO): all $(RFDICO)
+$(ROOFITLIBSO): $(RFDICO)
 	@echo
 	@echo "Making shared library $(@) ..."
 	$(CXX) -shared $(RFDICO) -o $(RFLIBSO) $(CXXFLAGS)
 
-shared: $(TOOLSLIBSO) $(ROOFITLIBSO)
+shared: all $(ROOFITLIBSO) $(TOOLSLIBSO)
 
 print:
 	@echo
@@ -116,6 +126,7 @@ print:
 	@echo
 	@echo "Dictionaries"
 	@echo $(TOOLSDIC)
+	@echo $(RFDIC)
 	@echo $(ROOFITDIC)
 	@echo
 	@echo "Flags"
