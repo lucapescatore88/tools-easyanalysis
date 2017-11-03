@@ -9,24 +9,27 @@ TOOLSINC   = $(wildcard $(TOOLSDIR)/*.hpp)
 TOOLSOBJ   = $(patsubst $(TOOLSDIR)/%.cpp, $(TOOLSDIR)/obj/%.o, $(TOOLSSRC))
 TOOLSLD    = $(TOOLSDIR)/LinkDef.h
 TOOLSLIB   = $(LIBDIR)/lib$(NAME).a
-
-ROOTCLING  = rootcling
-TOOLSDIC   = $(LIBDIR)/Dict.cc
-TOOLSDICO  = $(LIBDIR)/Dict.o
+TOOLSDIC   = $(LIBDIR)/Dict_$(NAME).cc
+TOOLSDICO  = $(LIBDIR)/Dict_$(NAME).o
 TOOLSLIBSO = $(LIBDIR)/lib$(NAME).so
 TOOLSLIBRM = $(LIBDIR)/lib$(NAME).rootmap
 
 ROOFIT     = roofit
 ROOFITDIR  = $(TOOLSSYS)/$(ROOFIT)
 INCFLAGS   += -I$(ROOFITDIR)
-ROOFITLIB  = $(LIBDIR)/lib$(ROOFIT).a
-
-ROOTCINT   = rootcint
 ROOFITSRC  = $(wildcard $(ROOFITDIR)/*.cpp)
 ROOFITINC  = $(wildcard $(ROOFITDIR)/*.hpp)
 ROOFITDIC  = $(patsubst $(ROOFITDIR)/%.cpp,     $(ROOFITDIR)/dic/%.cpp, $(ROOFITSRC))
 ROOFITDICO = $(patsubst $(ROOFITDIR)/dic/%.cpp, $(ROOFITDIR)/obj/%.o,   $(ROOFITDIC))
-ROOFITDF   = $(ROOFITDIR)/LinkDef.h
+ROOFITLD   = $(ROOFITDIR)/LinkDef.h
+ROOFITLIB  = $(LIBDIR)/lib$(ROOFIT).a
+RFDIC   = $(LIBDIR)/Dict_$(ROOFIT).cc
+RFDICO  = $(LIBDIR)/Dict_$(ROOFIT).o
+ROOFITLIBSO = $(LIBDIR)/lib$(ROOFIT).so
+ROOFITLIBRM = $(LIBDIR)/lib$(ROOFIT).rootmap
+
+ROOTCINT   = rootcint
+ROOTCLING  = rootcling
 
 GSLDIR     = $(GSLSYS)
 INCFLAGS  += -I$(GSLDIR)/include
@@ -44,11 +47,6 @@ MAKES      = $(ROOFITDIC) $(ROOFITDICO) $(ROOFITLIB) $(TOOLSOBJ) $(TOOLSLIB)
 
 all: $(MAKES)
 
-$(TOOLSDIR)/obj/%.o: $(TOOLSDIR)/%.cpp
-	@echo
-	@echo "Making object $(@) ..."
-	$(CXX) -c $< -o $@ $(CXXFLAGS)
-
 $(TOOLSDIR)/obj/%.o: $(TOOLSDIR)/%.cpp $(TOOLSDIR)/%.hpp
 	@echo
 	@echo "Making object $(@) ..."
@@ -58,11 +56,6 @@ $(TOOLSLIB): $(TOOLSOBJ)
 	@echo
 	@echo "Making static library $(@) ..."
 	ar rcs $@ $^;
-
-$(ROOFITDIR)/dic/%.cpp: $(ROOFITDIR)/%.cpp
-	@echo
-	@echo "Making dictionary $(@) ..."
-	$(ROOTCINT) -l -f $@ -c -p -I$(GSLDIR)/include $^
 
 $(ROOFITDIR)/dic/%.cpp: $(ROOFITDIR)/%.cpp $(ROOFITDIR)/%.hpp
 	@echo
@@ -89,11 +82,27 @@ $(TOOLSDICO): $(TOOLSDIC)
 	@echo "Making dictionary object $(@) ..."
 	$(CXX) -c $(TOOLSDIC) -o $(TOOLSDICO) $(CXXFLAGS)
 
-shared: all $(TOOLSDICO)
-#$(TOOLSLIBSO): all $(TOOLSDICO)
+$(TOOLSLIBSO): all $(TOOLSDICO)
 	@echo
 	@echo "Making shared library $(@) ..."
 	$(CXX) -shared $(TOOLSDICO) -o $(TOOLSLIBSO) $(CXXFLAGS)
+
+$(RFDIC):
+	@echo
+	@echo "Making dictionary $(@) ..."
+	cd $(NAME) ; $(ROOTCLING) -rootbuild -f $(RFDIC) -s $(RFLIBSO) -rmf $(ROOFITLIBRM) -I$(ROOTINC) $(INCFLAGS) $(ROOFITSRC) $(ROOFITINC) $(ROOFITLD)
+
+$(RFDICO): $(RFDIC)
+	@echo
+	@echo "Making dictionary object $(@) ..."
+	$(CXX) -c $(RFDIC) -o $(RFDICO) $(CXXFLAGS)
+
+$(ROOFITLIBSO): all $(RFDICO)
+	@echo
+	@echo "Making shared library $(@) ..."
+	$(CXX) -shared $(RFDICO) -o $(RFLIBSO) $(CXXFLAGS)
+
+shared: $(TOOLSLIBSO) $(ROOFITLIBSO)
 
 print:
 	@echo
@@ -117,11 +126,13 @@ print:
 	@echo $(TOOLSLIB)
 	@echo $(TOOLSLIBSO)
 	@echo $(ROOFITLIB)
+	@echo $(ROOFITLIBSO)
 	@echo
 
 clean:
 	@echo "Cleaning ..."
-	@rm -f $(TOOLSLIB) $(TOOLSLIBSO) $(ROOFITLIB) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBSO) $(TOOLSLIBRM)
+	@rm -f $(TOOLSLIB) $(TOOLSLIBSO) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBRM)
+	@rm -f $(ROOFITLIB) $(ROOFITLIBSO) $(RFDIC) $(RFDICO) $(RFLIBRM)
 
 cleanall: clean
 	@rm -f $(MAKES)

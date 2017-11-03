@@ -18,10 +18,12 @@
 #include "Math/IFunction.h"
 #include "gsl/gsl_sf_bessel.h"
 
+#ifndef ROOIPATIA2
 const Double_t sq2pi = sqrt(2*acos(-1.0));
 const Double_t sq2pi_inv = 1./sq2pi;
 const Double_t logsq2pi = log(sq2pi);
 const Double_t log_de_2 = log(2.0);
+#endif
 
 Double_t RooIpatia__low_x_BK(Double_t nu,Double_t x){
   return TMath::Gamma(nu)*pow(2,nu-1)*pow(x,-nu);

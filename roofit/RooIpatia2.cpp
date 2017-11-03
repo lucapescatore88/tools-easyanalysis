@@ -19,10 +19,12 @@
 #include "gsl/gsl_sf_bessel.h"
 #include "TSystem.h"
 
+#ifndef ROOIPATIA
 const Double_t sq2pi = TMath::Sqrt(2.*TMath::ACos(-1.));
 const Double_t sq2pi_inv = 1./sq2pi;
 const Double_t logsq2pi = TMath::Log(sq2pi);
 const Double_t log_de_2 = TMath::Log(2.);
+#endif
 
 Double_t RooIpatia2__low_x_BK(Double_t nu,Double_t x){
   return TMath::Gamma(nu)*TMath::Power(2.,nu-1.)*TMath::Power(x,-nu);
