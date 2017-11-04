@@ -14,7 +14,5 @@ source scripts/setup.sh (or setup.csh if you use tcsh)
 
 To build the libraries
 ```bash
-cd build
-cmake ..
 make
 ```

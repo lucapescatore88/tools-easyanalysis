@@ -18,13 +18,14 @@ ROOFIT     = roofit
 ROOFITDIR  = $(TOOLSSYS)/$(ROOFIT)
 INCFLAGS   += -I$(ROOFITDIR)
 ROOFITSRC  = $(wildcard $(ROOFITDIR)/*.cpp)
-ROOFITINC  = $(wildcard $(ROOFITDIR)/*.hpp)
+ROOFITINC  = $(wildcard $(ROOFITDIR)/*.h)
 ROOFITDIC  = $(patsubst $(ROOFITDIR)/%.cpp,     $(ROOFITDIR)/dic/%.cpp, $(ROOFITSRC))
 ROOFITDICO = $(patsubst $(ROOFITDIR)/dic/%.cpp, $(ROOFITDIR)/obj/%.o,   $(ROOFITDIC))
 ROOFITLD   = $(ROOFITDIR)/LinkDef.h
+ROOFITINC  := $(filter-out $(ROOFITLD), $(ROOFITINC))
 ROOFITLIB  = $(LIBDIR)/lib$(ROOFIT).a
-RFDIC   = $(LIBDIR)/Dict_$(ROOFIT).cc
-RFDICO  = $(LIBDIR)/Dict_$(ROOFIT).o
+RFDIC      = $(LIBDIR)/Dict_$(ROOFIT).cc
+RFDICO     = $(LIBDIR)/Dict_$(ROOFIT).o
 ROOFITLIBSO = $(LIBDIR)/lib$(ROOFIT).so
 ROOFITLIBRM = $(LIBDIR)/lib$(ROOFIT).rootmap
 
@@ -100,7 +101,7 @@ $(TOOLSLIBSO): $(TOOLSDICO)
 $(RFDIC):
 	@echo
 	@echo "Making dictionary $(@) ..."
-	cd $(NAME) ; $(ROOTCLING) -rootbuild -f $(RFDIC) -s $(RFLIBSO) -rmf $(ROOFITLIBRM) -I$(ROOTINC) $(INCFLAGS) $(ROOFITSRC) $(ROOFITINC) $(ROOFITLD)
+	cd $(ROOFIT) ; $(ROOTCLING) -rootbuild -f $(RFDIC) -s $(ROOFITLIBSO) -rmf $(ROOFITLIBRM) -I$(ROOTINC) $(INCFLAGS) $(ROOFITINC) $(ROOFITLD)
 
 $(RFDICO): $(RFDIC)
 	@echo
@@ -110,7 +111,7 @@ $(RFDICO): $(RFDIC)
 $(ROOFITLIBSO): $(RFDICO)
 	@echo
 	@echo "Making shared library $(@) ..."
-	$(CXX) -shared $(RFDICO) -o $(RFLIBSO) $(CXXFLAGS)
+	$(CXX) -shared $(RFDICO) -o $(ROOFITLIBSO) $(CXXFLAGS)
 
 shared: all $(ROOFITLIBSO) $(TOOLSLIBSO)
 
