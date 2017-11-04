@@ -22,38 +22,45 @@
 //
 // reference: Johnson, N. L. (1954). Systems of frequency curves derived from the first law of Laplace., Trabajos de Estadistica, 5, 283-291.
 //
+
 #ifndef ROOJOHNSONSU
 #define ROOJOHNSONSU
+
 #include "RooAbsPdf.h"
 #include "RooRealProxy.h"
 #include "RooCategoryProxy.h"
 #include "RooAbsReal.h"
 #include "RooAbsCategory.h"
+
 class RooJohnson : public RooAbsPdf {
-public:
-  RooJohnson() {} ;
-  RooJohnson(const char *name, const char *title,
-          RooAbsReal& _x,
-          RooAbsReal& _mean,
-          RooAbsReal& _width,
-          RooAbsReal& _nu,
-           RooAbsReal& _tau);
-  RooJohnson(const RooJohnson& other, const char* name=0) ;
-  virtual TObject* clone(const char* newname) const { return new RooJohnson(*this,newname); }
-  inline virtual ~RooJohnson() { }
-protected:
-  RooRealProxy x ;
-  RooRealProxy mean ;
-  RooRealProxy width ;
-  RooRealProxy nu ;
-  RooRealProxy tau ;
-  Double_t evaluate() const ;
-  // Integrals
-  Int_t getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* rangeName=0) const ;
-  Double_t analyticalIntegral(Int_t code, const char* rangeName=0) const ;
-private:
-public:
-  ClassDef(RooJohnson,1) // Your description goes here...
+
+ public:
+    RooJohnson() {} ;
+    RooJohnson(const char *name, const char *title,
+	       RooAbsReal& _x,
+	       RooAbsReal& _mean,
+	       RooAbsReal& _width,
+	       RooAbsReal& _nu,
+	       RooAbsReal& _tau);
+    RooJohnson(const RooJohnson& other, const char* name=0) ;
+    virtual TObject* clone(const char* newname) const { return new RooJohnson(*this,newname); }
+    inline virtual ~RooJohnson() { }
+
+ protected:
+    RooRealProxy x ;
+    RooRealProxy mean ;
+    RooRealProxy width ;
+    RooRealProxy nu ;
+    RooRealProxy tau ;
+    Double_t evaluate() const ;
+    // Integrals
+    Int_t getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* rangeName=0) const ;
+    Double_t analyticalIntegral(Int_t code, const char* rangeName=0) const ;
+
+ public:
+    ClassDef(RooJohnson,1) // Your description goes here...
+
 };
+
 #endif
 

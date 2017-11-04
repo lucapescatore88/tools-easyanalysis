@@ -101,7 +101,7 @@ $(TOOLSLIBSO): $(TOOLSDICO)
 $(RFDIC):
 	@echo
 	@echo "Making dictionary $(@) ..."
-	cd $(ROOFIT) ; $(ROOTCLING) -rootbuild -f $(RFDIC) -s $(ROOFITLIBSO) -rmf $(ROOFITLIBRM) -I$(ROOTINC) $(INCFLAGS) $(ROOFITINC) $(ROOFITLD)
+	cd $(ROOFIT) ; $(ROOTCLING) -rootbuild -f $(RFDIC) -s $(ROOFITLIBSO) -rmf $(ROOFITLIBRM) -I$(ROOTINC) $(INCFLAGS) $(ROOFITSRC) $(ROOFITINC) $(ROOFITLD)
 
 $(RFDICO): $(RFDIC)
 	@echo
@@ -113,7 +113,7 @@ $(ROOFITLIBSO): $(RFDICO)
 	@echo "Making shared library $(@) ..."
 	$(CXX) -shared $(RFDICO) -o $(ROOFITLIBSO) $(CXXFLAGS)
 
-shared: all $(ROOFITLIBSO) $(TOOLSLIBSO)
+shared: $(TOOLSLIBSO) $(ROOFITLIBSO)
 
 print:
 	@echo
@@ -141,10 +141,15 @@ print:
 	@echo $(ROOFITLIBSO)
 	@echo
 
+cleanso:
+	@echo "Cleaning shared ..."
+#	@rm -f $(TOOLSLIBSO) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBRM)
+	@rm -f $(ROOFITLIBSO) $(RFDIC) $(RFDICO) $(ROOFITLIBRM)
+
 clean:
 	@echo "Cleaning ..."
 	@rm -f $(TOOLSLIB) $(TOOLSLIBSO) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBRM)
-	@rm -f $(ROOFITLIB) $(ROOFITLIBSO) $(RFDIC) $(RFDICO) $(RFLIBRM)
+	@rm -f $(ROOFITLIB) $(ROOFITLIBSO) $(RFDIC) $(RFDICO) $(ROOFITLIBRM)
 
 cleanall: clean
 	@rm -f $(MAKES)

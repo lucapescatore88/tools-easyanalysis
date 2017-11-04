@@ -14,29 +14,28 @@
 #include "RooAbsCategory.h"
  
 class RooLogGamma : public RooAbsPdf {
-public:
-  RooLogGamma() {} ; 
-  RooLogGamma(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _nu,
-	      RooAbsReal& _landa,
-	      RooAbsReal& _alpha);
-  RooLogGamma(const RooLogGamma& other, const char* name=0) ;
-  virtual TObject* clone(const char* newname) const { return new RooLogGamma(*this,newname); }
-  inline virtual ~RooLogGamma() { }
 
-protected:
+ public:
+    RooLogGamma() {} ; 
+    RooLogGamma(const char *name, const char *title,
+		RooAbsReal& _x,
+		RooAbsReal& _nu,
+		RooAbsReal& _landa,
+		RooAbsReal& _alpha);
+    RooLogGamma(const RooLogGamma& other, const char* name=0) ;
+    virtual TObject* clone(const char* newname) const { return new RooLogGamma(*this,newname); }
+    inline virtual ~RooLogGamma() { }
 
-  RooRealProxy x ;
-  RooRealProxy nu ;
-  RooRealProxy landa ;
-  RooRealProxy alpha ;
-  
-  Double_t evaluate() const ;
+ protected:
+    RooRealProxy x ;
+    RooRealProxy nu ;
+    RooRealProxy landa ;
+    RooRealProxy alpha ;
+    Double_t evaluate() const ;
 
-private:
+ public:
+    ClassDef(RooLogGamma,1) // Your description goes here...
 
-  ClassDef(RooLogGamma,1) // Your description goes here...
 };
  
 #endif

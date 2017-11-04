@@ -14,33 +14,32 @@
 #include "RooAbsCategory.h"
  
 class RooApollonios : public RooAbsPdf {
-public:
-  RooApollonios() {} ; 
-  RooApollonios(const char *name, const char *title,
-	      RooAbsReal& _m,
-	      RooAbsReal& _m0,
-	      RooAbsReal& _sigma,
-	      RooAbsReal& _b,
-	      RooAbsReal& _a,
-	      RooAbsReal& _n);
-  RooApollonios(const RooApollonios& other, const char* name=0) ;
-  virtual TObject* clone(const char* newname) const { return new RooApollonios(*this,newname); }
-  inline virtual ~RooApollonios() { }
 
-protected:
+ public:
+    RooApollonios() {} ; 
+    RooApollonios(const char *name, const char *title,
+		  RooAbsReal& _m,
+		  RooAbsReal& _m0,
+		  RooAbsReal& _sigma,
+		  RooAbsReal& _b,
+		  RooAbsReal& _a,
+		  RooAbsReal& _n);
+    RooApollonios(const RooApollonios& other, const char* name=0) ;
+    virtual TObject* clone(const char* newname) const { return new RooApollonios(*this,newname); }
+    inline virtual ~RooApollonios() { }
 
-  RooRealProxy m ;
-  RooRealProxy m0 ;
-  RooRealProxy sigma ;
-  RooRealProxy b ;
-  RooRealProxy a ;
-  RooRealProxy n ;
-  
-  Double_t evaluate() const ;
+ protected:
+    RooRealProxy m ;
+    RooRealProxy m0 ;
+    RooRealProxy sigma ;
+    RooRealProxy b ;
+    RooRealProxy a ;
+    RooRealProxy n ;
+    Double_t evaluate() const ;
 
-private:
+ public:
+    ClassDef(RooApollonios,1) // Your description goes here...
 
-  ClassDef(RooApollonios,1) // Your description goes here...
 };
  
 #endif

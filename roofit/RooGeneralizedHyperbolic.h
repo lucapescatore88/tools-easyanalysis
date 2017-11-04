@@ -14,33 +14,32 @@
 #include "RooAbsCategory.h"
  
 class RooGeneralizedHyperbolic : public RooAbsPdf {
-public:
-  RooGeneralizedHyperbolic() {} ; 
-  RooGeneralizedHyperbolic(const char *name, const char *title,
-	      RooAbsReal& _x,
-	      RooAbsReal& _l,
-	      RooAbsReal& _alpha,
-	      RooAbsReal& _beta,
-	      RooAbsReal& _delta,
-	      RooAbsReal& _mu);
-  RooGeneralizedHyperbolic(const RooGeneralizedHyperbolic& other, const char* name=0) ;
-  virtual TObject* clone(const char* newname) const { return new RooGeneralizedHyperbolic(*this,newname); }
-  inline virtual ~RooGeneralizedHyperbolic() { }
 
-protected:
+ public:
+    RooGeneralizedHyperbolic() {} ; 
+    RooGeneralizedHyperbolic(const char *name, const char *title,
+			     RooAbsReal& _x,
+			     RooAbsReal& _l,
+			     RooAbsReal& _alpha,
+			     RooAbsReal& _beta,
+			     RooAbsReal& _delta,
+			     RooAbsReal& _mu);
+    RooGeneralizedHyperbolic(const RooGeneralizedHyperbolic& other, const char* name=0) ;
+    virtual TObject* clone(const char* newname) const { return new RooGeneralizedHyperbolic(*this,newname); }
+    inline virtual ~RooGeneralizedHyperbolic() { }
 
-  RooRealProxy x ;
-  RooRealProxy l ;
-  RooRealProxy alpha ;
-  RooRealProxy beta ;
-  RooRealProxy delta ;
-  RooRealProxy mu ;
-  
-  Double_t evaluate() const ;
+ protected:
+    RooRealProxy x ;
+    RooRealProxy l ;
+    RooRealProxy alpha ;
+    RooRealProxy beta ;
+    RooRealProxy delta ;
+    RooRealProxy mu ;
+    Double_t evaluate() const ;
 
-private:
+ public:
+    ClassDef(RooGeneralizedHyperbolic,1) // Your description goes here...
 
-  ClassDef(RooGeneralizedHyperbolic,1) // Your description goes here...
 };
  
 #endif
