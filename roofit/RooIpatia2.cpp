@@ -19,12 +19,10 @@
 #include "gsl/gsl_sf_bessel.h"
 #include "TSystem.h"
 
-#ifndef ROOIPATIA
-const Double_t sq2pi = TMath::Sqrt(2.*TMath::ACos(-1.));
-const Double_t sq2pi_inv = 1./sq2pi;
-const Double_t logsq2pi = TMath::Log(sq2pi);
-const Double_t log_de_2 = TMath::Log(2.);
-#endif
+const Double_t RooIpatia2__sq2pi = TMath::Sqrt(2.*TMath::ACos(-1.));
+const Double_t RooIpatia2__sq2pi_inv = 1./RooIpatia2__sq2pi;
+const Double_t RooIpatia2__logsq2pi = TMath::Log(RooIpatia2__sq2pi);
+const Double_t RooIpatia2__log_de_2 = TMath::Log(2.);
 
 Double_t RooIpatia2__low_x_BK(Double_t nu,Double_t x){
     return TMath::Gamma(nu)*TMath::Power(2.,nu-1.)*TMath::Power(x,-nu);
@@ -32,7 +30,7 @@ Double_t RooIpatia2__low_x_BK(Double_t nu,Double_t x){
 
 
 Double_t RooIpatia2__low_x_LnBK(Double_t nu, Double_t x){
-    return TMath::Log(TMath::Gamma(nu)) + (nu-1.)*log_de_2 - nu * TMath::Log(x);
+    return TMath::Log(TMath::Gamma(nu)) + (nu-1.)*RooIpatia2__log_de_2 - nu * TMath::Log(x);
 }
 
 Double_t RooIpatia2__BK(Double_t ni, Double_t x) {
@@ -58,19 +56,19 @@ Double_t RooIpatia2__LnBK(double ni, double x) {
 
 Double_t RooIpatia2__LogEval(Double_t d, Double_t l, Double_t alpha, Double_t beta, Double_t delta) {
     //Double_t d = x-mu;
-    //Double_t sq2pi = TMath::Sqrt(2*TMath::ACos(-1));
+    //Double_t RooIpatia2__sq2pi = TMath::Sqrt(2*TMath::ACos(-1));
     Double_t gamma = alpha;//TMath::Sqrt(alpha*alpha-beta*beta);
     Double_t dg = delta*gamma;
     Double_t thing = delta*delta + d*d;
-    Double_t logno = l*TMath::Log(gamma/delta) - logsq2pi -RooIpatia2__LnBK(l, dg);
+    Double_t logno = l*TMath::Log(gamma/delta) - RooIpatia2__logsq2pi -RooIpatia2__LnBK(l, dg);
   
     return TMath::Exp(logno + beta*d +(0.5-l)*(TMath::Log(alpha)-0.5*TMath::Log(thing)) + RooIpatia2__LnBK(l-0.5,alpha*TMath::Sqrt(thing)));// + TMath::Log(TMath::Abs(beta)+0.0001) );
 
 }
 
 Double_t RooIpatia2__diff_eval(Double_t d, Double_t l, Double_t alpha, Double_t beta, Double_t delta){
-    //Double_t sq2pi = TMath::Sqrt(2*TMath::ACos(-1));
-    //Double_t cons1 = 1./sq2pi;
+    //Double_t RooIpatia2__sq2pi = TMath::Sqrt(2*TMath::ACos(-1));
+    //Double_t cons1 = 1./RooIpatia2__sq2pi;
     Double_t gamma = alpha;// TMath::Sqrt(alpha*alpha-beta*beta);
     Double_t dg = delta*gamma;
     //Double_t mu_ = mu;// - delta*beta*RooIpatia2__BK(l+1,dg)/(gamma*RooIpatia2__BK(l,dg));
@@ -78,7 +76,7 @@ Double_t RooIpatia2__diff_eval(Double_t d, Double_t l, Double_t alpha, Double_t 
     Double_t thing = delta*delta + d*d;
     Double_t sqthing = TMath::Sqrt(thing);
     Double_t alphasq = alpha*sqthing;
-    Double_t no = TMath::Power(gamma/delta,l)/RooIpatia2__BK(l,dg)*sq2pi_inv;
+    Double_t no = TMath::Power(gamma/delta,l)/RooIpatia2__BK(l,dg)*RooIpatia2__sq2pi_inv;
     Double_t ns1 = 0.5-l;
   
     return no*TMath::Power(alpha, ns1)*TMath::Power(thing, l/2. - 1.25)*(-d*alphasq*(RooIpatia2__BK(l - 1.5, alphasq) + RooIpatia2__BK(l + 0.5, alphasq)) + (2.*(beta*thing + d*l) - d)*RooIpatia2__BK(ns1, alphasq))*TMath::Exp(beta*d)/2.;
