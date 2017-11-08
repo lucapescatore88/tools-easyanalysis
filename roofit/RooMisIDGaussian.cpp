@@ -48,11 +48,12 @@ RooMisIDGaussian::RooMisIDGaussian(const char *name, const char *title,
         sigma("sigma","sigma",this,_sigma),
         dm2("dm2","dm2",this,_dm2),
         x("x","x",this,kTRUE,kFALSE),
-        xmin("xmin","xmin",this,kTRUE,kFALSE),
         dx("dx","dx",this,kTRUE,kFALSE),
         slopelist("slopelist","slopelist",this,kTRUE,kFALSE),
         coefslist("coefslist","coefslist",this,kTRUE,kFALSE),
-        slopeSize(0)
+        slopeSize(0),
+        xmin("xmin","xmin",this,kTRUE,kFALSE),
+        xmax("xmax","xmax",this,kTRUE,kFALSE)
 {
     // add coefficients and slopes from referenced pdf 
     RooArgList *deps = (RooArgList*)_xpdf.parseDependents();
@@ -89,7 +90,9 @@ RooMisIDGaussian::RooMisIDGaussian(const char *name, const char *title,
         sigma("sigma","sigma",this,_sigma),
         dm2("dm2","dm2",this,_dm2),
         x("x","x",this,_x),
-        abspdf("abspdf","abspdf",this,(RooAbsReal&)_xpdf)
+        abspdf("abspdf","abspdf",this,(RooAbsReal&)_xpdf),
+        xmin("xmin","xmin",this,kTRUE,kFALSE),
+        xmax("xmax","xmax",this,kTRUE,kFALSE)
 {
     // ensure that functions know we deal with 2D function
     flag_2D = true;
@@ -111,7 +114,10 @@ RooMisIDGaussian::RooMisIDGaussian(const char *name, const char *title,
         mean("mean","mean",this,_mean),
         sigma("sigma","sigma",this,_sigma),
         dm2("dm2","dm2",this,_dm2),
-        x("x","x",this,_x)
+        x("x","x",this,_x),
+        xmin("xmin","xmin",this,kTRUE,kFALSE),
+        xmax("xmax","xmax",this,kTRUE,kFALSE)
+
 {
     // ensure that functions know we deal with 2D function
     flag_2D = true;
@@ -138,11 +144,12 @@ RooMisIDGaussian::RooMisIDGaussian(const char *name, const char *title,
         sigma("sigma","sigma",this,_sigma),
         dm2("dm2","dm2",this,_dm2),
         x("x","x",this,_x),
-        xmin("xmin","xmin",this,_xmin),
         dx("dx","dx",this,_dx),
         slopelist("slopelist","slopelist",this,kTRUE,kFALSE),
         coefslist("coefslist","coefslist",this,kTRUE,kFALSE),
-        slopeSize(_slopelist.getSize())
+        slopeSize(_slopelist.getSize()),
+        xmin("xmin","xmin",this,_xmin),
+        xmax("xmax","xmax",this,kTRUE,kFALSE)
 {
     // assert the (relative) sizes of the lists
     if (!((slopeSize == _coefslist.getSize()) || (slopeSize == _coefslist.getSize() + 1))) {
@@ -216,13 +223,13 @@ RooMisIDGaussian::RooMisIDGaussian(const char *name, const char *title,
         mean("mean","mean",this,_mean),
         sigma("sigma","sigma",this,_sigma),
         dm2("dm2","dm2",this,_dm2),
-        power("power","power",this,_power),
-        xmin("xmin","xmin",this,_xmin),
-        xmax("xmax","xmax",this,_xmax),
         dx("dx","dx",this,_dx),
+        power("power","power",this,_power),
         slopelist("slopelist","slopelist",this,kTRUE,kFALSE),
         coefslist("coefslist","coefslist",this,kTRUE,kFALSE),
-        slopeSize(5)
+        slopeSize(5),
+        xmin("xmin","xmin",this,_xmin),
+        xmax("xmax","xmax",this,_xmax)
 {
     // approximation of a power law with exponentials
     Double_t beta_approx = 3.0;
@@ -261,12 +268,12 @@ RooMisIDGaussian::RooMisIDGaussian(const char *name, const char *title,
         mean("mean","mean",this,_mean),
         sigma("sigma","sigma",this,_sigma),
         dm2("dm2","dm2",this,_dm2),
-        xmin("xmin","xmin",this,_xmin),
         dx("dx","dx",this,_dx),
         slopelist("slopelist","slopelist",this,kTRUE,kFALSE),
-        xmax("xmax","xmax",this,_xmax),
         coefslist("coefslist","coefslist",this,kTRUE,kFALSE),
-        slopeSize(_slopelist.getSize())
+        slopeSize(_slopelist.getSize()),
+        xmin("xmin","xmin",this,_xmin),
+        xmax("xmax","xmax",this,_xmax)
 {
     // assert the (relative) sizes of the lists
     if (!((slopeSize == _coefslist.getSize()) || (slopeSize == _coefslist.getSize() + 1))) {
@@ -333,14 +340,14 @@ RooMisIDGaussian::RooMisIDGaussian(const RooMisIDGaussian& other, const char* na
     sigma("sigma",this,other.sigma),
     dm2("dm2",this,other.dm2),
     x("x",this,other.x),
-    xmin("xmin",this,other.xmin),
-    xmax("xmax",this,other.xmax),
     dx("dx",this,other.dx),
     power("power",this,other.power),
     abspdf("abspdf",this,other.abspdf),
     slopelist("slopelist",this,other.slopelist),
     coefslist("coefslist",this,other.coefslist),
-    slopeSize(other.slopeSize)
+    slopeSize(other.slopeSize),
+    xmin("xmin",this,other.xmin),
+    xmax("xmax",this,other.xmax)
 {
     flag_2D = other.flag_2D; 
     flag_num_int = other.flag_num_int;
@@ -434,7 +441,7 @@ Double_t RooMisIDGaussian::primitiveSplineGauss2D(const double mval,
         k2 += s[i] * val;
         z  += s[i] * s[i] * val;
     }
-    Double_t t  = (xval - xminval) / dxval;
+    //Double_t t  = (xval - xminval) / dxval;
     Double_t b  = -k2 * dxval + (y2-y1);
     Double_t a  = 2.0 * b + 0.5 * z * dxval * dxval ;
 
@@ -505,7 +512,7 @@ Double_t RooMisIDGaussian::primitiveSplineGauss1D(const double mval,
         k2 += s[i] * val;
         z  += s[i] * s[i] * val;
     }
-    Double_t t  = (xval - xminval) / dxval;
+    //Double_t t  = (xval - xminval) / dxval;
     Double_t b  = -k2 * dxval + (y2-y1);
     Double_t a  = 2.0 * b + 0.5 * z * dxval * dxval ;
 
@@ -521,7 +528,7 @@ Double_t RooMisIDGaussian::primitiveSplineGauss1D(const double mval,
     Double_t dm2xval = dm2val * xval;
     Double_t mucorr = sqrt( meanval * meanval + dm2xval );
     Double_t arg = ( mval - mucorr ) / ( sqrt2 * sigval ) ;
-    Double_t erf_x = RooMath::erf(arg);
+    //Double_t erf_x = RooMath::erf(arg);
     Double_t mvals[9], muvals[9], sigvals[9];
     for (int i = 0; i < 9; ++i) {
         mvals[i] = pow(mval,i);
@@ -845,7 +852,7 @@ Double_t RooMisIDGaussian::analyticalIntegral(Int_t code, const char* rangeName)
         // integrate over m
         // Ranges
         Double_t xval = x;
-        Double_t dm2val = dm2; 
+        //Double_t dm2val = dm2; 
 
         // ensure that mass range is compatible with x values
         Double_t m0 = m.min(rangeName);

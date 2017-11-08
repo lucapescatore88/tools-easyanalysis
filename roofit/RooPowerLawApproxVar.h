@@ -36,15 +36,15 @@ public:
   inline virtual ~RooPowerLawApproxVar() { }
 
 protected:
+  Int_t m_index ;
   RooRealProxy m_power ;
   Double_t m_beta_approx ;
   Int_t m_n_expos ;
-  Int_t m_index ;
   Flags m_flags ;
 
   Double_t evaluate() const ;
 
-private:
+public:
   ClassDef(RooPowerLawApproxVar,1) 
 };
 

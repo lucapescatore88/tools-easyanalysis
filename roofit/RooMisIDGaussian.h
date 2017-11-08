@@ -73,7 +73,7 @@ public:
           RooAbsReal& _xmin,
           RooAbsReal& _dx,
           RooArgList& _slopelist,
-	        RooArgList& _coefslist,
+	      RooArgList& _coefslist,
           RooAbsReal& _xmax);
 
   RooMisIDGaussian(const RooMisIDGaussian& other, const char* name=0) ;
@@ -93,16 +93,16 @@ protected:
   RooRealProxy mean ;
   RooRealProxy sigma ;
   RooRealProxy dm2 ;
-  RooRealProxy power ;
   RooRealProxy x ;
-  RooRealProxy xmin ;
-  RooRealProxy xmax ;
   RooRealProxy dx ;
+  RooRealProxy power ;
   RooRealProxy abspdf ; 
   RooListProxy slopelist ;
   RooListProxy coefslist ;
-
   Int_t slopeSize ;
+  RooRealProxy xmin ;
+  RooRealProxy xmax ;
+
   TIterator* _slopeIter ;
   TIterator* _coefsIter ;
 

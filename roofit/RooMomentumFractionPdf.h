@@ -63,7 +63,7 @@ protected:
 
   Double_t evaluate() const ;
 
-private:
+public:
   ClassDef(RooMomentumFractionPdf,1) 
 };
  
