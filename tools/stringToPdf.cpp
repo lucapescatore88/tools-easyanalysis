@@ -119,6 +119,12 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     stval_list["nu"]   = new RooRealVar("nu_" + namepdf_, "\\nu" + pstrname, 0., -100., 100.);
     stval_list["tau"]  = new RooRealVar("tau_" + namepdf_, "\\tau" + pstrname, 1., 0., 1000.);
 
+    stval_list["dm"]  = new RooRealVar("dm_" + namepdf_, "\\Delta(m)" + pstrname, 0., 0., 1000.);
+    stval_list["dx"]  = new RooRealVar("dx_" + namepdf_, "\\Delta(x)" + pstrname, 20., 0., 100.);
+    stval_list["xmin"]  = new RooRealVar("xmin_" + namepdf_, "xmin" + pstrname, 1.);//, 0., 1000.);
+    stval_list["xmax"]  = new RooRealVar("xmax_" + namepdf_, "xmax" + pstrname, 50.);//, 0., 1000.);
+    stval_list["pow"]  = new RooRealVar("pow_" + namepdf_, "pow" + pstrname, 1., 0., 20.);
+
     std::map <string, vector<string>> par_list;
     vector<string> ApolloniosPar    {"m", "s", "b", "a", "n"};
     vector<string> ArgusPar         {"m0", "p", "c"};
@@ -141,6 +147,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     vector<string> Ipatia2Par       {"m", "s", "b", "l", "z", "a", "n", "a2", "n2"};
     vector<string> VoigtPar         {"m", "s", "g"};
     vector<string> JohnsonPar       {"m", "s", "nu", "tau"};
+    vector<string> MisIDGaussianPar {"m", "s", "dm", "pow","xmin","xmax","dx"};
 
     par_list["Apollonios"]  = ApolloniosPar;
     par_list["Argus"]       = ArgusPar;
@@ -163,6 +170,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     par_list["Ipatia2"]     = Ipatia2Par;
     par_list["Voigt"]       = VoigtPar;
     par_list["Johnson"]     = JohnsonPar;
+    par_list["MisIDGauss"]  = MisIDGaussianPar;
 
     size_t plusgaus = typepdf_.find("AndGauss");
     size_t pluscb   = typepdf_.find("AndCB");
@@ -206,7 +214,6 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
 
 RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar * var, Str2VarMap myvars, string opt, TString title)
 {
-    //cout << "Building Pdf" << endl;
     RooAbsPdf * pdf = NULL;
     string typepdf_ = (string)typepdf;
     TString namepdf_ = ((TString)namepdf).ReplaceAll("bkg_", "");
@@ -218,9 +225,19 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
 
     Str2VarMap p = getPar(typepdf_, namepdf_, var, myvars, opt, title);
 
-    if (typepdf_.substr(0, 5).find("Gauss") != string::npos)
+    if (typepdf_.find("MisIDGauss") != string::npos)
     {
-        pdf = new RooGaussian(namepdf, title, *var, *p["m"], *p["s"]);
+        cout << "Setting MisID" << endl;
+        p["m"]->Print();
+        p["s"]->Print();
+        p["dm"]->Print();
+        p["pow"]->Print();
+        p["xmin"]->Print();
+        p["xmax"]->Print();
+        p["dx"]->Print();
+        cout << "Constructor" << endl;
+        pdf = new RooMisIDGaussian(namepdf, namepdf, *var, *p["m"], *p["s"], *p["dm"], *p["pow"], *p["xmin"], *p["xmax"], *p["dx"]);
+        cout << "Done" << endl;
     }
     else if (typepdf_.find("DGauss") != string::npos)
     {
@@ -245,6 +262,10 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
         RooGaussian * gauss1 = new RooGaussian("gauss1_" + namepdf_, "Gauss", *var, *p["m"], *p["s3"]);
 
         pdf = new RooAddPdf(namepdf, namepdf, RooArgList(*CB1, *CB2, *gauss1), RooArgList(*p["f"], *p["f2"]));
+    }
+    else if (typepdf_.substr(0, 5).find("Gauss") != string::npos)
+    {
+        pdf = new RooGaussian(namepdf, title, *var, *p["m"], *p["s"]);
     }
     else if (typepdf_.find("DCB") != string::npos)
     {

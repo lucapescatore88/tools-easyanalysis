@@ -9,5 +9,6 @@
 #include "RooIpatia2.h"
 #include "RooJohnson.h"
 //#include "RooLogGamma.h"
+#include "RooMisIDGaussian.h"
 
 #endif

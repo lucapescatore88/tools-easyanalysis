@@ -99,7 +99,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
     }
     else m_model = m_sig;
 
-    if (m_pmode == "v")
+    if(m_pmode == "v" && m_model)
     {
         cout << "\n" << m_name << ": Initialized Correctly! The model is:" << endl;
         m_model->Print();

@@ -28,5 +28,7 @@
 #pragma link C++ defined_in "RooJohnson.h";
 //#pragma link C++ class RooLogGamma+;
 //#pragma link C++ defined_in "RooLogGamma.h";
+#pragma link C++ class RooMisIDGaussian+;
+#pragma link C++ defined_in "RooMisIDGaussian.h";
 
 #endif
