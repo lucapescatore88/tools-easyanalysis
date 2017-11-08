@@ -28,5 +28,13 @@
 #pragma link C++ defined_in "RooJohnson.h";
 //#pragma link C++ class RooLogGamma+;
 //#pragma link C++ defined_in "RooLogGamma.h";
+#pragma link C++ class RooMisIDGaussian+;
+#pragma link C++ defined_in "RooMisIDGaussian.h";
+#pragma link C++ class RooMomentumFractionPdf+;
+#pragma link C++ defined_in "RooMomentumFractionPdf.h";
+#pragma link C++ class RooPowerLawApproxVar+;
+#pragma link C++ defined_in "RooPowerLawApproxVar.h";
+
+
 
 #endif

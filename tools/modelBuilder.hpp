@@ -164,6 +164,15 @@ protected:
                 res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
             }
             else res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, 2);
+            /*if(opt.find("-noshift") == string::npos)
+            {
+                RooRealVar * shift = new RooRealVar("shift_rookey_"+(TString)_name,"shift_rookey_"+(TString)_name,0.,-1000.,1000.);
+                RooRealVar * dummy_sigma = new RooRealVar("dummysigma_rookey","dummysigma_rookey",0.);
+                RooGaussian * resMod = new RooGaussian("resmod_"+(TString)_name,"resmod_"+(TString)_name,*myvar,*shift,*dummy_sigma);
+                res = new RooFFTConvPdf(res->GetName()+(TString)"_conv",res->GetTitle(),*myvar,*res,*resMod);
+                //keyvar = new RooFormulaVar("x_rookey_"+(TString)_name,"x_rokey_"+(TString)_name,"@0+@1",RooArgList(*myvar,*shift));
+            }*/
+
 
             if (opt.find("-print") != string::npos)
             {
@@ -176,21 +185,13 @@ protected:
                 TString name_ = _name;
                 name_.ReplaceAll("__noprint__", "");
                 name_.ReplaceAll(" ", "_");
-                name_.ReplaceAll("#", "_");
-                name_.ReplaceAll("^", "_");
-                name_.ReplaceAll("{", "_");
-                name_.ReplaceAll("}", "_");
-                name_.ReplaceAll("(", "_");
-                name_.ReplaceAll(")", "_");
+                name_.ReplaceAll("#", "_").ReplaceAll("^", "_");
+                name_.ReplaceAll("{", "_").ReplaceAll("}", "_");
+                name_.ReplaceAll("(", "_").ReplaceAll(")", "_");
                 name_.ReplaceAll(":", "_");
-                name_.ReplaceAll("/", "_");
-                name_.ReplaceAll("+", "_");
-                name_.ReplaceAll("-", "_");
-                name_.ReplaceAll("*", "_");
-                name_.ReplaceAll(",", "_");
-                name_.ReplaceAll(".", "_");
-                name_.ReplaceAll("__", "_");
-                name_.ReplaceAll("_for", "__for");
+                name_.ReplaceAll("/", "_").ReplaceAll("+", "_").ReplaceAll("-", "_").ReplaceAll("*", "_");
+                name_.ReplaceAll(",", "_").ReplaceAll(".", "_");
+                name_.ReplaceAll("__", "_").ReplaceAll("_for", "__for");
                 c->Print("rooKeysModel_" + name_ + ".pdf");
                 delete c;
                 delete keysplot;
