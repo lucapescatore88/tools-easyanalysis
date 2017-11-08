@@ -1,0 +1,21 @@
+name: 'test'
+title: 'test'
+units: 'MeV/c^{2}'
+
+datatree : 'DecayTuple'
+datafile : 'test.root'
+
+var :
+    name : 'B0_M'
+    min  : 5150
+    max  : 5850
+
+sig : 
+#    pdf : 'Gauss-m[5280,5150,5850]'
+#    pdf : 'Ipatia-m[5280,5150,5850]-Xz[.005]-Xb[0]'
+    pdf : 'Ipatia2-m[5280,5150,5850]-Xz[.005]-Xb[0]'
+#     pdf : 'Apollonios-m[5280,5150,5850]'
+
+bkgs :
+    - Comb : 
+        pdf : 'Exp-b[-0.005,-0.1,-1e-6]'

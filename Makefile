@@ -9,24 +9,28 @@ TOOLSINC   = $(wildcard $(TOOLSDIR)/*.hpp)
 TOOLSOBJ   = $(patsubst $(TOOLSDIR)/%.cpp, $(TOOLSDIR)/obj/%.o, $(TOOLSSRC))
 TOOLSLD    = $(TOOLSDIR)/LinkDef.h
 TOOLSLIB   = $(LIBDIR)/lib$(NAME).a
-
-ROOTCLING  = rootcling
-TOOLSDIC   = $(LIBDIR)/Dict.cc
-TOOLSDICO  = $(LIBDIR)/Dict.o
+TOOLSDIC   = $(LIBDIR)/Dict_$(NAME).cc
+TOOLSDICO  = $(LIBDIR)/Dict_$(NAME).o
 TOOLSLIBSO = $(LIBDIR)/lib$(NAME).so
 TOOLSLIBRM = $(LIBDIR)/lib$(NAME).rootmap
 
 ROOFIT     = roofit
 ROOFITDIR  = $(TOOLSSYS)/$(ROOFIT)
 INCFLAGS   += -I$(ROOFITDIR)
-ROOFITLIB  = $(LIBDIR)/lib$(ROOFIT).a
-
-ROOTCINT   = rootcint
 ROOFITSRC  = $(wildcard $(ROOFITDIR)/*.cpp)
-ROOFITINC  = $(wildcard $(ROOFITDIR)/*.hpp)
+ROOFITINC  = $(wildcard $(ROOFITDIR)/*.h)
 ROOFITDIC  = $(patsubst $(ROOFITDIR)/%.cpp,     $(ROOFITDIR)/dic/%.cpp, $(ROOFITSRC))
 ROOFITDICO = $(patsubst $(ROOFITDIR)/dic/%.cpp, $(ROOFITDIR)/obj/%.o,   $(ROOFITDIC))
-ROOFITDF   = $(ROOFITDIR)/LinkDef.h
+ROOFITLD   = $(ROOFITDIR)/LinkDef.h
+ROOFITINC  := $(filter-out $(ROOFITLD), $(ROOFITINC))
+ROOFITLIB  = $(LIBDIR)/lib$(ROOFIT).a
+RFDIC      = $(LIBDIR)/Dict_$(ROOFIT).cc
+RFDICO     = $(LIBDIR)/Dict_$(ROOFIT).o
+ROOFITLIBSO = $(LIBDIR)/lib$(ROOFIT).so
+ROOFITLIBRM = $(LIBDIR)/lib$(ROOFIT).rootmap
+
+ROOTCINT   = rootcint
+ROOTCLING  = rootcling
 
 GSLDIR     = $(GSLSYS)
 INCFLAGS  += -I$(GSLDIR)/include
@@ -89,11 +93,27 @@ $(TOOLSDICO): $(TOOLSDIC)
 	@echo "Making dictionary object $(@) ..."
 	$(CXX) -c $(TOOLSDIC) -o $(TOOLSDICO) $(CXXFLAGS)
 
-shared: all $(TOOLSDICO)
-#$(TOOLSLIBSO): all $(TOOLSDICO)
+$(TOOLSLIBSO): $(TOOLSDICO)
 	@echo
 	@echo "Making shared library $(@) ..."
 	$(CXX) -shared $(TOOLSDICO) -o $(TOOLSLIBSO) $(CXXFLAGS)
+
+$(RFDIC):
+	@echo
+	@echo "Making dictionary $(@) ..."
+	cd $(ROOFIT) ; $(ROOTCLING) -rootbuild -f $(RFDIC) -s $(ROOFITLIBSO) -rmf $(ROOFITLIBRM) -I$(ROOTINC) $(INCFLAGS) $(ROOFITSRC) $(ROOFITINC) $(ROOFITLD)
+
+$(RFDICO): $(RFDIC)
+	@echo
+	@echo "Making dictionary object $(@) ..."
+	$(CXX) -c $(RFDIC) -o $(RFDICO) $(CXXFLAGS)
+
+$(ROOFITLIBSO): $(RFDICO)
+	@echo
+	@echo "Making shared library $(@) ..."
+	$(CXX) -shared $(RFDICO) -o $(ROOFITLIBSO) $(CXXFLAGS)
+
+shared: $(TOOLSLIBSO) $(ROOFITLIBSO)
 
 print:
 	@echo
@@ -107,6 +127,7 @@ print:
 	@echo
 	@echo "Dictionaries"
 	@echo $(TOOLSDIC)
+	@echo $(RFDIC)
 	@echo $(ROOFITDIC)
 	@echo
 	@echo "Flags"
@@ -117,11 +138,18 @@ print:
 	@echo $(TOOLSLIB)
 	@echo $(TOOLSLIBSO)
 	@echo $(ROOFITLIB)
+	@echo $(ROOFITLIBSO)
 	@echo
+
+cleanso:
+	@echo "Cleaning shared ..."
+#	@rm -f $(TOOLSLIBSO) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBRM)
+	@rm -f $(ROOFITLIBSO) $(RFDIC) $(RFDICO) $(ROOFITLIBRM)
 
 clean:
 	@echo "Cleaning ..."
-	@rm -f $(TOOLSLIB) $(TOOLSLIBSO) $(ROOFITLIB) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBSO) $(TOOLSLIBRM)
+	@rm -f $(TOOLSLIB) $(TOOLSLIBSO) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBRM)
+	@rm -f $(ROOFITLIB) $(ROOFITLIBSO) $(RFDIC) $(RFDICO) $(ROOFITLIBRM)
 
 cleanall: clean
 	@rm -f $(MAKES)
