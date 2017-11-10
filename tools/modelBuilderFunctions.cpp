@@ -505,10 +505,11 @@ Str2VarMap eraseParameter(Str2VarMap * parlist, vector<string> names)
 TString getLegendLabel( TString title, string opt )
 {
     TString leglabel = title.ReplaceAll("_print", "");
-    bool isbkg = leglabel.Contains("bkg_");
+    //bool isbkg = leglabel.Contains("bkg_");
     leglabel = leglabel.ReplaceAll("bkg_", "");
-    if (isbkg) leglabel = "Bkg. " + leglabel;
-    leglabel.ReplaceAll("totsig_", "Sig. ");
+    //if (isbkg) leglabel = "Bkg. " + leglabel;
+    //leglabel.ReplaceAll("totsig_", "Sig. ");
+    leglabel.ReplaceAll("totsig_", "");
 
     if (opt.find("-origlegnames") == string::npos)
     {
@@ -765,8 +766,8 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
     if (model && data && opt.find("-nochi2") == string::npos)
     {
         double * chi2ndf = calcChi2(frame, getNFreePars(model, RooArgSet(*var)));
-        if (opt.find("-chi2ndf") != string::npos) label = Form("Chi2/NDF =  %4.2f", chi2ndf[0]);
-        else label = Form("Chi2/NDF =  %4.2f / %4.2f", chi2ndf[0] * chi2ndf[1], chi2ndf[1]);
+        if (opt.find("-chi2ndf") != string::npos) label = Form("#chi^{2}/ndf =  %4.2f", chi2ndf[0]);
+        else label = Form("#chi^{2}/ndf =  %4.2f / %4.2f", chi2ndf[0] * chi2ndf[1], chi2ndf[1]);
     }
     if (model && noblind && opt.find("-noparams") == string::npos)
     {
