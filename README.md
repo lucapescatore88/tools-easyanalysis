@@ -12,7 +12,12 @@ To setup the proper environment
 source scripts/setup.sh (or setup.csh if you use tcsh)
 ```
 
-To build the libraries
+To build the static libraries
 ```bash
 make
+```
+
+To build the shared libraries to be loaded in python
+```bash
+make shared
 ```
