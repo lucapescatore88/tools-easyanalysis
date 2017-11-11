@@ -113,7 +113,7 @@ $(ROOFITLIBSO): $(RFDICO)
 	@echo "Making shared library $(@) ..."
 	$(CXX) -shared $(RFDICO) -o $(ROOFITLIBSO) $(CXXFLAGS)
 
-shared: $(TOOLSLIBSO) $(ROOFITLIBSO)
+shared: $(ROOFITLIBSO) $(TOOLSLIBSO)
 
 print:
 	@echo
@@ -143,7 +143,7 @@ print:
 
 cleanso:
 	@echo "Cleaning shared ..."
-#	@rm -f $(TOOLSLIBSO) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBRM)
+	@rm -f $(TOOLSLIBSO) $(TOOLSDIC) $(TOOLSDICO) $(TOOLSLIBRM)
 	@rm -f $(ROOFITLIBSO) $(RFDIC) $(RFDICO) $(ROOFITLIBRM)
 
 clean:

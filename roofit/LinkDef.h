@@ -35,6 +35,4 @@
 #pragma link C++ class RooPowerLawApproxVar+;
 #pragma link C++ defined_in "RooPowerLawApproxVar.h";
 
-
-
 #endif
