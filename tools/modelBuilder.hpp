@@ -249,7 +249,7 @@ protected:
         frac->SetName((TString)frac->GetName() + "_" + m_name);
 
         nstr += "__for_" + (TString)m_var->GetName();
-        RooAbsPdf * comp = getPdf(_comp, nstr, _myvars, _opt, (RooRealVar *)NULL, nstr + "_" + m_title);
+        RooAbsPdf * comp = getPdf(_comp, nstr, _myvars, _opt, (RooRealVar *)NULL, nstr + "_" + m_title); // + "__print");
 
         if (comp != NULL && _frac != NULL && lowopt.find("-nofit") == string::npos)
         {
@@ -272,7 +272,6 @@ protected:
 
     template <class T> RooAbsPdf * AddBkgComponentPvt(const char * _name, T * _comp, double _frac = 0, const char * _opt = "", Str2VarMap _myvars = Str2VarMap())
     {
-
         if (!m_sig) { cout << "*** WARNING: Signal not set! Set the signal before any background!" << endl; return NULL; }
 
         TString nstr = "bkg_" + (TString)_name;
@@ -322,7 +321,7 @@ protected:
         {
             m_sig = getPdf(_sig, "sig" + myname, myvars, opt, (RooRealVar *)NULL, "sig_" + m_title);
             m_sig->SetName("totsig" + myname);
-            m_sig->SetTitle("totsig_" + m_title);
+            m_sig->SetTitle("totsig_" + m_title); // + "__print");
         }
         return m_sig;
     }

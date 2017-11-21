@@ -123,7 +123,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     stval_list["dx"]  = new RooRealVar("dx_" + namepdf_, "\\Delta(x)" + pstrname, 0.5, 0., 5.);
     stval_list["xmin"]  = new RooRealVar("xmin_" + namepdf_, "xmin" + pstrname, 1.);//, 0., 1000.);
     stval_list["xmax"]  = new RooRealVar("xmax_" + namepdf_, "xmax" + pstrname, 50.);//, 0., 1000.);
-    stval_list["pow"]  = new RooRealVar("pow_" + namepdf_, "pow" + pstrname, 2.0, 0.05, 20.);
+    stval_list["pow"]  = new RooRealVar("pow_" + namepdf_, "\\lambda" + pstrname, 2.0, 0.05, 20.);
 
     std::map <string, vector<string>> par_list;
     vector<string> ApolloniosPar    {"m", "s", "b", "a", "n"};
@@ -229,25 +229,15 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
 
     if (typepdf_.find("MomFracPdf") != string::npos)
     {
-        cout << "Setting RooMomentumFractionPdf" << endl;
-        p["xmin"]->Print();
-        p["dx"]->Print();
-        p["pow"]->Print();
+        //cout << "Setting RooMomentumFractionPdf" << endl;
+        //p["xmin"]->Print();
+        //p["dx"]->Print();
+        //p["pow"]->Print();
         pdf = new RooMomentumFractionPdf(namepdf, namepdf, *var, *p["xmin"], *p["dx"], *p["pow"]);
     }
     if (typepdf_.find("MisIDGauss") != string::npos)
     {
-        cout << "Setting MisID" << endl;
-        p["m"]->Print();
-        p["s"]->Print();
-        p["dm2"]->Print();
-        p["pow"]->Print();
-        p["xmin"]->Print();
-        p["xmax"]->Print();
-        p["dx"]->Print();
-        cout << "Constructor" << endl;
         pdf = new RooMisIDGaussian(namepdf, namepdf, *var, *p["m"], *p["s"], *p["dm2"], *p["pow"], *p["xmin"], *p["xmax"], *p["dx"]);
-        cout << "Done" << endl;
     }
     else if (typepdf_.find("DGauss") != string::npos)
     {
