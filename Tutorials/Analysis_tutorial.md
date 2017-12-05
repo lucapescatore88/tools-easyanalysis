@@ -8,7 +8,7 @@ It can do three things:
     - use the information from a fit (e.g. to calculate the sWeight)
 
 A full doxygen for the class can be found at
-http://test-lhcbbham.web.cern.ch/test-lhcbbham/d7/dae/classAnalysis.html
+http://pluca.web.cern.ch/pluca/doxygen/annotated.html
 
 
 ## PART 1 - Constructors and handling data
