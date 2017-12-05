@@ -10,29 +10,34 @@ It can do three things:
 A full doxygen for the class can be found at
 http://pluca.web.cern.ch/pluca/doxygen/annotated.html
 
-This tutorial is in C++ but all classes can also be used in python.
-Open the Analysis_tutorial_python tutorial to get the same instructions as here but in python. 
+To use the libraries use ```make shared``` and make sure that the tools-easyanalysis/python folder is in your PYTHONPATH.
+The to improt just type
+
+```
+import easyanalysis as ea
+```
+
 
 ## PART 1 - Constructors and handling data
 
 The base constructor for the class is:
 
 ```
-Analysis (TString _name, TString _title, TreeReader *reader, TCut *_cuts, RooRealVar *_var=NULL, string _w="")
+Analysis (str name, str title, TreeReader reader, TCut cuts, RooRealVar var)
 ```
 
 Where:
-- "_name"  it's the name for the object and must be unique.
-- "_title" it's just a title.
+- "name"  it's the name for the object and must be unique.
+- "title" it's just a title.
 - "reader" it's a TreeReader object which contains a TChain and holds pointers to all its branches.
-- "_cuts"  are cuts that you want to be applied no matter what
-- "_var"   it's the observable to be fitted, it's not compulsory to have one if you just want to apply cuts.
-- "_w"     it's the name of a branch of the TChain to be interpreted as weight
+- "cuts"  are cuts that you want to be applied no matter what
+- "var"   it's the observable to be fitted, it's not compulsory to have one if you just want to apply cuts.
+- "w"     it's the name of a branch of the TChain to be interpreted as weight
 
 In case your tree is in a single file you can also use the simplified constructor
 
 ```
-Analysis (TString _name, TString _title, string treename, string filename, RooRealVar *_var=NULL, TCut *_cuts=NULL, string _w="")
+Analysis (str name, str title, str treename, str filename, RooRealVar var, TCut cuts=NULL)
 ```
 
 - "treename" it's the name of a tree in a file
@@ -42,9 +47,9 @@ Other two constructors for particular situations are available (see the doxygen)
 
 ### Initialising: (VERY IMPORTANT)
 
-Before using the object. After filling information on data but also on the model.
-You need to initialise it by using ```Analysis::Initialize()```.
-e.g. This is necessary before applyCuts() or before Fit().
+Before using the object, after filling information on data and the model,
+you need to initialise it by using ```ana.Initialize()```.
+e.g. This is necessary e.g. before Fit().
 
 Options: 
     By default "-exp-namepar" (Always divided by dashes!)
@@ -63,7 +68,7 @@ You can add a model using the SetSignal() and addBkgComponent() method.
 ### Create PDFs: SetSignal()
 
 ```
-ana->SetSignal (T *_sig, double _nsig=0, string opt="-namepar", Str2VarMap myvars=Str2VarMap(), string weight="")
+ana.SetSignal (T sig, float nsig, str opt, Str2VarMap myvars=Str2VarMap())
 ```
 
 Arguments:
@@ -80,7 +85,7 @@ Arguments:
            DCB\_OST means DCB with Opposite Side Tails, and DCB_Sn means Same "n" (the tail slope if the 2 CB is kept in common)
            You can also convolute any model with a gaussian adding ConvGauss to its name.
            
-           Then you can (it's not compulsory) specify parameters in the following way:
+           Then you can (it is not compulsory) specify parameters in the following way:
            
            *"model-Xparam1[val,min,max]-param2[val,min,max]"*
            
@@ -99,7 +104,7 @@ Arguments:
   *  RooAbsPdf : If nothing above satisfies you you can buil a model of your own and give it to the fitter
     
      
-- _nsig  This is the yield connected to the signal. You can give it a double or a RooRealVar.
+- nsig  This is the yield connected to the signal. You can give it a double or a RooRealVar.
 			If you give it a double it will build a RooRealVar following this rules
 			\_nsig > 0 -> is a  RooRealVar with initial value "_nsig"
 			\_nsig < 0 -> is a RooRealVar with value "\_nsig" and fixed in the fit (the signal yield will not float)
@@ -118,22 +123,22 @@ Arguments:
 		Then you want to fit J/psi and use its parameters for the rare fit.
 			   
 			   ```
-			   Analysis * anaJpsi = new Analysis(...)
-			   Analysis * anaRare = new Analysis(...)
-			   anaJpsi->SetSignal(...);
-			   anaJpsi->addBkgCompnent(...);
-			   anaJpsi->Initialize("");
-			   anaJpsi->Fit();                                 //Fit Jpsi
-			   Str2VarMap jpsiPars = anaJpsi->GetSigParams();  //Retrieve parameters
-			   anaRare->SetSignal("...",50,"",jpsiPars);       //Use parameters.
-			   //This fits a resonant samples and used the parameters found for the rare fit
+			   anaJpsi = ea.Analysis(...)
+			   anaRare = ea.Analysis(...)
+			   anaJpsi.SetSignal(...);
+			   anaJpsi.addBkgComponent(...);
+			   anaJpsi.Initialize("");
+			   anaJpsi.Fit();                                 //Fit Jpsi
+			   jpsiPars = anaJpsi.GetSigParams();  //Retrieve parameters
+			   anaRare.SetSignal("...",50,"",jpsiPars);       //Use parameters.
+			   #This fits a resonant samples and used the parameters found for the rare fit
 			   ```
 	
 	
 #### Backgrounds
 
 ```
-ana->addBkgComponent (const char *_name, T *_comp, double _frac=0, string opt="-namepar", Str2VarMap myvars=Str2VarMap(), string weight="")
+ana.addBkgComponent (str name, T comp, float frac, str opt="-namepar", Str2VarMap myvars=Str2VarMap())
 ```
 
 To add a bkg component. As many as you like. There it is required to give the component an unique name "_name".
@@ -146,8 +151,8 @@ e.g. Let's say you know the ratio between Bd and Bs you expect.
 Then you can define the Bd and Bs yields as
 
 ```
-RooRealVar * NBd = new RooRealVar("NBd",...)
-RooFormulaVar * NBs = new RooFormulaVar("NBs","somefactor * NBd",*NBd);
+NBd = RooRealVar("NBd",...)
+NBs = RooFormulaVar("NBs","somefactor * NBd",NBd);
 ```
 
 Then giving NBd and NBs to addBkgComponent() will happen that NBd is free in the fit and NBs linked to it.
@@ -159,7 +164,7 @@ if |_frac| < 1. It is not interpreted as an absolute yield but as a fraction wrt
 ### Fit 
 
 ```
-ana->Fit(double min=0, double max=0., unsigned nbins=50, bool unbinned=false, string print="-range-log", TCut mycuts="")
+ana.Fit(unsigned nbins=50, bool unbinned=false, string print="-log", TCut mycuts="")
 ```
 
 After setting the model and initializing you can fit.
@@ -192,16 +197,15 @@ myfancyfitter(ana->getModel(),ana->GetDataSet())
 ##   Just one example 
 
 ```
-RooRealVar * MM = new RooRealVar("MM","MM",5300,5000,6000);
-Analysis * anaRare = new Analysis("my_ana","B0","myB0tree","myfile",MM)
-TCut cuts = "somecuts";
+MM = RooRealVar("MM","MM",5300,5000,6000)
+anaRare = ea.Analysis("my_ana","B0","myB0tree","myfile",MM)
+cuts = TCut("somecuts")
  
-anaRare->SetSignal("DCB-Xm[3283]");       // Double Crystal Ball with mass parameter fixed to 3283
-anaRare->SetSignal("Combinatorial","Exp-b[-0.005,-0.03,0.01]"); // Exponential with slope variable between -0.03 and 0.01
-anaRare->Initialize("");  // Never forget this!
-anaRare->applyCuts(cuts);  // Apply the cuts "cuts" (cuts is a (TCut *))
-anaRare->Fit(5300,5800,50,true,"-minos-quiet") // Fit unbinned in the given interval using minos
-// The output will be fancy nice plots with legends and parameter boxes
+anaRare.SetSignal("DCB-Xm[3283]")       # Double Crystal Ball with mass parameter fixed to 3283
+anaRare.SetSignal("Combinatorial","Exp-b[-0.005,-0.03,0.01]") # Exponential with slope variable between -0.03 and 0.01
+anaRare.Initialize("-docuts")  # Never forget this! Option -docuts applies the cuts specified in the constructor
+anaRare.Fit(5300,5800,50,true,"-minos-quiet") # Fit unbinned in the given interval using minos
+# The output will be fancy nice plots with legends and parameter boxes
 ```
 
 
@@ -209,44 +213,10 @@ anaRare->Fit(5300,5800,50,true,"-minos-quiet") // Fit unbinned in the given inte
 
 ## PART 2 :Handling data:
 
-### Apply cuts
-
-```
-TTree * applyCuts (TCut _cuts=NULL, bool substtree=true, void(*addFunc)(TreeReader *, TTree *, bool)=NULL, double frac=1)
-```
-
-Applies the logical and between the cuts added in the constructor and the ones passed to the method.
-It returns a reduced TTree and by default it stores it in the object too.
-N.B.: The initial dataset will not be modified so you can reapply different cuts.
-
-- substtree :  The reduced tree is returned and if substtree=true if also stored in the object (for a future fit for example)
-- frac      :  must be 0 < frac <= 1. It selects only the first frac*100% of the events in the initial dataset.
-- addFunc(TreeReader *, TTree *, bool)
-
-You may define a function to add variables to the tree too. This has to follow the template below.
-The addFunc is called ones at the beginning of the event loop with 3rd argument = true.
-And then once per event with 3rd argument = false. The idea is to let you initialise branches and then fill them.
-
-```
-void addFunc(TreeReader *reader, TTree *tree, bool reset)
-{
-	static var1, var2, ...;
-	
-	if(reset)
-	{
-		// Set branches and initialize stuff
-	}
-	else
-	{
-		//Do stuff 
-	}
-}
-```
-
 ### Check for multiple cadidates
 
 ```
-TTree * CheckMultiple(FUNC_PTR choose=NULL)
+TTree CheckMultiple(FUNC_PTR choose=NULL)
 ```
 
 This goes through the dataset and checks if there are multiple candidates in a single event 
@@ -266,24 +236,24 @@ Long64_t choose	(TreeReader * reader, vector< Long64_t > entry )
 }	
 ```
 
-### RooDataSet * CreateDataSet()
+### RooDataSet CreateDataSet()
 
 This function simply used the information in the Analysis object to produce a RooDataSet which then you can use.
 N.B.: By default the RooDataSet will contain only the observable you specified in the constructor.
 If you want it to include more variables you can do it by using
 
 ```
-Analysis::addVariable(name)
+ana.addVariable(name)
 ```
 
 Example:
 
 ```
-RooRealVar * MM = new RooRealVar("MM","MM",5300,5000,6000);
-Analysis * ana = new Analysis("my_ana","B0","myB0tree","myfile",MM);
-ana->addVariable("Jpsi_MM");
-ana->Initialize("");
-RooDataSet * ana->GetDataSet();
+MM = RooRealVar("MM","MM",5300,5000,6000)
+ana = Analysis("my_ana","B0","myB0tree","myfile",MM)
+ana.addVariable("Jpsi_MM")
+ana.Initialize("")
+data = ana->GetDataSet()
 ```
 
 Notice that for fitting it is not necessary to get the dataset. All is done automatically.
@@ -296,15 +266,15 @@ This is just in case you want to do something with the dataset by yourself.
 
 Two functions are provided to set units. One is just SetUnits(string,factor)
 
-e.g. ```ana->SetUnits("MeV")``` ---> A label [MeV] will appear on the axis
+e.g. ```ana.SetUnits("MeV")``` ---> A label [MeV] will appear on the axis
 If factor is not specified then factor = 1 and nothing happens
-If factor != 1 (```ana->SetUnits("MeV",0.01)```) then the first time that 
+If factor != 1 (```ana.SetUnits("MeV",0.01)```) then the first time that 
 one creates the DataSet (initializes) a new observable 
 is created by rescaling each entry by the factor. This may take some time but just once.
 
 An other function is also provided which finds the factor for you.
 
-e.g. ```ana->SetUnits("MeV","GeV")``` means that the input data is in MeV and you want the output plots in GeV
+e.g. ```ana.SetUnits("MeV","GeV")``` means that the input data is in MeV and you want the output plots in GeV
 So the dataset will be scaled by 1000 and "GeV/#it{c}^{2}" sill be used as label
 
 
@@ -313,11 +283,11 @@ So the dataset will be scaled by 1000 and "GeV/#it{c}^{2}" sill be used as label
 You can perform blind analysis by using 
 
 ```
-ana->SetBlindRegion(min,max).
+ana.SetBlindRegion(min,max).
 ```
 
 The plots will be blinded in that region (can also be more than one blind interval).
-Be aware that data is not removed and does contribute in the fit. It's just not shown.
+Be aware that data is not removed and does contribute in the fit. It is just not shown.
 Since data contributes parameters of the fit and yields will be hidden and the chi2 as well.
 If you need more than one region be careful to add them in sequence from low
 to high and also to check that they don't overlap.
@@ -332,11 +302,11 @@ Two functions are provided Generate(...). One produces a definite total number o
 If you just need to generate signal (n background) a quick constructor is provided.
      
      ```
-Analysis *toy = Analysis("toy", MM);
-toy->SetSignal(...);
-toy->addBkgComponent(...)
-toy->Initialize("");
-toy->Generate(50,100); //50 signal and 100 bkg
+toy = Analysis("toy", MM)
+toy.SetSignal(...);
+toy.addBkgComponent(...)
+toy.Initialize("");
+toy.Generate(50,100); #50 signal and 100 bkg
      ```
      
 If you do not have background but one single PDF
@@ -344,13 +314,13 @@ If you do not have background but one single PDF
 then you can use directly a dedicated contructor.
 
 ```
-Analysis (TString _name, RooRealVar *_var, RooAbsPdf *pdf=NULL, int ngen=1000, string opt="-subtree")
+Analysis (str name, RooRealVar var, RooAbsPdf pdf = NULL, int ngen = 1000)
 ```
 Example
 
 ```
-Analysis *toy = Analysis("toy", MM, "Gauss-m[5000]-s[20]", 1000);```
-toy->Fit();
+toy = ea.Analysis("toy", MM, "Gauss-m[5000]-s[20]", 1000)```
+toy.Fit();
 ```
 
 Not even need to be intialized in this case: all is automatic!
@@ -366,22 +336,22 @@ Using Generate() you can use a couple of useful options:
 
 ###   Just one example 
 ```
-TreeReader * reader = new TreeReader("mytree");
-reader->AddFile("file1.root");
-reader->AddFile("file2.root"); 
-// I had here to add 2 files. It it's only one you can give directly name 
-// of tree and file to the Analysis constructor
+reader = ea.TreeReader("mytree");
+reader.AddFile("file1.root");
+reader.AddFile("file2.root"); 
+# I had here to add 2 files. It is only one you can give directly name 
+# of tree and file to the Analysis constructor
 
-RooRealVar * MM = new RooRealVar("MM","MM",5300,5000,6000);
-Analysis * ana = new Analysis("Bs2MM", "B_{s}#rightarrow#mu#mu", reader, "", MM);
-TCut cuts = "somecuts";
+MM = new RooRealVar("MM","MM",5300,5000,6000);
+ana = new ea.Analysis("Bs2MM", "B_{s}#rightarrow#mu#mu", reader, "", MM);
+cuts = TCut("somecuts");
  
-ana->SetSignal("DCB-Xm[3283]");
-ana->SetSignal("Combinatorial","Exp-b[-0.005,-0.03,0.01]");
-ana->Initialize("");
-ana->applyCuts(cuts);
-ana->Fit(5300,5800,50,true,"-minos-quiet")
+ana.SetSignal("DCB-Xm[3283]");
+ana.SetSignal("Combinatorial","Exp-b[-0.005,-0.03,0.01]");
+ana.Initialize("-docuts");
+ana.Fit(50,true,"-minos-quiet")
 ```
+
 ----------------------------------------------------------
 
 ## PART 3 - Simultaneous fits
@@ -396,17 +366,17 @@ SimultaousFit() function to fit.
 e.g.
 
 ```
-Analysis * ana1 = new Analysis(...);
-ana1->SetSignal(...);
+ana1 = ea.Analysis(...);
+ana1.SetSignal(...);
 ...
-Analysis * ana2 = new Analysis(...);
-ana2->SetSignal(...);
+ana2 = ea.Analysis(...);
+ana2.SetSignal(...);
 ...
 
-MultiAnalysis * multiana = new MultiAnalysis("somename");
-multiana->AddCategory(ana1,"name_for_ana1");
-multiana->AddCategory(ana2,"name_for_ana2");
-multiana->SimultaneousFit();
+multiana = ea.MultiAnalysis("somename");
+multiana.AddCategory(ana1,"name_for_ana1");
+multiana.AddCategory(ana2,"name_for_ana2");
+multiana.SimultaneousFit();
 ```
 
 Notice that:
@@ -430,28 +400,28 @@ independent samples and the same function is fit on both with
 all same shape parameters but separate yields.
 
 ```
-RooRealVar * MM = new RooRealVar("MM","mass",min,max)
-Analysis * ana1 = new Analysis("MyCoolAnalyser1","B0","mytree","myfile");
-ana1->SetSignal("DCB");
-ana1->addBkgComponent("Combinatorial","Exp");
-ana1->Initialize("");
+MM = RooRealVar("MM","mass",min,max)
+ana1 = ea.Analysis("MyCoolAnalyser1","B0","mytree","myfile");
+ana1.SetSignal("DCB");
+ana1.addBkgComponent("Combinatorial","Exp");
+ana1.Initialize("");
 
-// Str2VarMap is a c++ map object that maps a function parameters to their names
-// You can use it for examples as pars["m"]->getVal() or ((RooRealVar *)pars["m"])->setConstant().
-//Notice that the elements of the map are RooAbsReal namely RooRealVar or RooFormulaVar.
-//Therefore for some purposes you need to cast.
-Str2VarMap pars = ana1->GetSigParams();
+# Str2VarMap is a c++ map object that maps a function parameters to their names
+# You can use it for examples as pars["m"]->getVal() or ((RooRealVar *)pars["m"])->setConstant().
+# Notice that the elements of the map are RooAbsReal namely RooRealVar or RooFormulaVar.
+# Therefore for some purposes you need to cast.
+Str2VarMap pars = ana1.GetSigParams();
 
-Analysis * ana2 = new Analysis("MyCoolAnalyser2","B0","mytree2","myfile2");
-ana2->SetSignal("DCB",0,"",pars); // Here is the key point for sharing. 
-                                  // This function get as arguments: model, numer of events to begin
-								  // with (0 is default), options and parameters to use. In this case
-								  // all the shape parameters of the first Analsys object.
+ana2 = ea.Analysis("MyCoolAnalyser2","B0","mytree2","myfile2");
+ana2.SetSignal("DCB",0,"",pars); # Here is the key point for sharing. 
+                                 # This function get as arguments: model, numer of events to begin
+								 # with (0 is default), options and parameters to use. In this case
+								 # all the shape parameters of the first Analsys object.
 
-MultiAnalysis * multiana = new MultiAnalysis("somename");
-multiana->AddCategory(ana1,"name_for_ana1");
-multiana->AddCategory(ana2,"name_for_ana2");
-multiana->SimultaneousFit();
+multiana = ea.MultiAnalysis("somename");
+multiana.AddCategory(ana1,"name_for_ana1");
+multiana.AddCategory(ana2,"name_for_ana2");
+multiana.SimultaneousFit();
 ```
 
 In this second example the shape parameters are independent but the yields of the two samples are linked.
@@ -459,24 +429,24 @@ Say that you what to fit 2 samples of Downstream and Long candidates. But the de
 its branching ratio should be common.
 
 ```
-RooRealVar * BR = new RooRealVar("BR","BR(B^0#rightarrow\mu\mu)",min,max)
-RooAbsReal * NLong = new RooFormulaVar("NLong",Form("BR * %f",my_long_efficiency),RooArgSet( * BR));
-RooAbsReal * NDown = new RooFormulaVar("NDown",Form("BR * %f",my_down_efficiency),RooArgSet( * BR));
-// Two yields are defined as a function of a common BR
+BR = RooRealVar("BR","BR(B^0#rightarrow\mu\mu)",min,max)
+NLong = RooFormulaVar("NLong",Form("BR * %f",my_long_efficiency),RooArgSet( * BR));
+NDown = RooFormulaVar("NDown",Form("BR * %f",my_down_efficiency),RooArgSet( * BR));
+# Two yields are defined as a function of a common BR
 
-RooRealVar * MM = new RooRealVar("MM","mass",min,max)
-Analysis * ana1 = new Analysis("Down","B0","mytree","myfile");
-ana1->SetSignal("DCB",NDown); // I explicitely tell the object to you my RooFormulaVar for the yield
-ana1->addBkgComponent("Combinatorial","Exp");
+MM = RooRealVar("MM","mass",min,max)
+ana1 = ea.Analysis("Down","B0","mytree","myfile");
+ana1.SetSignal("DCB",NDown); // I explicitely tell the object to you my RooFormulaVar for the yield
+ana1.addBkgComponent("Combinatorial","Exp");
 
-Analysis * ana2 = new Analysis("Long","B0","mytree2","myfile2");
-ana2->SetSignal("DCB",NLong); // Long is connected to Down though the BR!
-ana2->addBkgComponent("Combinatorial","Exp");
+ana2 = ea.Analysis("Long","B0","mytree2","myfile2");
+ana2.SetSignal("DCB",NLong); # Long is connected to Down though the BR!
+ana2.addBkgComponent("Combinatorial","Exp");
 
-MultiAnalysis * multiana = new MultiAnalysis("somename");
-multiana->AddCategory(ana1,"name_for_ana1");
-multiana->AddCategory(ana2,"name_for_ana2");
-multiana->SimultaneousFit();
+multiana = new MultiAnalysis("somename");
+multiana.AddCategory(ana1,"name_for_ana1");
+multiany.AddCategory(ana2,"name_for_ana2");
+multiana.SimultaneousFit();
 ```
 
 
@@ -499,3 +469,7 @@ After fitting you can extract information!!
 - CalcSWeight()        -> Will return a tree same as the stored tree with 2 variables added sW and sWR
 	                          sW is the proper sWeight and sWR is the reduced SWeight (simpy S(x) / (S(x) + B(x)))
 - and much else (see doxygen)	
+
+
+
+
