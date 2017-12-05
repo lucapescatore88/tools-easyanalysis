@@ -21,3 +21,5 @@ To build the shared libraries to be loaded in python
 ```bash
 make shared
 ```
+
+A doxygen is available at http://pluca.web.cern.ch/pluca/doxygen/annotated.html
