@@ -1,4 +1,4 @@
-#Tutorial to use the Analysis class
+# Tutorial to use the Analysis class
 ----------------------------------------------------------------------------
 
 This class is intended to be a RooFit wrapper to simplify its use at least is some situations.
