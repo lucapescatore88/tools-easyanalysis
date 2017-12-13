@@ -898,7 +898,6 @@ RooDataSet * Analysis::CalcSWeightRooFit(unsigned nbins, bool unbinned, string o
     if (m_pmode == "v") cout << endl << m_name << ": CalcSWeightRooFit " << option << endl;
 
     RooDataSet::setDefaultStorageType(RooAbsData::Tree);
-
     bool doInit = false;
     vector<string> comps = { m_nsig->GetName() };
     RooArgSet * yields = new RooArgSet(*m_nsig);
@@ -953,6 +952,7 @@ RooDataSet * Analysis::CalcSWeightRooFit(unsigned nbins, bool unbinned, string o
     TCanvas *c = new TCanvas();
     gStyle->SetOptStat(0);
 
+    RooDataSet::setDefaultStorageType(RooAbsData::Tree); //needed to be able to save tree
     m_reducedTree->Draw(sweights[0].GetName() + (TString)">>hSWeights_" + sweights[0].GetName());
 
     c->Print((TString) m_name + "_sWeights.pdf");
