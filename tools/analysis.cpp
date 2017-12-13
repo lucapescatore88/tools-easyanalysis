@@ -281,6 +281,10 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         cout << "***** WARNING: No m_model is set! *****" << endl;
         return NULL;
     }
+    int ncpu = 1;
+    size_t poscpu = option.find("-ncpu");
+    if(poscpu!=string::npos) ncpu = atoi(option.substr(poscpu+5).c_str());
+    cout << "Using " << ncpu << " CPUs" << endl;
 
     RooCmdArg fitRange(RooCmdArg::none());
     double minr = m_var->getMin();
@@ -341,7 +345,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         // Prepare Likelihood (normalise and add constraints)
 
         //RooAbsReal * nll = CreateLogL(isExtended)
-        RooAbsReal * nll = m_model->createNLL(*mydata, isExtended, fitRange);
+        RooAbsReal * nll = m_model->createNLL(*mydata, isExtended, fitRange, NumCPU(ncpu));
         double nll_init_val = nll->getVal(nll->getVariables());
         RooFormulaVar * nll_norm = new RooFormulaVar("nll_norm", ("@0-" + to_string(nll_init_val)).c_str(), *nll);
         RooAbsReal * nll_toFit = nll_norm;
