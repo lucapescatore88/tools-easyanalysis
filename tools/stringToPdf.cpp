@@ -229,10 +229,6 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
 
     if (typepdf_.find("MomFracPdf") != string::npos)
     {
-        //cout << "Setting RooMomentumFractionPdf" << endl;
-        //p["xmin"]->Print();
-        //p["dx"]->Print();
-        //p["pow"]->Print();
         pdf = new RooMomentumFractionPdf(namepdf, namepdf, *var, *p["xmin"], *p["dx"], *p["pow"]);
     }
     if (typepdf_.find("MisIDGauss") != string::npos)
@@ -401,7 +397,7 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
 
     if (typepdf_.find("ConvGauss") != string::npos)
     {
-        RooRealVar * mg = new RooRealVar("conv_mg_" + namepdf_, "Mean of resolution", 0.);
+        RooRealVar * mg = new RooRealVar("conv_mg_" + namepdf_, "m_{res}", 0.);
         RooGaussian * resolution_gauss = new RooGaussian("convgauss_" + namepdf_, "", *var, *mg, *p["sconv"]);
         RooNumConvPdf * respdf = new RooNumConvPdf(namepdf, namepdf, *var, *pdf, *resolution_gauss);
         respdf->setConvolutionWindow(*mg, *p["sconv"], 3);

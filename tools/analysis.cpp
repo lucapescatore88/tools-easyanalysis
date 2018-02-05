@@ -684,7 +684,7 @@ RooPlot* Analysis::Print(string option, unsigned bins, TString Xtitle, TString t
     bool dom_model = true;
     RooDataSet * mydata = NULL;
     if (!myvar) myvar = m_var;
-    if (option.find("-nom_model") != string::npos) dom_model = false;
+    if (option.find("-nomodel") != string::npos) dom_model = false;
     if (option.find("-nodata") == string::npos) mydata = GetDataSet(option);
     return Print(dom_model, mydata, option, bins, Xtitle, title, myvar);
 }
@@ -694,7 +694,7 @@ RooPlot* Analysis::Print(RooRealVar * myvar, string option, unsigned bins, TStri
     bool dom_model = true;
     RooDataSet * mydata = NULL;
     if (!myvar) myvar = m_var;
-    if (option.find("-nom_model") != string::npos) dom_model = false;
+    if (option.find("-nomodel") != string::npos) dom_model = false;
     if (option.find("-nodata") == string::npos) mydata = GetDataSet(option);
     return Print(dom_model, mydata, option, bins, Xtitle, title, myvar);
 }
@@ -770,9 +770,6 @@ RooPlot * Analysis::PrintAndCalcChi2(int nbins, string option, RooAbsData * myda
     f = Print(true, mydata, option, nbins);
 
     m_chi2 = calcChi2(f, getNFreePars(m_model, RooArgSet(*m_var)), rangeplot);
-    //double * chi2ndf = calcChi2(f, getNFreePars(m_model,RooArgSet(*m_var)), rangeplot);
-    //m_chi2[0] = chi2ndf[0];
-    //m_chi2[1] = chi2ndf[1];
     if (option == 'v') PrintChi2();
 
     return f;

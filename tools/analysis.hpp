@@ -138,7 +138,7 @@ public:
         Analysis(_name, _title, _var, "-subtree", _w, _cuts)
     {
         m_dataReader = reader;
-        if (!m_dataReader) cout << "Attention!! Your TreeReader is NULL, this is going to break..." << endl;
+        if (!m_dataReader) { cout << "Attention!! Your TreeReader is NULL, this is going to break..." << endl; return; }
         if (!m_dataReader->isValid()) m_dataReader->Initialize();
         m_reducedTree = (TTree *)m_dataReader->GetChain();
     };
