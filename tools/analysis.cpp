@@ -407,11 +407,11 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
 		++i;
 	    }
 
-	    if (m_pmode == "v") cout << endl << m_name << ": (" << i << ")   CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << ",   LogL = " << m_fitRes->minNll() << " (" << TMath::Abs((m_fitRes->minNll() - minNll) / minNll) << ")" << endl << endl;
+	    if (m_pmode == "v") cout << endl << m_name << ": (" << i << ")   CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << ",   LogL = " << m_fitRes->minNll() << " (" << TMath::Abs((m_fitRes->minNll() - minNll) / minNll) << ")" << endl;
 	}
 
         if (low_opt.find("-quiet") == string::npos)
-            cout << endl << m_name << ":   CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << endl;
+            cout << endl << m_name << ":   CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << endl << endl;
 
     }
     else { cout << "NO DATA!!" << endl; return NULL; }
