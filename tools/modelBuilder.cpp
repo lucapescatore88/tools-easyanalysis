@@ -44,6 +44,26 @@ RooDataSet * ModelBuilder::GetParamsVariations(int nvariations, RooFitResult * f
     return variations;
 }
 
+
+void ModelBuilder::AddGaussConstraint(TString name, double mean, double sigma)
+{
+    AddGaussConstraint(getParam(m_model, (string)name), mean, sigma);
+}
+
+void ModelBuilder::AddGaussConstraint(RooRealVar * par, double mean, double sigma)
+{
+    if (mean == -1e9) mean = par->getVal();
+    if (sigma == -1e9) sigma = par->getError();
+    TString name = par->GetName();
+
+    RooRealVar  *cm = new RooRealVar("cm_" + name, "mean_" + name, mean);
+    RooRealVar  *cs = new RooRealVar("cs_" + name, "error_" + name, sigma);
+    RooGaussian *constr = new RooGaussian("constr_" + name, "constr_" + name, *par, *cm, *cs);
+    if (m_pmode == "v") cout << Form("Constraint: " + name + "%s -> gauss(%f,%f)", mean, sigma) << endl;
+
+    AddConstraint(constr);
+}
+
 /*
    Builds the model. And must be run before any fit.
    @param opt: options string. Options available are:

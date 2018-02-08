@@ -45,6 +45,7 @@ protected:
     RooAbsReal * m_nbkg;
     vector <RooAbsPdf *> m_bkg_components;
     vector <RooAbsReal *> m_bkg_fractions;
+    RooArgSet * m_constr;
 
     bool m_totBkgMode;
     vector<Color_t> m_colors;
@@ -357,6 +358,7 @@ public:
         m_nsig = new RooRealVar("nsig_" + m_name, "N_{sig}", 0., 0., 1.e8);
         m_nbkg = new RooRealVar("nbkg_" + m_name, "N_{bkg}", 0., 0., 1.e8);
         if (_title == "") m_title = m_name;
+        m_constr = new RooArgSet("constraints_" + m_name);
     }
 
     ~ModelBuilder()
@@ -569,6 +571,11 @@ public:
         cout << endl << endl;
         return;
     }
+
+    void AddConstraint(RooAbsReal * pdfconst) { m_constr->add(*pdfconst); }
+    void AddGaussConstraint(TString name, double mean, double sigma);
+    void AddGaussConstraint(RooRealVar * par, double mean = -1e9, double sigma = -1e9);
+    RooArgSet * GetConstraints() { return m_constr; }
 
     void SetLastBkgColor(Color_t color)
     {
