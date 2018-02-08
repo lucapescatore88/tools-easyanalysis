@@ -99,7 +99,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
     }
     else m_model = m_sig;
 
-    if(m_pmode == "v" && m_model)
+    if (m_pmode == "v" && m_model)
     {
         cout << "\n" << m_name << ": Initialized Correctly! The model is:" << endl;
         m_model->Print();
@@ -376,17 +376,17 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
         if (opt.find("-vname") != string::npos) pname += ("_" + (TString)myvar->GetName());
 
         if (opt.find("-eps") != string::npos) c->Print(pname + logstr + ".eps");
-        if (opt.find("-animated") != string::npos){
-	  size_t pos = opt.find("-animated") + 10;
-	  string ss = opt.substr(pos, string::npos);
-	  if ((TString(ss)).Atoi()<=0)
-	    { //if the given parameter is not an integer, we trow and error and ignore the parameter
-	      Error("Print", "In -animated, the given parameter should be a positive integer, expressing the delay after each image, in tens of ms.");
-	      ss = "";
-	    }
-	  c->Print(pname + logstr + ".gif++"+ss+"++");
+        if (opt.find("-animated") != string::npos) {
+            size_t pos = opt.find("-animated") + 10;
+            string ss = opt.substr(pos, string::npos);
+            if ((TString(ss)).Atoi() <= 0)
+            {   //if the given parameter is not an integer, we trow and error and ignore the parameter
+                Error("Print", "In -animated, the given parameter should be a positive integer, expressing the delay after each image, in tens of ms.");
+                ss = "";
+            }
+            c->Print(pname + logstr + ".gif++" + ss + "++");
         }
-	else if (opt.find("-allformats") != string::npos)
+        else if (opt.find("-allformats") != string::npos)
         {
             c->Print(pname + logstr + ".eps");
             c->Print(pname + logstr + ".pdf");

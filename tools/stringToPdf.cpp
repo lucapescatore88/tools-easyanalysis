@@ -147,8 +147,8 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     vector<string> Ipatia2Par       {"m", "s", "b", "l", "z", "a", "n", "a2", "n2"};
     vector<string> VoigtPar         {"m", "s", "g"};
     vector<string> JohnsonPar       {"m", "s", "nu", "tau"};
-    vector<string> MisIDGaussianPar {"m", "s", "dm2", "pow","xmin","xmax","dx"};
-    vector<string> MomFracPdfPar    {"xmin","dx","pow"};
+    vector<string> MisIDGaussianPar {"m", "s", "dm2", "pow", "xmin", "xmax", "dx"};
+    vector<string> MomFracPdfPar    {"xmin", "dx", "pow"};
 
     par_list["Apollonios"]  = ApolloniosPar;
     par_list["Argus"]       = ArgusPar;
