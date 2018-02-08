@@ -343,77 +343,73 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
             isExtended = Extended(kFALSE);
 
         if (low_opt.find("-fitto") != string::npos)
-	{
-	    RooCmdArg constraints = ExternalConstraints(*m_constr);
+	    {
+	        RooCmdArg constraints = ExternalConstraints(*m_constr);
 	    
-	    RooCmdArg isQuiet = PrintLevel(2);
-	    if (low_opt.find("-quiet") != string::npos)
-		isQuiet = PrintLevel(-1);
+	        RooCmdArg isQuiet = PrintLevel(2);
+	        if (low_opt.find("-quiet") != string::npos)
+		    isQuiet = PrintLevel(-1);
 
-	    RooCmdArg useMinos = Minos(kFALSE);
-	    if (low_opt.find("-minos") != string::npos)
-		useMinos = Minos(kTRUE);
+	        RooCmdArg useMinos = Minos(kFALSE);
+	        if (low_opt.find("-minos") != string::npos)
+		    useMinos = Minos(kTRUE);
 
-	    m_fitRes = m_model->fitTo(*mydata, fitRange, isExtended, SumW2Error(true), isQuiet, Warnings(false), useMinos, Save(true), constraints);
-	}
-	else
-	{
-	    // Prepare Likelihood (normalise and add constraints)
-
-	    //RooAbsReal * nll = CreateLogL(isExtended)
-	    RooAbsReal * nll = m_model->createNLL(*mydata, isExtended, fitRange, NumCPU(ncpu));
-
-	    double nll_init_val = nll->getVal(nll->getVariables());
-	    RooFormulaVar * nll_norm = new RooFormulaVar("nll_norm", ("@0-" + to_string(nll_init_val)).c_str(), *nll);
-	    RooAbsReal * nll_toFit = nll_norm;
-	    if (m_constr->getSize() > 0)
-	    {
-		    RooArgList list_for_product;
-		    list_for_product.add(*nll_norm);
-		    list_for_product.add(*m_constr);
-		    RooProduct * nll_constr = new RooProduct("nll_constrained", "nll_constrained", list_for_product);
-		    nll_toFit = nll_constr;
+	        m_fitRes = m_model->fitTo(*mydata, fitRange, isExtended, SumW2Error(true), isQuiet, Warnings(false), useMinos, Save(true), constraints);
 	    }
+	    else
+    	{
+	        // Prepare Likelihood (normalise and add constraints)
 
-	    // Actual fit
+	        RooAbsReal * nll = m_model->createNLL(*mydata, isExtended, fitRange, NumCPU(ncpu));
 
-	    RooMinuit m(*nll_toFit);
+	        double nll_init_val = nll->getVal(nll->getVariables());
+	        RooFormulaVar * nll_norm = new RooFormulaVar("nll_norm", ("@0-" + to_string(nll_init_val)).c_str(), *nll);
+	        RooAbsReal * nll_toFit = nll_norm;
+	        if (m_constr->getSize() > 0)
+	        {
+		        RooArgList list_for_product;
+		        list_for_product.add(*nll_norm);
+		        list_for_product.add(*m_constr);
+		        RooProduct * nll_constr = new RooProduct("nll_constrained", "nll_constrained", list_for_product);
+		        nll_toFit = nll_constr;
+	        }
 
-	    if (low_opt.find("-quiet") != string::npos)
-	    {
-		    m.setPrintLevel(-1);
-		    m.setWarnLevel(-1);
-	    }
+	        // Actual fit
 
-        bool refit = false;
-        if(option.find("-refit")!=string::npos) refit = true;
+	        RooMinuit m(*nll_toFit);
 
-	    int i(1);
-	    double minNll(1);
-	    do
-	    {
-		    if (i > 5) break;
+	        if (low_opt.find("-quiet") != string::npos)
+	        {
+		        m.setPrintLevel(-1);
+		        m.setWarnLevel(-1);
+	        }
 
-		    m.migrad();
-		    m.hesse();
-		    if (low_opt.find("-minos") != string::npos) m.minos();
-		    m_fitRes = m.save();
+            bool refit = false;
+            if(option.find("-refit")!=string::npos) refit = true;
 
-		    if (m_fitRes)
-		    {
-		        if (m_pmode == "v") { cout << endl << m_name << ": (" << i << ")   CovQual = " << m_fitRes->covQual();
-                cout << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm();
-                cout << ",   LogL = " << m_fitRes->minNll() << " (" << TMath::Abs((m_fitRes->minNll() - minNll) / minNll) << ")" << endl; }
-		        minNll = m_fitRes->minNll();
-		    }
+	        int i(1);
+	        double minNll(1);
+	        do
+	        {
+		        if (i > 5) break;
 
-		++i;
-	    }
-        while (refit && (m_fitRes == NULL || ((m_fitRes->covQual() < 3) && (TMath::Abs((m_fitRes->minNll() - minNll) / minNll) > 0.01))) ) // loop until converged or no improvement found
+		        m.migrad();
+		        m.hesse();
+		        if (low_opt.find("-minos") != string::npos) m.minos();
+		        m_fitRes = m.save();
 
-        //if (low_opt.find("-quiet") == string::npos)
-        //    cout << endl << m_name << ":   CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << endl << endl;
+		        if (m_fitRes)
+		        {
+		            if (m_pmode == "v") { cout << endl << m_name << ": (" << i << ")   CovQual = " << m_fitRes->covQual();
+                    cout << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm();
+                    cout << ",   LogL = " << m_fitRes->minNll() << " (" << TMath::Abs((m_fitRes->minNll() - minNll) / minNll) << ")" << endl; }
+		            minNll = m_fitRes->minNll();
+		        }
 
+		    ++i;
+	        }
+            while (refit && (m_fitRes == NULL || (m_fitRes->covQual() < 3 && TMath::Abs((m_fitRes->minNll() - minNll) / minNll) > 0.01)) ); // loop until converged or no improvement found
+        }
     }
     else { cout << "NO DATA!!" << endl; return NULL; }
 
