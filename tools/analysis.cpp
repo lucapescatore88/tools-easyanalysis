@@ -345,9 +345,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         if (low_opt.find("-fitto") != string::npos)
 	{
 	    RooCmdArg constraints = ExternalConstraints(*m_constr);
-	    if (low_opt.find("-constrainall") != string::npos)
-		constraints = ExternalConstraints(*gaussianConstraints(m_model, RooArgSet(*m_var)));
-
+	    
 	    RooCmdArg isQuiet = PrintLevel(2);
 	    if (low_opt.find("-quiet") != string::npos)
 		isQuiet = PrintLevel(-1);
@@ -370,11 +368,11 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
 	    RooAbsReal * nll_toFit = nll_norm;
 	    if (m_constr->getSize() > 0)
 	    {
-		RooArgList list_for_product;
-		list_for_product.add(*nll_norm);
-		list_for_product.add(*m_constr);
-		RooProduct * nll_constr = new RooProduct("nll_constrained", "nll_constrained", list_for_product);
-		nll_toFit = nll_constr;
+		    RooArgList list_for_product;
+		    list_for_product.add(*nll_norm);
+		    list_for_product.add(*m_constr);
+		    RooProduct * nll_constr = new RooProduct("nll_constrained", "nll_constrained", list_for_product);
+		    nll_toFit = nll_constr;
 	    }
 
 	    // Actual fit
@@ -383,35 +381,38 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
 
 	    if (low_opt.find("-quiet") != string::npos)
 	    {
-		m.setPrintLevel(-1);
-		m.setWarnLevel(-1);
+		    m.setPrintLevel(-1);
+		    m.setWarnLevel(-1);
 	    }
+
+        bool refit = false;
+        if(option.find("-refit")!=string::npos) refit = true;
 
 	    int i(1);
 	    double minNll(1);
-	    while (m_fitRes == NULL || ((m_fitRes->covQual() < 3) && (TMath::Abs((m_fitRes->minNll() - minNll) / minNll) > 0.01))) // loop until converged or no improvement found
+	    do
 	    {
-		if (i > 5) break;
+		    if (i > 5) break;
 
-		m.migrad();
-		m.hesse();
-		if (low_opt.find("-minos") != string::npos) m.minos();
-		m_fitRes = m.save();
+		    m.migrad();
+		    m.hesse();
+		    if (low_opt.find("-minos") != string::npos) m.minos();
+		    m_fitRes = m.save();
 
-		if (m_fitRes)
-		{
-		    if (m_pmode == "v") cout << endl << m_name << ": (" << i << ")   CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << ",   LogL = " << m_fitRes->minNll() << " (" << TMath::Abs((m_fitRes->minNll() - minNll) / minNll) << ")" << endl;
-		    minNll = m_fitRes->minNll();
-		}
+		    if (m_fitRes)
+		    {
+		        if (m_pmode == "v") { cout << endl << m_name << ": (" << i << ")   CovQual = " << m_fitRes->covQual();
+                cout << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm();
+                cout << ",   LogL = " << m_fitRes->minNll() << " (" << TMath::Abs((m_fitRes->minNll() - minNll) / minNll) << ")" << endl; }
+		        minNll = m_fitRes->minNll();
+		    }
 
 		++i;
 	    }
+        while (refit && (m_fitRes == NULL || ((m_fitRes->covQual() < 3) && (TMath::Abs((m_fitRes->minNll() - minNll) / minNll) > 0.01))) ) // loop until converged or no improvement found
 
-	    if (m_pmode == "v") cout << endl << m_name << ": (" << i << ")   CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << ",   LogL = " << m_fitRes->minNll() << " (" << TMath::Abs((m_fitRes->minNll() - minNll) / minNll) << ")" << endl;
-	}
-
-        if (low_opt.find("-quiet") == string::npos)
-            cout << endl << m_name << ":   CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << endl << endl;
+        //if (low_opt.find("-quiet") == string::npos)
+        //    cout << endl << m_name << ":   CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << endl << endl;
 
     }
     else { cout << "NO DATA!!" << endl; return NULL; }
