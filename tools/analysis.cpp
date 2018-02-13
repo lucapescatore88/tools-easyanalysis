@@ -35,7 +35,7 @@ bool Analysis::Initialize(string option, double frac)
     if (m_pmode == "v") cout << endl << m_name << ": Initialize " << option << endl;
 
     m_chi2[0] = m_chi2[1] = -1;
-
+    
     vector<double> allregions;
     allregions.push_back(m_var->getMin());
     for (unsigned r = 0; r < m_regions.size(); ++r)
@@ -194,26 +194,6 @@ TH1 * Analysis::CreateHisto(double min, double max, int nbin, TCut _cuts, string
     }
 
     return m_dataHist;
-}
-
-
-void Analysis::AddGaussConstraint(TString name, double mean, double sigma)
-{
-    AddGaussConstraint(getParam(m_model, (string)name), mean, sigma);
-}
-
-void Analysis::AddGaussConstraint(RooRealVar * par, double mean, double sigma)
-{
-    if (mean == -1e9) mean = par->getVal();
-    if (sigma == -1e9) sigma = par->getError();
-    TString name = par->GetName();
-
-    RooRealVar  *cm = new RooRealVar("cm_" + name, "mean_" + name, mean);
-    RooRealVar  *cs = new RooRealVar("cs_" + name, "error_" + name, sigma);
-    RooGaussian *constr = new RooGaussian("constr_" + name, "constr_" + name, *par, *cm, *cs);
-    if (m_pmode == "v") cout << Form("Constraint: " + name + "%s -> gauss(%f,%f)", mean, sigma) << endl;
-
-    AddConstraint(constr);
 }
 
 
