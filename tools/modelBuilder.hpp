@@ -388,7 +388,7 @@ public:
      * <br> "-exp":     Automatically adds an exponential coponent to the background.
      * <br> "-noBkg" -> ignores bkg
      * */
-    RooAbsPdf * Initialize(string optstr = "-exp");
+    RooAbsPdf * Initialize(string optstr = "");
 
 
     /* Public overloads of AddBkgComponentPvt, necessary for python interface */
@@ -573,6 +573,7 @@ public:
     }
 
     void AddConstraint(RooAbsReal * pdfconst) { m_constr->add(*pdfconst); }
+    void AddGaussConstraint(TString pdf, TString name, double mean, double sigma);
     void AddGaussConstraint(TString name, double mean, double sigma);
     void AddGaussConstraint(RooRealVar * par, double mean = -1e9, double sigma = -1e9);
     RooArgSet * GetConstraints() { return m_constr; }
@@ -593,7 +594,6 @@ public:
     void SetVariable(RooRealVar * _var)
     {
         _var->SetTitle( ((TString)_var->GetTitle()).ReplaceAll("__var__", "") + "__var__" );
-        //_var->SetName( ((TString)_var->GetName()).ReplaceAll("__var__","")+"__var__" );
         m_var = _var;
         m_tmpvar = new RooRealVar(*_var);
     }

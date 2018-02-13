@@ -35,7 +35,7 @@ bool Analysis::Initialize(string option, double frac)
     if (m_pmode == "v") cout << endl << m_name << ": Initialize " << option << endl;
 
     m_chi2[0] = m_chi2[1] = -1;
-
+    
     vector<double> allregions;
     allregions.push_back(m_var->getMin());
     for (unsigned r = 0; r < m_regions.size(); ++r)
