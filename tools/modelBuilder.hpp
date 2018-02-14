@@ -45,6 +45,7 @@ protected:
     RooAbsReal * m_nbkg;
     vector <RooAbsPdf *> m_bkg_components;
     vector <RooAbsReal *> m_bkg_fractions;
+    RooArgSet * m_constr;
 
     bool m_totBkgMode;
     vector<Color_t> m_colors;
@@ -357,6 +358,7 @@ public:
         m_nsig = new RooRealVar("nsig_" + m_name, "N_{sig}", 0., 0., 1.e8);
         m_nbkg = new RooRealVar("nbkg_" + m_name, "N_{bkg}", 0., 0., 1.e8);
         if (_title == "") m_title = m_name;
+        m_constr = new RooArgSet("constraints_" + m_name);
     }
 
     ~ModelBuilder()
@@ -386,7 +388,7 @@ public:
      * <br> "-exp":     Automatically adds an exponential coponent to the background.
      * <br> "-noBkg" -> ignores bkg
      * */
-    RooAbsPdf * Initialize(string optstr = "-exp");
+    RooAbsPdf * Initialize(string optstr = "");
 
 
     /* Public overloads of AddBkgComponentPvt, necessary for python interface */
@@ -570,6 +572,12 @@ public:
         return;
     }
 
+    void AddConstraint(RooAbsReal * pdfconst) { m_constr->add(*pdfconst); }
+    void AddGaussConstraint(TString pdf, TString name, double mean, double sigma);
+    void AddGaussConstraint(TString name, double mean, double sigma);
+    void AddGaussConstraint(RooRealVar * par, double mean = -1e9, double sigma = -1e9);
+    RooArgSet * GetConstraints() { return m_constr; }
+
     void SetLastBkgColor(Color_t color)
     {
         if (m_colors.size() == m_bkg_components.size()) m_colors[m_colors.size() - 1] = color;
@@ -586,7 +594,6 @@ public:
     void SetVariable(RooRealVar * _var)
     {
         _var->SetTitle( ((TString)_var->GetTitle()).ReplaceAll("__var__", "") + "__var__" );
-        //_var->SetName( ((TString)_var->GetName()).ReplaceAll("__var__","")+"__var__" );
         m_var = _var;
         m_tmpvar = new RooRealVar(*_var);
     }

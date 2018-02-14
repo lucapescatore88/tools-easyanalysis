@@ -35,7 +35,7 @@ bool Analysis::Initialize(string option, double frac)
     if (m_pmode == "v") cout << endl << m_name << ": Initialize " << option << endl;
 
     m_chi2[0] = m_chi2[1] = -1;
-
+    
     vector<double> allregions;
     allregions.push_back(m_var->getMin());
     for (unsigned r = 0; r < m_regions.size(); ++r)
@@ -197,26 +197,6 @@ TH1 * Analysis::CreateHisto(double min, double max, int nbin, TCut _cuts, string
 }
 
 
-void Analysis::AddGaussConstraint(TString name, double mean, double sigma)
-{
-    AddGaussConstraint(getParam(m_model, (string)name), mean, sigma);
-}
-
-void Analysis::AddGaussConstraint(RooRealVar * par, double mean, double sigma)
-{
-    if (mean == -1e9) mean = par->getVal();
-    if (sigma == -1e9) sigma = par->getError();
-    TString name = par->GetName();
-
-    RooRealVar  *cm = new RooRealVar("cm_" + name, "mean_" + name, mean);
-    RooRealVar  *cs = new RooRealVar("cs_" + name, "error_" + name, sigma);
-    RooGaussian *constr = new RooGaussian("constr_" + name, "constr_" + name, *par, *cm, *cs);
-    if (m_pmode == "v") cout << Form("Constraint : " + name + "%s -> gauss(%f,%f)", mean, sigma) << endl;
-
-    AddConstraint(constr);
-}
-
-
 /*
    Functions to set the units.
    "units" is a string with the unit label
@@ -283,7 +263,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     }
     int ncpu = 1;
     size_t poscpu = option.find("-ncpu");
-    if(poscpu!=string::npos) ncpu = atoi(option.substr(poscpu+5).c_str());
+    if (poscpu != string::npos) ncpu = atoi(option.substr(poscpu + 5).c_str());
     cout << "Using " << ncpu << " CPUs" << endl;
 
     RooCmdArg fitRange(RooCmdArg::none());
@@ -342,46 +322,85 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         if ( (low_opt.find("-noextended") != string::npos) || (m_bkg_components.size() < 1) )
             isExtended = Extended(kFALSE);
 
-        // Prepare Likelihood (normalise and add constraints)
-
-        //RooAbsReal * nll = CreateLogL(isExtended)
-        RooAbsReal * nll = m_model->createNLL(*mydata, isExtended, fitRange, NumCPU(ncpu));
-        double nll_init_val = nll->getVal(nll->getVariables());
-        RooFormulaVar * nll_norm = new RooFormulaVar("nll_norm", ("@0-" + to_string(nll_init_val)).c_str(), *nll);
-        RooAbsReal * nll_toFit = nll_norm;
-        if (m_constr->getSize() > 0)
+        if (low_opt.find("-fitto") != string::npos)
         {
-            RooArgList list_for_product;
-            list_for_product.add(*nll_norm);
-            list_for_product.add(*m_constr);
-            RooAddition * nll_constr = new RooAddition("nll_constrained", "nll_constrained", list_for_product);
-            nll_toFit = nll_constr;
+            RooCmdArg constraints = ExternalConstraints(*m_constr);
+            
+            RooCmdArg isQuiet = PrintLevel(2);
+            if (low_opt.find("-quiet") != string::npos)
+                isQuiet = PrintLevel(-1);
+
+            RooCmdArg useMinos = Minos(kFALSE);
+            if (low_opt.find("-minos") != string::npos)
+                useMinos = Minos(kTRUE);
+
+            m_fitRes = m_model->fitTo(*mydata, fitRange, isExtended, SumW2Error(true), isQuiet, Warnings(false), useMinos, Save(true), constraints);
+
+            if (m_fitRes)
+            {
+                if (m_pmode == "v") {
+                    cout << endl << m_name << ":   CovQual = " << m_fitRes->covQual();
+                    cout << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm();
+                    cout << ",   LogL = " << m_fitRes->minNll() << endl;
+                }
+            }
         }
-
-        // Actual fit
-
-        RooMinuit m(*nll_toFit);
-
-        if (low_opt.find("-quiet") != string::npos)
+        else
         {
-            m.setPrintLevel(-1);
-            m.setWarnLevel(-1);
+            // Prepare Likelihood (normalise and add constraints)
+
+            RooAbsReal * nll = m_model->createNLL(*mydata, isExtended, fitRange, NumCPU(ncpu));
+
+            double nll_init_val = nll->getVal(nll->getVariables());
+            RooFormulaVar * nll_norm = new RooFormulaVar("nll_norm", ("@0-" + to_string(nll_init_val)).c_str(), *nll);
+            RooAbsReal * nll_toFit = nll_norm;
+            if (m_constr->getSize() > 0)
+            {
+                RooArgList list_for_product;
+                list_for_product.add(*nll_norm);
+                list_for_product.add(*m_constr);
+                nll_toFit = new RooAddition("nll_constrained", "nll_constrained", list_for_product);
+                //nll_toFit = new RooProduct("nll_constrained", "nll_constrained", list_for_product);
+            }
+
+            // Actual fit
+
+            RooMinuit m(*nll_toFit);
+
+            if (low_opt.find("-quiet") != string::npos)
+            {
+                m.setPrintLevel(-1);
+                m.setWarnLevel(-1);
+            }
+
+            bool refit = false;
+            if (option.find("-refit") != string::npos) refit = true;
+
+            int i(1);
+            double minNll(1);
+            do
+            {
+                if (i > 5) break;
+
+                m.migrad();
+                m.hesse();
+                if (low_opt.find("-minos") != string::npos) m.minos();
+                m_fitRes = m.save();
+
+                if (m_fitRes)
+                {
+                    if (m_pmode == "v") {
+                        cout << endl << m_name << ": (" << i << ")   CovQual = " << m_fitRes->covQual();
+                        cout << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm();
+                        cout << ",   LogL = " << m_fitRes->minNll() << " (" << TMath::Abs((m_fitRes->minNll() - minNll) / minNll) << ")" << endl;
+                    }
+                    minNll = m_fitRes->minNll();
+                }
+
+                ++i;
+            }
+            while (refit && (m_fitRes == NULL || (m_fitRes->covQual() < 3 && TMath::Abs((m_fitRes->minNll() - minNll) / minNll) > 0.01)) ); // loop until converged or no improvement found
         }
-
-        int i(0);
-        while (m_fitRes == NULL || m_fitRes->covQual() < 3) // loop until convergence
-        {
-            m.migrad() ;
-            m.hesse() ;
-            if (low_opt.find("-minos") != string::npos) m.minos();
-            m_fitRes = m.save();
-
-            ++i; if (i > 20) break; // exit after 20 iterations
-        }
-
-        if (low_opt.find("-quiet") == string::npos)
-            cout << m_name << " :  CovQual = " << m_fitRes->covQual() << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm() << endl;
-
     }
     else { cout << "NO DATA!!" << endl; return NULL; }
 
@@ -486,13 +505,13 @@ void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
             if (name.find("totbkg") != string::npos) m_bkg = (RooAbsPdf*)argBkg;
         }
     }
-/*
-    if (wsSig && wsBkg)
-    {
-        m_init = true;
-        ForceValid();
-    }
-*/
+    /*
+        if (wsSig && wsBkg)
+        {
+            m_init = true;
+            ForceValid();
+        }
+    */
 }
 
 void Analysis::ImportData(RooWorkspace * ws)

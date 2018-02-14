@@ -93,7 +93,6 @@ class Analysis : public ModelBuilder {
     RooFitResult * m_fitRes;
     double m_fitmin;
     double m_fitmax;
-    RooArgSet * m_constr;
     vector<RooRealVar*> m_datavars;
 
     /** \brief Converts the information in the Analysis object in a RooDataSet which can be fitted
@@ -116,7 +115,6 @@ public:
         m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
         m_dataReader(NULL), m_reducedTree(NULL), m_dataHist(NULL), scale(1)
     {
-        m_constr = new RooArgSet("constraints_" + m_name);
         if (!m_var) SetVariable(new RooRealVar("x", "", 0));
         m_datavars.push_back(m_var);
         if (_w != "") SetWeight( (TString)_w );
@@ -254,11 +252,6 @@ public:
     }
     TH1 * GetHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", TH1 * htemplate = NULL)
     { return CreateHisto(min, max, nbin, _cuts, _weight); }
-
-    void AddConstraint(RooAbsReal * pdfconst) { m_constr->add(*pdfconst); }
-    void AddGaussConstraint(TString name, double mean, double sigma);
-    void AddGaussConstraint(RooRealVar * par, double mean = -1e9, double sigma = -1e9);
-    RooArgSet * GetConstraints() { return m_constr; }
 
     /** \brief Adds a blinded region.
      If you have to add more than one region you must add them in order from low to high and the must not overlap. If you set one or more regions parameters will be hidden and model and data will not be plotted in those regions.

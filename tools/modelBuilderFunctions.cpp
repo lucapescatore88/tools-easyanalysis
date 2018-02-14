@@ -664,7 +664,7 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
             string title = arg->GetName();
             bool isplot = false;
 
-            if(title.find("power_law_approx") != string::npos) continue;
+            if (title.find("power_law_approx") != string::npos) continue;
             if (opt.find("-printonly") == string::npos && name.find("_noprint") == string::npos)
             {
                 if (name.find("wrtsig") != string::npos) continue;

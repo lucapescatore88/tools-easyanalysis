@@ -44,6 +44,42 @@ RooDataSet * ModelBuilder::GetParamsVariations(int nvariations, RooFitResult * f
     return variations;
 }
 
+
+void ModelBuilder::AddGaussConstraint(TString name, double mean, double sigma)
+{
+    if(sigma <= 0) { cout << "Re sigma of the constraint must be >0, if you want it =0 the please set the parameter constant instead." << endl; }
+    if (!m_sig) { cout << "You have to set the signal model before setting constraints to it." << endl; return; }
+    RooRealVar * par = getParam(m_sig, (string)name, "-cut");
+    if(!par) { cout << "Parameter " << name << " not found in signal pdf" << endl; return; }
+    AddGaussConstraint(par, mean, sigma);
+}
+
+void ModelBuilder::AddGaussConstraint(TString pdf, TString name, double mean, double sigma)
+{
+    if(sigma <= 0) { cout << "Re sigma of the constraint must be >0, if you want it =0 the please set the parameter constant instead." << endl; }
+    
+    if(pdf == "sig") return AddGaussConstraint(name, mean, sigma);
+    int id = GetBkgID((string)pdf);
+    if (id < 0) { cout << "You have to '" << pdf << "' background component before setting constraints to it." << endl; return; }
+    RooRealVar * par = getParam(m_bkg_components[id], (string)name, "-cut");
+    if(!par) { cout << "Parameter " << name << " not found in " << pdf << " pdf" << endl; return; }
+    AddGaussConstraint(par, mean, sigma);
+}
+
+void ModelBuilder::AddGaussConstraint(RooRealVar * par, double mean, double sigma)
+{
+    if (mean == -1e9) mean = par->getVal();
+    if (sigma == -1e9) sigma = par->getError();
+    TString name = par->GetName();
+
+    RooRealVar  *cm = new RooRealVar("cm_" + name, "mean_" + name, mean);
+    RooRealVar  *cs = new RooRealVar("cs_" + name, "error_" + name, sigma);
+    RooGaussian *constr = new RooGaussian("constr_" + name, "constr_" + name, *par, *cm, *cs);
+    if (m_pmode == "v") cout << Form("Constraint: " + name + "%s -> gauss(%f,%f)", mean, sigma) << endl;
+
+    AddConstraint(constr);
+}
+
 /*
    Builds the model. And must be run before any fit.
    @param opt: options string. Options available are:
@@ -64,7 +100,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
     bool doExp = (optstr.find("-exp") != string::npos);
     if ( doExp ) AddBkgComponent("exp", "Exp", 1.e4, Str2VarMap(), "-ibegin");
     if ( m_totBkgMode ) m_bkg_fractions.clear();
-
+    
     for (unsigned i = 0; i < m_bkg_components.size(); i++)
     {
         bkgList->add(*(m_bkg_components[i]));
@@ -99,7 +135,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
     }
     else m_model = m_sig;
 
-    if(m_pmode == "v" && m_model)
+    if (m_pmode == "v" && m_model)
     {
         cout << "\n" << m_name << ": Initialized Correctly! The model is:" << endl;
         m_model->Print();
@@ -376,17 +412,17 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
         if (opt.find("-vname") != string::npos) pname += ("_" + (TString)myvar->GetName());
 
         if (opt.find("-eps") != string::npos) c->Print(pname + logstr + ".eps");
-        if (opt.find("-animated") != string::npos){
-	  size_t pos = opt.find("-animated") + 10;
-	  string ss = opt.substr(pos, string::npos);
-	  if ((TString(ss)).Atoi()<=0)
-	    { //if the given parameter is not an integer, we trow and error and ignore the parameter
-	      Error("Print", "In -animated, the given parameter should be a positive integer, expressing the delay after each image, in tens of ms.");
-	      ss = "";
-	    }
-	  c->Print(pname + logstr + ".gif++"+ss+"++");
+        if (opt.find("-animated") != string::npos) {
+            size_t pos = opt.find("-animated") + 10;
+            string ss = opt.substr(pos, string::npos);
+            if ((TString(ss)).Atoi() <= 0)
+            {   //if the given parameter is not an integer, we trow and error and ignore the parameter
+                Error("Print", "In -animated, the given parameter should be a positive integer, expressing the delay after each image, in tens of ms.");
+                ss = "";
+            }
+            c->Print(pname + logstr + ".gif++" + ss + "++");
         }
-	else if (opt.find("-allformats") != string::npos)
+        else if (opt.find("-allformats") != string::npos)
         {
             c->Print(pname + logstr + ".eps");
             c->Print(pname + logstr + ".pdf");
