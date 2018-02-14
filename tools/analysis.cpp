@@ -354,7 +354,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
             RooArgList list_for_product;
             list_for_product.add(*nll_norm);
             list_for_product.add(*m_constr);
-            RooProduct * nll_constr = new RooProduct("nll_constrained", "nll_constrained", list_for_product);
+            RooAddition * nll_constr = new RooAddition("nll_constrained", "nll_constrained", list_for_product);
             nll_toFit = nll_constr;
         }
 
