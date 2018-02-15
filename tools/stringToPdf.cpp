@@ -56,6 +56,7 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
 TString getPrintParName(TString namepdf_, string opt)
 {
     namepdf_ = namepdf_.ReplaceAll("__noprint__", "");
+    namepdf_ = ((TString)namepdf_).ReplaceAll("bkg_", "");
     size_t pos_ = ((string)namepdf_).find("_");
     TString namepdf = (TString)(((string)namepdf_).substr(0, pos_));
     TString nameana = (TString)((string)namepdf_).substr(pos_ + 1, string::npos);
