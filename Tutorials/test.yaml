@@ -14,8 +14,8 @@ var :
 sig : 
     pdf : 'Gauss-m[5620,5550,5700]-s[20,0,100]'
     params:
-        m : 'gauss 5620 0.1'
-        s : 'gauss 20 1'
+        #m : 'gauss 5620 0'
+        s : 'gauss 20 0.1'
 
 bkgs :
     - Comb : 
