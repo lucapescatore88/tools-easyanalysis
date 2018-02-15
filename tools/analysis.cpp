@@ -218,7 +218,7 @@ void Analysis::SetUnits(string inUnit, string outUnit)
     m_unit = units[iOut] + "/c^{2}";
 }
 
-void Analysis::SetUnits(string outUnit, double scalefactor)
+void Analysis::SetUnits(string outUnit)//, double scalefactor)
 {
     m_unit = outUnit;
 }
