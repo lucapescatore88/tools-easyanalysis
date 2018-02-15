@@ -49,8 +49,9 @@ def set_component(name,comp,an) :
                         params[pname].setConstant(0)
 
 
-
-        for pname in plist.keys() :
+        pl = []
+        if plist is not None : pl = plist.keys()
+        for pname in pl :
             if 'gauss' in plist[pname] and pname not in constr.keys() :
                 if plist[pname] == 'gauss' : 
                     print pname, "--> No contraint set for this parameter and no values imported"

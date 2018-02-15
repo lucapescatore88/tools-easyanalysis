@@ -325,7 +325,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         if (low_opt.find("-fitto") != string::npos)
         {
             RooCmdArg constraints = ExternalConstraints(*m_constr);
-
+            
             RooCmdArg isQuiet = PrintLevel(2);
             if (low_opt.find("-quiet") != string::npos)
                 isQuiet = PrintLevel(-1);
@@ -359,8 +359,8 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
                 RooArgList list_for_product;
                 list_for_product.add(*nll_norm);
                 list_for_product.add(*m_constr);
-                RooProduct * nll_constr = new RooProduct("nll_constrained", "nll_constrained", list_for_product);
-                nll_toFit = nll_constr;
+                nll_toFit = new RooAddition("nll_constrained", "nll_constrained", list_for_product);
+                //nll_toFit = new RooProduct("nll_constrained", "nll_constrained", list_for_product);
             }
 
             // Actual fit
