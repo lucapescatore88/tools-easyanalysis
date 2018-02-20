@@ -12,4 +12,5 @@
 #include "analysis.hpp"
 #include "multiAnalysis.hpp"
 
+#include "STCut.hpp"
 #endif

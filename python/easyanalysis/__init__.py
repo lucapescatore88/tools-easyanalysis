@@ -21,6 +21,7 @@ __importables__ = [
     'pull',
     'computeAverage',
     'computeAverage2D',
+    'STCut'
 ]
 
 for importable in __importables__:

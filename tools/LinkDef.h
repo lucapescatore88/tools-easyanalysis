@@ -44,4 +44,7 @@
 #pragma link C++ class TreeReader+;
 #pragma link C++ defined_in "treeReader.hpp";
 
+#pragma link C++ class STCut+;
+#pragma link C++ defined_in "STCut.hpp";
+  
 #endif
