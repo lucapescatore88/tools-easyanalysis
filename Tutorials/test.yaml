@@ -1,10 +1,10 @@
 
 name: 'TestAna'
-title: '#alpha#nu#alpha#lambda#upsilon#sigma#iota#sigma'
+title: 'Test'
 units: 'MeV/c^{2}'
 
-datatree : 'reduced_Lb2JpsiL'
-datafile : '/eos/lhcb/user/p/pluca/Analysis/Lb2emu/Tuple/out.root' 
+datatree : None
+datafile : None
 
 var :
     name : 'Lb_MM'
@@ -12,7 +12,10 @@ var :
     max  : 6000
 
 sig : 
-    pdf : 'Gauss-m[5620,5550,5700]'
+    pdf : 'Gauss-m[5620,5550,5700]-s[20,0,100]'
+    params:
+        m : 'gauss 5620 0.1'
+        s : 'gauss 20 1'
 
 bkgs :
     - Comb : 

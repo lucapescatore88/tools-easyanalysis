@@ -10,7 +10,8 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
 {
     RooRealVar * curpar = (RooRealVar *)stval_list[par];
     size_t pos = parstr.find(par + "[");
-
+    if (par == "a2os") pos = parstr.find("a2[");
+    
     string dist_name = "";
     size_t posname = option.find("-n");
     if (posname != string::npos)
@@ -19,7 +20,7 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
     string parMapName = "";
     if (myvars.size() > 0)
     {
-        if ( par == "a2os" ) parMapName = isParInMap( "a2", myvars, dist_name );
+        if (par == "a2os") parMapName = isParInMap( "a2", myvars, dist_name );
         else parMapName = isParInMap( par, myvars, dist_name );
 
         if (parMapName == "") cout << parMapName << " (WRONG!!)" << endl;
@@ -55,6 +56,7 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
 TString getPrintParName(TString namepdf_, string opt)
 {
     namepdf_ = namepdf_.ReplaceAll("__noprint__", "");
+    namepdf_ = ((TString)namepdf_).ReplaceAll("bkg_", "");
     size_t pos_ = ((string)namepdf_).find("_");
     TString namepdf = (TString)(((string)namepdf_).substr(0, pos_));
     TString nameana = (TString)((string)namepdf_).substr(pos_ + 1, string::npos);
@@ -147,8 +149,8 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     vector<string> Ipatia2Par       {"m", "s", "b", "l", "z", "a", "n", "a2", "n2"};
     vector<string> VoigtPar         {"m", "s", "g"};
     vector<string> JohnsonPar       {"m", "s", "nu", "tau"};
-    vector<string> MisIDGaussianPar {"m", "s", "dm2", "pow","xmin","xmax","dx"};
-    vector<string> MomFracPdfPar    {"xmin","dx","pow"};
+    vector<string> MisIDGaussianPar {"m", "s", "dm2", "pow", "xmin", "xmax", "dx"};
+    vector<string> MomFracPdfPar    {"xmin", "dx", "pow"};
 
     par_list["Apollonios"]  = ApolloniosPar;
     par_list["Argus"]       = ArgusPar;
@@ -229,10 +231,6 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
 
     if (typepdf_.find("MomFracPdf") != string::npos)
     {
-        //cout << "Setting RooMomentumFractionPdf" << endl;
-        //p["xmin"]->Print();
-        //p["dx"]->Print();
-        //p["pow"]->Print();
         pdf = new RooMomentumFractionPdf(namepdf, namepdf, *var, *p["xmin"], *p["dx"], *p["pow"]);
     }
     if (typepdf_.find("MisIDGauss") != string::npos)
@@ -401,7 +399,7 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
 
     if (typepdf_.find("ConvGauss") != string::npos)
     {
-        RooRealVar * mg = new RooRealVar("conv_mg_" + namepdf_, "Mean of resolution", 0.);
+        RooRealVar * mg = new RooRealVar("conv_mg_" + namepdf_, "m_{res}", 0.);
         RooGaussian * resolution_gauss = new RooGaussian("convgauss_" + namepdf_, "", *var, *mg, *p["sconv"]);
         RooNumConvPdf * respdf = new RooNumConvPdf(namepdf, namepdf, *var, *pdf, *resolution_gauss);
         respdf->setConvolutionWindow(*mg, *p["sconv"], 3);
