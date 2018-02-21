@@ -12,15 +12,15 @@ class STCut {
 
   public:
 
-
 		const TCut* GetTCut() const;
 		const char* GetTitle() const;
 		const char* GetName() const;
-		const std::vector<const STCut*>* GetMembers(bool deep=false) const;
+		const std::vector<STCut>* GetMembers(bool deep=false) const;
 
 		STCut(const TCut&); //constructor from TCut
 		STCut(const char*); //constructor from char*
-
+		STCut(const STCut&); //copy constructor
+		STCut() = default; //default empty constructor
 
 		//+= operators
 		STCut& operator+=(const char*);
@@ -32,8 +32,8 @@ class STCut {
 
 	private:
 		TCut c;
-		std::vector<const STCut*> members;
-		void fill_basic_members (std::vector<const STCut*>*, const std::vector<const STCut*>*) const;
+		std::vector<STCut> members; //cannot use pointers to STCuts here. It's unsafe, if they point to a temporary object for example
+		void fill_basic_members (std::vector<STCut>*, const std::vector<STCut>*) const;
 };
 
 
