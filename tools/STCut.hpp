@@ -16,9 +16,9 @@ class STCut {
 		const TCut* GetTCut() const;
 		const char* GetTitle() const;
 		const char* GetName() const;
-		const std::vector<STCut*>* GetMembers(bool deep=false) const;
+		const std::vector<const STCut*>* GetMembers(bool deep=false) const;
 
-		STCut(TCut&); //constructor from TCut
+		STCut(const TCut&); //constructor from TCut
 		STCut(const char*); //constructor from char*
 
 
@@ -32,8 +32,8 @@ class STCut {
 
 	private:
 		TCut c;
-		std::vector<STCut*> members;
-		void fill_basic_members (std::vector<STCut*>*, const std::vector<STCut*>*) const;
+		std::vector<const STCut*> members;
+		void fill_basic_members (std::vector<const STCut*>*, const std::vector<const STCut*>*) const;
 };
 
 

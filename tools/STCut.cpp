@@ -3,8 +3,9 @@
 
 #include "STCut.hpp"
 
+
 //constructor with TCut
-STCut::STCut (TCut& cut) {
+STCut::STCut (const TCut& cut) {
 	c=cut;
 }
 
@@ -20,20 +21,20 @@ const TCut* STCut::GetTCut() const {
 	return &c;
 }
 
-const std::vector<STCut*>* STCut::GetMembers(bool deep) const { //if deep, it goes down the hierarchy of members, returning the base ones
+const std::vector<const STCut*>* STCut::GetMembers(bool deep) const { //if deep, it goes down the hierarchy of members, returning the base ones
 
 	if (!deep) return &members; //"normal" behavious
 	else {
-		std::vector<STCut*>* basic_members = new std::vector<STCut*>;
+		std::vector<const STCut*>* basic_members = new std::vector<const STCut*>;
 		STCut::fill_basic_members(basic_members, &members);
 
 	return basic_members;
 	}
  }
 
-void STCut::fill_basic_members (std::vector<STCut*>* basic_members, const std::vector<STCut*>* input_members) const {
+void STCut::fill_basic_members (std::vector<const STCut*>* basic_members, const std::vector<const STCut*>* input_members) const {
 	for (auto member : *input_members) { //loop on members to find the deepest ones
-		const std::vector<STCut*>* members_of_member = member->GetMembers();
+		const std::vector<const STCut*>* members_of_member = member->GetMembers();
 		if (members_of_member->empty()) basic_members->emplace_back(member);
 		else STCut::fill_basic_members(basic_members, members_of_member);
 	}
@@ -63,7 +64,13 @@ const char* STCut::GetName() const {
  }
 
   STCut& STCut::operator+=(const STCut& stcut) {
- 	return STCut::operator+=(stcut.GetTCut()->GetTitle());
+	STCut* this_copy = new STCut(*this);
+ 	
+ 	members.clear();
+ 	members.emplace_back(this_copy); //add itself as a member, as it is now (to keep structure)
+ 	c+=(*stcut.GetTCut()); //just call TCut's +=
+ 	members.emplace_back(&stcut);
+ 	return *this;
  }
 
 
