@@ -30,19 +30,22 @@ void TreeReader::AddChain(TChain *chain)
 
 
 
-void TreeReader::AddFile(const char *fileName, const char* treeName, Long64_t maxEntries)
+void TreeReader::AddFile(const char *fileName, const char *treeName, Long64_t maxEntries)
 {
     if (fChain)
     {
-        if (!TFile::Open(fileName)) return;
-        fChain->AddFile(fileName, maxEntries, treeName);
+	string fileName_ = (string) fileName;
+	string treeName_ = (string) treeName;
+        if ((fileName_.find("*") == string::npos) && (fileName_.find("?") == string::npos) && (fileName_.find("[") == string::npos) && (fileName_.find("]") == string::npos)) if (!TFile::Open(fileName)) return;
+	if (treeName_ != "") fChain->AddFile(fileName, maxEntries, treeName);
+        else fChain->Add(fileName, maxEntries);
         if (pmode == "v") cout << "TreeReader - Adding file: " << fileName << " " << treeName << endl;
     }
 }
 
 
 
-void TreeReader::AddFriend(const char *fileName, const char* treeName)
+void TreeReader::AddFriend(const char *fileName, const char *treeName)
 {
     if (fChain)
     {
@@ -82,7 +85,7 @@ void TreeReader::AddList(const char *fileName)
 
 
 
-TTree * TreeReader::CopyTree(TCut cut, double frac, string name)
+TTree *TreeReader::CopyTree(TCut cut, double frac, string name)
 {
     if (!init)
     {
@@ -237,14 +240,14 @@ bool TreeReader::Initialize(vector <string> br, string opt)
 {
     if (!init)
     {
-        if ( !fChain )
+        if (!fChain)
         {
             cout << endl << "TreeReader - No tree to initialize" << endl << endl;
             return false;
         }
 
         TObjArray *fileElements = fChain->GetListOfFiles();
-        if ( !fileElements || ( fileElements->GetEntries() == 0 ))
+        if (!fileElements || (fileElements->GetEntries() == 0))
         {
             cout << endl << "TreeReader - No file(s) to initialize" << endl << endl;
             return false;
@@ -253,18 +256,18 @@ bool TreeReader::Initialize(vector <string> br, string opt)
 
     varList.clear();
 
-    TObjArray* branches = fChain->GetListOfBranches();
+    TObjArray *branches = fChain->GetListOfBranches();
     int nBranches = branches->GetEntries();
 
     for (int i = 0; i < nBranches; ++i)
     {
-        TBranch* branch = (TBranch*)branches->At(i);
+        TBranch *branch = (TBranch*)branches->At(i);
         string brname = branch->GetName();
-        TLeaf* leaf = branch->GetLeaf(branch->GetName());
+        TLeaf *leaf = branch->GetLeaf(branch->GetName());
 
         if ( leaf == 0 )  // leaf name is different from branch name
         {
-            TObjArray* leafs = branch->GetListOfLeaves();
+            TObjArray *leafs = branch->GetListOfLeaves();
             leaf = (TLeaf*)leafs->At(0);
         }
 
@@ -276,7 +279,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
         // Find out whether we have array by inspecting leaf title
         if ( title.find("[") != std::string::npos )
         {
-            TLeaf * nelem = leaf->GetLeafCounter(arreysize);
+            TLeaf *nelem = leaf->GetLeafCounter(arreysize);
             if (arreysize == 1 && nelem != NULL) arreysize = nelem->GetMaximum() + 1; //search for maximum value of the lenght
         }
 
@@ -307,7 +310,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
 
             if (addVar)
             {
-                variable * tmpVar = new variable(id, arreysize);
+                variable *tmpVar = new variable(id, arreysize);
 
                 tmpVar->name = leaf->GetName();
                 tmpVar->bname = branch->GetName();
@@ -340,7 +343,7 @@ bool TreeReader::Initialize(vector <string> br, string opt)
 
 
 
-void TreeReader::BranchNewTree(TTree* tree)
+void TreeReader::BranchNewTree(TTree *tree)
 {
     for (unsigned it = 0; it < varList.size(); ++it)
     {
@@ -352,7 +355,7 @@ void TreeReader::BranchNewTree(TTree* tree)
 
 
 
-void TreeReader::FillNewTree(TTree* tree, TCut cuts, double frac, void (*addFunc)(TreeReader *, TTree *, bool))
+void TreeReader::FillNewTree(TTree *tree, TCut cuts, double frac, void (*addFunc)(TreeReader *, TTree *, bool))
 {
     fChain->Draw(">>skim", cuts, "entrylist");
     TEntryList *skim = (TEntryList*)gDirectory->Get("skim");
@@ -400,7 +403,7 @@ bool TreeReader::partialSort()
             {
                 if ( varGets > varList[j]->nGets )
                 {
-                    variable* tmp = varList[i];
+                    variable *tmp = varList[i];
                     varList[i] = varList[j];
                     varList[j] = tmp;
                     didSwap = true;
