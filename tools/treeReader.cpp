@@ -14,7 +14,6 @@ void TreeReader::AddChain(TChain *chain)
     if (fChain)
     {
         if (pmode == "v") cout << "TreeReader - Adding chain" << endl << endl;
-
         TObjArray *fileElements = chain->GetListOfFiles();
         TIter next(fileElements);
         TChainElement *chEl = 0;
@@ -23,9 +22,9 @@ void TreeReader::AddChain(TChain *chain)
         {
             AddFile(chEl->GetTitle());
         }
-
         Initialize();
     }
+    return;
 }
 
 
@@ -34,13 +33,31 @@ void TreeReader::AddFile(const char *fileName, const char *treeName, Long64_t ma
 {
     if (fChain)
     {
-	string fileName_ = (string) fileName;
+	if (!TFile::Open(fileName)) return;
 	string treeName_ = (string) treeName;
-        if ((fileName_.find("*") == string::npos) && (fileName_.find("?") == string::npos) && (fileName_.find("[") == string::npos) && (fileName_.find("]") == string::npos)) if (!TFile::Open(fileName)) return;
 	if (treeName_ != "") fChain->AddFile(fileName, maxEntries, treeName);
         else fChain->Add(fileName, maxEntries);
-        if (pmode == "v") cout << "TreeReader - Adding file: " << fileName << " " << treeName << endl;
+	if (pmode == "v") cout << "TreeReader - Adding file: " << fileName << " " << treeName << endl;
     }
+    return;
+}
+
+
+
+void TreeReader::AddFiles(const char *fileName, const char *treeName, Long64_t maxEntries)
+{
+    if (fChain)
+    {
+	string fileName_ = (string) fileName;
+	glob_t glob_result;
+	glob(fileName_.c_str(), GLOB_TILDE, NULL, &glob_result);
+	for(unsigned int i = 0; i < glob_result.gl_pathc; ++i)
+	{
+	    AddFile(glob_result.gl_pathv[i], treeName, maxEntries);
+	}
+	globfree(&glob_result);
+    }
+    return;
 }
 
 
@@ -81,6 +98,7 @@ void TreeReader::AddList(const char *fileName)
         }
         listfile.close();
     }
+    return;
 }
 
 
@@ -169,6 +187,8 @@ void TreeReader::PrintListOfFiles()
             cout << endl;
         }
     }
+
+    return;
 }
 
 
@@ -193,6 +213,8 @@ void TreeReader::PrintListOfVariables()
         }
         cout << endl;
     }
+
+    return;
 }
 
 
@@ -232,6 +254,8 @@ void TreeReader::SetBranchStatus(vector<string> branches, bool status, string op
             if (pmode == "v") cout << "TreeReader - SetBranchStatus " << status << ": " << fChain->GetName() << " (" << nbranches << ")" << endl << endl;
         }
     }
+
+    return;
 }
 
 
@@ -351,6 +375,7 @@ void TreeReader::BranchNewTree(TTree *tree)
         string branchID = TypeDB::branchID(var->GetType());
         tree->Branch(var->name, var->value.address, var->title + "/" + branchID);
     }
+    return;
 }
 
 

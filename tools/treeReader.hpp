@@ -13,6 +13,7 @@
 #include <cstring>
 #include <iomanip>
 #include <sstream>
+#include <glob.h>
 
 #include "TROOT.h"
 #include "TBranch.h"
@@ -325,18 +326,20 @@ public:
     static void SetPrintFileLevel( string pm ) { pfile = pm; }
     static string GetPrintFileLevel( ) { return pfile; }
 
-    /** \brief Function to add files to the internal TChain
-     *
-     * Remember to initialize after adding new Files!
-     *
+    /** \brief Function to add a chain to the internal TChain
      *  */
 
     void AddChain(TChain *chain);
 
-    /** \brief Function to add a chain to the internal TChain
+    /** \brief Function to add a file to the internal TChain
      *  */
 
     void AddFile(const char *fileName, const char *treeName = "", Long64_t maxEntries = -1);
+
+    /** \brief Function to add multiple files to the internal TChain
+     *  */
+
+    void AddFiles(const char *fileName, const char *treeName = "", Long64_t maxEntries = -1);
 
     /** \brief Function to add a friend to the internal TChain
      *  */
@@ -344,8 +347,6 @@ public:
     void AddFriend(const char *fileName, const char *treeName = "");
 
     /** \brief Function to add a list of files to the internal TChain
-     *
-     * Remember to initialize after adding new Files!
      *  */
 
     void AddList(const char *fileName);
