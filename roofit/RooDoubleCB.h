@@ -90,7 +90,7 @@ protected:
 
   //private:
 
-  //ClassDef(RooDoubleCB,1) // Your description goes here...
+  ClassDef(RooDoubleCB,1)
 }
   
   ;

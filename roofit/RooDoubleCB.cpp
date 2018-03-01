@@ -9,7 +9,7 @@ using namespace RooFit;
 
 
 
-//ClassImp(RooDoubleCB) 
+ClassImp(RooDoubleCB) 
 
 RooDoubleCB::RooDoubleCB()
 {
