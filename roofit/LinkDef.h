@@ -34,5 +34,7 @@
 #pragma link C++ defined_in "RooMomentumFractionPdf.h";
 #pragma link C++ class RooPowerLawApproxVar+;
 #pragma link C++ defined_in "RooPowerLawApproxVar.h";
+#pragma link C++ class RooDoubleCB+;
+#pragma link C++ defined_in "RooDoubleCB.h";
 
 #endif

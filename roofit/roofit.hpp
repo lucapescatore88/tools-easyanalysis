@@ -10,5 +10,6 @@
 #include "RooJohnson.h"
 //#include "RooLogGamma.h"
 #include "RooMisIDGaussian.h"
+#include "RooDoubleCB.h"
 
 #endif
