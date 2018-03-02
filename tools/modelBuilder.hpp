@@ -398,9 +398,9 @@ public:
         return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
     }
 
-    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, double _frac = 0, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
+    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, double _frac = 0, const char * _opt = "")
     {
-        return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
+        return AddBkgComponentPvt(_name, _comp, _frac, _opt);
     }
 
     RooAbsPdf * AddBkgComponent(const char * _name, RooAbsPdf * _comp, double _frac = 0, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
@@ -413,9 +413,9 @@ public:
         return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
     }
 
-    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, RooAbsReal * _frac, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
+    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, RooAbsReal * _frac, const char * _opt = "")
     {
-        return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
+        return AddBkgComponentPvt(_name, _comp, _frac, _opt);
     }
 
     RooAbsPdf * AddBkgComponent(const char * _name, RooAbsPdf * _comp, RooAbsReal * _frac, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
@@ -424,11 +424,6 @@ public:
     }
 
     RooAbsPdf * AddBkgComponent(const char * _name, const char * _comp, Str2VarMap _myvars, double _frac = 0, const char * _opt = "")
-    {
-        return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
-    }
-
-    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, Str2VarMap _myvars, double _frac = 0, const char * _opt = "")
     {
         return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
     }
