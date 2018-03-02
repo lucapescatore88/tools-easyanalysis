@@ -133,6 +133,23 @@ protected:
             }
 
             RooDataSet * sigDataSet = NULL;
+            /* If var needs to be changed, here include original mass var name in vars 
+            */
+            RooRealVar * tree_mass_var = NULL;
+            if (opt.find("-var[") != string::npos)
+            {
+                size_t pos = opt.find("-var[") + 2;
+                size_t posend = opt.find("]", pos);
+                if (pos != posend - 1) {
+		    TString varname = (TString)opt.substr(pos + 1, posend - pos - 1);
+		    if (varname != "1")
+		    {
+                        tree_mass_var = new RooRealVar(varname, varname,0.);
+			vars->add(*tree_mass_var);
+		    }
+		}
+            }
+
             if (opt.find("-w[") != string::npos)
             {
                 size_t pos = opt.find("-w[") + 2;
@@ -157,14 +174,38 @@ protected:
                 sigDataSet->reduce(treecut);
             }
 
+            double rho;
             if (opt.find("-rho") != string::npos)
             {
                 int pos = opt.find("-rho");
                 string rhostr = opt.substr(pos + 4, 20);
-                double rho = ((TString)rhostr).Atof();
-                res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
+                rho = ((TString)rhostr).Atof();
             }
-            else res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, 2);
+            rho = 2;
+
+            /* Here the RooDataSet is based on a tree
+            \\ myvar is the mass variable used, such as Lb_MM
+            \\ massname is the name in the tree
+            \\ Need to add that one to the RooDataSet when making it 
+            */
+            if (opt.find("-var[") != string::npos)
+            {
+                size_t pos = opt.find("-var[") + 2;
+                size_t posend = opt.find("]", pos);
+                size_t pos_scale = opt.find("-scale[") + 2;
+                size_t posend_scale = opt.find("]",pos);
+                if (pos != posend - 1 and pos_scale != posend_scale - 1) {
+		    TString massname = (TString)opt.substr(pos + 1 , posend - pos -1);
+                    TString scale    = (TString)opt.substr(pos_scale + 1 , posend_scale - pos_scale -1);
+		    if (massname != "1")
+		    {
+			RooFormulaVar massfunc(myvar->GetName(), myvar->GetName(),massname+"*"+scale,RooArgList(*tree_mass_var));
+                        RooRealVar*   massvar  = (RooRealVar*) sigDataSet->addColumn(massfunc);
+                        res = new RooKeysPdf((TString)_name, _title, *massvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
+		    }
+		}
+            }
+            else res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
             /*if(opt.find("-noshift") == string::npos)
             {
                 RooRealVar * shift = new RooRealVar("shift_rookey_"+(TString)_name,"shift_rookey_"+(TString)_name,0.,-1000.,1000.);
