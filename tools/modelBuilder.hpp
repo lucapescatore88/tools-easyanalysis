@@ -439,9 +439,9 @@ public:
         return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
     }
 
-    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, double _frac = 0, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
+    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, double _frac = 0, const char * _opt = "")
     {
-        return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
+        return AddBkgComponentPvt(_name, _comp, _frac, _opt);
     }
 
     RooAbsPdf * AddBkgComponent(const char * _name, RooAbsPdf * _comp, double _frac = 0, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
@@ -454,9 +454,9 @@ public:
         return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
     }
 
-    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, RooAbsReal * _frac, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
+    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, RooAbsReal * _frac, const char * _opt = "")
     {
-        return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
+        return AddBkgComponentPvt(_name, _comp, _frac, _opt);
     }
 
     RooAbsPdf * AddBkgComponent(const char * _name, RooAbsPdf * _comp, RooAbsReal * _frac, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
@@ -465,11 +465,6 @@ public:
     }
 
     RooAbsPdf * AddBkgComponent(const char * _name, const char * _comp, Str2VarMap _myvars, double _frac = 0, const char * _opt = "")
-    {
-        return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
-    }
-
-    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, Str2VarMap _myvars, double _frac = 0, const char * _opt = "")
     {
         return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
     }
@@ -532,14 +527,14 @@ public:
         return SetSignalPvt(_sig, _nsig, _opt, _myvars);
     }
 
-    RooAbsPdf * SetSignal(TTree * _sig, RooAbsReal * _nsig, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
+    RooAbsPdf * SetSignal(TTree * _sig, RooAbsReal * _nsig, const char * _opt = "")
     {
-        return SetSignalPvt(_sig, _nsig, _opt, _myvars);
+        return SetSignalPvt(_sig, _nsig, _opt);
     }
 
-    RooAbsPdf * SetSignal(TTree * _sig, double _nsig = 0., Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
+    RooAbsPdf * SetSignal(TTree * _sig, double _nsig = 0., const char * _opt = "")
     {
-        return SetSignalPvt(_sig, _nsig, _opt, _myvars);
+        return SetSignalPvt(_sig, _nsig, _opt);
     }
 
     RooAbsPdf * SetSignal(const char * _sig, RooAbsReal * _nsig, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
@@ -561,12 +556,6 @@ public:
     {
         return SetSignalPvt(_sig, 0., _opt, _myvars);
     }
-
-    RooAbsPdf * SetSignal(TTree * _sig, Str2VarMap _myvars, double _nsig = 0., const char * _opt = "")
-    {
-        return SetSignalPvt(_sig, 0., _opt, _myvars);
-    }
-
 
 
     template <class T> RooAbsPdf * SetExtraSignalDimension(T * _sig, RooRealVar * extravar, string opt = "", Str2VarMap myvars = Str2VarMap())

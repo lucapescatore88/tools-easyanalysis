@@ -136,6 +136,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     vector<string> DCBPar           {"m", "s", "s2", "f", "a", "a2",   "n", "n2"};
     vector<string> DCBPar_Sn        {"m", "s", "s2", "f", "a", "a2",   "n"};
     vector<string> DCBPar_OST       {"m", "s", "s2", "f", "a", "a2os", "n", "n2"};
+    vector<string> DSCBPar          {"m", "s", "a", "n", "a2", "n2"};
     vector<string> DCBGaussPar      {"m", "s", "s2", "s3", "f", "f2", "a", "a2os", "n", "n2"};
     vector<string> TCBPar           {"m", "s", "s2", "s3", "f", "f2", "a", "a2", "a3", "n", "n2", "n3"};
     vector<string> ExpPar           {"b"};
@@ -160,6 +161,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     par_list["DCB"]         = DCBPar;
     par_list["DCB_Sn"]      = DCBPar_Sn;
     par_list["DCB_OST"]     = DCBPar_OST;
+    par_list["DSCB"]         = DSCBPar;
     par_list["DCBGauss"]    = DCBGaussPar;
     par_list["TCB"]         = TCBPar;
     par_list["Exp"]         = ExpPar;
@@ -251,6 +253,10 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
         RooGaussian * gauss3 = new RooGaussian("gauss3_" + namepdf_, "Gauss", *var, *p["m"], *p["s3"]);
 
         pdf = new RooAddPdf(namepdf, namepdf, RooArgList(*gauss1, *gauss2, *gauss3), RooArgList(*p["f"], *p["f2"]));
+    }
+    else if (typepdf_.find("DSCB") != string::npos)
+    {
+        pdf = new RooDoubleCB(namepdf, namepdf, *var, *p["m"], *p["s"], *p["a"], *p["n"], *p["a2"], *p["n2"]);
     }
     else if (typepdf_.find("DCBGauss") != string::npos)
     {
