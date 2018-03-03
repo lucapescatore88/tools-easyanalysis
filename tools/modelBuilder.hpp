@@ -208,7 +208,7 @@ protected:
 		    if (massname != "1")
 		    {
 			RooFormulaVar massfunc(myvar->GetName(), myvar->GetName(),"("+massname+")*"+scale,RooArgList(*tree_mass_var));
-                        RooRealVar*   massvar  = (RooRealVar*) sigDataSet->addColumn(massfunc);
+                        sigDataSet->addColumn(massfunc);
                         // Code to do the RooKeysPdf over a longer range
                         // Get range of RooKeys dataset
                         sigDataSet->getRange(*myvar,min_mass,max_mass);
