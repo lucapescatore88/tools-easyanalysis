@@ -138,7 +138,7 @@ protected:
             RooRealVar * tree_mass_var = NULL;
             if (opt.find("-var[") != string::npos)
             {
-                size_t pos = opt.find("-var[") + 2;
+                size_t pos = opt.find("-var[") + 4;
                 size_t posend = opt.find("]", pos);
                 if (pos != posend - 1) {
 		    TString varname = (TString)opt.substr(pos + 1, posend - pos - 1);
@@ -146,6 +146,7 @@ protected:
 		    {
                         tree_mass_var = new RooRealVar(varname, varname,0.);
 			vars->add(*tree_mass_var);
+                        vars->remove(*myvar);
 		    }
 		}
             }
@@ -190,18 +191,28 @@ protected:
             */
             if (opt.find("-var[") != string::npos)
             {
-                size_t pos = opt.find("-var[") + 2;
+                size_t pos = opt.find("-var[") + 4;
                 size_t posend = opt.find("]", pos);
-                size_t pos_scale = opt.find("-scale[") + 2;
-                size_t posend_scale = opt.find("]",pos);
+                size_t pos_scale = opt.find("-scale[") + 6;
+                size_t posend_scale = opt.find("]",pos_scale);
+                
                 if (pos != posend - 1 and pos_scale != posend_scale - 1) {
 		    TString massname = (TString)opt.substr(pos + 1 , posend - pos -1);
                     TString scale    = (TString)opt.substr(pos_scale + 1 , posend_scale - pos_scale -1);
+                    //cout << massname << " " << scale << endl;
+                    //tree_mass_var->Print();
 		    if (massname != "1")
 		    {
-			RooFormulaVar massfunc(myvar->GetName(), myvar->GetName(),massname+"*"+scale,RooArgList(*tree_mass_var));
+			RooFormulaVar massfunc(myvar->GetName(), myvar->GetName(),"("+massname+")*"+scale,RooArgList(*tree_mass_var));
                         RooRealVar*   massvar  = (RooRealVar*) sigDataSet->addColumn(massfunc);
-                        res = new RooKeysPdf((TString)_name, _title, *massvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
+
+                        // Code to do the RooKeysPdf over a longer range
+                        double max = myvar->getMax();
+                        double min = myvar->getMin();
+                        myvar->setRange(4000.,6300.); // Need to get proper range here
+                        res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
+                        myvar->setRange(min,max);
+                        // Make sure mass var is set to original range after RooKeysPdf calculation
 		    }
 		}
             }
