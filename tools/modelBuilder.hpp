@@ -84,6 +84,7 @@ protected:
     {
         string t = typeid(T).name();
         RooAbsPdf * res = NULL;
+        RooAbsPdf * res_fitrange = NULL; // For check of RooKeysPdf over fitRange
 
         if (_title == "") _title = _name;
 
@@ -209,21 +210,22 @@ protected:
 		    {
 			RooFormulaVar massfunc(myvar->GetName(), myvar->GetName(),"("+massname+")*"+scale,RooArgList(*tree_mass_var));
                         sigDataSet->addColumn(massfunc);
-                        // Code to do the RooKeysPdf over a longer range
-                        // Get range of RooKeys dataset
-                        sigDataSet->getRange(*myvar,min_mass,max_mass);
-                        // Set range for RooKeys
-                        myvar->setRange(min_mass,max_mass); // Need to get proper range here
-                        res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
+                        // Code to do the RooKeysPdf over a longer range (first over fit range)
+                        res_fitrange = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
+                        // Set full range range for RooKeys
+                        sigDataSet->getRange(*myvar,min_mass,max_mass); // Get range of dataset in mass variable, has to be done after transformation
+
+                        myvar->setRange(min_mass,max_mass); 
+                        res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
                         // Set range back to fit variable range
                         myvar->setRange(min,max);
-                        // Make sure mass var is set to original range after RooKeysPdf calculation
+
 		    }
 		}
             }
             else
             {
-                sigDataSet->getRange(*myvar,min_mass,max_mass); // Get range of dataset in mass variable
+                sigDataSet->getRange(*myvar,min_mass,max_mass); // Get range of dataset in mass variable, has to be done here
                 myvar->setRange(min_mass,max_mass);  
                 res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
                 myvar->setRange(min,max); // Set mass variable range back to the proper one
@@ -241,15 +243,58 @@ protected:
 
             if (opt.find("-print") != string::npos)
             {
-                myvar->setRange(min_mass,max_mass);  
+                myvar->setRange("fit_range",min,max); // Just for normalisation purposes now 
 
                 TCanvas * c = new TCanvas();
                 RooPlot * keysplot = myvar->frame();
                 sigDataSet->plotOn(keysplot);
-                res->plotOn(keysplot);
+                res_fitrange->plotOn(keysplot,NormRange("fit_range"));
                 keysplot->SetTitle(_name);
                 keysplot->Draw();
                 TString name_ = _name;
+                name_.ReplaceAll("__noprint__", "");
+                name_.ReplaceAll(" ", "_");
+                name_.ReplaceAll("#", "_").ReplaceAll("^", "_");
+                name_.ReplaceAll("{", "_").ReplaceAll("}", "_");
+                name_.ReplaceAll("(", "_").ReplaceAll(")", "_");
+                name_.ReplaceAll(":", "_");
+                name_.ReplaceAll("/", "_").ReplaceAll("+", "_").ReplaceAll("-", "_").ReplaceAll("*", "_");
+                name_.ReplaceAll(",", "_").ReplaceAll(".", "_");
+                name_.ReplaceAll("__", "_").ReplaceAll("_for", "__for");
+                c->Print("rooKeysModel_fitrange_plotandpdf" + name_ + ".pdf");
+                delete c;
+                delete keysplot;
+
+
+                c = new TCanvas();
+                keysplot = myvar->frame();
+                sigDataSet->plotOn(keysplot);
+                res->plotOn(keysplot,NormRange("fit_range"));
+                keysplot->SetTitle(_name);
+                keysplot->Draw();
+                name_ = _name;
+                name_.ReplaceAll("__noprint__", "");
+                name_.ReplaceAll(" ", "_");
+                name_.ReplaceAll("#", "_").ReplaceAll("^", "_");
+                name_.ReplaceAll("{", "_").ReplaceAll("}", "_");
+                name_.ReplaceAll("(", "_").ReplaceAll(")", "_");
+                name_.ReplaceAll(":", "_");
+                name_.ReplaceAll("/", "_").ReplaceAll("+", "_").ReplaceAll("-", "_").ReplaceAll("*", "_");
+                name_.ReplaceAll(",", "_").ReplaceAll(".", "_");
+                name_.ReplaceAll("__", "_").ReplaceAll("_for", "__for");
+                c->Print("rooKeysModel_fitrange_plot" + name_ + ".pdf");
+                delete c;
+                delete keysplot;
+
+                myvar->setRange(min_mass,max_mass);  
+
+                c = new TCanvas();
+                keysplot = myvar->frame();
+                sigDataSet->plotOn(keysplot);
+                res->plotOn(keysplot);//,NormRange("full_range"));
+                keysplot->SetTitle(_name);
+                keysplot->Draw();
+                name_ = _name;
                 name_.ReplaceAll("__noprint__", "");
                 name_.ReplaceAll(" ", "_");
                 name_.ReplaceAll("#", "_").ReplaceAll("^", "_");
@@ -263,7 +308,6 @@ protected:
                 delete c;
                 delete keysplot;
                 myvar->setRange(min,max); // Set mass variable range back to the proper one
-
             }
         }
         else if (t.find("TH1") != string::npos)
