@@ -213,25 +213,19 @@ protected:
                         sigDataSet->addColumn(massfunc);
                         // Code to do the RooKeysPdf over a longer range (first over fit range)
                         res_fitrange = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
-                        // Set full range range for RooKeys
-                        sigDataSet->getRange(*myvar,min_mass,max_mass); // Get range of dataset in mass variable, has to be done after transformation
-
-                        myvar->setRange(min_mass,max_mass); 
-                        res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
-                        // Set range back to fit variable range
-                        myvar->setRange(min,max);
 
 		    }
 		}
             }
-            else
-            {
-                sigDataSet->getRange(*myvar,min_mass,max_mass); // Get range of dataset in mass variable, has to be done here
-                myvar->setRange(min_mass,max_mass);  
-                res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
-                myvar->setRange(min,max); // Set mass variable range back to the proper one
 
-            }
+            // Set full range range for RooKeys
+            sigDataSet->getRange(*myvar,min_mass,max_mass); // Get range of dataset in mass variable, has to be done after transformation
+            myvar->setRange(min_mass,max_mass); 
+            res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
+            // Set range back to fit variable range
+            myvar->setRange(min,max);
+
+
             /*if(opt.find("-noshift") == string::npos)
             {
                 RooRealVar * shift = new RooRealVar("shift_rookey_"+(TString)_name,"shift_rookey_"+(TString)_name,0.,-1000.,1000.);
