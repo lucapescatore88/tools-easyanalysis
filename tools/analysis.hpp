@@ -203,7 +203,7 @@ public:
      *  @param outUnit: is a label for the unit"units" is a string with the unit label
         @scalefactor: factor to rescale input data if they are given in a unit different than the one you want
      **/
-    void SetUnits(string outUnit, double scalefactor = 1);
+    void SetUnits(string outUnit);//, double scalefactor = 1);
     double GetScale() { return scale; }
     string GetUnits() { return m_unit; }
 
