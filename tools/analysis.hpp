@@ -110,7 +110,7 @@ class Analysis : public ModelBuilder {
 
 public:
 
-    Analysis( TString _name, TString _title, RooRealVar * _var, string opt = "-subtree", string _w = "", TCut * _cuts = NULL):
+    Analysis( TString _name, TString _title, RooRealVar * _var, string _opt = "", string _w = "", TCut * _cuts = NULL):
         ModelBuilder(_name, _var, _title), m_cuts(_cuts), m_chi2(new double[2]), m_init(false), m_unit(""),
         m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
         m_dataReader(NULL), m_reducedTree(NULL), m_dataHist(NULL), scale(1)
@@ -120,7 +120,7 @@ public:
         if (_w != "") SetWeight( (TString)_w );
     };
 
-    Analysis( TString _name, RooRealVar * _var, RooAbsPdf * _pdf = NULL, int _ngen = 1000, string _opt = "-subtree"):
+    Analysis( TString _name, RooRealVar * _var, RooAbsPdf * _pdf = NULL, int _ngen = 1000, string _opt = ""):
         Analysis(_name, _name, _var, _opt)
     {
         if (_pdf)
@@ -133,7 +133,7 @@ public:
     };
 
     Analysis( TString _name, TString _title, TreeReader * reader, TCut * _cuts, RooRealVar * _var = NULL, string _w = ""):
-        Analysis(_name, _title, _var, "-subtree", _w, _cuts)
+        Analysis(_name, _title, _var, "", _w, _cuts)
     {
         m_dataReader = reader;
         if (!m_dataReader) { cout << "Attention!! Your TreeReader is NULL, this is going to break..." << endl; return; }
@@ -152,6 +152,13 @@ public:
     Analysis( TString _name, TString _title, string treename, string filename, RooRealVar * _var = NULL, TCut * _cuts = NULL, string _w = ""):
         Analysis( _name, _title, new TreeReader(treename.c_str(), filename.c_str()), _cuts, _var, _w)
     {};
+
+    Analysis( TString _name, TString _title, TH1D * histo, RooRealVar * _var = NULL):
+        Analysis(_name, _title, _var)
+    {
+	m_dataHist = (TH1 *) histo;
+	CreateDataSet();
+    };
 
     /// \brief Special constructor for single quick fit
     template <typename T = RooAbsPdf *, typename D = RooDataSet *> Analysis( TString _name, TString _title, D * dd,
@@ -270,7 +277,7 @@ public:
      * <br> "-seed(n)":  To set a specific seed
      * <br> "-smear(r)": "r" is a double interpreted as resolution. The generated events will be gaussian smeared by this resolution.
      **/
-    TTree * Generate(int nevt, string opt = "-subtree");
+    TTree * Generate(int nevt, string opt = "");
 
     /** \brief Generate events using the model inetrnally set and a specific number of signal and background events
          * @param nsigevt: Number of signal events to generate
@@ -279,7 +286,7 @@ public:
          * <br> "-seed(n)":  To set a specific seed
          * <br> "-smear(r)": "r" is a double interpreted as resolution. The generated events will be gaussian smeared by this resolution.
          **/
-    TTree * Generate(double nsigevt, double nbkgevt, string opt = "-subtree");
+    TTree * Generate(double nsigevt, double nbkgevt, string opt = "");
 
     /** \brief Allows to apply cuts on "dataReader" and returnes a tree containing only events which pass the cut.
       @param substtree: if you want to set the three obtained as "reducedTree" (default = true)
