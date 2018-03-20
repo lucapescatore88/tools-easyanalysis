@@ -100,7 +100,6 @@ class Analysis : public ModelBuilder {
 
     RooDataSet * CreateDataSet(string opt = "", TCut mycuts = "");
     TH1 * CreateHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", string opt = "", TH1 * htemplate = NULL);
-    //TH1 * CreateHisto(string opt);
 
     TreeReader * m_dataReader;
     TTree * m_reducedTree;

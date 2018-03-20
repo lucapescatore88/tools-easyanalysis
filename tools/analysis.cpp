@@ -134,29 +134,8 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
         }
         else m_data = new RooDataSet("data_" + m_name, "data" + m_name, varList, Import(*m_reducedTree));
 
-        //CreateHisto("-usedataset");
-
         if (m_pmode == "v") m_data->Print();
     }
-    /*
-    else if (m_dataHist)
-    {
-        RooDataHist *htmp   = new RooDataHist("data" + m_name, "", *m_var, m_dataHist);
-        RooRealVar  *w      = new RooRealVar("w"  + m_name, "", 1., 0., 1.e6);
-        RooArgSet   *ArgSet = new RooArgSet("args");
-        ArgSet->add(*m_var);
-        ArgSet->add(*w);
-        RooDataSet  *tmp    = new RooDataSet("data" + m_name, "", *ArgSet, "w" + m_name);
-
-        for (int i = 0; i < htmp->numEntries(); ++i)
-        {
-            htmp->get(i);
-            tmp->add(*htmp->get(i), htmp->weight(), htmp->weightError(RooAbsData::SumW2));
-        }
-
-        m_data = tmp;
-    }
-    */
 
     return m_data;
 }
@@ -364,7 +343,6 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
                 list_for_product.add(*nll_norm);
                 list_for_product.add(*m_constr);
                 nll_toFit = new RooAddition("nll_constrained", "nll_constrained", list_for_product);
-                //nll_toFit = new RooProduct("nll_constrained", "nll_constrained", list_for_product);
             }
 
             // Actual fit
@@ -509,13 +487,6 @@ void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
             if (name.find("totbkg") != string::npos) m_bkg = (RooAbsPdf*)argBkg;
         }
     }
-    /*
-        if (wsSig && wsBkg)
-        {
-            m_init = true;
-            ForceValid();
-        }
-    */
 }
 
 void Analysis::ImportData(RooWorkspace * ws)
