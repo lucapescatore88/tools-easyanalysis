@@ -144,7 +144,12 @@ def create_analysis(config) :
     v = r.RooRealVar(cont['var']['name'],cont['var']['name'],cont['var']['min'],cont['var']['max'])
 
     if cont['datafile'] != 'None' :
-        a = ea.Analysis(cont['name'],cont['title'],cont['datatree'],cont['datafile'],v,cut)
+        if 'datatree' in cont.keys() :
+            a = ea.Analysis(cont['name'],cont['title'],cont['datatree'],cont['datafile'],v,cut)
+        elif 'datahist' in cont.keys() :
+            f = r.TFile(cont['datafile'])
+            h = f.Get(cont['datahist'])
+            a = ea.Analysis(cont['name'],cont['title'],h,v)
     else :
         a = ea.Analysis(cont['name'],cont['title'],v)
 

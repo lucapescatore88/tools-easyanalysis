@@ -146,12 +146,7 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
    This function returns an histogram of the variable in the "reducedTree" dataset
    between min and max and with nbins and "cuts" applied.
    */
-/*
-TH1 * Analysis::CreateHisto(string option)
-{
-    return CreateHisto(0, 0, 50, (TCut)"", "", option);
-}
-*/
+
 TH1 * Analysis::CreateHisto(double min, double max, int nbin, TCut _cuts, string _weight, string option, TH1 * htemplate)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
