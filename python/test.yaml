@@ -2,7 +2,8 @@ name: 'test'
 title: 'test'
 units: 'MeV/c^{2}'
 
-datatree : 'DecayTuple'
+datahist : 'mass_histo'
+#datatree : 'DecayTuple'
 datafile : 'test.root'
 
 var :
