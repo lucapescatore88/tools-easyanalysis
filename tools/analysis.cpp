@@ -150,7 +150,7 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
         for (int i = 0; i < htmp->numEntries(); ++i)
         {
             htmp->get(i);
-            tmp->add(*htmp->get(i), htmp->weight());
+            tmp->add(*htmp->get(i), htmp->weight(), htmp->weightError(RooAbsData::SumW2));
         }
 
         m_data = tmp;
