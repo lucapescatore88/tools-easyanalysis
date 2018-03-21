@@ -231,20 +231,20 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
 
     Str2VarMap p = getPar(typepdf_, namepdf_, var, myvars, opt, title);
 
-    if (typepdf_.find("MomFracPdf") != string::npos)
+    if (typepdf_.substr(0, 5).find("Gauss") != string::npos)
     {
-        pdf = new RooMomentumFractionPdf(namepdf, namepdf, *var, *p["xmin"], *p["dx"], *p["pow"]);
+        pdf = new RooGaussian(namepdf, title, *var, *p["m"], *p["s"]);
     }
-    if (typepdf_.find("MisIDGauss") != string::npos)
+    else if (typepdf_.find("MisIDGauss") != string::npos)
     {
-        pdf = new RooMisIDGaussian(namepdf, namepdf, *var, *p["m"], *p["s"], *p["dm2"], *p["pow"], *p["xmin"], *p["xmax"], *p["dx"]);
+        pdf = new RooMisIDGaussian(namepdf, title, *var, *p["m"], *p["s"], *p["dm2"], *p["pow"], *p["xmin"], *p["xmax"], *p["dx"]);
     }
     else if (typepdf_.find("DGauss") != string::npos)
     {
         RooGaussian * gauss1 = new RooGaussian("gauss1_" + namepdf_, "Gauss", *var, *p["m"], *p["s"]);
         RooGaussian * gauss2 = new RooGaussian("gauss2_" + namepdf_, "Gauss", *var, *p["m"], *p["s2"]);
 
-        pdf = new RooAddPdf(namepdf, namepdf, RooArgList(*gauss1, *gauss2), *p["f"]);
+        pdf = new RooAddPdf(namepdf, title, RooArgList(*gauss1, *gauss2), *p["f"]);
     }
     else if (typepdf_.find("TGauss") != string::npos)
     {
@@ -252,62 +252,48 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
         RooGaussian * gauss2 = new RooGaussian("gauss2_" + namepdf_, "Gauss", *var, *p["m"], *p["s2"]);
         RooGaussian * gauss3 = new RooGaussian("gauss3_" + namepdf_, "Gauss", *var, *p["m"], *p["s3"]);
 
-        pdf = new RooAddPdf(namepdf, namepdf, RooArgList(*gauss1, *gauss2, *gauss3), RooArgList(*p["f"], *p["f2"]));
+        pdf = new RooAddPdf(namepdf, title, RooArgList(*gauss1, *gauss2, *gauss3), RooArgList(*p["f"], *p["f2"]));
     }
-    else if (typepdf_.find("DSCB") != string::npos)
-    {
-        pdf = new RooDoubleCB(namepdf, namepdf, *var, *p["m"], *p["s"], *p["a"], *p["n"], *p["a2"], *p["n2"]);
-    }
-    else if (typepdf_.find("DCBGauss") != string::npos)
-    {
-        RooCBShape * CB1 = new RooCBShape("CB1_" + namepdf_, "CB", *var, *p["m"], *p["s"], *p["a"], *p["n"]);
-        RooCBShape * CB2 = new RooCBShape("CB2_" + namepdf_, "CB", *var, *p["m"], *p["s2"], *p["a2"], *p["n2"]);
 
-        RooGaussian * gauss1 = new RooGaussian("gauss1_" + namepdf_, "Gauss", *var, *p["m"], *p["s3"]);
-
-        pdf = new RooAddPdf(namepdf, namepdf, RooArgList(*CB1, *CB2, *gauss1), RooArgList(*p["f"], *p["f2"]));
-    }
-    else if (typepdf_.substr(0, 5).find("Gauss") != string::npos)
+    else if (typepdf_.substr(0, 2).find("CB") != string::npos)
     {
-        pdf = new RooGaussian(namepdf, title, *var, *p["m"], *p["s"]);
+        RooAbsPdf * cb = new RooCBShape(namepdf, "CB", *var, *p["m"], *p["s"], *p["a"], *p["n"]);
+        if (typepdf_.find("CBGauss") != string::npos)
+        {
+	    cb->SetName("cb_" + namepdf_);
+            RooGaussian * gauss = new RooGaussian("gauss_" + namepdf_, "Gauss", *var, *p["m"], *p["sg"]);
+            pdf = new RooAddPdf(namepdf, title, RooArgSet(*cb, *gauss), *p["fg"]);
+        }
+        else pdf = cb;
     }
     else if (typepdf_.find("DCB") != string::npos)
     {
-        RooCBShape * CB1 = new RooCBShape("CB1_" + namepdf_, "CB", *var, *p["m"], *p["s"], *p["a"], *p["n"]);
-
-        RooCBShape * CB2;
+        RooCBShape * cb1 = new RooCBShape("cb1_" + namepdf_, "CB", *var, *p["m"], *p["s"], *p["a"], *p["n"]);
+        RooCBShape * cb2;
         if (typepdf_.find("_Sn") != string::npos)
-            CB2 = new RooCBShape("CB2_" + namepdf_, "CB", *var, *p["m"], *p["s2"], *p["a2"], *p["n"]);
-        else CB2 = new RooCBShape("CB2_" + namepdf_, "CB", *var, *p["m"], *p["s2"], *p["a2"], *p["n2"]);
+             cb2 = new RooCBShape("cb2_" + namepdf_, "CB", *var, *p["m"], *p["s2"], *p["a2"], *p["n"]);
+        else cb2 = new RooCBShape("cb2_" + namepdf_, "CB", *var, *p["m"], *p["s2"], *p["a2"], *p["n2"]);
 
-        pdf = new RooAddPdf(namepdf, namepdf, RooArgList(*CB1, *CB2), *p["f"]);
+        if (typepdf_.find("DCBGauss") != string::npos)
+	{
+	    RooGaussian * gauss = new RooGaussian("gauss_" + namepdf_, "Gauss", *var, *p["m"], *p["sg"]);
+	    pdf = new RooAddPdf(namepdf, title, RooArgSet(*cb1, *cb2, *gauss), RooArgList(*p["f"], *p["fg"]));
+	}
+        else pdf = new RooAddPdf(namepdf, title, RooArgList(*cb1, *cb2), *p["f"]);
     }
     else if (typepdf_.find("TCB") != string::npos)
     {
-        RooCBShape * CB1 = new RooCBShape("CB1_" + namepdf_, "CB", *var, *p["m"], *p["s"], *p["a"], *p["n"]);
-        RooCBShape * CB2 = new RooCBShape("CB2_" + namepdf_, "CB", *var, *p["m"], *p["s2"], *p["a2"], *p["n2"]);
-        RooCBShape * CB3 = new RooCBShape("CB3_" + namepdf_, "CB", *var, *p["m"], *p["s3"], *p["a3"], *p["n3"]);
+        RooCBShape * cb1 = new RooCBShape("cb1_" + namepdf_, "CB", *var, *p["m"], *p["s"], *p["a"], *p["n"]);
+        RooCBShape * cb2 = new RooCBShape("cb2_" + namepdf_, "CB", *var, *p["m"], *p["s2"], *p["a2"], *p["n2"]);
+        RooCBShape * cb3 = new RooCBShape("cb3_" + namepdf_, "CB", *var, *p["m"], *p["s3"], *p["a3"], *p["n3"]);
 
-        pdf = new RooAddPdf(namepdf, namepdf, RooArgList(*CB1, *CB2, *CB3), RooArgList(*p["f"], *p["f2"]));
+        pdf = new RooAddPdf(namepdf, title, RooArgList(*cb1, *cb2, *cb3), RooArgList(*p["f"], *p["f2"]));
     }
-    else if (typepdf_.substr(0, 2).find("CB") != string::npos)
+    else if (typepdf_.find("DSCB") != string::npos)
     {
-        RooAbsPdf *CB = new RooCBShape(namepdf, namepdf, *var, *p["m"], *p["s"], *p["a"], *p["n"]);
-        if (typepdf_.find("CBGauss") != string::npos)
-        {
-            RooGaussian * gaussCB = new RooGaussian("gauss_" + namepdf_, "Gauss", *var, *p["m"], *p["sg"]);
-            pdf = new RooAddPdf("CBGauss_" + namepdf_, "CBGauss", RooArgSet(*CB, *gaussCB), *p["fg"]);
-        }
-        else pdf = CB;
+        pdf = new RooDoubleCB(namepdf, title, *var, *p["m"], *p["s"], *p["a"], *p["n"], *p["a2"], *p["n2"]);
     }
-    else if (typepdf_.find("Voigt") != string::npos)
-    {
-        pdf = new RooVoigtian(namepdf, namepdf, *var, *p["m"], *p["s"], *p["g"]);
-    }
-    else if (typepdf_.find("BreitWigner") != string::npos)
-    {
-        pdf = new RooBreitWigner(namepdf, namepdf, *var, *p["m"], *p["g"]);
-    }
+
     else if (typepdf_.find("Poly") != string::npos || typepdf_.find("Cheb") != string::npos)
     {
         TString str_npar = (TString)(typepdf_.substr(4, string::npos));
@@ -349,69 +335,81 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
             parList->add(*v);
         }
 
-        if (typepdf_.find("Poly") != string::npos) pdf = new RooPolynomial(namepdf, namepdf, *var, *parList);
-        else pdf = new RooChebychev(namepdf, namepdf, *var, *parList);
+        if (typepdf_.find("Poly") != string::npos) pdf = new RooPolynomial(namepdf, title, *var, *parList);
+        else pdf = new RooChebychev(namepdf, title, *var, *parList);
     }
+
     else if (typepdf_.find("ExpAGauss") != string::npos)
     {
-        pdf = new RooExpAndGauss(namepdf, namepdf, *var, *p["m"], *p["s"], *p["b"]);
+        pdf = new RooExpAndGauss(namepdf, title, *var, *p["m"], *p["s"], *p["b"]);
     }
     else if (typepdf_.find("ExpCGauss") != string::npos)
     {
-        pdf = new RooGExpModel(namepdf, namepdf, *var, *p["s"], *p["b"]);
+        pdf = new RooGExpModel(namepdf, title, *var, *p["s"], *p["b"]);
     }
-    else if (typepdf_.find("Exp") != string::npos)
+    else if (typepdf_.substr(0, 3).find("Exp") != string::npos)
     {
-        pdf = new RooExponential(namepdf, namepdf, *var, *p["b"]);
+        pdf = new RooExponential(namepdf, title, *var, *p["b"]);
     }
+
     else if (typepdf_.find("Argus") != string::npos)
     {
-        pdf = new RooArgusBG(namepdf, namepdf, *var, *p["m0"], *p["c"], *p["p"]);
-    }
-    else if (typepdf_.find("Gamma") != string::npos)
-    {
-        pdf = new RooGamma(namepdf, namepdf, *var, *p["g"], *p["b"], *p["m"]);
+        pdf = new RooArgusBG(namepdf, title, *var, *p["m0"], *p["c"], *p["p"]);
     }
     else if (typepdf_.find("Apollonios") != string::npos)
     {
-        pdf = new RooApollonios(namepdf, namepdf, *var, *p["m"], *p["s"], *p["b"], *p["a"], *p["n"]);
+        pdf = new RooApollonios(namepdf, title, *var, *p["m"], *p["s"], *p["b"], *p["a"], *p["n"]);
+    }
+    else if (typepdf_.find("BreitWigner") != string::npos)
+    {
+        pdf = new RooBreitWigner(namepdf, title, *var, *p["m"], *p["g"]);
+    }
+    else if (typepdf_.find("Gamma") != string::npos)
+    {
+        pdf = new RooGamma(namepdf, title, *var, *p["g"], *p["b"], *p["m"]);
     }
     else if (typepdf_.find("Johnson") != string::npos)
     {
-        pdf = new RooJohnson(namepdf, namepdf, *var, *p["m"], *p["s"], *p["nu"], *p["tau"]);
-    }
-    else if (typepdf_.find("Ipatia2") != string::npos)
-    {
-        pdf = new RooIpatia2(namepdf, namepdf, *var, *p["l"], *p["z"], *p["b"], *p["s"], *p["m"], *p["a"], *p["n"], *p["a2"], *p["n2"]);
+        pdf = new RooJohnson(namepdf, title, *var, *p["m"], *p["s"], *p["nu"], *p["tau"]);
     }
     else if (typepdf_.find("Ipatia") != string::npos)
     {
-        pdf = new RooIpatia(namepdf, namepdf, *var, *p["l"], *p["z"], *p["b"], *p["s"], *p["m"], *p["a"], *p["n"]);
+	if (typepdf_.find("Ipatia2") != string::npos)
+	    pdf = new RooIpatia2(namepdf, title, *var, *p["l"], *p["z"], *p["b"], *p["s"], *p["m"], *p["a"], *p["n"], *p["a2"], *p["n2"]);
+	else
+	    pdf = new RooIpatia(namepdf, title, *var, *p["l"], *p["z"], *p["b"], *p["s"], *p["m"], *p["a"], *p["n"]);
+    }
+    else if (typepdf_.find("MomFracPdf") != string::npos)
+    {
+        pdf = new RooMomentumFractionPdf(namepdf, title, *var, *p["xmin"], *p["dx"], *p["pow"]);
+    }
+    else if (typepdf_.find("Voigt") != string::npos)
+    {
+        pdf = new RooVoigtian(namepdf, title, *var, *p["m"], *p["s"], *p["g"]);
     }
 
     if (typepdf_.find("AndGauss") != string::npos)
     {
         pdf->SetName(((TString)pdf->GetName()).ReplaceAll("_print", ""));
-        RooGaussian * gauss = new RooGaussian("gauss_" + namepdf_, "Gauss", *var, *p["mg"], *p["sg"]);
+        RooGaussian * gauss = new RooGaussian("extragauss_" + namepdf_, "Gauss", *var, *p["mg"], *p["sg"]);
         pdf = new RooAddPdf((TString)namepdf + "_plus_Gauss", (TString)namepdf + "_plus_Gauss", RooArgList(*pdf, *gauss), *p["fg"]);
     }
-
     if (typepdf_.find("AndCB") != string::npos)
     {
         pdf->SetName(((TString)pdf->GetName()).ReplaceAll("_print", ""));
-        RooCBShape * cb = new RooCBShape("extraCB_" + namepdf_, "CB", *var, *p["mcb"], *p["scb"], *p["acb"], *p["ncb"]);
+        RooCBShape * cb = new RooCBShape("extracb_" + namepdf_, "CB", *var, *p["mcb"], *p["scb"], *p["acb"], *p["ncb"]);
         pdf = new RooAddPdf((TString)namepdf + "_plus_CB", (TString)namepdf + "_plus_CB", RooArgList(*pdf, *cb), *p["fcb"]);
     }
-
     if (typepdf_.find("ConvGauss") != string::npos)
     {
         RooRealVar * mg = new RooRealVar("conv_mg_" + namepdf_, "m_{res}", 0.);
         RooGaussian * resolution_gauss = new RooGaussian("convgauss_" + namepdf_, "", *var, *mg, *p["sconv"]);
         RooNumConvPdf * respdf = new RooNumConvPdf(namepdf, namepdf, *var, *pdf, *resolution_gauss);
         respdf->setConvolutionWindow(*mg, *p["sconv"], 3);
-        return (RooAbsPdf *)respdf;
+	pdf = (RooAbsPdf *)respdf;
     }
-    else return pdf;
+
+    return pdf;
 }
 
 RooAbsPdf * stringToPdf(const char * typepdf1, const char * typepdf2, const char * namepdf, RooRealVar * var1, RooRealVar * var2, Str2VarMap myvars, string opt, TString title)
