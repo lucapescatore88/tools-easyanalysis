@@ -61,7 +61,7 @@ bool Analysis::Initialize(string option, double frac)
     }
 
     if (m_data) m_init = true;
-    else if (!m_reducedTree) cout << "WARNING: No data available!!" << endl;
+    else if (!m_reducedTree && !m_dataHist) cout << "WARNING: No data available!!" << endl;
 
     bool result = ModelBuilder::Initialize(option);
     if (m_bkg_components.empty() && m_data) ((RooRealVar*)m_nsig)->setVal(m_data->numEntries());
