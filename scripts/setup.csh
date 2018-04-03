@@ -41,7 +41,6 @@ if ( ! ($?TOOLSSYS) ) then
     echo
 
     source $TOOLSSYS/scripts/setup.csh arch
-    source $TOOLSSYS/scripts/setup.csh cmake
     source $TOOLSSYS/scripts/setup.csh gcc
     source $TOOLSSYS/scripts/setup.csh python
     source $TOOLSSYS/scripts/setup.csh gsl
