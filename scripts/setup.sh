@@ -51,7 +51,7 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     source $TOOLSSYS/scripts/setup.sh python
     source $TOOLSSYS/scripts/setup.sh gsl
     source $TOOLSSYS/scripts/setup.sh root
-    source $TOOLSSYS/scripts/setup.sh cmake
+
     source $TOOLSSYS/scripts/setup.sh env
 fi
 

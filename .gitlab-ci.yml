@@ -11,7 +11,7 @@ build_cmake:
     - cd build
     - cmake ..
     - make -j 8
-    - ls 
+    - ls -lh
 
 build_make:
   tags:
