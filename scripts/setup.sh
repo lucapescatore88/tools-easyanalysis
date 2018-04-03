@@ -30,7 +30,7 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     export TOOLSSYS="$( command cd . "$( dirname "${BASH_SOURCE[0]}" )" && command pwd )"
 
     export LD_LIBRARY_PATH=$TOOLSSYS/roofit/dic:$LD_LIBRARY_PATH
-    export LD_LIBRARY_PATH=$TOOLSSYS/build/tools:$TOOLSSYS/build/roofit:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=$TOOLSSYS/build:$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=$TOOLSSYS/lib:$LD_LIBRARY_PATH
 
     export LD_INCLUDE_PATH=${TOOLSSYS}:$TOOLSSYS/tools:$TOOLSSYS/roofit:$LD_INCLUDE_PATH
@@ -50,7 +50,7 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     source $TOOLSSYS/scripts/setup.sh python
     source $TOOLSSYS/scripts/setup.sh gsl
     source $TOOLSSYS/scripts/setup.sh root
-
+    source $TOOLSSYS/scripts/setup.sh cmake
     source $TOOLSSYS/scripts/setup.sh env
 fi
 
