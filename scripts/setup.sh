@@ -5,7 +5,6 @@ shopt -s expand_aliases
 # LIBS
 export CVMFS=/cvmfs/lhcb.cern.ch
 export LCGSYS=$CVMFS/lib/lcg
-export ARCH=x86_64-slc6-gcc49-opt
 
 if [ ! -d $LCGSYS ]; then
     echo
@@ -45,8 +44,8 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     echo
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
-    
-    source $TOOLSSYS/scripts/setup.sh cmake
+
+    source $TOOLSSYS/scripts/setup.sh arch
     source $TOOLSSYS/scripts/setup.sh gcc
     source $TOOLSSYS/scripts/setup.sh python
     source $TOOLSSYS/scripts/setup.sh gsl
@@ -66,6 +65,38 @@ case "$1" in
         echo "Configuring ROOT_INCLUDE_PATH to $ROOT_INCLUDE_PATH"
         echo "Configuring PYTHONPATH        to $PYTHONPATH"
         echo
+
+        ;;
+
+    arch)
+	export ARCH=x86_64-slc6-gcc49-opt
+        if [ `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ]; then
+	    export ARCH=x86_64-slc6-gcc49-opt
+	fi
+	if [ `cat /etc/redhat-release | grep -ie "CentOS" | grep -ie "release 7" | wc -l` == 1 ]; then
+	    export ARCH=x86_64-centos7-gcc62-opt
+	fi
+	if [ "$2" != "" ]; then
+	    export ARCH=$2
+	fi
+
+	;;
+
+    lcg)
+	SYS=/cvmfs/sft.cern.ch/lcg/views
+	VER=LCG_92
+	source $TOOLSSYS/scripts/setup.sh arch x86_64-slc6-gcc62-opt
+	VER=$VER/$ARCH
+	if [ -f $SYS/$VER/setup.sh ]; then
+	    source $SYS/$VER/setup.sh
+	    export LCGSYS=$SYS/$VER
+
+            echo "Configuring LCG from $LCGSYS"
+        else
+            echo
+	    echo "LCG $SYS/$VER not available"
+            echo
+        fi
 
         ;;
 
