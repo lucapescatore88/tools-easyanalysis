@@ -78,7 +78,15 @@ switch ( "$1" )
 	source $TOOLSSYS/scripts/setup.csh arch x86_64-slc6-gcc62-opt
         set VER = $VER/$ARCH
 	if ( -f $SYS/$VER/setup.csh ) then
-	    source $SYS/$VER/setup.csh
+	    #source $SYS/$VER/setup.csh
+            set DUMMY = $TOOLSSYS/scripts/setup_lcg.csh
+            if ( -f $DUMMY ) rm -rf $DUMMY
+            touch $DUMMY
+            echo "set thisfile=$SYS/$VER/setup.csh" >> $DUMMY
+            echo "set thisdir=$SYS/$VER" >> $DUMMY
+            tail -n+13 $SYS/$VER/setup.csh >> $DUMMY
+            source $DUMMY
+            rm -rf $DUMMY
 	    setenv LCGSYS $SYS/$VER
 
 	    echo "Configuring LCG from $LCGSYS"
