@@ -199,7 +199,7 @@ switch ( "$1" )
                 setenv GSLSYS $SYS/$VER
                 setenv LD_LIBRARY_PATH $GSLSYS/lib:$LD_LIBRARY_PATH
                 setenv LD_INCLUDE_PATH $GSLSYS/include:$LD_INCLUDE_PATH
-
+                setenv PATH $GSLSYS/bin:$PATH
                 echo "Configuring GSL        from $GSLSYS"
             else
                 echo
