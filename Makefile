@@ -33,6 +33,7 @@ ROOTCINT   = rootcint
 ROOTCLING  = rootcling
 
 GSLFLAGS  = $(shell gsl-config --cflags --libs)
+GSLDIR = $(shell gsl-config --prefix)/include
 ROOTFLAGS  = $(shell root-config --cflags --glibs)
 ROOTINC    = $(shell root-config --incdir)
 
