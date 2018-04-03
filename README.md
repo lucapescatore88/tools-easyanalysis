@@ -37,7 +37,9 @@ make -j4
 ```
 To be able to load everything in python through ```ROOT.gSystem```, be sure ```LD_LIBRARY_PATH``` includes the directory where the ```.pcm,.rootmap and .so``` files are created, 
 By default they are produced in ```build/```.
-In principle, you should be able to include the easyanalysis to a cmake project simply by adding 
-```add_subdirectories(tools)```
+In principle, you should be able to include the easyanalysis to a cmake project simply  adding 
+```bash
+add_subdirectories(tools)
+```
 in your main project.
 
