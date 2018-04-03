@@ -28,7 +28,7 @@ if [ ! -n "${PYTHONPATH+x}" ]; then
 fi
 
 if [ ! -n "${TOOLSSYS+x}" ]; then
-    export TOOLSSYS="$( cd . "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    export TOOLSSYS="$( command cd . "$( dirname "${BASH_SOURCE[0]}" )" && command pwd )"
 
     export LD_LIBRARY_PATH=$TOOLSSYS/roofit/dic:$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=$TOOLSSYS/build/tools:$TOOLSSYS/build/roofit:$LD_LIBRARY_PATH
@@ -45,7 +45,7 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     echo
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
-
+    
     source $TOOLSSYS/scripts/setup.sh cmake
     source $TOOLSSYS/scripts/setup.sh gcc
     source $TOOLSSYS/scripts/setup.sh python
@@ -111,7 +111,7 @@ case "$1" in
         SYS=$LCGSYS/releases/Python
         VER=2.7.13-597a5
         VER=$VER/$ARCH
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+        if [ `echo "$LD_LIBRARY_PATH" | command grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export PYTHONSYS=$SYS/$VER
                 export PATH=$PYTHONSYS/bin:$PATH
@@ -136,7 +136,7 @@ case "$1" in
         SYS=$LCGSYS/releases/pyanalysis
         VER=2.0-32412
         VER=$VER/$ARCH
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+        if [ `echo "$LD_LIBRARY_PATH" | command grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export PYANALYSISSYS=$SYS/$VER
                 export PATH=$PYANALYSISSYS/bin:$PATH
@@ -157,7 +157,7 @@ case "$1" in
         SYS=$LCGSYS/releases/pytools
         VER=2.0-93db0
         VER=$VER/$ARCH
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+        if [ `echo "$LD_LIBRARY_PATH" | command grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export PYTOOLSSYS=$SYS/$VER
                 export PATH=$PYTOOLSSYS/bin:$PATH
@@ -178,12 +178,12 @@ case "$1" in
         SYS=$LCGSYS/releases/GSL
         VER=2.1-36ee5
         VER=$VER/$ARCH
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+        if [ `echo "$LD_LIBRARY_PATH" | command grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export GSLSYS=$SYS/$VER
                 export LD_LIBRARY_PATH=$GSLSYS/lib:$LD_LIBRARY_PATH
                 export LD_INCLUDE_PATH=$GSLSYS/include:$LD_INCLUDE_PATH
-
+		export PATH=$GSLSYS/bin:$PATH
                 echo "Configuring GSL        from $GSLSYS"
             else
                 echo
@@ -198,7 +198,7 @@ case "$1" in
         SYS=$LCGSYS/releases/ROOT
         VER=6.08.06-c8fb4
         VER=$VER/$ARCH
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+        if [ `echo "$LD_LIBRARY_PATH" | command grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export ROOTSYS=$SYS/$VER
                 export PATH=$ROOTSYS/bin:${PATH}
