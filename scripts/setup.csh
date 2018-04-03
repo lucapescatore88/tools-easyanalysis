@@ -3,7 +3,6 @@
 # LIBS
 setenv CVMFS /cvmfs/lhcb.cern.ch
 setenv LCGSYS $CVMFS/lib/lcg
-setenv ARCH x86_64-slc6-gcc49-opt
 
 if ( ! -d $LCGSYS ) then
     echo
@@ -41,6 +40,7 @@ if ( ! ($?TOOLSSYS) ) then
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
 
+    source $TOOLSSYS/scripts/setup.csh arch
     source $TOOLSSYS/scripts/setup.csh cmake
     source $TOOLSSYS/scripts/setup.csh gcc
     source $TOOLSSYS/scripts/setup.csh python
@@ -63,6 +63,32 @@ switch ( "$1" )
         echo
 
         breaksw
+
+    case arch:
+	setenv ARCH x86_64-slc6-gcc49-opt
+	if ( `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ) setenv ARCH x86_64-slc6-gcc49-opt
+	if ( `cat /etc/redhat-release | grep -ie "CentOS" | grep -ie "release 7" | wc -l` == 1 ) setenv ARCH x86_64-centos7-gcc62-opt
+	if ( "$2" != "" ) setenv ARCH $2
+
+	breaksw
+
+    case lcg:
+        set SYS = /cvmfs/sft.cern.ch/lcg/views
+        set VER = LCG_92
+	source $TOOLSSYS/scripts/setup.csh arch x86_64-slc6-gcc62-opt
+        set VER = $VER/$ARCH
+	if ( -f $SYS/$VER/setup.csh ) then
+	    source $SYS/$VER/setup.csh
+	    setenv LCGSYS $SYS/$VER
+
+	    echo "Configuring LCG from $LCGSYS"
+	else
+	    echo
+	    echo "LCG $SYS/$VER not available"
+	    echo
+	endif
+
+	breaksw
 
     case cmake:
         set SYS = $CVMFS/lib/contrib/CMake
