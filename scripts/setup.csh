@@ -41,6 +41,7 @@ if ( ! ($?TOOLSSYS) ) then
     echo
 
     source $TOOLSSYS/scripts/setup.csh arch
+    source $TOOLSSYS/scripts/setup.csh cmake
     source $TOOLSSYS/scripts/setup.csh gcc
     source $TOOLSSYS/scripts/setup.csh python
     source $TOOLSSYS/scripts/setup.csh gsl
@@ -64,7 +65,7 @@ switch ( "$1" )
         breaksw
 
     case arch:
-	setenv ARCH x86_64-slc6-gcc49-opt
+	if ( ! ($?ARCH) ) setenv
 	if ( `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ) setenv ARCH x86_64-slc6-gcc49-opt
 	if ( `cat /etc/redhat-release | grep -ie "CentOS" | grep -ie "release 7" | wc -l` == 1 ) setenv ARCH x86_64-centos7-gcc62-opt
 	if ( "$2" != "" ) setenv ARCH $2

@@ -46,6 +46,7 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     echo
 
     source $TOOLSSYS/scripts/setup.sh arch
+    source $TOOLSSYS/scripts/setup.sh cmake
     source $TOOLSSYS/scripts/setup.sh gcc
     source $TOOLSSYS/scripts/setup.sh python
     source $TOOLSSYS/scripts/setup.sh gsl
@@ -69,7 +70,9 @@ case "$1" in
         ;;
 
     arch)
-	export ARCH=x86_64-slc6-gcc49-opt
+        if [ -n "${ARCH+x}" ]; then
+            export ARCH
+        fi
         if [ `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ]; then
 	    export ARCH=x86_64-slc6-gcc49-opt
 	fi
