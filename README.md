@@ -24,7 +24,7 @@ make shared
 
 A doxygen is available at http://pluca.web.cern.ch/pluca/doxygen/annotated.html
 
-#Easyanalysis cmake
+# Easyanalysis cmake
 To be able to generate the libraries and load them in python when compiling using CMake:
 ```bash
 source scripts/setup.sh
