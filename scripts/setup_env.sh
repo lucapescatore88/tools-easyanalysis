@@ -21,5 +21,3 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
 fi
-
-

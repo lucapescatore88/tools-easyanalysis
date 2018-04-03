@@ -197,9 +197,10 @@ switch ( "$1" )
         if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ) then
             if ( -d $SYS/$VER ) then
                 setenv GSLSYS $SYS/$VER
+                setenv PATH $GSLSYS/bin:$PATH
                 setenv LD_LIBRARY_PATH $GSLSYS/lib:$LD_LIBRARY_PATH
                 setenv LD_INCLUDE_PATH $GSLSYS/include:$LD_INCLUDE_PATH
-                setenv PATH $GSLSYS/bin:$PATH
+
                 echo "Configuring GSL        from $GSLSYS"
             else
                 echo

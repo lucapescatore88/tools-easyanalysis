@@ -181,9 +181,10 @@ case "$1" in
         if [ `echo "$LD_LIBRARY_PATH" | command grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export GSLSYS=$SYS/$VER
+		export PATH=$GSLSYS/bin:$PATH
                 export LD_LIBRARY_PATH=$GSLSYS/lib:$LD_LIBRARY_PATH
                 export LD_INCLUDE_PATH=$GSLSYS/include:$LD_INCLUDE_PATH
-		export PATH=$GSLSYS/bin:$PATH
+
                 echo "Configuring GSL        from $GSLSYS"
             else
                 echo
