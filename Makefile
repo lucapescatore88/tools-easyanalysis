@@ -36,7 +36,7 @@ GSLFLAGS  = $(shell gsl-config --cflags --libs)
 GSLDIR = $(shell gsl-config --prefix)
 ROOTFLAGS  = $(shell root-config --cflags --glibs)
 ROOTINC    = $(shell root-config --incdir)
-
+INCFLAGS+=-I$(GSLDIR)/include
 CXX        = g++
 CXXFLAGS   = -g -fPIC -Wall -O2 -lTMVA -lRooFit -lRooStats -lMathMore $(ROOTFLAGS) $(INCFLAGS) $(GSLFLAGS)
 
