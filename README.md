@@ -12,6 +12,12 @@ To setup the proper environment
 source scripts/setup.sh (or setup.csh if you use tcsh)
 ```
 
+A doxygen is available at http://pluca.web.cern.ch/pluca/doxygen/annotated.html
+
+n.b. In order to access `easyanalysis` in python via `ROOT.gSystem`, `LD_LIBRARY_PATH` must include the directory where the `.pcm`, `.rootmap` and `.so` files are located (as done with `source scripts/setup`)
+
+## Make
+
 To build the static libraries
 ```bash
 make
@@ -22,24 +28,18 @@ To build the shared libraries to be loaded in python
 make shared
 ```
 
-A doxygen is available at http://pluca.web.cern.ch/pluca/doxygen/annotated.html
+## CMake
 
-# Easyanalysis cmake
-To be able to generate the libraries and load them in python when compiling using CMake:
+To build the static and shared libraries
 ```bash
-source scripts/setup.sh
-```
-Compile the code and produce the (single) library of easyanalysis (both roofit and tools in one go)
-```bash
-mkdir build #create a location where to build the code
-cd build 
+mkdir build
+cd build
+cmake ..
 make -j4
 ```
-To be able to load everything in python through ```ROOT.gSystem```, be sure ```LD_LIBRARY_PATH``` includes the directory where the ```.pcm,.rootmap and .so``` files are created, 
-By default they are produced in ```build/```.
-In principle, you should be able to include the easyanalysis to a cmake project simply  adding 
+
+One should be able to include `easyanalysis` in a cmake project by simply adding 
 ```bash
 add_subdirectories(tools)
 ```
-in your main project.
-
+to the main project
