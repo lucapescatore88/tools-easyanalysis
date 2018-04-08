@@ -61,7 +61,7 @@ bool Analysis::Initialize(string option, double frac)
     }
 
     if (m_data) m_init = true;
-    else if (!m_reducedTree) cout << "WARNING: No data available!!" << endl;
+    else if (!m_reducedTree && !m_dataHist) cout << "WARNING: No data available!!" << endl;
 
     bool result = ModelBuilder::Initialize(option);
     if (m_bkg_components.empty() && m_data) ((RooRealVar*)m_nsig)->setVal(m_data->numEntries());
@@ -134,26 +134,7 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
         }
         else m_data = new RooDataSet("data_" + m_name, "data" + m_name, varList, Import(*m_reducedTree));
 
-        CreateHisto("-usedataset");
-
         if (m_pmode == "v") m_data->Print();
-    }
-    else if (m_dataHist)
-    {
-        RooDataHist *htmp   = new RooDataHist("data" + m_name, "", *m_var, m_dataHist);
-        RooRealVar  *w      = new RooRealVar("w" + m_name, "", 1., 0., 1.e6);
-        RooArgSet   *ArgSet = new RooArgSet("args");
-        ArgSet->add(*m_var);
-        ArgSet->add(*w);
-        RooDataSet  *tmp    = new RooDataSet("data" + m_name, "", *ArgSet, "w" + m_name);
-
-        for (int i = 0; i < htmp->numEntries(); ++i)
-        {
-            htmp->get(i);
-            tmp->add(*htmp->get(i), htmp->weight());
-        }
-
-        m_data = tmp;
     }
 
     return m_data;
@@ -165,11 +146,6 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
    This function returns an histogram of the variable in the "reducedTree" dataset
    between min and max and with nbins and "cuts" applied.
    */
-
-TH1 * Analysis::CreateHisto(string option)
-{
-    return CreateHisto(0, 0, 50, (TCut)"", "", option);
-}
 
 TH1 * Analysis::CreateHisto(double min, double max, int nbin, TCut _cuts, string _weight, string option, TH1 * htemplate)
 {
@@ -218,7 +194,7 @@ void Analysis::SetUnits(string inUnit, string outUnit)
     m_unit = units[iOut] + "/c^{2}";
 }
 
-void Analysis::SetUnits(string outUnit, double scalefactor)
+void Analysis::SetUnits(string outUnit)//, double scalefactor)
 {
     m_unit = outUnit;
 }
@@ -308,6 +284,8 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
             CreateHisto(minr, maxr, nbins, (TCut)"", GetWeight(), option);
             mydata = new RooDataHist("data" + m_name, "", *m_var, m_dataHist);
         }
+        if (m_dataHist && !unbinned)
+            mydata = new RooDataHist("data" + m_name, "", *m_var, m_dataHist);
     }
 
     if ((m_pmode != "v") || (low_opt.find("-quiet") != string::npos))
@@ -360,7 +338,6 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
                 list_for_product.add(*nll_norm);
                 list_for_product.add(*m_constr);
                 nll_toFit = new RooAddition("nll_constrained", "nll_constrained", list_for_product);
-                //nll_toFit = new RooProduct("nll_constrained", "nll_constrained", list_for_product);
             }
 
             // Actual fit
@@ -505,13 +482,6 @@ void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
             if (name.find("totbkg") != string::npos) m_bkg = (RooAbsPdf*)argBkg;
         }
     }
-    /*
-        if (wsSig && wsBkg)
-        {
-            m_init = true;
-            ForceValid();
-        }
-    */
 }
 
 void Analysis::ImportData(RooWorkspace * ws)

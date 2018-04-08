@@ -84,6 +84,7 @@ protected:
     {
         string t = typeid(T).name();
         RooAbsPdf * res = NULL;
+        RooAbsPdf * res_fitrange = NULL; // For check of RooKeysPdf over fitRange
 
         if (_title == "") _title = _name;
 
@@ -133,6 +134,24 @@ protected:
             }
 
             RooDataSet * sigDataSet = NULL;
+            /* If var needs to be changed, here include original mass var name in vars 
+            */
+            RooRealVar * tree_mass_var = NULL;
+            if (opt.find("-var[") != string::npos)
+            {
+                size_t pos = opt.find("-var[") + 4;
+                size_t posend = opt.find("]", pos);
+                if (pos != posend - 1) {
+		    TString varname = (TString)opt.substr(pos + 1, posend - pos - 1);
+		    if (varname != "1")
+		    {
+                        tree_mass_var = new RooRealVar(varname, varname,0.);
+			vars->add(*tree_mass_var);
+                        vars->remove(*myvar);
+		    }
+		}
+            }
+
             if (opt.find("-w[") != string::npos)
             {
                 size_t pos = opt.find("-w[") + 2;
@@ -157,14 +176,56 @@ protected:
                 sigDataSet->reduce(treecut);
             }
 
+            double rho;
             if (opt.find("-rho") != string::npos)
             {
                 int pos = opt.find("-rho");
                 string rhostr = opt.substr(pos + 4, 20);
-                double rho = ((TString)rhostr).Atof();
-                res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
+                rho = ((TString)rhostr).Atof();
             }
-            else res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, 2);
+            else{
+                rho = 2;
+            }
+            /* Here the RooDataSet is based on a tree
+            \\ myvar is the mass variable used, such as Lb_MM
+            \\ massname is the name in the tree
+            \\ Need to add that one to the RooDataSet when making it 
+            */
+            double max_mass,min_mass; // Max and min values of dataset range for mass variable
+            // Get range of fit variable
+            double max = myvar->getMax();
+            double min = myvar->getMin();
+            // Used both in -var[] and plotting of RooKeys
+
+            if (opt.find("-var[") != string::npos)
+            {
+                size_t pos = opt.find("-var[") + 4;
+                size_t posend = opt.find("]", pos);
+                size_t pos_scale = opt.find("-scale[") + 6;
+                size_t posend_scale = opt.find("]",pos_scale);
+                
+                if (pos != posend - 1 and pos_scale != posend_scale - 1) {
+		    TString massname = (TString)opt.substr(pos + 1 , posend - pos -1);
+                    TString scale    = (TString)opt.substr(pos_scale + 1 , posend_scale - pos_scale -1);
+		    if (massname != "1")
+		    {
+			RooFormulaVar massfunc(myvar->GetName(), myvar->GetName(),"("+massname+")*"+scale,RooArgList(*tree_mass_var));
+                        sigDataSet->addColumn(massfunc);
+                        // Code to do the RooKeysPdf over a longer range (first over fit range)
+                        res_fitrange = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
+
+		    }
+		}
+            }
+
+            // Set full range range for RooKeys
+            sigDataSet->getRange(*myvar,min_mass,max_mass); // Get range of dataset in mass variable, has to be done after transformation
+            myvar->setRange(min_mass,max_mass); 
+            res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
+            // Set range back to fit variable range
+            myvar->setRange(min,max);
+
+
             /*if(opt.find("-noshift") == string::npos)
             {
                 RooRealVar * shift = new RooRealVar("shift_rookey_"+(TString)_name,"shift_rookey_"+(TString)_name,0.,-1000.,1000.);
@@ -177,10 +238,12 @@ protected:
 
             if (opt.find("-print") != string::npos)
             {
+                myvar->setRange("fit_range",min,max); // Just for normalisation purposes now 
+
                 TCanvas * c = new TCanvas();
                 RooPlot * keysplot = myvar->frame();
                 sigDataSet->plotOn(keysplot);
-                res->plotOn(keysplot);
+                res_fitrange->plotOn(keysplot,NormRange("fit_range"));
                 keysplot->SetTitle(_name);
                 keysplot->Draw();
                 TString name_ = _name;
@@ -193,9 +256,53 @@ protected:
                 name_.ReplaceAll("/", "_").ReplaceAll("+", "_").ReplaceAll("-", "_").ReplaceAll("*", "_");
                 name_.ReplaceAll(",", "_").ReplaceAll(".", "_");
                 name_.ReplaceAll("__", "_").ReplaceAll("_for", "__for");
+                c->Print("rooKeysModel_fitrange_plotandpdf" + name_ + ".pdf");
+                delete c;
+                delete keysplot;
+
+
+                c = new TCanvas();
+                keysplot = myvar->frame();
+                sigDataSet->plotOn(keysplot);
+                res->plotOn(keysplot,NormRange("fit_range"));
+                keysplot->SetTitle(_name);
+                keysplot->Draw();
+                name_ = _name;
+                name_.ReplaceAll("__noprint__", "");
+                name_.ReplaceAll(" ", "_");
+                name_.ReplaceAll("#", "_").ReplaceAll("^", "_");
+                name_.ReplaceAll("{", "_").ReplaceAll("}", "_");
+                name_.ReplaceAll("(", "_").ReplaceAll(")", "_");
+                name_.ReplaceAll(":", "_");
+                name_.ReplaceAll("/", "_").ReplaceAll("+", "_").ReplaceAll("-", "_").ReplaceAll("*", "_");
+                name_.ReplaceAll(",", "_").ReplaceAll(".", "_");
+                name_.ReplaceAll("__", "_").ReplaceAll("_for", "__for");
+                c->Print("rooKeysModel_fitrange_plot" + name_ + ".pdf");
+                delete c;
+                delete keysplot;
+
+                myvar->setRange(min_mass,max_mass);  
+
+                c = new TCanvas();
+                keysplot = myvar->frame();
+                sigDataSet->plotOn(keysplot);
+                res->plotOn(keysplot);//,NormRange("full_range"));
+                keysplot->SetTitle(_name);
+                keysplot->Draw();
+                name_ = _name;
+                name_.ReplaceAll("__noprint__", "");
+                name_.ReplaceAll(" ", "_");
+                name_.ReplaceAll("#", "_").ReplaceAll("^", "_");
+                name_.ReplaceAll("{", "_").ReplaceAll("}", "_");
+                name_.ReplaceAll("(", "_").ReplaceAll(")", "_");
+                name_.ReplaceAll(":", "_");
+                name_.ReplaceAll("/", "_").ReplaceAll("+", "_").ReplaceAll("-", "_").ReplaceAll("*", "_");
+                name_.ReplaceAll(",", "_").ReplaceAll(".", "_");
+                name_.ReplaceAll("__", "_").ReplaceAll("_for", "__for");
                 c->Print("rooKeysModel_" + name_ + ".pdf");
                 delete c;
                 delete keysplot;
+                myvar->setRange(min,max); // Set mass variable range back to the proper one
             }
         }
         else if (t.find("TH1") != string::npos)
@@ -398,9 +505,9 @@ public:
         return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
     }
 
-    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, double _frac = 0, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
+    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, double _frac = 0, const char * _opt = "")
     {
-        return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
+        return AddBkgComponentPvt(_name, _comp, _frac, _opt);
     }
 
     RooAbsPdf * AddBkgComponent(const char * _name, RooAbsPdf * _comp, double _frac = 0, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
@@ -413,9 +520,9 @@ public:
         return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
     }
 
-    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, RooAbsReal * _frac, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
+    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, RooAbsReal * _frac, const char * _opt = "")
     {
-        return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
+        return AddBkgComponentPvt(_name, _comp, _frac, _opt);
     }
 
     RooAbsPdf * AddBkgComponent(const char * _name, RooAbsPdf * _comp, RooAbsReal * _frac, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
@@ -424,11 +531,6 @@ public:
     }
 
     RooAbsPdf * AddBkgComponent(const char * _name, const char * _comp, Str2VarMap _myvars, double _frac = 0, const char * _opt = "")
-    {
-        return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
-    }
-
-    RooAbsPdf * AddBkgComponent(const char * _name, TTree * _comp, Str2VarMap _myvars, double _frac = 0, const char * _opt = "")
     {
         return AddBkgComponentPvt(_name, _comp, _frac, _opt, _myvars);
     }
@@ -491,14 +593,14 @@ public:
         return SetSignalPvt(_sig, _nsig, _opt, _myvars);
     }
 
-    RooAbsPdf * SetSignal(TTree * _sig, RooAbsReal * _nsig, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
+    RooAbsPdf * SetSignal(TTree * _sig, RooAbsReal * _nsig, const char * _opt = "")
     {
-        return SetSignalPvt(_sig, _nsig, _opt, _myvars);
+        return SetSignalPvt(_sig, _nsig, _opt);
     }
 
-    RooAbsPdf * SetSignal(TTree * _sig, double _nsig = 0., Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
+    RooAbsPdf * SetSignal(TTree * _sig, double _nsig = 0., const char * _opt = "")
     {
-        return SetSignalPvt(_sig, _nsig, _opt, _myvars);
+        return SetSignalPvt(_sig, _nsig, _opt);
     }
 
     RooAbsPdf * SetSignal(const char * _sig, RooAbsReal * _nsig, Str2VarMap _myvars = Str2VarMap(), const char * _opt = "")
@@ -520,12 +622,6 @@ public:
     {
         return SetSignalPvt(_sig, 0., _opt, _myvars);
     }
-
-    RooAbsPdf * SetSignal(TTree * _sig, Str2VarMap _myvars, double _nsig = 0., const char * _opt = "")
-    {
-        return SetSignalPvt(_sig, 0., _opt, _myvars);
-    }
-
 
 
     template <class T> RooAbsPdf * SetExtraSignalDimension(T * _sig, RooRealVar * extravar, string opt = "", Str2VarMap myvars = Str2VarMap())

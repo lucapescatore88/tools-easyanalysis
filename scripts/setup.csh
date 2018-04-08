@@ -3,7 +3,6 @@
 # LIBS
 setenv CVMFS /cvmfs/lhcb.cern.ch
 setenv LCGSYS $CVMFS/lib/lcg
-setenv ARCH x86_64-slc6-gcc49-opt
 
 if ( ! -d $LCGSYS ) then
     echo
@@ -41,6 +40,7 @@ if ( ! ($?TOOLSSYS) ) then
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
 
+    source $TOOLSSYS/scripts/setup.csh arch
     source $TOOLSSYS/scripts/setup.csh cmake
     source $TOOLSSYS/scripts/setup.csh gcc
     source $TOOLSSYS/scripts/setup.csh python
@@ -63,6 +63,40 @@ switch ( "$1" )
         echo
 
         breaksw
+
+    case arch:
+	if ( ! ($?ARCH) ) setenv
+	if ( `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ) setenv ARCH x86_64-slc6-gcc49-opt
+	if ( `cat /etc/redhat-release | grep -ie "CentOS" | grep -ie "release 7" | wc -l` == 1 ) setenv ARCH x86_64-centos7-gcc62-opt
+	if ( "$2" != "" ) setenv ARCH $2
+
+	breaksw
+
+    case lcg:
+        set SYS = /cvmfs/sft.cern.ch/lcg/views
+        set VER = LCG_92
+	source $TOOLSSYS/scripts/setup.csh arch x86_64-slc6-gcc62-opt
+        set VER = $VER/$ARCH
+	if ( -f $SYS/$VER/setup.csh ) then
+	    #source $SYS/$VER/setup.csh
+            set DUMMY = $TOOLSSYS/scripts/setup_lcg.csh
+            if ( -f $DUMMY ) rm -rf $DUMMY
+            touch $DUMMY
+            echo "set thisfile=$SYS/$VER/setup.csh" >> $DUMMY
+            echo "set thisdir=$SYS/$VER" >> $DUMMY
+            tail -n+13 $SYS/$VER/setup.csh >> $DUMMY
+            source $DUMMY
+            rm -rf $DUMMY
+	    setenv LCGSYS $SYS/$VER
+
+	    echo "Configuring LCG from $LCGSYS"
+	else
+	    echo
+	    echo "LCG $SYS/$VER not available"
+	    echo
+	endif
+
+	breaksw
 
     case cmake:
         set SYS = $CVMFS/lib/contrib/CMake
@@ -197,6 +231,7 @@ switch ( "$1" )
         if ( `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ) then
             if ( -d $SYS/$VER ) then
                 setenv GSLSYS $SYS/$VER
+                setenv PATH $GSLSYS/bin:$PATH
                 setenv LD_LIBRARY_PATH $GSLSYS/lib:$LD_LIBRARY_PATH
                 setenv LD_INCLUDE_PATH $GSLSYS/include:$LD_INCLUDE_PATH
 

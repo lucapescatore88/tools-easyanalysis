@@ -5,7 +5,6 @@ shopt -s expand_aliases
 # LIBS
 export CVMFS=/cvmfs/lhcb.cern.ch
 export LCGSYS=$CVMFS/lib/lcg
-export ARCH=x86_64-slc6-gcc49-opt
 
 if [ ! -d $LCGSYS ]; then
     echo
@@ -28,10 +27,10 @@ if [ ! -n "${PYTHONPATH+x}" ]; then
 fi
 
 if [ ! -n "${TOOLSSYS+x}" ]; then
-    export TOOLSSYS="$( cd . "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    export TOOLSSYS="$( command cd . "$( dirname "${BASH_SOURCE[0]}" )" && command pwd )"
 
     export LD_LIBRARY_PATH=$TOOLSSYS/roofit/dic:$LD_LIBRARY_PATH
-    export LD_LIBRARY_PATH=$TOOLSSYS/build/tools:$TOOLSSYS/build/roofit:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=$TOOLSSYS/build:$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=$TOOLSSYS/lib:$LD_LIBRARY_PATH
 
     export LD_INCLUDE_PATH=${TOOLSSYS}:$TOOLSSYS/tools:$TOOLSSYS/roofit:$LD_INCLUDE_PATH
@@ -46,6 +45,7 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
 
+    source $TOOLSSYS/scripts/setup.sh arch
     source $TOOLSSYS/scripts/setup.sh cmake
     source $TOOLSSYS/scripts/setup.sh gcc
     source $TOOLSSYS/scripts/setup.sh python
@@ -66,6 +66,40 @@ case "$1" in
         echo "Configuring ROOT_INCLUDE_PATH to $ROOT_INCLUDE_PATH"
         echo "Configuring PYTHONPATH        to $PYTHONPATH"
         echo
+
+        ;;
+
+    arch)
+        if [ -n "${ARCH+x}" ]; then
+            export ARCH
+        fi
+        if [ `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ]; then
+	    export ARCH=x86_64-slc6-gcc49-opt
+	fi
+	if [ `cat /etc/redhat-release | grep -ie "CentOS" | grep -ie "release 7" | wc -l` == 1 ]; then
+	    export ARCH=x86_64-centos7-gcc62-opt
+	fi
+	if [ "$2" != "" ]; then
+	    export ARCH=$2
+	fi
+
+	;;
+
+    lcg)
+	SYS=/cvmfs/sft.cern.ch/lcg/views
+	VER=LCG_92
+	source $TOOLSSYS/scripts/setup.sh arch x86_64-slc6-gcc62-opt
+	VER=$VER/$ARCH
+	if [ -f $SYS/$VER/setup.sh ]; then
+	    source $SYS/$VER/setup.sh
+	    export LCGSYS=$SYS/$VER
+
+            echo "Configuring LCG from $LCGSYS"
+        else
+            echo
+	    echo "LCG $SYS/$VER not available"
+            echo
+        fi
 
         ;;
 
@@ -111,7 +145,7 @@ case "$1" in
         SYS=$LCGSYS/releases/Python
         VER=2.7.13-597a5
         VER=$VER/$ARCH
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+        if [ `echo "$LD_LIBRARY_PATH" | command grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export PYTHONSYS=$SYS/$VER
                 export PATH=$PYTHONSYS/bin:$PATH
@@ -136,7 +170,7 @@ case "$1" in
         SYS=$LCGSYS/releases/pyanalysis
         VER=2.0-32412
         VER=$VER/$ARCH
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+        if [ `echo "$LD_LIBRARY_PATH" | command grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export PYANALYSISSYS=$SYS/$VER
                 export PATH=$PYANALYSISSYS/bin:$PATH
@@ -157,7 +191,7 @@ case "$1" in
         SYS=$LCGSYS/releases/pytools
         VER=2.0-93db0
         VER=$VER/$ARCH
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+        if [ `echo "$LD_LIBRARY_PATH" | command grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export PYTOOLSSYS=$SYS/$VER
                 export PATH=$PYTOOLSSYS/bin:$PATH
@@ -178,9 +212,10 @@ case "$1" in
         SYS=$LCGSYS/releases/GSL
         VER=2.1-36ee5
         VER=$VER/$ARCH
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+        if [ `echo "$LD_LIBRARY_PATH" | command grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export GSLSYS=$SYS/$VER
+		export PATH=$GSLSYS/bin:$PATH
                 export LD_LIBRARY_PATH=$GSLSYS/lib:$LD_LIBRARY_PATH
                 export LD_INCLUDE_PATH=$GSLSYS/include:$LD_INCLUDE_PATH
 
@@ -198,7 +233,7 @@ case "$1" in
         SYS=$LCGSYS/releases/ROOT
         VER=6.08.06-c8fb4
         VER=$VER/$ARCH
-        if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+        if [ `echo "$LD_LIBRARY_PATH" | command grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export ROOTSYS=$SYS/$VER
                 export PATH=$ROOTSYS/bin:${PATH}
