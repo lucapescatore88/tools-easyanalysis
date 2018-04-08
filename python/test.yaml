@@ -4,7 +4,7 @@ units: 'MeV/c^{2}'
 
 datahist : 'mass_histo'
 #datatree : 'DecayTuple'
-datafile : 'test.root'
+datafile : '$TOOLSSYS/python/test.root'
 
 var :
     name : 'B0_M'
