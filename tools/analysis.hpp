@@ -158,7 +158,7 @@ public:
 	    m_dataHist = (TH1 *) histo;
     };
 
-    Analysis( TString _name, TString _title, RooDataSet * histo, RooRealVar * _var = NULL):
+    Analysis( TString _name, TString _title, RooDataSet * dd, RooRealVar * _var = NULL):
         Analysis(_name, _title, _var)
     {
 	    m_data = (RooDataSet *)dd;
@@ -169,7 +169,7 @@ public:
         Analysis(_name, _title, _var, _opt, _w)
     {
         m_data = (RooDataSet *)dd;
-        if (_sig) { SetSignal(_sig, 1.e4, _opt); Initialize(""); }
+        if (_sig) { SetSignal(_sig); Initialize(""); }
     };
 
     /// \brief Special constructor for single quick fit
@@ -181,7 +181,7 @@ public:
         m_reducedTree = (TTree *)dd;
         CreateDataSet();
 
-        if (_sig) { SetSignal(_sig, 1.e4, _opt); Initialize(""); }
+        if (_sig) { SetSignal(_sig); Initialize(""); }
     };
  
     ~Analysis()
