@@ -155,29 +155,35 @@ public:
     Analysis( TString _name, TString _title, TH1D * histo, RooRealVar * _var = NULL):
         Analysis(_name, _title, _var)
     {
-	m_dataHist = (TH1 *) histo;
+	    m_dataHist = (TH1 *) histo;
+    };
+
+    Analysis( TString _name, TString _title, RooDataSet * dd, RooRealVar * _var = NULL):
+        Analysis(_name, _title, _var)
+    {
+	    m_data = (RooDataSet *)dd;
+    };
+   
+    /// \brief Special constructor for single quick fit
+    Analysis( TString _name, TString _title, RooDataSet * dd, RooRealVar * _var, RooAbsPdf * _sig, string _w = "", string _opt = ""):
+        Analysis(_name, _title, _var, _opt, _w)
+    {
+        m_data = (RooDataSet *)dd;
+        if (_sig) { SetSignal(_sig); Initialize(""); }
     };
 
     /// \brief Special constructor for single quick fit
-    template <typename T = RooAbsPdf *, typename D = RooDataSet *> Analysis( TString _name, TString _title, D * dd,
-            RooRealVar * _var, T * _sig = (RooAbsPdf*)NULL, string _w = "", string _opt = ""):
+    Analysis( TString _name, TString _title, TTree * dd, RooRealVar * _var, RooAbsPdf * _sig, string _w = "", string _opt = ""):
         Analysis(_name, _title, _var, _opt, _w)
     {
-        string tdata = typeid(D).name();
-        if (tdata.find("RooDataSet") != string::npos) m_data = (RooDataSet *)dd;
-        else if (tdata.find("TTree") != string::npos)
-        {
-            m_dataReader = new TreeReader((TTree *)dd);
-            m_dataReader->Initialize();
-            m_reducedTree = (TTree *)dd;
-            CreateDataSet();
-        }
-        else if (tdata.find("TH1") != string::npos) { m_dataHist = (TH1 *)dd; CreateDataSet(); }
-        else cout << "Type '" << tdata << "' not supported!" << endl;
+        m_dataReader = new TreeReader((TTree *)dd);
+        m_dataReader->Initialize();
+        m_reducedTree = (TTree *)dd;
+        CreateDataSet();
 
-        if (_sig) { SetSignal(_sig, 1.e4, _opt); Initialize(""); }
+        if (_sig) { SetSignal(_sig); Initialize(""); }
     };
-
+ 
     ~Analysis()
     {
         //if(m_dataReader) delete m_dataReader;
