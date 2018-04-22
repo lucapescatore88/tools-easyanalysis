@@ -27,7 +27,7 @@ Double_t RooGeneralizedHyperbolic__low_x_LnBK(Double_t nu, Double_t x){
 }
 
 Double_t RooGeneralizedHyperbolic__BK(Double_t ni, Double_t x) {
-    Double_t nu = abs(ni);
+    Double_t nu = TMath::Abs(ni);
     if ( x < 1e-06 && nu > 0) return RooGeneralizedHyperbolic__low_x_BK(nu,x);
     if ( x < 1e-04 && nu > 0 && nu < 55) return RooGeneralizedHyperbolic__low_x_BK(nu,x);
     if ( x < 0.1 && nu >= 55) return RooGeneralizedHyperbolic__low_x_BK(nu,x);
@@ -37,7 +37,7 @@ Double_t RooGeneralizedHyperbolic__BK(Double_t ni, Double_t x) {
 }
 
 Double_t RooGeneralizedHyperbolic__LnBK(double ni, double x) {
-    Double_t nu = abs(ni);
+    Double_t nu = TMath::Abs(ni);
     if ( x < 1e-06 && nu > 0) return RooGeneralizedHyperbolic__low_x_LnBK(nu,x);
     if ( x < 1e-04 && nu > 0 && nu < 55) return RooGeneralizedHyperbolic__low_x_LnBK(nu,x);
     if ( x < 0.1 && nu >= 55) return RooGeneralizedHyperbolic__low_x_LnBK(nu,x);
