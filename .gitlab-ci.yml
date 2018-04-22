@@ -19,7 +19,6 @@ build_make:
   script:
     - cd $REPOSYS
     - source ./scripts/setup.sh
-    - make print
     - make
     - make shared
     - ls -lh lib/

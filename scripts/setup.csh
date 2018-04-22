@@ -68,7 +68,8 @@ switch ( "$1" )
     case arch:
         setenv ARCH `uname`
         if ( $ARCH == "Linux" ) then
-            if ( `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ) setenv ARCH x86_64-slc6-gcc62-opt
+            if ( `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ) setenv ARCH x86_64-slc6-gcc49-opt
+            #if ( `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ) setenv ARCH x86_64-slc6-gcc62-opt
             if ( `cat /etc/redhat-release | grep -ie "CentOS" | grep -ie "release 7" | wc -l` == 1 ) setenv ARCH x86_64-centos7-gcc62-opt
         endif
         if ( "$2" != "" ) setenv ARCH $2

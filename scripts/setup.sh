@@ -82,7 +82,8 @@ case "$1" in
         export ARCH=`uname`
         if [ $ARCH == "Linux" ]; then
             if [ `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ]; then
-                export ARCH=x86_64-slc6-gcc62-opt
+                export ARCH=x86_64-slc6-gcc49-opt
+                #export ARCH=x86_64-slc6-gcc62-opt
             fi
             if [ `cat /etc/redhat-release | grep -ie "CentOS" | grep -ie "release 7" | wc -l` == 1 ]; then
                 export ARCH=x86_64-centos7-gcc62-opt
