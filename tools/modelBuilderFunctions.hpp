@@ -173,6 +173,7 @@ Str2VarMap eraseParameter(Str2VarMap * pars, vector<string> names);
  * <br> default       -> Scales the parameter by "c"
  * <br> opt=="-shift" -> Adds a shift by "c"
  */
+Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, vector<string> opt);
 Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt = "-scale");
 Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt = "-scale");
 Str2VarMap ModifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt = "-scale");

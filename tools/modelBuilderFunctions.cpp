@@ -160,7 +160,7 @@ string isParInMap( string par, Str2VarMap myvars, string option )
 //default       -> Scales the parameter by "c"
 //opt=="-shift" -> Adds a shift by "c"
 
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt)
+Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, vector<string> opt)
 {
     for (unsigned i = 0; i < names.size(); i++)
     {
@@ -169,18 +169,24 @@ Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar
         if (!par) { cout << "Parameter " << names[i] << " not found!" << endl; continue; }
         TString fname = (TString)par->GetName() + "__" + c[i]->GetName();
         string fkey = parMapName;
-        if (opt.find("-n") != string::npos)
+        if (opt[i].find("-n") != string::npos)
         {
-            int posn = opt.find("-n");
-            int posdash = opt.find("-", posn + 2);
-            fname += ("_" + opt.substr(posn + 2, posdash));
+            int posn = opt[i].find("-n");
+            int posdash = opt[i].find("-", posn + 2);
+            fname += ("_" + opt[i].substr(posn + 2, posdash));
         }
         RooFormulaVar * fpar;
-        if (opt.find("-shift") != string::npos) fpar = new RooFormulaVar(fname + "_shifted", "@0+@1", RooArgSet(*c[i], *par));
+        if (opt[i].find("-shift") != string::npos) fpar = new RooFormulaVar(fname + "_shifted", "@0+@1", RooArgSet(*c[i], *par));
         else fpar = new RooFormulaVar(fname + "_scaled", "@0*@1", RooArgSet(*c[i], *par));
         (*pars)[fkey] = fpar;
     }
     return *pars;
+}
+
+Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt)
+{
+    vector<string> vo(names.size(), opt);
+    return ModifyPars(pars, names, c, vo);
 }
 
 Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt)
