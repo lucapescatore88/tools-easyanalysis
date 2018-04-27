@@ -49,6 +49,8 @@ if ( ! ($?TOOLSSYS) ) then
     source $TOOLSSYS/scripts/setup.csh root
 
     source $TOOLSSYS/scripts/setup.csh env
+
+    alias cMake "$TOOLSSYS/scripts/make.csh"
 endif
 
 # CASES

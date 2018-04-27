@@ -45,6 +45,8 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
 
+    alias cMake="$TOOLSSYS/scripts/make.sh"
+
     source $TOOLSSYS/scripts/setup.sh arch
     if [ $ARCH == "Darwin" ]; then
         source $TOOLSSYS/scripts/setup.sh env
