@@ -445,8 +445,10 @@ public:
 
     RooDataSet * CalcSWeightRooFit(unsigned nbins = 50, bool unbinned = false, string option = "");
 
+    /** \brief Modifies parameters of the signal PDF and stores modifying RooRealVars
+     **/
 
-    void ModifySigPars(string option, vector <string> parsToBeMod, vector<RooRealVar *> modPars, vector<string> modOpts)
+    void ModifySigPars(vector <string> parsToBeMod, vector<RooRealVar *> modPars, vector<string> modOpts, string option = "")
     {
         Str2VarMap pars = GetSigParams(option);
         modifyPars(&pars, parsToBeMod, modPars, modOpts);
@@ -455,6 +457,10 @@ public:
             m_modSigPars[parsToBeMod[i]] = modPars[i];
         }
         return;
+    }
+    Str2VarMap GetModifySigPars()
+    {
+        return m_modSigPars;
     }
 
 };

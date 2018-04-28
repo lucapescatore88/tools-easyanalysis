@@ -424,11 +424,11 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
             }
 
             bkgpdfs[bname].add(*components[bb]);
-            bkgfracs[bname].add((*ana[i]->GetBkgFractions()[bb]));
+            bkgfracs[bname].add((*ana[i]->GetNBkgPtrs()[bb]));
             totpdfs.add(*components[bb]);
-            totfracs.add((*ana[i]->GetBkgFractions()[bb]));
-            sumNbkg[bname] += ana[i]->GetBkgFractions()[bb]->getVal();
-            sumNtotbkg += ana[i]->GetBkgFractions()[bb]->getVal();
+            totfracs.add((*ana[i]->GetNBkgPtrs()[bb]));
+            sumNbkg[bname] += ana[i]->GetNBkgPtrs()[bb]->getVal();
+            sumNtotbkg += ana[i]->GetNBkgPtrs()[bb]->getVal();
         }
         first = false;
     }

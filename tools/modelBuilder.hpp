@@ -739,7 +739,7 @@ public:
     ///\brief Prints to screen the composition e.g signal = NSIG / NTOT, bkg1 = NBKG1/NTOT, etc
     void PrintComposition(float min = 0., float max = 0., RooFitResult * fitRes = NULL);
     ///\brief Returns the full list of bkg yields variables
-    vector<RooAbsReal *> GetBkgFractions() { return m_bkg_fractions; }
+    vector<RooAbsReal *> GetNBkgPtrs() { return m_bkg_fractions; }
 
     int GetBkgID( string name )
     {
@@ -747,7 +747,7 @@ public:
             if (((string)m_bkg_components[i]->GetTitle()).find("bkg_" + name + "_") != string::npos) return i;
         return -1;
     }
-    RooAbsReal * GetBkgFraction( string name )
+    RooAbsReal * GetNBkgPtr( string name )
     {
         int id = GetBkgID( name );
         if (id < 0) return NULL;
