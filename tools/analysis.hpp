@@ -58,9 +58,9 @@
 #include "RooHistPdf.h"
 #include "TRandom3.h"
 
-#include "treeReader.hpp"
-#include "modelBuilder.hpp"
 #include "generalFunctions.hpp"
+#include "modelBuilder.hpp"
+#include "treeReader.hpp"
 
 using namespace std;
 using namespace RooFit;
@@ -94,6 +94,8 @@ class Analysis : public ModelBuilder {
     double m_fitmin;
     double m_fitmax;
     vector<RooRealVar*> m_datavars;
+
+    Str2VarMap m_modSigPars;
 
     /** \brief Converts the information in the Analysis object in a RooDataSet which can be fitted
     **/
@@ -419,8 +421,6 @@ public:
         else { cout << "Parameter " << name << " not found" << endl; return -999999; }
     }
 
-
-
     ///\brief Returns chi2/NDF
     double GetChi2();
     ///\brief Returns NDF
@@ -444,6 +444,19 @@ public:
      **/
 
     RooDataSet * CalcSWeightRooFit(unsigned nbins = 50, bool unbinned = false, string option = "");
+
+
+    void ModifySigPars(string option, vector <string> parsToBeMod, vector<RooRealVar *> modPars, vector<string> modOpts)
+    {
+        Str2VarMap pars = GetSigParams(option);
+        modifyPars(&pars, parsToBeMod, modPars, modOpts);
+        for (unsigned i = 0; i < parsToBeMod.size(); i++)
+        {
+            m_modSigPars[parsToBeMod[i]] = modPars[i];
+        }
+        return;
+    }
+
 };
 
 

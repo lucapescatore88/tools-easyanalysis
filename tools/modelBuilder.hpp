@@ -5,10 +5,10 @@
 
 #include "RooMultiVarGaussian.h"
 
-#include "treeReader.hpp"
 #include "generalFunctions.hpp"
 #include "modelBuilderFunctions.hpp"
 #include "stringToPdf.hpp"
+#include "treeReader.hpp"
 
 using namespace std;
 using namespace RooFit;

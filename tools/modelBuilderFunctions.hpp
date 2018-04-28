@@ -66,8 +66,8 @@
 #include "RooPlot.h"
 
 #include "generalFunctions.hpp"
-#include "treeReader.hpp"
 #include "roofit.hpp"
+#include "treeReader.hpp"
 
 using namespace std;
 using namespace RooFit;

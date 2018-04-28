@@ -36,10 +36,10 @@
 #include "RooCategory.h"
 #include "RooMsgService.h"
 
-#include "treeReader.hpp"
-#include "modelBuilder.hpp"
-#include "generalFunctions.hpp"
 #include "analysis.hpp"
+#include "generalFunctions.hpp"
+#include "modelBuilder.hpp"
+#include "treeReader.hpp"
 
 using namespace RooFit;
 using namespace RooStats;
