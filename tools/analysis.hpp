@@ -462,6 +462,10 @@ public:
     {
         return m_modSigPars;
     }
+    RooRealVar * GetModifySigPar(string name)
+    {
+        return (RooRealVar *) m_modSigPars[name];
+    }
 
 };
 
