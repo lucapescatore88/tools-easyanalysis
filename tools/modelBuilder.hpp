@@ -819,9 +819,7 @@ public:
 
     RooWorkspace * SaveToRooWorkspace(string option);
 
-    /** \brief Modifies parameters of the signal PDF and stores modifying RooRealVars
-     **/
-
+    /// \brief Modifies parameters of the signal PDF and stores modifying RooRealVars
     void ModifySigParams(vector <string> parsToBeMod, vector<RooRealVar *> modPars, vector<string> modOpts, string opt = "")
     {
         Str2VarMap pars = GetSigParams(opt);
@@ -832,7 +830,9 @@ public:
         }
         return;
     }
+    /// \brief Returns modifying RooRealVars of the signal PDF
     Str2VarMap GetModifySigParams() { return m_modSigPars; }
+    /// \brief Returns modifying RooRealVar of the signal PDF
     RooRealVar * GetModifySigParam(string name) { return (RooRealVar *) m_modSigPars[name]; }
 
 };
