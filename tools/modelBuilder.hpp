@@ -822,9 +822,9 @@ public:
     /** \brief Modifies parameters of the signal PDF and stores modifying RooRealVars
      **/
 
-    void ModifySigPars(vector <string> parsToBeMod, vector<RooRealVar *> modPars, vector<string> modOpts, string option = "")
+    void ModifySigPars(vector <string> parsToBeMod, vector<RooRealVar *> modPars, vector<string> modOpts, string opt = "")
     {
-        Str2VarMap pars = GetSigParams(option);
+        Str2VarMap pars = GetSigParams(opt);
         modifyPars(&pars, parsToBeMod, modPars, modOpts);
         for (unsigned i = 0; i < parsToBeMod.size(); i++)
         {
