@@ -112,8 +112,6 @@ void getParam(RooFitResult *fRes, string name, double &par, double &parE, string
 double getParVal(RooFitResult *fRes, string name, string type = "f");
 double getParErr(RooFitResult *fRes, string name, string type = "f");
 
-
-
 /** \brief Gets the list of parameters of a RooAbsPdf in Str2VarMap form
  * If any name is specified in pnames these names are used to make a selection of parameters. If "pnames" is empty all parameters are returned.
  * opt=="-origNames" keeps the names as they are otherwise keeps only the part before the underscore "(alwayskept)_(optional)"
@@ -148,7 +146,6 @@ bool checkModel(RooAbsPdf * model);
   @param title: title
   @param leg: A TLegend object to fill
  **/
-
 
 RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model = NULL, string opt = "",
                    unsigned bins = 50, vector<string> regStr = vector<string>(1, "PlotRange"), map<string, vector<double>> reg = map<string, vector<double>>(),
@@ -187,6 +184,5 @@ TPaveText * createParamBox(RooAbsPdf * pdf, RooRealVar * obs, string opt, RooFit
 void printPars(Str2VarMap pars, string opt = "");
 
 TString getLegendLabel( TString title, string opt = "" );
-
 
 #endif

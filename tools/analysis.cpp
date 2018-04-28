@@ -967,5 +967,3 @@ RooDataSet * Analysis::CalcSWeightRooFit(unsigned nbins, bool unbinned, string o
 
     return m_data;
 }
-
-

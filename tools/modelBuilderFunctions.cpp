@@ -823,7 +823,3 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
 {
     return getFrame(var, data, model, opt, bins, vector<string>(1, "PlotRange"), map<string, vector<double>>(), Xtitle, Ytitle, leg, custom_colors);
 }
-
-
-
-

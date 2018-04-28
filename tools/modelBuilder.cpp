@@ -655,5 +655,3 @@ RooWorkspace * ModelBuilder::SaveToRooWorkspace(string option)
 
     return ws;
 }
-
-
