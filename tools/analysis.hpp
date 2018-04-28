@@ -105,14 +105,14 @@ class Analysis : public ModelBuilder {
     TTree * m_reducedTree;
     TH1 * m_dataHist;
 
-    double scale;
+    double m_scale;
 
 public:
 
     Analysis( TString _name, TString _title, RooRealVar * _var, string _opt = "", string _w = "", TCut * _cuts = NULL):
         ModelBuilder(_name, _var, _title), m_cuts(_cuts), m_chi2(new double[2]), m_init(false), m_unit(""),
         m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
-        m_dataReader(NULL), m_reducedTree(NULL), m_dataHist(NULL), scale(1)
+        m_dataReader(NULL), m_reducedTree(NULL), m_dataHist(NULL), m_scale(1)
     {
         if (!m_var) SetVariable(new RooRealVar("x", "", 0));
         m_datavars.push_back(m_var);
@@ -215,7 +215,7 @@ public:
         @scalefactor: factor to rescale input data if they are given in a unit different than the one you want
      **/
     void SetUnits(string outUnit);//, double scalefactor = 1);
-    double GetScale() { return scale; }
+    double GetScale() { return m_scale; }
     string GetUnits() { return m_unit; }
 
     /** \brief Adds a variable to the internal DataSet

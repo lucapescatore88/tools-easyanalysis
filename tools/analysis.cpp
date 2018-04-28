@@ -35,7 +35,7 @@ bool Analysis::Initialize(string option, double frac)
     if (m_pmode == "v") cout << endl << m_name << ": Initialize " << option << endl;
 
     m_chi2[0] = m_chi2[1] = -1;
-    
+
     vector<double> allregions;
     allregions.push_back(m_var->getMin());
     for (unsigned r = 0; r < m_regions.size(); ++r)
@@ -92,13 +92,13 @@ void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
     else if (!m_reducedTree)
         m_reducedTree = (TTree*) m_dataReader->GetChain();//->Clone("reduced_" + m_name);
 
-    if ( scale != 1 && !m_dataReader->HasVar( ((string)m_var->GetName() + "_unscaled").c_str() ) )
+    if ( m_scale != 1 && !m_dataReader->HasVar( ((string)m_var->GetName() + "_unscaled").c_str() ) )
     {
         if (m_pmode == "v") cout << "Scaling variable... " << endl;
         string oldm_pmode = TreeReader::GetPrintLevel();
         TreeReader::SetPrintLevel("s");
-        Scaler::Set(scale, m_var);
-        applyFunc(&Scaler::Scale);
+        Scaler::Set(m_scale, m_var);
+        ApplyFunc(&Scaler::Scale);
         TreeReader::SetPrintLevel(oldm_pmode);
     }
 
@@ -190,7 +190,7 @@ void Analysis::SetUnits(string inUnit, string outUnit)
     while ( outUnit != units[iOut] && iOut < nunits ) iOut++;
 
     if (iIn >= nunits || iOut >= nunits) { cout << "In or Out unit not found, units are not set" << endl; return; }
-    scale = TMath::Power(1000, (iIn - iOut));
+    m_scale = TMath::Power(1000, (iIn - iOut));
     m_unit = units[iOut] + "/c^{2}";
 }
 
@@ -303,7 +303,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         if (low_opt.find("-fitto") != string::npos)
         {
             RooCmdArg constraints = ExternalConstraints(*m_constr);
-            
+
             RooCmdArg isQuiet = PrintLevel(2);
             if (low_opt.find("-quiet") != string::npos)
                 isQuiet = PrintLevel(-1);
@@ -510,12 +510,12 @@ void Analysis::ImportData(RooWorkspace * ws)
    N.B.: addFunc is called once before the loop and here you should set static addresses.
    */
 
-TTree * Analysis::applyFunc(void (*addFunc)(TreeReader *,  TTree *, bool), double frac)
+TTree * Analysis::ApplyFunc(void (*addFunc)(TreeReader *,  TTree *, bool), double frac)
 {
-    return applyCuts((TCut)"", true, addFunc, frac);
+    return ApplyCuts((TCut)"", true, addFunc, frac);
 }
 
-TTree * Analysis::applyCuts(TCut _cuts, bool substtree, void (*addFunc)(TreeReader *,  TTree *, bool),  double frac)
+TTree * Analysis::ApplyCuts(TCut _cuts, bool substtree, void (*addFunc)(TreeReader *,  TTree *, bool),  double frac)
 {
     if ( !m_dataReader ) {cout << "WARNING: No tree available! Set one before applying cuts." << endl; return NULL;}
     if ( m_pmode == "v" ) cout << endl << m_name << ": Creating new tree with candidates which passed all cuts" << endl;
@@ -533,7 +533,7 @@ TTree * Analysis::applyCuts(TCut _cuts, bool substtree, void (*addFunc)(TreeRead
    This functions checks for multiple candidate in the same event and creates a plot of number of candidates and a new tree with a variable "isChosenCand" added. This will be 1 for the best candidate and 0 for the others.
    @substRedTree = true to set the tree obtained as "reducedTree"
    @useCuts = true also applies cuts on the tree and checks only events which pass the cut
-   N.B.: if you just need to apply cuts ad not to check for multiples USE "applyCuts" it's much more efficient.
+   N.B.: if you just need to apply cuts ad not to check for multiples USE "ApplyCuts" it's much more efficient.
 
    randomKill() is a standard function for random killing of multiple candidates.
    */
