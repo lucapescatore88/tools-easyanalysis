@@ -95,8 +95,6 @@ class Analysis : public ModelBuilder {
     double m_fitmax;
     vector<RooRealVar*> m_datavars;
 
-    Str2VarMap m_modSigPars;
-
     /** \brief Converts the information in the Analysis object in a RooDataSet which can be fitted
     **/
 
@@ -444,28 +442,6 @@ public:
      **/
 
     RooDataSet * CalcSWeightRooFit(unsigned nbins = 50, bool unbinned = false, string option = "");
-
-    /** \brief Modifies parameters of the signal PDF and stores modifying RooRealVars
-     **/
-
-    void ModifySigPars(vector <string> parsToBeMod, vector<RooRealVar *> modPars, vector<string> modOpts, string option = "")
-    {
-        Str2VarMap pars = GetSigParams(option);
-        modifyPars(&pars, parsToBeMod, modPars, modOpts);
-        for (unsigned i = 0; i < parsToBeMod.size(); i++)
-        {
-            m_modSigPars[parsToBeMod[i]] = modPars[i];
-        }
-        return;
-    }
-    Str2VarMap GetModifySigPars()
-    {
-        return m_modSigPars;
-    }
-    RooRealVar * GetModifySigPar(string name)
-    {
-        return (RooRealVar *) m_modSigPars[name];
-    }
 
 };
 
