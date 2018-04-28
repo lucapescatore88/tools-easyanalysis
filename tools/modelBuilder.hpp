@@ -822,7 +822,7 @@ public:
     /** \brief Modifies parameters of the signal PDF and stores modifying RooRealVars
      **/
 
-    void ModifySigPars(vector <string> parsToBeMod, vector<RooRealVar *> modPars, vector<string> modOpts, string opt = "")
+    void ModifySigParams(vector <string> parsToBeMod, vector<RooRealVar *> modPars, vector<string> modOpts, string opt = "")
     {
         Str2VarMap pars = GetSigParams(opt);
         modifyPars(&pars, parsToBeMod, modPars, modOpts);
@@ -832,8 +832,8 @@ public:
         }
         return;
     }
-    Str2VarMap GetModifySigPars() { return m_modSigPars; }
-    RooRealVar * GetModifySigPar(string name) { return (RooRealVar *) m_modSigPars[name]; }
+    Str2VarMap GetModifySigParams() { return m_modSigPars; }
+    RooRealVar * GetModifySigParam(string name) { return (RooRealVar *) m_modSigPars[name]; }
 
 };
 
