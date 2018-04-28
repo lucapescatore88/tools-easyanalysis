@@ -47,22 +47,22 @@ RooDataSet * ModelBuilder::GetParamsVariations(int nvariations, RooFitResult * f
 
 void ModelBuilder::AddGaussConstraint(TString name, double mean, double sigma)
 {
-    if(sigma <= 0) { cout << "Re sigma of the constraint must be >0, if you want it =0 the please set the parameter constant instead." << endl; }
+    if (sigma <= 0) { cout << "Re sigma of the constraint must be >0, if you want it =0 the please set the parameter constant instead." << endl; }
     if (!m_sig) { cout << "You have to set the signal model before setting constraints to it." << endl; return; }
     RooRealVar * par = getParam(m_sig, (string)name, "-cut");
-    if(!par) { cout << "Parameter " << name << " not found in signal pdf" << endl; return; }
+    if (!par) { cout << "Parameter " << name << " not found in signal pdf" << endl; return; }
     AddGaussConstraint(par, mean, sigma);
 }
 
 void ModelBuilder::AddGaussConstraint(TString pdf, TString name, double mean, double sigma)
 {
-    if(sigma <= 0) { cout << "Re sigma of the constraint must be >0, if you want it =0 the please set the parameter constant instead." << endl; }
-    
-    if(pdf == "sig") return AddGaussConstraint(name, mean, sigma);
+    if (sigma <= 0) { cout << "Re sigma of the constraint must be >0, if you want it =0 the please set the parameter constant instead." << endl; }
+
+    if (pdf == "sig") return AddGaussConstraint(name, mean, sigma);
     int id = GetBkgID((string)pdf);
     if (id < 0) { cout << "You have to '" << pdf << "' background component before setting constraints to it." << endl; return; }
     RooRealVar * par = getParam(m_bkg_components[id], (string)name, "-cut");
-    if(!par) { cout << "Parameter " << name << " not found in " << pdf << " pdf" << endl; return; }
+    if (!par) { cout << "Parameter " << name << " not found in " << pdf << " pdf" << endl; return; }
     AddGaussConstraint(par, mean, sigma);
 }
 
@@ -100,7 +100,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
     bool doExp = (optstr.find("-exp") != string::npos);
     if ( doExp ) AddBkgComponent("exp", "Exp", 1.e4, Str2VarMap(), "-ibegin");
     if ( m_totBkgMode ) m_bkg_fractions.clear();
-    
+
     for (unsigned i = 0; i < m_bkg_components.size(); i++)
     {
         bkgList->add(*(m_bkg_components[i]));

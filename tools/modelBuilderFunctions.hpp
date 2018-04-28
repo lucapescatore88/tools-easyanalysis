@@ -78,7 +78,7 @@ using namespace RooFit;
 typedef std::map <string, RooAbsReal *> Str2VarMap;
 typedef std::map <string, RooAbsReal *>::iterator Str2VarMapItr;
 
-vector <Color_t> GetDefaultColors();
+vector <Color_t> getDefaultColors();
 
 /// \brief Returns the number of free patameters in a RooAbsPdf
 int getNFreePars(RooAbsPdf * pdf, RooArgSet vars);
@@ -173,10 +173,10 @@ Str2VarMap eraseParameter(Str2VarMap * pars, vector<string> names);
  * <br> default       -> Scales the parameter by "c"
  * <br> opt=="-shift" -> Adds a shift by "c"
  */
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, vector<string> opt);
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt = "-scale");
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt = "-scale");
-Str2VarMap ModifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt = "-scale");
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, vector<string> opt);
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt = "-scale");
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt = "-scale");
+Str2VarMap modifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt = "-scale");
 
 TPaveText * createParamBox(RooAbsPdf * pdf, RooRealVar * obs, string opt, RooFitResult * fitRes = NULL);
 
@@ -184,7 +184,7 @@ TPaveText * createParamBox(RooAbsPdf * pdf, RooRealVar * obs, string opt, RooFit
  * <br> opt == "-nocost"  ->  doesn't print constants
  * <br> opt == "-latex"   ->  prints the Title instead of Name of variables assuming latex format
  */
-void PrintPars(Str2VarMap pars, string opt = "");
+void printPars(Str2VarMap pars, string opt = "");
 
 TString getLegendLabel( TString title, string opt = "" );
 

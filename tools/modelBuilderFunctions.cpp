@@ -1,7 +1,7 @@
 #include "modelBuilderFunctions.hpp"
 
 
-vector <Color_t> GetDefaultColors()
+vector <Color_t> getDefaultColors()
 {
     vector <Color_t> default_colors;
     default_colors.push_back(kCyan + 1);
@@ -160,7 +160,7 @@ string isParInMap( string par, Str2VarMap myvars, string option )
 //default       -> Scales the parameter by "c"
 //opt=="-shift" -> Adds a shift by "c"
 
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, vector<string> opt)
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, vector<string> opt)
 {
     for (unsigned i = 0; i < names.size(); i++)
     {
@@ -183,22 +183,22 @@ Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar
     return *pars;
 }
 
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt)
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt)
 {
     vector<string> vo(names.size(), opt);
-    return ModifyPars(pars, names, c, vo);
+    return modifyPars(pars, names, c, vo);
 }
 
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt)
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt)
 {
     vector<RooRealVar *> vc(names.size(), c);
-    return ModifyPars(pars, names, vc, opt);
+    return modifyPars(pars, names, vc, opt);
 }
 
-Str2VarMap ModifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt)
+Str2VarMap modifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt)
 {
     vector<string> names(1, name);
-    return ModifyPars(pars, names, c, opt);
+    return modifyPars(pars, names, c, opt);
 }
 
 
@@ -206,7 +206,7 @@ Str2VarMap ModifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt
 //opt == "-nocost"  ->  doesn't print constants
 //opt == "-latex"   ->  prints the Title instead of Name of variables assuming latex format
 
-void PrintPars(Str2VarMap pars, string opt)
+void printPars(Str2VarMap pars, string opt)
 {
     for (Str2VarMapItr iter = pars.begin(); iter != pars.end(); iter++)
     {
@@ -236,7 +236,7 @@ void PrintPars(Str2VarMap pars, string opt)
 void printParams(RooAbsPdf * pdf, RooArgSet obs, string opt)
 {
     Str2VarMap pars = getParamList(pdf, obs, opt + "-orignames");
-    PrintPars(pars, opt);
+    printPars(pars, opt);
 }
 
 

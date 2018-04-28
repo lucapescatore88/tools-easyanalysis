@@ -80,7 +80,7 @@ protected:
      *                e.g.: "-c[B0_PT > 50 && Kst_P > 200]-v[B0_PT,Kst_P]"
      *                <br> "-s(n)" (TTree only): n = 1 or n = 2 (default) defines how fine is the resolution of the smoothing
      *  */
-    template <class T> RooAbsPdf * getPdf(T * _base, const char * _name, Str2VarMap mypars = Str2VarMap(), string opt = "", RooRealVar * myvar = NULL, TString _title = "")
+    template <class T> RooAbsPdf * GetPDF(T * _base, const char * _name, Str2VarMap mypars = Str2VarMap(), string opt = "", RooRealVar * myvar = NULL, TString _title = "")
     {
         string t = typeid(T).name();
         RooAbsPdf * res = NULL;
@@ -134,7 +134,7 @@ protected:
             }
 
             RooDataSet * sigDataSet = NULL;
-            /* If var needs to be changed, here include original mass var name in vars 
+            /* If var needs to be changed, here include original mass var name in vars
             */
             RooRealVar * tree_mass_var = NULL;
             if (opt.find("-var[") != string::npos)
@@ -142,14 +142,14 @@ protected:
                 size_t pos = opt.find("-var[") + 4;
                 size_t posend = opt.find("]", pos);
                 if (pos != posend - 1) {
-		    TString varname = (TString)opt.substr(pos + 1, posend - pos - 1);
-		    if (varname != "1")
-		    {
-                        tree_mass_var = new RooRealVar(varname, varname,0.);
-			vars->add(*tree_mass_var);
+                    TString varname = (TString)opt.substr(pos + 1, posend - pos - 1);
+                    if (varname != "1")
+                    {
+                        tree_mass_var = new RooRealVar(varname, varname, 0.);
+                        vars->add(*tree_mass_var);
                         vars->remove(*myvar);
-		    }
-		}
+                    }
+                }
             }
 
             if (opt.find("-w[") != string::npos)
@@ -157,13 +157,13 @@ protected:
                 size_t pos = opt.find("-w[") + 2;
                 size_t posend = opt.find("]", pos);
                 if (pos != posend - 1) {
-		    TString wname = (TString)opt.substr(pos + 1, posend - pos - 1);
-		    if (wname != "1")
-		    {
-			vars->add(*(new RooRealVar(wname, wname, 0.)));
-			sigDataSet = new RooDataSet((TString)_name + "_DataSet_" + m_name, "", (TTree*)_base, *vars, 0, wname);
-		    }
-		}
+                    TString wname = (TString)opt.substr(pos + 1, posend - pos - 1);
+                    if (wname != "1")
+                    {
+                        vars->add(*(new RooRealVar(wname, wname, 0.)));
+                        sigDataSet = new RooDataSet((TString)_name + "_DataSet_" + m_name, "", (TTree*)_base, *vars, 0, wname);
+                    }
+                }
             }
             else sigDataSet = new RooDataSet((TString)_name + "_DataSet_" + m_name, "", (TTree*)_base, *vars);
 
@@ -183,15 +183,15 @@ protected:
                 string rhostr = opt.substr(pos + 4, 20);
                 rho = ((TString)rhostr).Atof();
             }
-            else{
+            else {
                 rho = 2;
             }
             /* Here the RooDataSet is based on a tree
             \\ myvar is the mass variable used, such as Lb_MM
             \\ massname is the name in the tree
-            \\ Need to add that one to the RooDataSet when making it 
+            \\ Need to add that one to the RooDataSet when making it
             */
-            double max_mass,min_mass; // Max and min values of dataset range for mass variable
+            double max_mass, min_mass; // Max and min values of dataset range for mass variable
             // Get range of fit variable
             double max = myvar->getMax();
             double min = myvar->getMin();
@@ -202,28 +202,28 @@ protected:
                 size_t pos = opt.find("-var[") + 4;
                 size_t posend = opt.find("]", pos);
                 size_t pos_scale = opt.find("-scale[") + 6;
-                size_t posend_scale = opt.find("]",pos_scale);
-                
+                size_t posend_scale = opt.find("]", pos_scale);
+
                 if (pos != posend - 1 and pos_scale != posend_scale - 1) {
-		    TString massname = (TString)opt.substr(pos + 1 , posend - pos -1);
-                    TString scale    = (TString)opt.substr(pos_scale + 1 , posend_scale - pos_scale -1);
-		    if (massname != "1")
-		    {
-			RooFormulaVar massfunc(myvar->GetName(), myvar->GetName(),"("+massname+")*"+scale,RooArgList(*tree_mass_var));
+                    TString massname = (TString)opt.substr(pos + 1 , posend - pos - 1);
+                    TString scale    = (TString)opt.substr(pos_scale + 1 , posend_scale - pos_scale - 1);
+                    if (massname != "1")
+                    {
+                        RooFormulaVar massfunc(myvar->GetName(), myvar->GetName(), "(" + massname + ")*" + scale, RooArgList(*tree_mass_var));
                         sigDataSet->addColumn(massfunc);
                         // Code to do the RooKeysPdf over a longer range (first over fit range)
                         res_fitrange = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
 
-		    }
-		}
+                    }
+                }
             }
 
             // Set full range range for RooKeys
-            sigDataSet->getRange(*myvar,min_mass,max_mass); // Get range of dataset in mass variable, has to be done after transformation
-            myvar->setRange(min_mass,max_mass); 
+            sigDataSet->getRange(*myvar, min_mass, max_mass); // Get range of dataset in mass variable, has to be done after transformation
+            myvar->setRange(min_mass, max_mass);
             res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
             // Set range back to fit variable range
-            myvar->setRange(min,max);
+            myvar->setRange(min, max);
 
 
             /*if(opt.find("-noshift") == string::npos)
@@ -238,12 +238,12 @@ protected:
 
             if (opt.find("-print") != string::npos)
             {
-                myvar->setRange("fit_range",min,max); // Just for normalisation purposes now 
+                myvar->setRange("fit_range", min, max); // Just for normalisation purposes now
 
                 TCanvas * c = new TCanvas();
                 RooPlot * keysplot = myvar->frame();
                 sigDataSet->plotOn(keysplot);
-                res_fitrange->plotOn(keysplot,NormRange("fit_range"));
+                res_fitrange->plotOn(keysplot, NormRange("fit_range"));
                 keysplot->SetTitle(_name);
                 keysplot->Draw();
                 TString name_ = _name;
@@ -264,7 +264,7 @@ protected:
                 c = new TCanvas();
                 keysplot = myvar->frame();
                 sigDataSet->plotOn(keysplot);
-                res->plotOn(keysplot,NormRange("fit_range"));
+                res->plotOn(keysplot, NormRange("fit_range"));
                 keysplot->SetTitle(_name);
                 keysplot->Draw();
                 name_ = _name;
@@ -281,7 +281,7 @@ protected:
                 delete c;
                 delete keysplot;
 
-                myvar->setRange(min_mass,max_mass);  
+                myvar->setRange(min_mass, max_mass);
 
                 c = new TCanvas();
                 keysplot = myvar->frame();
@@ -302,7 +302,7 @@ protected:
                 c->Print("rooKeysModel_" + name_ + ".pdf");
                 delete c;
                 delete keysplot;
-                myvar->setRange(min,max); // Set mass variable range back to the proper one
+                myvar->setRange(min, max); // Set mass variable range back to the proper one
             }
         }
         else if (t.find("TH1") != string::npos)
@@ -313,7 +313,7 @@ protected:
         else
         {
             if (((string)_name).find("_noprint") != string::npos) cout << m_name << ": ATTANTION:_noprint option in background name: component won't be added to background list" << endl;
-            else cout << m_name << ": ***** ATTANTION: Wrong type (" << t << ") given to getPdf. Only string, RooAbsPdf, vector<RooAbsPdf *>, TTree and TH1 are allowed! *****" << endl;
+            else cout << m_name << ": ***** ATTANTION: Wrong type (" << t << ") given to GetPDF. Only string, RooAbsPdf, vector<RooAbsPdf *>, TTree and TH1 are allowed! *****" << endl;
         }
 
         return res;
@@ -329,11 +329,11 @@ protected:
      *  <br> - _frac < -1   same as _frac > 1 but the number is fixed. Meaning that the yield of this bacgkround will not float in the fit
      *
      * @param opt: Options:
-     * -> It is passed as options to getPdf()
+     * -> It is passed as options to GetPDF()
      * <br> - "-ibegin":  Adds the bkg component in front and not at the back of the backgrounds list
      *
      * @param myvars:
-     * -> It is passed as argument of getPdf()
+     * -> It is passed as argument of GetPDF()
      *  */
 
     template <class T> RooAbsPdf * AddBkgComponentPvt(const char * _name, T * _comp, RooAbsReal * _frac, const char * _opt = "", Str2VarMap _myvars = Str2VarMap())
@@ -357,7 +357,7 @@ protected:
         frac->SetName((TString)frac->GetName() + "_" + m_name);
 
         nstr += "__for_" + (TString)m_var->GetName();
-        RooAbsPdf * comp = getPdf(_comp, nstr, _myvars, _opt, (RooRealVar *)NULL, nstr + "_" + m_title); // + "__print");
+        RooAbsPdf * comp = GetPDF(_comp, nstr, _myvars, _opt, (RooRealVar *)NULL, nstr + "_" + m_title); // + "__print");
 
         if (comp != NULL && _frac != NULL && lowopt.find("-nofit") == string::npos)
         {
@@ -365,13 +365,13 @@ protected:
             {
                 m_bkg_components.push_back(comp);
                 m_bkg_fractions.push_back(frac);
-                SetLastBkgColor(GetDefaultColors()[m_bkg_components.size() - 1]);
+                setLastBkgColor(getDefaultColors()[m_bkg_components.size() - 1]);
             }
             else
             {
                 m_bkg_components.insert(m_bkg_components.begin(), comp);
                 m_bkg_fractions.insert(m_bkg_fractions.begin(), frac);
-                m_colors.insert(m_colors.begin(), GetDefaultColors()[m_bkg_components.size() - 1]);
+                m_colors.insert(m_colors.begin(), getDefaultColors()[m_bkg_components.size() - 1]);
             }
         }
 
@@ -427,7 +427,7 @@ protected:
         myname += "__for_" + (TString)m_var->GetName();
         if (_sig)
         {
-            m_sig = getPdf(_sig, "sig" + myname, myvars, opt, (RooRealVar *)NULL, "sig_" + m_title);
+            m_sig = GetPDF(_sig, "sig" + myname, myvars, opt, (RooRealVar *)NULL, "sig_" + m_title);
             m_sig->SetName("totsig" + myname);
             m_sig->SetTitle("totsig_" + m_title); // + "__print");
         }
@@ -565,7 +565,7 @@ public:
         TString name_tot  = pdfname + "__and_" + (TString)extravar->GetName();
         old_bkg->SetName(pdfname + "__noprint__");
 
-        RooAbsPdf * new_comp = getPdf(_pdf, name_comp, myvars, opt, extravar);
+        RooAbsPdf * new_comp = GetPDF(_pdf, name_comp, myvars, opt, extravar);
         bkg = new RooProdPdf("prod", "", *old_bkg, *new_comp);
 
         bkg->SetName(name_tot);
@@ -637,7 +637,7 @@ public:
         TString name_tot = pdfname + "__and_" + (TString)extravar->GetName();
         m_sig->SetName(pdfname + "__noprint__");
 
-        RooAbsPdf * new_comp = getPdf(_sig, name_comp, myvars, opt, extravar);
+        RooAbsPdf * new_comp = GetPDF(_sig, name_comp, myvars, opt, extravar);
 
         m_sig = new RooProdPdf("prod", "", *old_sig, *new_comp);
         m_sig->SetName(name_tot);
@@ -674,7 +674,7 @@ public:
     void AddGaussConstraint(RooRealVar * par, double mean = -1e9, double sigma = -1e9);
     RooArgSet * GetConstraints() { return m_constr; }
 
-    void SetLastBkgColor(Color_t color)
+    void setLastBkgColor(Color_t color)
     {
         if (m_colors.size() == m_bkg_components.size()) m_colors[m_colors.size() - 1] = color;
         else m_colors.push_back(color);
@@ -743,23 +743,23 @@ public:
 
     int GetBkgID( string name )
     {
-        for(size_t i = 0; i < m_bkg_components.size(); i++)
-            if(((string)m_bkg_components[i]->GetTitle()).find("bkg_"+name+"_")!=string::npos) return i;
+        for (size_t i = 0; i < m_bkg_components.size(); i++)
+            if (((string)m_bkg_components[i]->GetTitle()).find("bkg_" + name + "_") != string::npos) return i;
         return -1;
     }
-    RooAbsReal * GetBkgFraction( string name ) 
-    { 
+    RooAbsReal * GetBkgFraction( string name )
+    {
         int id = GetBkgID( name );
-        if(id<0) return NULL;
+        if (id < 0) return NULL;
         return m_bkg_fractions[id];
     }
     Str2VarMap GetBkgParams( string name )
     {
         int id = GetBkgID( name );
-        if(id < 0) return Str2VarMap();
-        return getParams(m_bkg_components[id],RooArgSet(*m_var),vector<string>());
+        if (id < 0) return Str2VarMap();
+        return getParams(m_bkg_components[id], RooArgSet(*m_var), vector<string>());
     }
-    
+
     ///\brief Returns the number of sig events in the full range. Same as GetNSigVal(0,0)
     double GetSigVal(double * valerr = NULL, RooFitResult * fitRes = NULL);
     ///\brief Returns the number of sig events in the full range. And can also return its asymmetric error
@@ -804,13 +804,13 @@ public:
 
 
     ///\brief Prints all the paramters to screen in RooFit format (opt="-nocost" skips constants)
-    void PrintParams(string opt = "") { PrintPars(GetParams("-orignames"), opt); }
+    void PrintParams(string opt = "") { printPars(GetParams("-orignames"), opt); }
     ///\brief Prints the sgnal pdf paramters to screen in RooFit format (opt="-nocost" skips constants)
-    void PrintSigParams(string opt = "") { PrintPars(GetSigParams("-orignames"), opt); }
+    void PrintSigParams(string opt = "") { printPars(GetSigParams("-orignames"), opt); }
     ///\brief Prints all the paramters to screen in latex table format (opt="-nocost" skips constants)
-    void PrintParamsTable(string opt = "") { PrintPars(GetParams("-orignames"), "-latex" + opt); }
+    void PrintParamsTable(string opt = "") { printPars(GetParams("-orignames"), "-latex" + opt); }
     ///\brief Prints all sigal PDF paramters to screen in latex table format (opt="-nocost" skips constants)
-    void PrintSigParamsTable(string opt = "") { PrintPars(GetSigParams("-orignames"), "-latex" + opt); }
+    void PrintSigParamsTable(string opt = "") { printPars(GetSigParams("-orignames"), "-latex" + opt); }
 
     ///\brief Returns the value of S(x)/(S(x)+B(x)) for x = value. It corresponds to a naive S-weight.
     float GetReducedSWeight(float value);

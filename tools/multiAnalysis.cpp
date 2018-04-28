@@ -478,7 +478,7 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
         leg->AddEntry(pl->findObject("sumSigPdf"), siglabel, "l");
     }
 
-    vector <Color_t> colors = GetDefaultColors();
+    vector <Color_t> colors = getDefaultColors();
     if (ana[k]->GetColors().size() > 0) colors = ana[k]->GetColors();
     int styles[] = {3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10};
     int counter = 0;
@@ -715,9 +715,3 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
     return pl;
 
 }
-
-
-
-
-
-

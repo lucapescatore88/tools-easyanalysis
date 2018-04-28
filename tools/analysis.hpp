@@ -155,15 +155,15 @@ public:
     Analysis( TString _name, TString _title, TH1D * histo, RooRealVar * _var = NULL):
         Analysis(_name, _title, _var)
     {
-	    m_dataHist = (TH1 *) histo;
+        m_dataHist = (TH1 *) histo;
     };
 
     Analysis( TString _name, TString _title, RooDataSet * dd, RooRealVar * _var = NULL):
         Analysis(_name, _title, _var)
     {
-	    m_data = (RooDataSet *)dd;
+        m_data = (RooDataSet *)dd;
     };
-   
+
     /// \brief Special constructor for single quick fit
     Analysis( TString _name, TString _title, RooDataSet * dd, RooRealVar * _var, RooAbsPdf * _sig, string _w = "", string _opt = ""):
         Analysis(_name, _title, _var, _opt, _w)
@@ -183,7 +183,7 @@ public:
 
         if (_sig) { SetSignal(_sig); Initialize(""); }
     };
- 
+
     ~Analysis()
     {
         //if(m_dataReader) delete m_dataReader;
@@ -298,14 +298,14 @@ public:
       <br> N.B.: addFunc is called once before the loop and here you should set static addresses.
      @param frac: uses only the fraction "frac" of the available entries
      **/
-    TTree * applyCuts(TCut _cuts = NULL, bool substtree = true, void (*addFunc)(TreeReader *, TTree *, bool) = NULL, double frac = 1);
-    TTree * applyFunc(void (*addFunc)(TreeReader *, TTree *, bool), double frac = 1);
+    TTree * ApplyCuts(TCut _cuts = NULL, bool substtree = true, void (*addFunc)(TreeReader *, TTree *, bool) = NULL, double frac = 1);
+    TTree * ApplyFunc(void (*addFunc)(TreeReader *, TTree *, bool), double frac = 1);
 
 
     /** \brief Checks for multiple candidate in the same event
      * */
     /** Also creates a plot of number of candidates and a new tree with a variable "isSingle" added. This will be 1 for the best candidate and 0 for the others.
-    N.B.: if you just need to apply cuts ad not to check for multiples USE "applyCuts" it's much more efficient.
+    N.B.: if you just need to apply cuts ad not to check for multiples USE "ApplyCuts" it's much more efficient.
 
     randomKill() is a standard function for random killing of multiple candidates.
     However you can make your own function and pass it to the method.
@@ -379,7 +379,7 @@ public:
         if (!m_init || !m_fitRes) return -1;
         return ModelBuilder::GetNBkgVal(min, max, valerr, m_fitRes);
     }
-  double GetNBkgErr(double min = 0, double max = 0)
+    double GetNBkgErr(double min = 0, double max = 0)
     {
         double valerr = 0;
         GetNBkgVal(min, max, &valerr);
@@ -390,7 +390,7 @@ public:
         if (!m_init || !m_fitRes) return -1;
         return ModelBuilder::GetNSigVal(min, max, valerr, m_fitRes);
     }
-  double GetNSigErr(double min = 0, double max = 0)
+    double GetNSigErr(double min = 0, double max = 0)
     {
         double valerr = 0;
         GetNSigVal(min, max, &valerr);
