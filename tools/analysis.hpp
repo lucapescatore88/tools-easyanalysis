@@ -101,16 +101,6 @@ class Analysis : public ModelBuilder {
 
     double m_scale;
 
-    /** \brief Creates the RooDataSet which can be fitted
-    **/
-
-    void CreateDataSet(string opt = "", TCut mycuts = "");
-
-    /** \brief Creates the RooDataHist which can be fitted
-    **/
-
-    void CreateDataHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", string opt = "", TH1 * htemplate = NULL);
-
 public:
 
     Analysis( TString _name, TString _title, RooRealVar * _var, string _opt = "", string _w = "", TCut * _cuts = NULL):
@@ -197,18 +187,15 @@ public:
     };
 
 
-    RooFitResult * GetFitRes() { return m_fitRes; }
-    void SetFitRes(RooFitResult *fitRes = NULL) { m_fitRes = fitRes; }
-
     static string GetPrintLevel() { return m_pmode; }
     static void SetPrintLevel(string mode) { m_pmode = mode; ModelBuilder::SetPrintLevel(mode); TreeReader::SetPrintLevel(mode);  }
 
     void CreateReducedTree(string option = "", double frac = -1., TCut cuts = "");
-
     TTree * GetReducedTree() { return m_reducedTree; }
 
     TreeReader * GetTreeReader() { return m_dataReader; }
 
+    void CreateDataSet(string opt = "", TCut mycuts = "");
     RooDataSet * GetDataSet(string opt = "")
     {
         if (opt.find("-recalc") != string::npos || !m_data) CreateDataSet(opt);
@@ -216,13 +203,13 @@ public:
     }
     void SetDataSet( RooDataSet * d ) { m_data = d; }
 
+    void CreateDataHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", string opt = "", TH1 * htemplate = NULL);
     TH1 * GetDataHisto(string opt = "")
     {
         if (opt.find("-recalc") != string::npos || !m_dataHist) CreateDataHisto();
         return m_dataHist;
     }
     void SetDataHisto( TH1 * h ) { m_dataHist = h; }
-
 
     /** \brief Sets units finding the scale factor too
      *  @param inUnit: unit of the input data. Based on the inUit-outUnit difference the scale factor is found. <br>Works only with masses in eV-PeV.
@@ -365,6 +352,9 @@ public:
      **/
     RooPlot * Fit(unsigned nbins = 50, bool unbinned = false, string print = "-range-log", TCut mycuts = "");
     RooPlot * Fit(string option, TCut extracuts = TCut(""));
+
+    RooFitResult * GetFitRes() { return m_fitRes; }
+    void SetFitRes(RooFitResult *fitRes = NULL) { m_fitRes = fitRes; }
 
     /** \brief Makes nice plots of data and models including blinded plots
       @param do_model: if true plots model on data

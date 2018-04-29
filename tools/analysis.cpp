@@ -25,7 +25,7 @@ void Analysis::AddAllVariables()
 }
 
 /*
-   Function to unitialize the Analysis object before fitting
+   Itializes the Analysis object before fitting
    */
 
 bool Analysis::Initialize(string option, double frac)
@@ -74,6 +74,9 @@ bool Analysis::Initialize(string option, double frac)
 }
 
 
+/*
+   Reduces the Tree to create RooDataSet and RooDataHist
+   */
 
 void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
 {
@@ -106,7 +109,7 @@ void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
 
 
 /*
-   This function converts the information in the Analysis object in a RooDataSet
+   Creates the RooDataSet to be fitted
    */
 
 void Analysis::CreateDataSet(string option, TCut mycuts)
@@ -140,9 +143,8 @@ void Analysis::CreateDataSet(string option, TCut mycuts)
 }
 
 
-
 /*
-   This function converts the information in the Analysis object in a RooDataHist
+   Creates the RooDataHist to be fitted
    */
 
 void Analysis::CreateDataHisto(double min, double max, int nbin, TCut _cuts, string _weight, string option, TH1 * htemplate)
@@ -196,7 +198,6 @@ void Analysis::SetUnits(string outUnit)//, double scalefactor)
 {
     m_unit = outUnit;
 }
-
 
 
 /*
