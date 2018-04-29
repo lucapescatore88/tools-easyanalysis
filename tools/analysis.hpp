@@ -95,17 +95,21 @@ class Analysis : public ModelBuilder {
     double m_fitmax;
     vector<RooRealVar*> m_datavars;
 
-    /** \brief Converts the information in the Analysis object in a RooDataSet which can be fitted
-    **/
-
-    RooDataSet * CreateDataSet(string opt = "", TCut mycuts = "");
-    TH1 * CreateHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", string opt = "", TH1 * htemplate = NULL);
-
     TreeReader * m_dataReader;
     TTree * m_reducedTree;
     TH1 * m_dataHist;
 
     double m_scale;
+
+    /** \brief Creates the RooDataSet which can be fitted
+    **/
+
+    void CreateDataSet(string opt = "", TCut mycuts = "");
+
+    /** \brief Creates the RooDataHist which can be fitted
+    **/
+
+    void CreateDataHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", string opt = "", TH1 * htemplate = NULL);
 
 public:
 
@@ -196,12 +200,29 @@ public:
     RooFitResult * GetFitRes() { return m_fitRes; }
     void SetFitRes(RooFitResult *fitRes = NULL) { m_fitRes = fitRes; }
 
-    static void SetPrintLevel(string mode) { m_pmode = mode; ModelBuilder::SetPrintLevel(mode); TreeReader::SetPrintLevel(mode);  }
     static string GetPrintLevel() { return m_pmode; }
+    static void SetPrintLevel(string mode) { m_pmode = mode; ModelBuilder::SetPrintLevel(mode); TreeReader::SetPrintLevel(mode);  }
+
+    void CreateReducedTree(string option = "", double frac = -1., TCut cuts = "");
 
     TTree * GetReducedTree() { return m_reducedTree; }
+
     TreeReader * GetTreeReader() { return m_dataReader; }
-    TH1 * GetHisto() { return m_dataHist; }
+
+    RooDataSet * GetDataSet(string opt = "")
+    {
+        if (opt.find("-recalc") != string::npos || !m_data) CreateDataSet(opt);
+        return m_data;
+    }
+    void SetDataSet( RooDataSet * d ) { m_data = d; }
+
+    TH1 * GetDataHisto(string opt = "")
+    {
+        if (opt.find("-recalc") != string::npos || !m_dataHist) CreateDataHisto();
+        return m_dataHist;
+    }
+    void SetDataHisto( TH1 * h ) { m_dataHist = h; }
+
 
     /** \brief Sets units finding the scale factor too
      *  @param inUnit: unit of the input data. Based on the inUit-outUnit difference the scale factor is found. <br>Works only with masses in eV-PeV.
@@ -215,8 +236,9 @@ public:
         @scalefactor: factor to rescale input data if they are given in a unit different than the one you want
      **/
     void SetUnits(string outUnit);//, double scalefactor = 1);
-    double GetScale() { return m_scale; }
     string GetUnits() { return m_unit; }
+
+    double GetScale() { return m_scale; }
 
     /** \brief Adds a variable to the internal DataSet
      * An Analysis object can also be used to create RooDataSet objects to use then somewhere else. Therefore it comes usefull to have in the RooDataSet more than one variable. This can me added simpy by name (if it exists in the input tree).
@@ -231,38 +253,33 @@ public:
         AddVariable(new RooRealVar(vname, vname, 0.));
     }
     void AddAllVariables();
-    bool isValid() { return m_init; }
 
     /** Function to unitialize the Analysis object before fitting
      *  <br> Runs ModelBuilder::Initialize() to initialize the model
      *  <br> Runs CreatedataSet() to initialize the data
      **/
     bool Initialize(string _usesig = "-exp", double frac = -1.);
-    void CreateReducedTree(string option = "", double frac = -1., TCut cuts = "");
+
+    bool isValid() { return m_init; }
+
     RooAbsReal * CreateLogL(RooCmdArg extended)
     {
         if (m_model && m_data) return m_model->createNLL(*m_data, extended);
         else return NULL;
     }
+
     void SetWeight( TString w ) { m_weight = new RooRealVar(w, w, 1.); return; }
     string GetWeight() { if (!m_weight) return ""; else return m_weight->GetName(); }
-    void SetDataSet( RooDataSet * d ) { m_data = d; }
+
     void SetCuts( TCut _cuts ) { m_cuts = &_cuts; }
     void SetCuts( TCut * _cuts ) { m_cuts = _cuts; }
     void SetCuts( TString _cuts ) { m_cuts = new TCut(_cuts); }
 
     RooWorkspace * SaveToRooWorkspace(string option = "");
+
     void ImportModel(RooWorkspace * ws);
     void ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg);
     void ImportData(RooWorkspace * ws);
-
-    RooDataSet * GetDataSet( string opt = "" )
-    {
-        if (opt.find("-recalc") != string::npos || !m_data) return CreateDataSet(opt);
-        else return m_data;
-    }
-    TH1 * GetHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", TH1 * htemplate = NULL)
-    { return CreateHisto(min, max, nbin, _cuts, _weight); }
 
     /** \brief Adds a blinded region.
      If you have to add more than one region you must add them in order from low to high and the must not overlap. If you set one or more regions parameters will be hidden and model and data will not be plotted in those regions.
@@ -373,18 +390,6 @@ public:
         if (m_fitRes) ModelBuilder::PrintComposition(min, max, m_fitRes);
         else cout << "Fit didn't happen yet, composition unkown" << endl;
     }
-
-    double GetNBkgVal(double min = 0, double max = 0, double * valerr = NULL)
-    {
-        if (!m_init || !m_fitRes) return -1;
-        return ModelBuilder::GetNBkgVal(min, max, valerr, m_fitRes);
-    }
-    double GetNBkgErr(double min = 0, double max = 0)
-    {
-        double valerr = 0;
-        GetNBkgVal(min, max, &valerr);
-        return valerr;
-    }
     double GetNSigVal(double min = 0, double max = 0, double * valerr = NULL)
     {
         if (!m_init || !m_fitRes) return -1;
@@ -403,6 +408,18 @@ public:
     double GetSigFraction(float min, float max, double * valerr = NULL)
     {
         return ModelBuilder::GetSigFraction(min, max, valerr, m_fitRes);
+    }
+
+    double GetNBkgVal(double min = 0, double max = 0, double * valerr = NULL)
+    {
+        if (!m_init || !m_fitRes) return -1;
+        return ModelBuilder::GetNBkgVal(min, max, valerr, m_fitRes);
+    }
+    double GetNBkgErr(double min = 0, double max = 0)
+    {
+        double valerr = 0;
+        GetNBkgVal(min, max, &valerr);
+        return valerr;
     }
 
     RooRealVar * GetPar(string name) { return getParam(m_model, name); }

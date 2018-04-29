@@ -28,7 +28,6 @@ void Analysis::AddAllVariables()
    Function to unitialize the Analysis object before fitting
    */
 
-
 bool Analysis::Initialize(string option, double frac)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
@@ -107,10 +106,10 @@ void Analysis::CreateReducedTree(string option, double frac, TCut mycuts)
 
 
 /*
-   This function converts the information in the Analysis object in a RooDataHist which can be fitted
+   This function converts the information in the Analysis object in a RooDataSet
    */
 
-RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
+void Analysis::CreateDataSet(string option, TCut mycuts)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
     if (m_pmode == "v") cout << endl << m_name << ": CreateDataSet " << option << endl;
@@ -137,17 +136,16 @@ RooDataSet * Analysis::CreateDataSet(string option, TCut mycuts)
         if (m_pmode == "v") m_data->Print();
     }
 
-    return m_data;
+    return;
 }
 
 
 
 /*
-   This function returns an histogram of the variable in the "reducedTree" dataset
-   between min and max and with nbins and "cuts" applied.
+   This function converts the information in the Analysis object in a RooDataHist
    */
 
-TH1 * Analysis::CreateHisto(double min, double max, int nbin, TCut _cuts, string _weight, string option, TH1 * htemplate)
+void Analysis::CreateDataHisto(double min, double max, int nbin, TCut _cuts, string _weight, string option, TH1 * htemplate)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
     if (gDirectory->FindObject("hist_" + m_name))
@@ -169,7 +167,7 @@ TH1 * Analysis::CreateHisto(double min, double max, int nbin, TCut _cuts, string
         m_dataHist = (TH1*)gPad->GetPrimitive("hist_" + m_name);
     }
 
-    return m_dataHist;
+    return;
 }
 
 
@@ -278,10 +276,13 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     if (low_opt.find("-docuts") == string::npos || !m_data || extracuts != "" )
     {
         if ( (extracuts != "" || !m_data) && low_opt.find("-forcehist") == string::npos )
-            mydata = CreateDataSet(option, extracuts);
+        {
+            CreateDataSet(option, extracuts);
+            mydata = m_data;
+        }
         if ( (m_reducedTree && !unbinned) || low_opt.find("-forcehist") != string::npos )
         {
-            CreateHisto(minr, maxr, nbins, (TCut)"", GetWeight(), option);
+            CreateDataHisto(minr, maxr, nbins, (TCut) "", GetWeight(), option);
             mydata = new RooDataHist("data" + m_name, "", *m_var, m_dataHist);
         }
         if (m_dataHist && !unbinned)
