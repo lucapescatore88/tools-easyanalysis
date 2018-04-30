@@ -47,6 +47,7 @@ protected:
     vector <RooAbsReal *> m_bkg_fractions;
     RooArgSet * m_constr;
 
+    Str2VarMap m_sigPars;
     Str2VarMap m_modSigPars;
 
     bool m_totBkgMode;
@@ -314,8 +315,8 @@ protected:
         }
         else
         {
-            if (((string)_name).find("_noprint") != string::npos) cout << m_name << ": ATTANTION:_noprint option in background name: component won't be added to background list" << endl;
-            else cout << m_name << ": ***** ATTANTION: Wrong type (" << t << ") given to GetPDF. Only string, RooAbsPdf, vector<RooAbsPdf *>, TTree and TH1 are allowed! *****" << endl;
+            if (((string)_name).find("_noprint") != string::npos) cout << m_name << ": WARNING: _noprint option in background name: component won't be added to background list" << endl;
+            else cout << m_name << ": WARNING: Wrong type (" << t << ") given to GetPDF. Only string, RooAbsPdf, vector<RooAbsPdf *>, TTree and TH1 are allowed! *****" << endl;
         }
 
         return res;
@@ -826,29 +827,44 @@ public:
         if (parsToBeMod.size() == 0)
             return;
 
-        Str2VarMap pars = GetSigParams(opt);
-
-        cout << endl;
-        printPars(pars);
+        m_sigPars = GetSigParams(opt);
 
         if (opt.find("-noconst") == string::npos)
-            setConstant(&pars);
-
-        modifyPars(&pars, parsToBeMod, modPars, modOpts);
+            setConstant(&m_sigPars);
 
         cout << endl;
-        printPars(pars);
+        PrintSigParams();
         cout << endl;
+
+        modifyPars(&m_sigPars, parsToBeMod, modPars, modOpts);
 
         for (unsigned i = 0; i < parsToBeMod.size(); i++)
+        {
+            if (m_pmode == "v") cout << m_name << ": ModifySigParams " << parsToBeMod[i] << endl;
             m_modSigPars[parsToBeMod[i]] = modPars[i];
+        }
+
+        cout << endl;
+        PrintModifyingSigParams();
+        cout << endl;
+        PrintModifiedSigParams();
+        cout << endl;
 
         return;
     }
     /// \brief Returns modifying RooRealVars of the signal PDF
-    Str2VarMap GetModifySigParams() { return m_modSigPars; }
+    Str2VarMap GetModifyingSigParams() { return m_modSigPars; }
     /// \brief Returns modifying RooRealVar of the signal PDF
-    RooRealVar * GetModifySigParam(string name) { return (RooRealVar *) m_modSigPars[name]; }
+    RooRealVar * GetModifyingSigParam(string name) { return (RooRealVar *) m_modSigPars[name]; }
+    /// \brief Prints modifying RooRealVars of the signal PDF
+    void PrintModifyingSigParams(string opt = "") { printPars(m_modSigPars, opt); return; }
+
+    /// \brief Returns modified RooRealVars of the signal PDF
+    Str2VarMap GetModifiedSigParams() { return m_sigPars; }
+    /// \brief Returns modified RooRealVar of the signal PDF
+    RooRealVar * GetModifiedSigParam(string name) { return (RooRealVar *) m_sigPars[name]; }
+    /// \brief Prints modified RooRealVars of the signal PDF
+    void PrintModifiedSigParams(string opt = "") { printPars(m_sigPars, opt); return; }
 
 };
 
