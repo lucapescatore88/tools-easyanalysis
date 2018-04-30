@@ -276,9 +276,6 @@ void Analysis::CreateDataHisto(double min, double max, int nbin, TCut cuts, stri
         m_dataHist = (TH1*) gPad->GetPrimitive("hist_" + m_name);
     }
 
-    if (option.find("-writedataset") != string::npos)
-        m_data = new RooDataHist("data" + m_name, "", *m_var, m_dataHist);
-
     return;
 }
 
