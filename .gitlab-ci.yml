@@ -4,14 +4,19 @@ before_script:
 build_cmake:
   tags:
     - cvmfs
+  artifacts:
+    paths:
+      - python/test.pdf
   script:
     - cd $REPOSYS
     - source ./scripts/setup.sh
     - mkdir -p build
     - cd build
     - cmake ..
-    - make -j 8
+    - make -j8
     - ls -lh
+    - cd ../python
+    - python test.py
 
 build_make:
   tags:
@@ -20,5 +25,5 @@ build_make:
     - cd $REPOSYS
     - source ./scripts/setup.sh
     - make
-    - make shared
+    #- make shared
     - ls -lh lib/
