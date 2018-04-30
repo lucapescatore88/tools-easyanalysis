@@ -121,7 +121,7 @@ public:
         }
     };
 
-    Analysis(TString _name, TString _title, TreeReader * reader, TCut _cuts, RooRealVar * _var, string _w = ""):
+    Analysis(TString _name, TString _title, TreeReader * reader, TCut _cuts = "", RooRealVar * _var = NULL, string _w = ""):
         Analysis(_name, _title, _var, "", _w, _cuts)
     {
         m_dataReader = reader;
@@ -130,15 +130,15 @@ public:
         m_reducedTree = (TTree *) m_dataReader->GetChain();
     };
 
-    Analysis(TString _name, TString _title, TTree * tree, TCut _cuts, RooRealVar * _var, string _w = ""):
+    Analysis(TString _name, TString _title, TTree * tree, TCut _cuts = "", RooRealVar * _var = NULL, string _w = ""):
         Analysis(_name, _title, new TreeReader(tree), _cuts, _var, _w)
     {};
 
-    Analysis(TString _name, TString _title, TChain * tchain, TCut _cuts, RooRealVar * _var, string _w = ""):
+    Analysis(TString _name, TString _title, TChain * tchain, TCut _cuts = "", RooRealVar * _var = NULL, string _w = ""):
         Analysis(_name, _title, new TreeReader(tchain), _cuts, _var, _w)
     {};
 
-    Analysis(TString _name, TString _title, string treename, string filename, TCut _cuts, RooRealVar * _var, string _w = ""):
+    Analysis(TString _name, TString _title, string treename, string filename, TCut _cuts = "", RooRealVar * _var = NULL, string _w = ""):
         Analysis(_name, _title, new TreeReader(treename.c_str(), filename.c_str()), _cuts, _var, _w)
     {};
 
