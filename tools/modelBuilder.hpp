@@ -367,7 +367,7 @@ protected:
             {
                 m_bkg_components.push_back(comp);
                 m_bkg_fractions.push_back(frac);
-                setLastBkgColor(getDefaultColors()[m_bkg_components.size() - 1]);
+                SetLastBkgColor(getDefaultColors()[m_bkg_components.size() - 1]);
             }
             else
             {
@@ -676,7 +676,7 @@ public:
     void AddGaussConstraint(RooRealVar * par, double mean = -1e9, double sigma = -1e9);
     RooArgSet * GetConstraints() { return m_constr; }
 
-    void setLastBkgColor(Color_t color)
+    void SetLastBkgColor(Color_t color)
     {
         if (m_colors.size() == m_bkg_components.size()) m_colors[m_colors.size() - 1] = color;
         else m_colors.push_back(color);

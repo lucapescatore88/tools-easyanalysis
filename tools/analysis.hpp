@@ -62,9 +62,10 @@ using namespace RooFit;
 using namespace RooStats;
 
 
+typedef  Long64_t (*FUNC_PTR)(TreeReader *, vector<Long64_t>);
+
 Long64_t randomKill(TreeReader * reader, vector< Long64_t > entry);
 
-typedef  Long64_t (*FUNC_PTR)(TreeReader *, vector< Long64_t >);
 
 /** \class Analysis
  *  \brief Allows to handle data starting from TTree or TH1
@@ -75,7 +76,7 @@ typedef  Long64_t (*FUNC_PTR)(TreeReader *, vector< Long64_t >);
 
 class Analysis : public ModelBuilder {
 
-    TCut * m_cuts;
+    TCut m_cuts;
     double * m_chi2;
     vector <double> m_regions;
     vector <string> m_regStr;
@@ -98,17 +99,17 @@ class Analysis : public ModelBuilder {
 
 public:
 
-    Analysis( TString _name, TString _title, RooRealVar * _var, string _opt = "", string _w = "", TCut * _cuts = NULL):
+    Analysis(TString _name, TString _title, RooRealVar * _var, string _opt = "", string _w = "", TCut _cuts = ""):
         ModelBuilder(_name, _var, _title), m_cuts(_cuts), m_chi2(new double[2]), m_init(false), m_unit(""),
         m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
         m_dataReader(NULL), m_reducedTree(NULL), m_dataHist(NULL), m_scale(1)
     {
         if (!m_var) SetVariable(new RooRealVar("x", "", 0));
         m_datavars.push_back(m_var);
-        if (_w != "") SetWeight( (TString)_w );
+        if (_w != "") SetWeight((TString)_w);
     };
 
-    Analysis( TString _name, RooRealVar * _var, RooAbsPdf * _pdf = NULL, int _ngen = 1000, string _opt = ""):
+    Analysis(TString _name, RooRealVar * _var, RooAbsPdf * _pdf = NULL, int _ngen = 1000, string _opt = ""):
         Analysis(_name, _name, _var, _opt)
     {
         if (_pdf)
@@ -120,54 +121,54 @@ public:
         }
     };
 
-    Analysis( TString _name, TString _title, TreeReader * reader, TCut * _cuts, RooRealVar * _var = NULL, string _w = ""):
+    Analysis(TString _name, TString _title, TreeReader * reader, TCut _cuts, RooRealVar * _var, string _w = ""):
         Analysis(_name, _title, _var, "", _w, _cuts)
     {
         m_dataReader = reader;
         if (!m_dataReader) { cout << "Attention!! Your TreeReader is NULL, this is going to break..." << endl; return; }
         if (!m_dataReader->isValid()) m_dataReader->Initialize();
-        m_reducedTree = (TTree *)m_dataReader->GetChain();
+        m_reducedTree = (TTree *) m_dataReader->GetChain();
     };
 
-    Analysis( TString _name, TString _title, TTree * tree, TCut * _cuts, RooRealVar * _var = NULL, string _w = ""):
-        Analysis( _name, _title, new TreeReader(tree), _cuts, _var, _w)
+    Analysis(TString _name, TString _title, TTree * tree, TCut _cuts, RooRealVar * _var, string _w = ""):
+        Analysis(_name, _title, new TreeReader(tree), _cuts, _var, _w)
     {};
 
-    Analysis( TString _name, TString _title, TChain * tchain, TCut * _cuts, RooRealVar * _var = NULL, string _w = ""):
-        Analysis( _name, _title, new TreeReader(tchain), _cuts, _var, _w)
+    Analysis(TString _name, TString _title, TChain * tchain, TCut _cuts, RooRealVar * _var, string _w = ""):
+        Analysis(_name, _title, new TreeReader(tchain), _cuts, _var, _w)
     {};
 
-    Analysis( TString _name, TString _title, string treename, string filename, RooRealVar * _var = NULL, TCut * _cuts = NULL, string _w = ""):
-        Analysis( _name, _title, new TreeReader(treename.c_str(), filename.c_str()), _cuts, _var, _w)
+    Analysis(TString _name, TString _title, string treename, string filename, TCut _cuts, RooRealVar * _var, string _w = ""):
+        Analysis(_name, _title, new TreeReader(treename.c_str(), filename.c_str()), _cuts, _var, _w)
     {};
 
-    Analysis( TString _name, TString _title, TH1D * histo, RooRealVar * _var = NULL):
+    Analysis(TString _name, TString _title, TH1D * histo, RooRealVar * _var = NULL):
         Analysis(_name, _title, _var)
     {
         m_dataHist = (TH1 *) histo;
     };
 
-    Analysis( TString _name, TString _title, RooDataSet * dd, RooRealVar * _var = NULL):
+    Analysis(TString _name, TString _title, RooDataSet * dd, RooRealVar * _var = NULL):
         Analysis(_name, _title, _var)
     {
-        m_data = (RooDataSet *)dd;
+        m_data = (RooDataSet *) dd;
     };
 
     /// \brief Special constructor for single quick fit
-    Analysis( TString _name, TString _title, RooDataSet * dd, RooRealVar * _var, RooAbsPdf * _sig, string _w = "", string _opt = ""):
+    Analysis(TString _name, TString _title, RooDataSet * dd, RooRealVar * _var, RooAbsPdf * _sig, string _w = "", string _opt = ""):
         Analysis(_name, _title, _var, _opt, _w)
     {
-        m_data = (RooDataSet *)dd;
+        m_data = (RooDataSet *) dd;
         if (_sig) { SetSignal(_sig); Initialize(""); }
     };
 
     /// \brief Special constructor for single quick fit
-    Analysis( TString _name, TString _title, TTree * dd, RooRealVar * _var, RooAbsPdf * _sig, string _w = "", string _opt = ""):
+    Analysis(TString _name, TString _title, TTree * dd, RooRealVar * _var, RooAbsPdf * _sig, string _w = "", string _opt = ""):
         Analysis(_name, _title, _var, _opt, _w)
     {
-        m_dataReader = new TreeReader((TTree *)dd);
+        m_dataReader = new TreeReader((TTree *) dd);
         m_dataReader->Initialize();
-        m_reducedTree = (TTree *)dd;
+        m_reducedTree = (TTree *) dd;
         CreateDataSet();
 
         if (_sig) { SetSignal(_sig); Initialize(""); }
@@ -176,7 +177,6 @@ public:
     ~Analysis()
     {
         //if(m_dataReader) delete m_dataReader;
-        //if(m_cuts) delete m_cuts;
         //if(m_reducedTree) delete m_reducedTree;
         //if(m_dataHist) delete m_dataHist;
     };
@@ -185,12 +185,12 @@ public:
     static string GetPrintLevel() { return m_pmode; }
     static void SetPrintLevel(string mode) { m_pmode = mode; ModelBuilder::SetPrintLevel(mode); TreeReader::SetPrintLevel(mode);  }
 
-    void CreateReducedTree(string option = "", double frac = -1., TCut cuts = "");
+    void CreateReducedTree(string option = "", TCut cuts = "", double frac = -1.);
     TTree * GetReducedTree() { return m_reducedTree; }
 
     TreeReader * GetTreeReader() { return m_dataReader; }
 
-    void CreateDataSet(string opt = "", TCut mycuts = "");
+    void CreateDataSet(string opt = "", TCut cuts = "");
     RooDataSet * GetDataSet(string opt = "")
     {
         if (opt.find("-recalc") != string::npos || !m_data) CreateDataSet(opt);
@@ -198,7 +198,7 @@ public:
     }
     void SetDataSet( RooDataSet * d ) { m_data = d; }
 
-    void CreateDataHisto(double min = 0, double max = 0, int nbin = 50, TCut _cuts = "", string _weight = "", string opt = "", TH1 * htemplate = NULL);
+    void CreateDataHisto(double min = 0, double max = 0, int nbin = 50, TCut cuts = "", string weight = "", string opt = "", TH1 * htemplate = NULL);
     TH1 * GetDataHisto(string opt = "")
     {
         if (opt.find("-recalc") != string::npos || !m_dataHist) CreateDataHisto();
@@ -253,9 +253,8 @@ public:
     void SetWeight( TString w ) { m_weight = new RooRealVar(w, w, 1.); return; }
     string GetWeight() { if (!m_weight) return ""; else return m_weight->GetName(); }
 
-    void SetCuts( TCut _cuts ) { m_cuts = &_cuts; }
-    void SetCuts( TCut * _cuts ) { m_cuts = _cuts; }
-    void SetCuts( TString _cuts ) { m_cuts = new TCut(_cuts); }
+    void SetCuts( TCut cuts ) { m_cuts = cuts; }
+    void SetCuts( TString cuts ) { m_cuts = TCut(cuts); }
 
     RooWorkspace * SaveToRooWorkspace(string option = "");
 
