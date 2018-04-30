@@ -273,7 +273,14 @@ void Analysis::CreateDataHisto(double min, double max, int nbin, TCut cuts, stri
         }
         if (min != max) draw.Append(Form("(%i,%e,%e)", nbin, min, max));
 
-        if (m_pmode == "v") cout << "Candidates: " << m_reducedTree->GetEntries() << endl;
+        if (m_pmode == "v")
+        {
+            if (cuts != "")
+            {
+                cout << "N Tot = " << m_reducedTree->GetEntries() << endl;
+                cout << "OBJ: TCut       CUT     " << buildSelectStr(cuts, weight) << endl;
+            }
+        }
 
         m_reducedTree->Draw(draw, buildSelectStr(cuts, weight), "E");
 
@@ -355,10 +362,18 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         cout << "WARNING: No model is set!" << endl;
         return NULL;
     }
+
+    if (m_pmode == "v")
+    {
+        cout << endl << m_name << ": Fit ";
+        (unbinned) ? cout << "unbinned " : cout << "binned ";
+        cout << option << endl;
+    }
+
     int ncpu = 1;
     size_t poscpu = option.find("-ncpu");
     if (poscpu != string::npos) ncpu = atoi(option.substr(poscpu + 5).c_str());
-    cout << "Using " << ncpu << " CPUs" << endl;
+    if (m_pmode == "v") cout << m_name << ": Using " << ncpu << " CPU(s)" << endl;
 
     RooCmdArg fitRange(RooCmdArg::none());
     double vmin = m_var->getMin();
