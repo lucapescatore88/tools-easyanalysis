@@ -822,12 +822,27 @@ public:
     /// \brief Modifies parameters of the signal PDF and stores modifying RooRealVars
     void ModifySigParams(vector <string> parsToBeMod, vector<RooRealVar *> modPars, vector<string> modOpts, string opt = "")
     {
+        if (m_pmode == "v") cout << endl << m_name << ": ModifySigParams " << parsToBeMod.size() << " " << opt << endl;
+        if (parsToBeMod.size() == 0)
+            return;
+
         Str2VarMap pars = GetSigParams(opt);
+
+        cout << endl;
+        printPars(pars);
+
+        if (opt.find("-noconst") == string::npos)
+            setConstant(&pars);
+
         modifyPars(&pars, parsToBeMod, modPars, modOpts);
+
+        cout << endl;
+        printPars(pars);
+        cout << endl;
+
         for (unsigned i = 0; i < parsToBeMod.size(); i++)
-        {
             m_modSigPars[parsToBeMod[i]] = modPars[i];
-        }
+
         return;
     }
     /// \brief Returns modifying RooRealVars of the signal PDF
