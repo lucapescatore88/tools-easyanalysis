@@ -384,8 +384,10 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     if (m_pmode == "v") cout << endl << m_name << ": Fit " << m_var->getTitle() << " (" << nbins << "," << vmin << "," << vmax << ") " << option << endl;
 
     RooAbsData * mydata = m_data;
-    if (!unbinned)
+    if (!unbinned) {
         CreateDataHisto(vmin, vmax, nbins, extracuts, GetWeight(), option);
+        mydata = m_dataHist;
+    }
     else if (extracuts != "" )
     {
         CreateDataSet(option, extracuts);
