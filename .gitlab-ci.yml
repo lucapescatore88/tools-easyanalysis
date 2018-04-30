@@ -2,6 +2,7 @@ before_script:
   - export REPOSYS=$PWD
 
 build_cmake:
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:slc6
   tags:
     - cvmfs
   artifacts:
@@ -19,6 +20,7 @@ build_cmake:
     - python test.py
 
 build_make:
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:slc6
   tags:
     - cvmfs
   script:
