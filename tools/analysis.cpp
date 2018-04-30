@@ -95,7 +95,7 @@ void Analysis::CreateReducedTree(string option, TCut cuts, double frac)
 
     if (!m_dataReader->isValid()) m_dataReader->Initialize();
 
-    if ((option.find("-cuttree") != string::npos) && ((cuts != "") || (frac != -1))
+    if ((option.find("-cuttree") != string::npos) && ((cuts != "") || (frac != -1)))
     {
         m_reducedTree = (TTree*) m_dataReader->CopyTree(cuts, frac, (string) ("reduced_" + m_name));
         m_dataReader  = new TreeReader(m_reducedTree);
