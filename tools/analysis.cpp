@@ -256,7 +256,10 @@ void Analysis::CreateDataHisto(double min, double max, int nbin, TCut cuts, stri
     if ((weight == "") && m_weight) weight = m_weight->GetName();
 
     if (m_data && (option.find("-usedataset") != string::npos))
+    {
+        if (m_pmode == "v") m_data->Print();
         m_dataHist = m_data->createHistogram("hist_" + m_name, *m_var, Binning(nbin, min, max));
+    }
     else if (m_reducedTree)
     {
         TString draw((TString)m_var->GetName() + ">>hist_" + m_name);
@@ -268,12 +271,18 @@ void Analysis::CreateDataHisto(double min, double max, int nbin, TCut cuts, stri
             min = m_var->getMin();
             max = m_var->getMax();
         }
-
         if (min != max) draw.Append(Form("(%i,%e,%e)", nbin, min, max));
+
+        if (m_pmode == "v") cout << "Candidates: " << m_reducedTree->GetEntries() << endl;
 
         m_reducedTree->Draw(draw, buildSelectStr(cuts, weight), "E");
 
         m_dataHist = (TH1*) gPad->GetPrimitive("hist_" + m_name);
+    }
+
+    if (m_pmode == "v") {
+        if (m_dataHist) m_dataHist->Print();
+        cout << endl;
     }
 
     return;
