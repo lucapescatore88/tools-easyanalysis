@@ -276,6 +276,9 @@ void Analysis::CreateDataHisto(double min, double max, int nbin, TCut cuts, stri
         m_dataHist = (TH1*) gPad->GetPrimitive("hist_" + m_name);
     }
 
+    if (option.find("-writedataset") != string::npos)
+        m_data = new RooDataHist("data" + m_name, "", *m_var, m_dataHist);
+
     return;
 }
 
@@ -386,7 +389,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     RooAbsData * mydata = m_data;
     if (!unbinned) {
         CreateDataHisto(vmin, vmax, nbins, extracuts, GetWeight(), option);
-        mydata = m_dataHist;
+        mydata = new RooDataHist("data" + m_name, "", *m_var, m_dataHist);
     }
     else if (extracuts != "" )
     {
