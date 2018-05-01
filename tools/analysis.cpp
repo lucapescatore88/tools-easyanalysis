@@ -47,7 +47,6 @@ bool Analysis::Initialize(string option, double frac)
     {
         CreateReducedTree(option + "-cuttree", m_cuts, frac);
         CreateDataSet();
-        //CreateDataHisto(0, 0, 50, m_cuts, GetWeight(), option);
     }
 
     if (m_data) m_init = true;
