@@ -53,55 +53,57 @@ using namespace RooStats;
 
 class MultiAnalysis {
 
-    TString name;
-    vector< Analysis * > ana;
-    vector< TString > categories;
-    RooArgSet * vars;
-    RooDataSet * combData;
-    RooCategory * samples;
-    RooSimultaneous * combModel;
-    bool init;
-    bool isToy;
-    RooFitResult * fitResult;
-    RooArgSet * constr;
+    TString m_name;
+    vector< Analysis * > m_ana;
+    vector< TString > m_categories;
+    RooArgSet * m_vars;
+    RooDataSet * m_combData;
+    RooCategory * m_samples;
+    RooSimultaneous * m_combModel;
+    bool m_init;
+    bool m_isToy;
+    RooFitResult * m_fitResult;
+    RooArgSet * m_constr;
+    static string m_pmode;
 
 public:
 
     MultiAnalysis( TString _name ):
-        name(_name), init(false), isToy(false), fitResult(NULL)
+        m_name(_name), m_init(false), m_isToy(false), m_fitResult(NULL)
     {
-        samples = new RooCategory("samples", "samples");
-        vars = new RooArgSet("vars");
-        constr = new RooArgSet("constraints");
+        m_samples = new RooCategory("samples", "samples");
+        m_vars    = new RooArgSet("vars");
+        m_constr  = new RooArgSet("constraints");
     };
 
     ~MultiAnalysis()
     {
-        delete vars;
-        delete combData;
-        delete combModel;
-        delete samples;
-        ana.clear();
+        delete m_vars;
+        delete m_combData;
+        delete m_combModel;
+        delete m_samples;
+        m_ana.clear();
     };
 
-    RooAbsPdf * GetCombModel() { return combModel; }
-    RooDataSet * GetCombData() { return combData; }
-    void SetCombData(RooDataSet * data) { combData = data; };
-    void SetCombData(RooSimultaneous * model) { combModel = model; };
-
-    void ImportModel(RooWorkspace * ws);
+    RooDataSet * GetCombData() { return m_combData; }
+    void SetCombData(RooDataSet * data) { m_combData = data; };
     void ImportData(RooWorkspace * ws);
+
+    RooAbsPdf * GetCombModel() { return m_combModel; }
+    void SetCombModel(RooSimultaneous * model) { m_combModel = model; };
+    void ImportModel(RooWorkspace * ws);
 
     RooDataSet * Generate(int nevts, string option);
 
     void EnlargeYieldRanges(double factor);
 
-    TString GetName() { return name; }
-    void SetName(TString _name) { name = _name; }
-    RooFitResult * GetFitResult() { return fitResult; }
+    TString GetName() { return m_name; }
+    void SetName(TString _name) { m_name = _name; }
+
+    RooFitResult * GetFitResult() { return m_fitResult; }
     RooAbsReal * CreateLogL()
     {
-        if (combModel && combData) return combModel->createNLL(*combData);
+        if (m_combModel && m_combData) return m_combModel->createNLL(*m_combData);
         else return NULL;
     }
     void DrawLogL(RooRealVar * PoI) {
@@ -113,31 +115,30 @@ public:
         nllPlot->SetTitle("");
         nllPlot->SetMinimum(nll_val * 0.95);
         nllPlot->Draw();
-        c->Print(name + "_LogL_vs_" + (TString)PoI->GetName() + ".pdf");
+        c->Print(m_name + "_LogL_vs_" + (TString)PoI->GetName() + ".pdf");
     }
     const RooAbsReal * ProjectLogL(RooRealVar * PoI) {
-        RooArgSet * projectedVars = combModel->getParameters(RooDataSet("v", "", *PoI));
-        return combModel->createPlotProjection(*PoI, *projectedVars);
+        RooArgSet * projectedVars = m_combModel->getParameters(RooDataSet("v", "", *PoI));
+        return m_combModel->createPlotProjection(*PoI, *projectedVars);
     }
 
     ///\brief Builds the combined PDF and data set
     bool Initialize(string opt = "");
 
-
     RooWorkspace * SaveToRooWorkspace();
 
-    RooRealVar * GetPar(string name) { return getParam(combModel, name); }
+    RooRealVar * GetPar(string name) { return getParam(m_combModel, name); }
     double GetParVal(string name)
     {
         RooRealVar * par = GetPar(name);
         if (par) return par->getVal();
-        else { cout << "Parameter " << name << " not found" << endl; return -999999; }
+        else { cout << m_name << ": *** WARNING GetParVal *** Parameter " << name << " not found!" << endl; return -999999; }
     }
     double GetParErr(string name)
     {
         RooRealVar * par = GetPar(name);
         if (par) return par->getError();
-        else { cout << "Parameter " << name << " not found" << endl; return -999999; }
+        else { cout << m_name << ": *** WARNING GetParErr *** Parameter " << name << " not found!" << endl; return -999999; }
     }
 
     /** \brief Fits the internal model to the internal dataset
@@ -153,20 +154,20 @@ public:
     }
 
     ///\brief Adds one category you must give an Analysis object containing data and model and a name
-    void AddCategory(Analysis * _ana, TString nameCat);
+    void AddCategory(Analysis * ana, TString nameCat);
     void AddCategory(TString nameCat, RooRealVar * var, string opt = "setana");
 
     void PlotCategories();
 
     ///\brief Lists the available categories
-    void PrintCategories() { for (unsigned i = 0; i < categories.size(); i++) cout << categories[i] << endl; }
+    void PrintCategories() { for (unsigned i = 0; i < m_categories.size(); i++) cout << m_categories[i] << endl; }
     /// \brief Prints the sum of all datasets and models properly normalised
     RooPlot * PrintSum(string option = "", TString dovar = "", string name = "", int nbins = 50);
 
     void RandomizeInitialParams(string option = "");
     void SetConstants(vector<RooDataSet *> input, int index = 0);
 
-    void PrintParams() { printParams(combModel); };
+    void PrintParams() { printParams(m_combModel); };
 
     /** \brief Allows to Set an unique signal for all categories
      *  See Analysis::SetSignal()
@@ -178,16 +179,16 @@ public:
     {
         if (myvars.size() != 0)
         {
-            for (unsigned i = 0; i < categories.size(); i++) ana[i]->SetSignal(_sig, _nsig, opt + "-namepar", myvars);
+            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->SetSignal(_sig, _nsig, opt + "-namepar", myvars);
         }
         else if (opt.find("-i") != string::npos)
         {
-            for (unsigned i = 0; i < categories.size(); i++) ana[i]->SetSignal(_sig, _nsig, opt + "-namepar", Str2VarMap());
+            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->SetSignal(_sig, _nsig, opt + "-namepar", Str2VarMap());
         }
         else
         {
-            ana[0]->SetSignal(_sig, _nsig, opt + "-namepar", myvars);
-            for (unsigned i = 1; i < categories.size(); i++) ana[i]->SetSignal(ana[0]->GetSig());
+            m_ana[0]->SetSignal(_sig, _nsig, opt + "-namepar", myvars);
+            for (unsigned i = 1; i < m_categories.size(); i++) m_ana[i]->SetSignal(m_ana[0]->GetSig());
         }
     }
 
@@ -201,16 +202,16 @@ public:
     {
         if (myvars.size() != 0)
         {
-            for (unsigned i = 0; i < categories.size(); i++) ana[i]->AddBkgComponent(_name, _comp, _frac, opt + "-namepar", myvars);
+            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->AddBkgComponent(_name, _comp, _frac, opt + "-namepar", myvars);
         }
         else if (opt.find("-i") != string::npos)
         {
-            for (unsigned i = 0; i < categories.size(); i++) ana[i]->AddBkgComponent(_name, _comp, _frac, opt + "-namepar", Str2VarMap());
+            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->AddBkgComponent(_name, _comp, _frac, opt + "-namepar", Str2VarMap());
         }
         else
         {
-            ana[0]->AddBkgComponent(_name, _comp, _frac, myvars, opt + "-namepar");
-            for (unsigned i = 1; i < categories.size(); i++) ana[i]->AddBkgComponent(_name, _comp, _frac, opt + "-namepar", myvars);
+            m_ana[0]->AddBkgComponent(_name, _comp, _frac, myvars, opt + "-namepar");
+            for (unsigned i = 1; i < m_categories.size(); i++) m_ana[i]->AddBkgComponent(_name, _comp, _frac, opt + "-namepar", myvars);
         }
     }
 };

@@ -315,8 +315,8 @@ protected:
         }
         else
         {
-            if (((string)_name).find("_noprint") != string::npos) cout << m_name << ": WARNING: _noprint option in background name: component won't be added to background list" << endl;
-            else cout << m_name << ": WARNING: Wrong type (" << t << ") given to GetPDF. Only string, RooAbsPdf, vector<RooAbsPdf *>, TTree and TH1 are allowed! *****" << endl;
+            if (((string)_name).find("_noprint") != string::npos) cout << m_name << ": *** WARNING *** _noprint option in background name: component won't be added to background list" << endl;
+            else cout << m_name << ": *** WARNING *** Wrong type (" << t << ") given to GetPDF. Only string, RooAbsPdf, vector<RooAbsPdf *>, TTree and TH1 are allowed! *****" << endl;
         }
 
         return res;
@@ -341,7 +341,7 @@ protected:
 
     template <class T> RooAbsPdf * AddBkgComponentPvt(const char * _name, T * _comp, RooAbsReal * _frac, const char * _opt = "", Str2VarMap _myvars = Str2VarMap())
     {
-        if (!m_sig) { cout << "*** WARNING: Signal not set! Set the signal before any background!" << endl; return NULL; }
+        if (!m_sig) { cout << m_name << ": *** WARNING *** Signal not set! Set the signal before any background!" << endl; return NULL; }
 
         TString nstr = "bkg_" + (TString)_name;
         string lowopt = (string)_opt;
@@ -383,7 +383,7 @@ protected:
 
     template <class T> RooAbsPdf * AddBkgComponentPvt(const char * _name, T * _comp, double _frac = 0, const char * _opt = "", Str2VarMap _myvars = Str2VarMap())
     {
-        if (!m_sig) { cout << "*** WARNING: Signal not set! Set the signal before any background!" << endl; return NULL; }
+        if (!m_sig) { cout << m_name << ": *** WARNING *** Signal not set! Set the signal before any background!" << endl; return NULL; }
 
         TString nstr = "bkg_" + (TString)_name;
         RooAbsReal * frac = NULL;
@@ -397,13 +397,13 @@ protected:
 
         if (m_totBkgMode)
         {
-            if (val > 1) { cout << "Attention in 'm_totBkgMode' the nevt must be between 0 and 1" << endl; return NULL; }
+            if (val > 1) { cout << m_name << ": *** WARNING *** Un 'm_totBkgMode' the nevt must be between 0 and 1!" << endl; return NULL; }
             frac = new RooRealVar("f" + nstr, "f_{" + (TString)_name + "}", val, 0, 1);
         }
         else if ((TMath::Abs(_frac) > 0 && TMath::Abs(_frac) <= 1) || ((string)_opt).find("-frac") != string::npos)
         {
             TString ss( (TString)m_nsig->GetName() + Form(" * %e", val) );
-            if (!m_nsig) { cout << "Attention if you use this option abs(nevt) < 1 you must set the signal first." << endl; return NULL; }
+            if (!m_nsig) { cout << m_name << ": *** WARNING *** If you use this option abs(nevt) < 1 you must set the signal first!" << endl; return NULL; }
             frac = new RooFormulaVar("n" + nstr, "f_{" + (TString)_name + "}^{wrtsig}", ss, *m_nsig);
         }
         else frac = new RooRealVar("n" + nstr, "N_{" + (TString)_name + "}", val, min, max);
@@ -556,7 +556,7 @@ public:
             }
         }
 
-        if (!bkg) { cout << "You must set a background component with the specified name using AddBkgComponent() first" << endl; return NULL; }
+        if (!bkg) { cout << m_name << ": *** WARNING *** You must set a background component with the specified name using AddBkgComponent() first!" << endl; return NULL; }
 
         m_vars.push_back(extravar);
 
@@ -629,7 +629,7 @@ public:
 
     template <class T> RooAbsPdf * SetExtraSignalDimension(T * _sig, RooRealVar * extravar, string opt = "", Str2VarMap myvars = Str2VarMap())
     {
-        if (!m_sig) { cout << "You must set the signal using SetSignal() first" << endl; return NULL; }
+        if (!m_sig) { cout << m_name << ": *** WARNING *** You must set the signal using SetSignal() first!" << endl; return NULL; }
 
         m_vars.push_back(extravar);
 

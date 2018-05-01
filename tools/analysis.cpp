@@ -51,7 +51,7 @@ bool Analysis::Initialize(string option, double frac)
     }
 
     if (m_data) m_init = true;
-    else if (!m_reducedTree && !m_dataHist) cout << "WARNING: No data available!" << endl;
+    else if (!m_reducedTree && !m_dataHist) cout << m_name << ": *** WARNING Initialize *** No data available!" << endl;
 
     bool result = ModelBuilder::Initialize(option);
     if (m_bkg_components.empty() && m_data) ((RooRealVar*) m_nsig)->setVal(m_data->numEntries());
@@ -73,12 +73,12 @@ void Analysis::SetBlindRegion(double min, double max)
 {
     if (m_pmode == "v") cout << endl << m_name << ": SetBlindRegion " << min << " - " << max << endl;
 
-    if (min >= max) { cout << "WARNING: min has to be less than max!" << endl; return; }
-    if (m_regions.size() > 0) if (m_regions[m_regions.size()] > min) { cout << "WARNING: blind regions must not overlap and must be entered from lower to higher!" << endl; return; }
-    if (min < m_var->getMin() || max > m_var->getMax()) { cout << "WARNING: blind region must be inside the variable range!" << endl; return; }
+    if (min >= max) { cout << m_name << ": *** WARNING SetBlindRegion *** Min has to be less than Max!" << endl; return; }
+    if (m_regions.size() > 0) if (m_regions[m_regions.size()] > min) { cout << m_name << ": *** WARNING SetBlindRegion *** Blind regions must not overlap and must be entered from lower to higher!" << endl; return; }
+    if (min < m_var->getMin() || max > m_var->getMax()) { cout << m_name << ": *** WARNING SetBlindRegion *** Blind region must be inside the variable range!" << endl; return; }
     m_regions.push_back(min);
     m_regions.push_back(max);
-    if (m_init) cout << "Remember to re-initialzie!" << endl;
+    if (m_init) cout << m_name << ": Remember to re-initialzie!" << endl;
 
     return;
 }
@@ -105,7 +105,7 @@ void Analysis::CreateReducedTree(string option, TCut cuts, double frac)
 
     if ((m_scale != 1) && !m_dataReader->HasVar(((string)m_var->GetName() + "_unscaled").c_str()))
     {
-        if (m_pmode == "v") cout << "Scaling variable... " << endl;
+        if (m_pmode == "v") cout << m_name << ": Scaling variable ..." << endl;
         string pmode_ = TreeReader::GetPrintLevel();
         TreeReader::SetPrintLevel("s");
         Scaler::Set(m_scale, m_var);
@@ -130,7 +130,7 @@ TTree * Analysis::GetSingleTree(FUNC_PTR choose, TString namevar, bool reset)
 {
     if (!m_reducedTree)
     {
-        cout << endl << "WARNING: No reduced tree available!" << endl << endl;
+        cout << endl << m_name << ": *** WARNING GetSingleTree *** No reduced tree available!" << endl << endl;
         return NULL;
     }
 
@@ -219,7 +219,7 @@ void Analysis::CreateDataSet(string option, TCut cuts)
     for (auto vv : m_datavars) varList.add(*vv);
 
     if (m_dataReader && !m_dataReader->HasVars(m_datavars))
-        cout << "WARNING: the tree does not contain the requested variable!" << endl;
+        cout << m_name << ": *** WARNING CreateDataSet *** The tree does not contain the requested variable!" << endl;
 
     TTree * tmpTree = (TTree*) m_reducedTree;
     if (cuts != "") tmpTree = (TTree*) m_dataReader->CopyTree(cuts, -1, (string) ("tmp_" + m_name));
@@ -312,7 +312,7 @@ void Analysis::SetUnits(string inUnit, string outUnit)
     while ( inUnit != units[iIn] && iIn < nunits ) iIn++;
     while ( outUnit != units[iOut] && iOut < nunits ) iOut++;
 
-    if (iIn >= nunits || iOut >= nunits) { cout << "In or Out unit not found, units are not set" << endl; return; }
+    if (iIn >= nunits || iOut >= nunits) { cout << m_name << ": *** WARNING SetUnits *** In or Out unit not found, units are not set!" << endl; return; }
     m_scale = TMath::Power(1000, (iIn - iOut));
     m_unit = units[iOut] + "/c^{2}";
 
@@ -359,7 +359,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     transform(option.begin(), option.end(), option.begin(), ::tolower);
     if (!ModelBuilder::isValid())
     {
-        cout << "WARNING: No model is set!" << endl;
+        cout << m_name << ": *** WARNING Fit *** No model is set!" << endl;
         return NULL;
     }
 
@@ -383,7 +383,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     if (option.find("-sidebandfit") != string::npos)
     {
         string ranges = "";
-        if (m_regStr.size() < 2) cout << "WARNING: No region is set!" << endl;
+        if (m_regStr.size() < 2) cout << m_name << ": *** WARNING Fit *** No region is set!" << endl;
         else
         {
             for (auto r : m_regStr) if (r.find("band") != string::npos) ranges += r + ",";
@@ -401,7 +401,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
 
     if (!m_dataHist && !m_reducedTree && !m_data)
     {
-        cout << "WARNING: No data available!" << endl;
+        cout << m_name << ": *** WARNING Fit *** No data available!" << endl;
         return NULL;
     }
 
@@ -447,9 +447,11 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
             if (m_fitRes)
             {
                 if (m_pmode == "v") {
-                    cout << endl << m_name << ":   CovQual = " << m_fitRes->covQual();
-                    cout << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm();
-                    cout << ",   LogL = " << m_fitRes->minNll() << endl;
+                    cout << endl << m_name;
+                    cout << ":   CovQual = " << m_fitRes->covQual();
+                    cout << ",   Status = "  << m_fitRes->status();
+                    cout << ",   EDM = "     << m_fitRes->edm();
+                    cout << ",   LogL = "    << m_fitRes->minNll() << endl;
                 }
             }
         }
@@ -497,9 +499,11 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
                 if (m_fitRes)
                 {
                     if (m_pmode == "v") {
-                        cout << endl << m_name << ": (" << i << ")   CovQual = " << m_fitRes->covQual();
-                        cout << ",   Status = " << m_fitRes->status() << ",   EDM = " << m_fitRes->edm();
-                        cout << ",   LogL = " << m_fitRes->minNll() << " (" << TMath::Abs((m_fitRes->minNll() - minNll) / minNll) << ")" << endl;
+                        cout << endl << m_name;
+                        cout << ": (" << i << ")   CovQual = " << m_fitRes->covQual();
+                        cout <<               ",   Status = "  << m_fitRes->status();
+                        cout <<               ",   EDM = "     << m_fitRes->edm();
+                        cout <<               ",   LogL = "    << m_fitRes->minNll() << " (" << TMath::Abs((m_fitRes->minNll() - minNll) / minNll) << ")" << endl;
                     }
                     minNll = m_fitRes->minNll();
                 }
@@ -509,7 +513,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
             while (refit && (m_fitRes == NULL || (m_fitRes->covQual() < 3 && TMath::Abs((m_fitRes->minNll() - minNll) / minNll) > 0.01)) ); // loop until converged or no improvement found
         }
     }
-    else { cout << "WARNING: No data!" << endl; return NULL; }
+    else { cout << m_name << ": *** WARNING Fit *** No data!" << endl; return NULL; }
 
     if (option.find("-hidesig") != string::npos)
     {
@@ -531,22 +535,22 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
 
 double Analysis::GetChi2()
 {
-    if ( m_chi2[0] < 0. ) cout << "WARNING: No valid chi2 was calculated yet!" << endl;
+    if ( m_chi2[0] < 0. ) cout << m_name << ": *** WARNING GetChi2 *** No valid chi2 was calculated yet!" << endl;
     return m_chi2[0];
 }
 double Analysis::GetNDF()
 {
-    if ( m_chi2[1] < 0. ) cout << "WARNING: No valid chi2 was calculated yet!" << endl;
+    if ( m_chi2[1] < 0. ) cout << m_name << ": *** WARNING GetNDF *** No valid chi2 was calculated yet!" << endl;
     return m_chi2[1];
 }
 double Analysis::GetProb()
 {
-    if ( m_chi2[1] < 0. ) cout << "WARNING: No valid chi2 was calculated yet!" << endl;
+    if ( m_chi2[1] < 0. ) cout << m_name << ": *** WARNING GetProb *** No valid chi2 was calculated yet!" << endl;
     return TMath::Prob(m_chi2[0] * m_chi2[1], m_chi2[1]);
 }
 void Analysis::PrintChi2()
 {
-    if ( m_chi2[0] < 0. ) cout << "WARNING: No valid chi2 was calculated yet!" << endl;
+    if ( m_chi2[0] < 0. ) cout << m_name << ": *** WARNING PrintChi2 *** No valid chi2 was calculated yet!" << endl;
     else cout << m_name << fixed << setprecision(1) << ": Chi2/NDF = " << GetChi2() << " NDF = " << GetNDF() << " - with probability " << fixed << setprecision(3) << GetProb() << endl;
 }
 
@@ -588,7 +592,7 @@ RooPlot* Analysis::Print(RooRealVar * myvar, string option, unsigned bins, TStri
 
 RooPlot* Analysis::Print(bool domodel, RooAbsData * _data, string option, unsigned bins, TString Xtitle, TString title, RooRealVar * myvar)
 {
-    if (!_data) { cout << "WARNING: No data available!" << endl; domodel = true; }
+    if (!_data) { cout << m_name << ": *** WARNING Print *** No data available!" << endl; domodel = true; }
 
     unsigned posX = option.find("-x");
     if (posX < 1e4) Xtitle = option.substr(posX + 2, option.find("-", posX + 2) - posX - 2);
@@ -672,7 +676,7 @@ RooWorkspace * Analysis::SaveToRooWorkspace(string option)
     if (m_data)
     {
         ws->import(*m_data);
-        if (m_pmode == "v") cout << "m_data: " << m_data->GetName() << endl;
+        if (m_pmode == "v") cout << m_name << ": m_data = " << m_data->GetName() << endl;
     }
 
     return ws;
@@ -769,7 +773,7 @@ void Analysis::ImportData(RooWorkspace * ws)
         if (name.find("data_") != string::npos) m_data = (RooDataSet*) (*it);
     }
 
-    if (!m_data) cout << "Data not found in work space" << endl;
+    if (!m_data) cout << m_name << ": *** WARNING ImportData *** Data not found in work space!" << endl;
     else m_init = true;
 
     return;
@@ -783,7 +787,7 @@ void Analysis::ImportData(RooWorkspace * ws)
 TTree * Analysis::Generate(int nevt, string option)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if (m_pmode == "v") cout << endl << m_name << ": Generating " << nevt << " events (" << option << ")" << endl;
+    if (m_pmode == "v") cout << endl << m_name << ": Generate " << nevt << " events (" << option << ")" << endl;
 
     if (m_model)
     {
@@ -802,7 +806,7 @@ TTree * Analysis::Generate(int nevt, string option)
         else
         {
         */
-        cout << "Generating toys with roofit function" << endl;
+        //cout << "Generating toys with roofit function" << endl;
         size_t posseed = option.find("-seed");
         if (posseed != string::npos)
         {
@@ -824,7 +828,7 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
     cout << fixed << setprecision(3);
-    if (m_pmode == "v") cout << endl << m_name << ": Generating " << nsigevt << " signal events and " << nbkgevt << " bkg events (" << option << ")" << endl;
+    if (m_pmode == "v") cout << endl << m_name << ": Generate " << nsigevt << " signal events and " << nbkgevt << " bkg events (" << option << ")" << endl;
 
     if (m_sig && m_bkg)
     {
@@ -875,10 +879,10 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
    Function to calculate S-Weights for the data according to m_model
    */
 
-RooDataSet * Analysis::CalcSWeightRooFit(unsigned nbins, bool unbinned, string option)
+RooDataSet * Analysis::CalcSWeight(unsigned nbins, bool unbinned, string option)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
-    if (m_pmode == "v") cout << endl << m_name << ": CalcSWeightRooFit " << option << endl;
+    if (m_pmode == "v") cout << endl << m_name << ": CalcSWeight " << option << endl;
 
     RooDataSet::setDefaultStorageType(RooAbsData::Tree);
 
@@ -919,7 +923,7 @@ RooDataSet * Analysis::CalcSWeightRooFit(unsigned nbins, bool unbinned, string o
     m_name = oldname;
 
     cout << endl;
-    cout << "Calculating sWeights: " << m_model->GetName() << endl;
+    cout << m_name << ": Calculating sWeights: " << m_model->GetName() << endl;
     cout << endl;
 
     yields->Print();
@@ -977,7 +981,7 @@ TTree * Analysis::ApplyFunc(void (*addFunc)(TreeReader *,  TTree *, bool), doubl
 
 TTree * Analysis::ApplyCuts(TCut cuts, bool substtree, void (*addFunc)(TreeReader *,  TTree *, bool),  double frac)
 {
-    if ( !m_dataReader ) {cout << "WARNING: No tree available! Set one before applying cuts." << endl; return NULL;}
+    if ( !m_dataReader ) {cout << m_name << ": *** WARNING ApplyCuts *** No tree available! Set one before applying cuts." << endl; return NULL;}
     if ( m_pmode == "v" ) cout << endl << m_name << ": Creating new tree with candidates which passed all cuts" << endl;
 
     if (m_cuts != "") cuts = cuts && m_cuts;

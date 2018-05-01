@@ -125,7 +125,7 @@ public:
         Analysis(_name, _title, _var, "", _w, _cuts)
     {
         m_dataReader = reader;
-        if (!m_dataReader) { cout << "Attention!! Your TreeReader is NULL, this is going to break..." << endl; return; }
+        if (!m_dataReader) { cout << m_name << ": *** WARNING Analysis *** Your TreeReader is NULL, this is going to break!" << endl; return; }
         if (!m_dataReader->isValid()) m_dataReader->Initialize();
         m_reducedTree = (TTree *) m_dataReader->GetChain();
     };
@@ -319,9 +319,7 @@ public:
 
     TTree * GetSingles(vector<FUNC_PTR> choose, vector <TString> namevars)
     {
-        if (choose.size() != namevars.size()) {
-            cout << "*** WARNING: The vector of choose functions and their names must have the same size" << endl; return NULL;
-        }
+        if (choose.size() != namevars.size()) { cout << m_name << ": *** WARNING GetSingles *** The vector of choose functions and their names must have the same size" << endl; return NULL; }
         for (size_t cf = 0; cf < choose.size(); cf++)
             GetSingleTree(choose[cf], namevars[cf], true);
         return m_reducedTree;
@@ -372,7 +370,7 @@ public:
     void PrintComposition(float min, float max)
     {
         if (m_fitRes) ModelBuilder::PrintComposition(min, max, m_fitRes);
-        else cout << "Fit didn't happen yet, composition unkown" << endl;
+        else cout << m_name << ": *** WARNING PrintComposition *** Fit didn't happen yet, composition unkown!" << endl;
     }
     double GetNSigVal(double min = 0, double max = 0, double * valerr = NULL)
     {
@@ -411,13 +409,13 @@ public:
     {
         RooRealVar * par = GetPar(name);
         if (par) return par->getVal();
-        else { cout << "Parameter " << name << " not found" << endl; return -999999; }
+        else { cout << m_name << ": *** WARNING GetParVal *** Parameter " << name << " not found!" << endl; return -999999; }
     }
     double GetParErr(string name)
     {
         RooRealVar * par = GetPar(name);
         if (par) return par->getError();
-        else { cout << "Parameter " << name << " not found" << endl; return -999999; }
+        else { cout << m_name << ": *** WARNING GetParErr *** Parameter " << name << " not found!" << endl; return -999999; }
     }
 
     ///\brief Returns chi2/NDF
@@ -442,7 +440,7 @@ public:
         "-nofit" doesn't perform the fit
      **/
 
-    RooDataSet * CalcSWeightRooFit(unsigned nbins = 50, bool unbinned = false, string option = "");
+    RooDataSet * CalcSWeight(unsigned nbins = 50, bool unbinned = false, string option = "");
 
 };
 
