@@ -229,7 +229,7 @@ void printPars(Str2VarMap pars, string opt)
         }
         else
         {
-            cout << "[" << iter->first << "] : ";
+            //cout << "[" << iter->first << "] : ";
             iter->second->Print();
         }
     }
