@@ -175,19 +175,20 @@ public:
      *  <br> "-i" : The models are set the same but with indipendent parametrs.
      *  By default instead all parameters are kept in common.
      * */
-    template <class T> void SetUniqueSignal(T * _sig, string opt = "", Str2VarMap myvars = Str2VarMap(), double _nsig = 1.e4)
+    template <class T> void SetUniqueSignal(T * _sig, string _opt = "", Str2VarMap _myvars = Str2VarMap(), double _nsig = 1.e4)
     {
-        if (myvars.size() != 0)
+        //_opt += "-namepar";
+        if (_myvars.size() != 0)
         {
-            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->SetSignal(_sig, _nsig, opt + "-namepar", myvars);
+            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->SetSignal(_sig, _nsig, _opt, _myvars);
         }
-        else if (opt.find("-i") != string::npos)
+        else if (_opt.find("-i") != string::npos)
         {
-            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->SetSignal(_sig, _nsig, opt + "-namepar", Str2VarMap());
+            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->SetSignal(_sig, _nsig, _opt, Str2VarMap());
         }
         else
         {
-            m_ana[0]->SetSignal(_sig, _nsig, opt + "-namepar", myvars);
+            m_ana[0]->SetSignal(_sig, _nsig, _opt, _myvars);
             for (unsigned i = 1; i < m_categories.size(); i++) m_ana[i]->SetSignal(m_ana[0]->GetSig());
         }
     }
@@ -198,20 +199,21 @@ public:
      *  <br> "-i" : The models are set the same but with indipendent parametrs.
      *  By default instead all parameters are taken in common.
      * */
-    template <class T> void SetUniqueBkgComp(const char * _name, T * _comp, string opt = "", Str2VarMap myvars = Str2VarMap(), double _frac = 0)
+    template <class T> void SetUniqueBkgComp(const char * _name, T * _comp, string _opt = "", Str2VarMap _myvars = Str2VarMap(), double _frac = 0)
     {
-        if (myvars.size() != 0)
+        //_opt += "-namepar";
+        if (_myvars.size() != 0)
         {
-            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->AddBkgComponent(_name, _comp, _frac, opt + "-namepar", myvars);
+            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->AddBkgComponent(_name, _comp, _frac, _opt, _myvars);
         }
-        else if (opt.find("-i") != string::npos)
+        else if (_opt.find("-i") != string::npos)
         {
-            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->AddBkgComponent(_name, _comp, _frac, opt + "-namepar", Str2VarMap());
+            for (unsigned i = 0; i < m_categories.size(); i++) m_ana[i]->AddBkgComponent(_name, _comp, _frac, _opt, Str2VarMap());
         }
         else
         {
-            m_ana[0]->AddBkgComponent(_name, _comp, _frac, myvars, opt + "-namepar");
-            for (unsigned i = 1; i < m_categories.size(); i++) m_ana[i]->AddBkgComponent(_name, _comp, _frac, opt + "-namepar", myvars);
+            m_ana[0]->AddBkgComponent(_name, _comp, _frac, _myvars, _opt);
+            for (unsigned i = 1; i < m_categories.size(); i++) m_ana[i]->AddBkgComponent(_name, _comp, _frac, _opt, _myvars);
         }
     }
 };

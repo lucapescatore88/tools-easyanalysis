@@ -227,7 +227,11 @@ void printPars(Str2VarMap pars, string opt)
             catch (string err) {}
             cout << "$\t\t \\\\" << endl;
         }
-        else { iter->second->Print(); }
+        else
+        {
+            cout << "[" << iter->first << "] : ";
+            iter->second->Print();
+        }
     }
 }
 
