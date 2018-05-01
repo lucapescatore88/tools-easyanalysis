@@ -10,10 +10,11 @@ setenv LCG /cvmfs/sft.cern.ch/lcg
 setenv CVMFS /cvmfs/lhcb.cern.ch
 setenv LCGSYS $CVMFS/lib/lcg
 
-if ( ! ($?LD_INCLUDE_PATH) ) setenv LD_INCLUDE_PATH
-if ( ! ($?LD_LIBRARY_PATH) ) setenv LD_LIBRARY_PATH
+if ( ! ($?LD_INCLUDE_PATH) )   setenv LD_INCLUDE_PATH
+if ( ! ($?LD_LIBRARY_PATH) )   setenv LD_LIBRARY_PATH
 if ( ! ($?ROOT_INCLUDE_PATH) ) setenv ROOT_INCLUDE_PATH
-if ( ! ($?PYTHONPATH) )      setenv PYTHONPATH
+if ( ! ($?PYTHONPATH) )        setenv PYTHONPATH
+if ( ! ($?GLIMPSEPATH) )       setenv GLIMPSEPATH
 
 if ( ! ($?TOOLSSYS) ) then
     set EXE = "$0"
@@ -24,7 +25,7 @@ if ( ! ($?TOOLSSYS) ) then
     setenv TOOLSSYS `echo $TOOLSSYS | sed s:"/$EXE"::`
 
     setenv LD_LIBRARY_PATH $TOOLSSYS/roofit/dic:$LD_LIBRARY_PATH
-    setenv LD_LIBRARY_PATH $TOOLSSYS/build/tools:$TOOLSSYS/build/roofit:$LD_LIBRARY_PATH
+    setenv LD_LIBRARY_PATH $TOOLSSYS/build:$LD_LIBRARY_PATH
     setenv LD_LIBRARY_PATH $TOOLSSYS/lib:$LD_LIBRARY_PATH
 
     setenv LD_INCLUDE_PATH ${TOOLSSYS}:$TOOLSSYS/tools:$TOOLSSYS/roofit:$LD_INCLUDE_PATH
@@ -32,6 +33,13 @@ if ( ! ($?TOOLSSYS) ) then
     setenv ROOT_INCLUDE_PATH ${TOOLSSYS}:$TOOLSSYS/tools:$TOOLSSYS/roofit:$ROOT_INCLUDE_PATH
 
     setenv PYTHONPATH $TOOLSSYS/python:$PYTHONPATH
+
+    setenv GLIMPSEPATH "$GLIMPSEPATH $TOOLSSYS/tools $TOOLSSYS/roofit"
+
+    alias git_setup "source $TOOLSSYS/scripts/setup.csh"
+    alias git_glimpse "$TOOLSSYS/scripts/glimpse.csh"
+
+    alias cMake "$TOOLSSYS/scripts/make.csh"
 
     echo
     echo "Setup tools-easyanalysis"
@@ -49,8 +57,6 @@ if ( ! ($?TOOLSSYS) ) then
     source $TOOLSSYS/scripts/setup.csh root
 
     source $TOOLSSYS/scripts/setup.csh env
-
-    alias cMake "$TOOLSSYS/scripts/make.csh"
 endif
 
 # CASES

@@ -2,23 +2,30 @@ before_script:
   - export REPOSYS=$PWD
 
 build_cmake:
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:slc6
   tags:
     - cvmfs
+  artifacts:
+    paths:
+      - python/test.pdf
   script:
     - cd $REPOSYS
     - source ./scripts/setup.sh
     - mkdir -p build
     - cd build
     - cmake ..
-    - make -j 8
+    - make -j8
     - ls -lh
+    - cd ../python
+    - python test.py
 
 build_make:
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:slc6
   tags:
     - cvmfs
   script:
     - cd $REPOSYS
     - source ./scripts/setup.sh
     - make
-    - make shared
+    #- make shared
     - ls -lh lib/

@@ -23,7 +23,7 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
         if (par == "a2os") parMapName = isParInMap( "a2", myvars, dist_name );
         else parMapName = isParInMap( par, myvars, dist_name );
 
-        if (parMapName == "") cout << parMapName << " (WRONG!!)" << endl;
+        if (parMapName == "") cout << "addPar: *** WARNING *** " << par << " " << parstr << " " << option << endl;
     }
     if (parMapName != "") curpar = (RooRealVar *)myvars[parMapName];
     else if (par == "a2os" && myvars.find("a2") != myvars.end()) curpar = (RooRealVar *)myvars["a2"];

@@ -1,11 +1,9 @@
 import os
 import ROOT as r
 
-r.gSystem.Load(os.path.expandvars('$TOOLSSYS/lib/libtools'))
-r.gSystem.Load(os.path.expandvars('$TOOLSSYS/lib/libroofit'))
-
-#If you have compiled with CMake and you want to load both the libraries in one go, change the previous lines to 
-#gSystem.Load(os.path.expandvars('$TOOLSSYS/build/libeasyanalysis.so') and make sure you have LD_LIBRARY_PATH set to $TOOLSSYS/build)
+#r.gSystem.Load(os.path.expandvars('$TOOLSSYS/lib/libtools'))
+#r.gSystem.Load(os.path.expandvars('$TOOLSSYS/lib/libroofit'))
+r.gSystem.Load(os.path.expandvars('$TOOLSSYS/build/libeasyanalysis-shared'))
 
 __importables__ = [
     'TypeDB',

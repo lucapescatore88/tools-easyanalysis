@@ -221,7 +221,7 @@ public:
         case UCHAR:   { return reinterpret_cast<T*>(value.myUChar);  break; }
         case SHORT:   { return reinterpret_cast<T*>(value.myShort);  break; }
         case USHORT:  { return reinterpret_cast<T*>(value.myUShort); break; }
-        default: { cout << "*** WARNING: Type not available!" << endl; return NULL; }
+        default: { cout << "*** WARNING *** Type not available!" << endl; return NULL; }
         }
     }
 };
@@ -431,8 +431,8 @@ public:
 
     template <typename T = double> T GetValue(const char *name, int iValue = 0)
     {
-        if (!init) { cout << "*** WARNING: tree " << fChain->GetName() << " not initialized" << endl; return 0; }
-        if (!selected) { cout << "*** WARNING: no entry selected" << endl; return 0; }
+        if (!init) { cout << "*** WARNING *** Tree " << fChain->GetName() << " not initialized" << endl; return 0; }
+        if (!selected) { cout << "*** WARNING *** No entry selected" << endl; return 0; }
 
         ++nGets;
         if ( continueSorting && (nGets % 1000 == 0) ) continueSorting = partialSort();
@@ -472,7 +472,14 @@ public:
         for (auto v : vars) res *= HasVar(v->GetName());
         return res;
     }
-    inline bool isValid() { return init; }
+    inline bool isValid() {
+        if (!init)
+        {
+            cout << endl << "TreeReader : *** WARNING *** tree " << fChain->GetName() << " not initialized!" << endl;
+            return 0;
+        }
+        return init;
+    }
 
     /* \brief Returns the pointer to the variable object with name "name" for the current entry
     * Using the varable class interface you can read/write the name, type and value.

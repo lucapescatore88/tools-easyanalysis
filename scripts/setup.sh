@@ -25,6 +25,9 @@ fi
 if [ ! -n "${PYTHONPATH+x}" ]; then
     export PYTHONPATH
 fi
+if [ ! -n "${GLIMPSEPATH+x}" ]; then
+    export GLIMPSEPATH
+fi
 
 if [ ! -n "${TOOLSSYS+x}" ]; then
     export TOOLSSYS="$( command cd . "$( dirname "${BASH_SOURCE[0]}" )" && command pwd )"
@@ -39,13 +42,18 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
 
     export PYTHONPATH=$TOOLSSYS/python:$PYTHONPATH
 
+    export GLIMPSEPATH="$GLIMPSEPATH $TOOLSSYS/tools $TOOLSSYS/roofit"
+
+    alias git_setup="source $TOOLSSYS/scripts/setup.sh"
+    alias git_glimpse="$TOOLSSYS/scripts/glimpse.csh"
+
+    alias cMake="$TOOLSSYS/scripts/make.sh"
+
     echo
     echo "Setup tools-easyanalysis"
     echo
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
-
-    alias cMake="$TOOLSSYS/scripts/make.sh"
 
     source $TOOLSSYS/scripts/setup.sh arch
     if [ $ARCH == "Darwin" ]; then
