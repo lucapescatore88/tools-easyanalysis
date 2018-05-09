@@ -473,8 +473,16 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
 
             // Actual fit
 
-            RooMinuit m(*nll_toFit);
+            /*
+                RooMinimizer m(*nll_toFit);
+                We could also use RooMinimizer instead of RooMinuit and we can also change the minimizer MINUIT , MINUIT 2
+                https://root.cern.ch/doc/v608/classRooMinimizer.html
+                Also use RooMinuit can provoke some segfault on Mac OS X if no cleanup is done
+                https://root-forum.cern.ch/t/tvirtualfitter-destructor-problem/23823
 
+            */
+
+            RooMinuit m(*nll_toFit);
             if (option.find("-quiet") != string::npos)
             {
                 m.setPrintLevel(-1);
@@ -510,6 +518,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
                 ++i;
             }
             while (refit && (m_fitRes == NULL || (m_fitRes->covQual() < 3 && TMath::Abs((m_fitRes->minNll() - minNll) / minNll) > 0.01)) ); // loop until converged or no improvement found
+            m.cleanup();
         }
     }
     else { cout << m_name << ": *** WARNING Fit *** No data!" << endl; return NULL; }
