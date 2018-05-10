@@ -60,9 +60,9 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
         source $TOOLSSYS/scripts/setup.sh root
     else
         source $TOOLSSYS/scripts/setup.sh arch
-	if [ $ARCH != "Darwin" ]; then
+        if [ $ARCH != "Darwin" ]; then
             source $TOOLSSYS/scripts/setup.sh lcg
-	fi
+        fi
     fi
 
     source $TOOLSSYS/scripts/setup.sh env
