@@ -49,13 +49,7 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
 
-    source $TOOLSSYS/scripts/setup.sh arch
-    if [ $ARCH == "Darwin" ]; then
-        source $TOOLSSYS/scripts/setup.sh env
-        return
-    fi
-    if [ "$1" == "old" ]; then
-        SWITCH=""
+    if [ "$SWITCH" == "old" ]; then
         source $TOOLSSYS/scripts/setup.sh old
         source $TOOLSSYS/scripts/setup.sh cmake
         source $TOOLSSYS/scripts/setup.sh gcc
@@ -65,14 +59,18 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
         source $TOOLSSYS/scripts/setup.sh gsl
         source $TOOLSSYS/scripts/setup.sh root
     else
-        source $TOOLSSYS/scripts/setup.sh lcg
+        source $TOOLSSYS/scripts/setup.sh arch
+	if [ $ARCH != "Darwin" ]; then
+            source $TOOLSSYS/scripts/setup.sh lcg
+	fi
     fi
 
     source $TOOLSSYS/scripts/setup.sh env
+    return
 fi
 
 # CASES
-case "$1" in
+case "$SWITCH" in
 
     env)
         echo

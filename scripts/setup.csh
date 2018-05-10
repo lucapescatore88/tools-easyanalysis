@@ -42,9 +42,7 @@ if ( ! ($?TOOLSSYS) ) then
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
 
-    source $TOOLSSYS/scripts/setup.csh arch
-    if ( "$1" == "old" ) then
-        set SWITCH = ""
+    if ( "$SWITCH" == "old" ) then
         source $TOOLSSYS/scripts/setup.csh old
         source $TOOLSSYS/scripts/setup.csh cmake
         source $TOOLSSYS/scripts/setup.csh gcc
@@ -54,14 +52,16 @@ if ( ! ($?TOOLSSYS) ) then
         source $TOOLSSYS/scripts/setup.csh gsl
         source $TOOLSSYS/scripts/setup.csh root
     else
+        source $TOOLSSYS/scripts/setup.csh arch
         source $TOOLSSYS/scripts/setup.csh lcg
     endif
 
     source $TOOLSSYS/scripts/setup.csh env
+    exit
 endif
 
 # CASES
-switch ( "$1" )
+switch ( "$SWITCH" )
 
     case env:
         echo
