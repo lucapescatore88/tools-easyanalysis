@@ -1,14 +1,9 @@
 #!/bin/tcsh
 
 set SWITCH = "$1"
-if ( "$SWITCH" == "" ) set SWITCH = "lcg"
 set PKG = `echo $SWITCH | awk '{ print toupper( $0 ) }'`
 
 setenv LCG /cvmfs/sft.cern.ch/lcg
-
-# LIBS
-setenv CVMFS /cvmfs/lhcb.cern.ch
-setenv LCGSYS $CVMFS/lib/lcg
 
 if ( ! ($?LD_INCLUDE_PATH) )   setenv LD_INCLUDE_PATH
 if ( ! ($?LD_LIBRARY_PATH) )   setenv LD_LIBRARY_PATH
@@ -48,13 +43,17 @@ if ( ! ($?TOOLSSYS) ) then
     echo
 
     source $TOOLSSYS/scripts/setup.csh arch
-    source $TOOLSSYS/scripts/setup.csh cmake
-    source $TOOLSSYS/scripts/setup.csh gcc
-    source $TOOLSSYS/scripts/setup.csh python
-    source $TOOLSSYS/scripts/setup.csh pyanalysis
-    source $TOOLSSYS/scripts/setup.csh pytools
-    source $TOOLSSYS/scripts/setup.csh gsl
-    source $TOOLSSYS/scripts/setup.csh root
+    if ( "$1" == "old" ) then
+        source $TOOLSSYS/scripts/setup.csh cmake
+        source $TOOLSSYS/scripts/setup.csh gcc
+        source $TOOLSSYS/scripts/setup.csh python
+        source $TOOLSSYS/scripts/setup.csh pyanalysis
+        source $TOOLSSYS/scripts/setup.csh pytools
+        source $TOOLSSYS/scripts/setup.csh gsl
+        source $TOOLSSYS/scripts/setup.csh root
+    else
+        source $TOOLSSYS/scripts/setup.csh lcg
+    endif
 
     source $TOOLSSYS/scripts/setup.csh env
 endif
@@ -76,8 +75,7 @@ switch ( "$1" )
     case arch:
         setenv ARCH `uname`
         if ( $ARCH == "Linux" ) then
-            if ( `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ) setenv ARCH x86_64-slc6-gcc49-opt
-            #if ( `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ) setenv ARCH x86_64-slc6-gcc62-opt
+            if ( `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ) setenv ARCH x86_64-slc6-gcc62-opt
             if ( `cat /etc/redhat-release | grep -ie "CentOS" | grep -ie "release 7" | wc -l` == 1 ) setenv ARCH x86_64-centos7-gcc62-opt
         endif
         if ( "$2" != "" ) setenv ARCH $2
@@ -87,20 +85,18 @@ switch ( "$1" )
         breaksw
 
     case lcg:
-        set SYS = /cvmfs/sft.cern.ch/lcg/views
+        set SYS = $LCG/views
         set VER = LCG_92
         if ( "$2" != "" ) set VER = LCG_$2
         setenv LCGSYS $LCG
         setenv LCGVER $VER
-        source $REPOSYS/scripts/setup.csh arch
-        if ( `echo "$ARCH" | grep -ci "slc6"` == 1 ) then
-            echo
-            echo "Please use lxplus7.cern.ch"
-            echo
-            setenv ARCH ""
-            exit
-        endif
-        source $REPOSYS/scripts/setup.csh batch
+        #if ( `echo "$ARCH" | grep -ci "slc6"` == 1 ) then
+        #    echo
+        #    echo "Please use centos (e.g. lxplus7.cern.ch)"
+        #    echo
+        #    setenv ARCH ""
+        #    exit
+        #endif
         set PKG = "LCG"
         set VER = $VER/$ARCH
         if ( `echo "$PATH" | grep -ci "$SYS/$VER"` == 0 ) then
@@ -173,6 +169,22 @@ switch ( "$1" )
             endif
             rm -rf $DUMMY
         endif
+
+        breaksw
+
+    case old:
+        setenv CVMFS /cvmfs/lhcb.cern.ch
+        setenv LCGSYS $CVMFS/lib/lcg
+        if ( `echo "$ARCH" | grep -ci "slc6"` == 0 ) then
+            echo
+            echo "Wrong platform, please use x86_64-slc6-gcc49-opt"
+            echo
+            setenv ARCH ""
+            exit
+        endif
+        source $REPOSYS/scripts/setup.csh arch x86_64-slc6-gcc49-opt
+
+        printf "Configuring %-10s from %-1s \n" "LCG" $LCGSYS
 
         breaksw
 
