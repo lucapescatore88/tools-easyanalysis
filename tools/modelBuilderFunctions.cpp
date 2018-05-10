@@ -178,7 +178,7 @@ Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar
         RooFormulaVar * fpar;
         if (opt[i].find("-shift") != string::npos)
         {
-            if (opt[i].find("-delta") != string::npos)
+            if (opt[i].find("-offset") != string::npos)
             {
                 size_t par1 = opt[i].find("[");
                 size_t par2 = opt[i].find("]");
