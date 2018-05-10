@@ -200,6 +200,7 @@ case "$SWITCH" in
     old)
         export CVMFS=/cvmfs/lhcb.cern.ch
         export LCGSYS=$CVMFS/lib/lcg
+        source $TOOLSSYS/scripts/setup.sh arch
         if [ `echo "$ARCH" | grep -ci "slc6"` == 0 ]; then
             echo
             echo "Wrong platform, please use x86_64-slc6-gcc49-opt"

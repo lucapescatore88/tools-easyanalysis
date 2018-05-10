@@ -177,6 +177,7 @@ switch ( "$SWITCH" )
     case old:
         setenv CVMFS /cvmfs/lhcb.cern.ch
         setenv LCGSYS $CVMFS/lib/lcg
+        source $TOOLSSYS/scripts/setup.csh arch
         if ( `echo "$ARCH" | grep -ci "slc6"` == 0 ) then
             echo
             echo "Wrong platform, please use x86_64-slc6"
