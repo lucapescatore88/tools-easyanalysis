@@ -55,6 +55,8 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
         return
     fi
     if [ "$1" == "old" ]; then
+        SWITCH=""
+        source $TOOLSSYS/scripts/setup.sh old
         source $TOOLSSYS/scripts/setup.sh cmake
         source $TOOLSSYS/scripts/setup.sh gcc
         source $TOOLSSYS/scripts/setup.sh python

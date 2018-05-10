@@ -44,6 +44,8 @@ if ( ! ($?TOOLSSYS) ) then
 
     source $TOOLSSYS/scripts/setup.csh arch
     if ( "$1" == "old" ) then
+        set SWITCH = ""
+        source $TOOLSSYS/scripts/setup.csh old
         source $TOOLSSYS/scripts/setup.csh cmake
         source $TOOLSSYS/scripts/setup.csh gcc
         source $TOOLSSYS/scripts/setup.csh python
@@ -177,7 +179,7 @@ switch ( "$1" )
         setenv LCGSYS $CVMFS/lib/lcg
         if ( `echo "$ARCH" | grep -ci "slc6"` == 0 ) then
             echo
-            echo "Wrong platform, please use x86_64-slc6-gcc49-opt"
+            echo "Wrong platform, please use x86_64-slc6"
             echo
             setenv ARCH ""
             exit
