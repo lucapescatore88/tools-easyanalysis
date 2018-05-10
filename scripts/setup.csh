@@ -102,7 +102,7 @@ switch ( "$1" )
         if ( `echo "$PATH" | grep -ci "$SYS/$VER"` == 0 ) then
             if ( -f $SYS/$VER/setup.csh ) then
                 #source $SYS/$VER/setup.csh
-                set DUMMY = $REPOSYS/scripts/setup_lcg.csh
+                set DUMMY = $TOOLSSYS/scripts/setup_lcg.csh
                 if ( -f $DUMMY ) rm -rf $DUMMY
                 touch $DUMMY
                 echo "set thisfile=$SYS/$VER/setup.csh" >> $DUMMY
@@ -116,12 +116,12 @@ switch ( "$1" )
                     setenv CXX g++
                 endif
 
-                setenv PYTHONUSERBASE $REPOSYS/python/local
+                setenv PYTHONUSERBASE $TOOLSSYS/python/local
                 #setenv PYTHONPATH $PYTHONUSERBASE/lib/python2.7/site-packages:$PYTHONPATH
 
                 printf "Configuring %-10s from %-1s \n" $PKG $SYS/$LCGVER
 
-                source $REPOSYS/scripts/setup.csh lcgenv
+                source $TOOLSSYS/scripts/setup.csh lcgenv
             else
                 echo
                 printf "%-10s not availalbe at %-1s \n" $PKG $SYS/$LCGVER
@@ -140,7 +140,7 @@ switch ( "$1" )
                 setenv LCGENV_PATH $LCGSYS/releases
                 setenv PATH ${LCGENVSYS}:$PATH
 
-                alias lcgpkg "source $REPOSYS/scripts/setup.csh lcgpkg"
+                alias lcgpkg "source $TOOLSSYS/scripts/setup.csh lcgpkg"
 
                 printf "Configuring %-10s from %-1s \n" $PKG $SYS/$VER
             else
@@ -159,7 +159,7 @@ switch ( "$1" )
             echo
         else
             set PKG = `echo $2 | awk '{ print toupper( $0 ) }'`
-            set DUMMY = $REPOSYS/scripts/setup_lcg.csh
+            set DUMMY = $TOOLSSYS/scripts/setup_lcg.csh
             if ( -f $DUMMY ) rm -rf $DUMMY
             lcgenv -p $LCGVER $ARCH $2 > $DUMMY
             set SRC = `grep -e "setenv PATH" $DUMMY | head -n 1 | awk '{ print $3 }' | sed s:'"'::g | sed s:"/$ARCH":" ": | awk '{ print $1 }'`
@@ -182,7 +182,7 @@ switch ( "$1" )
             setenv ARCH ""
             exit
         endif
-        source $REPOSYS/scripts/setup.csh arch x86_64-slc6-gcc49-opt
+        source $TOOLSSYS/scripts/setup.csh arch x86_64-slc6-gcc49-opt
 
         printf "Configuring %-10s from %-1s \n" "LCG" $LCGSYS
 
