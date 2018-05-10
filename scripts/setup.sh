@@ -49,6 +49,12 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
 
+    if [ "$SWITCH" == "env" ]; then
+        source $TOOLSSYS/scripts/setup.sh arch
+        source $TOOLSSYS/scripts/setup.sh env
+        return
+    fi
+
     if [ "$SWITCH" == "old" ]; then
         source $TOOLSSYS/scripts/setup.sh old
         source $TOOLSSYS/scripts/setup.sh cmake
