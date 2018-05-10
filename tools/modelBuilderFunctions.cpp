@@ -183,7 +183,7 @@ Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar
                 size_t par1 = opt[i].find("[");
                 size_t par2 = opt[i].find("]");
                 string val  = opt[i].substr(par1 + 1, par2 - par1 - 1);
-                fpar = new RooFormulaVar(fname + "_shifted", ("@0+@1" + val).c_str(), RooArgSet(*c[i], *par));
+                fpar = new RooFormulaVar(fname + "_shifted", ("@0+@1+" + val).c_str(), RooArgSet(*c[i], *par));
             }
             else
                 fpar = new RooFormulaVar(fname + "_shifted", "@0+@1", RooArgSet(*c[i], *par));
