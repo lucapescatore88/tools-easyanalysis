@@ -182,16 +182,14 @@ protected:
                 sigDataSet->reduce(treecut);
             }
 
-            double rho;
+            double rho = 1;
             if (opt.find("-rho") != string::npos)
             {
                 int pos = opt.find("-rho");
                 string rhostr = opt.substr(pos + 4, 20);
                 rho = ((TString)rhostr).Atof();
             }
-            else {
-                rho = 2;
-            }
+
             /* Here the RooDataSet is based on a tree
             \\ myvar is the mass variable used, such as Lb_MM
             \\ massname is the name in the tree
