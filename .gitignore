@@ -1,1 +1,4 @@
-*.rootmap
+*build/*
+*/dic/*
+*/lib/*
+*/obj/*
