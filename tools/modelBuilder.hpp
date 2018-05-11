@@ -264,6 +264,7 @@ protected:
                     res_fitrange->plotOn(keysplot, NormRange("fit_range"));
                     res->plotOn(keysplot);
                     keysplot->SetTitle(_name);
+                    keysplot->SetXTitle(myvar->GetName());
                     keysplot->Draw();
                     c->Print("rooKeysPdf_compare" + name_ + ".pdf");
                     delete c;
@@ -275,6 +276,7 @@ protected:
                 sigDataSet->plotOn(keysplot);
                 res->plotOn(keysplot, NormRange("fit_range"));
                 keysplot->SetTitle(_name);
+                keysplot->SetXTitle(myvar->GetName());
                 keysplot->Draw();
                 c->Print("rooKeysPdf_" + name_ + ".pdf");
                 delete c;
@@ -287,6 +289,7 @@ protected:
                 sigDataSet->plotOn(keysplot);
                 res->plotOn(keysplot , NormRange("full_range"));
                 keysplot->SetTitle(_name);
+                keysplot->SetXTitle(myvar->GetName());
                 keysplot->Draw();
                 c->Print("rooKeysPdf_fullrange_" + name_ + ".pdf");
                 delete c;
