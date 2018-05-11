@@ -157,9 +157,9 @@ string isParInMap( string par, Str2VarMap myvars, string option )
 
 
 //Allows to modify a parameter (or more) in a RooFormulaVar
-//default       -> Scales the parameter by "c"
-//opt=="-shift" -> Adds a shift by "c"
-
+//default          -> Scales the parameter
+//opt=="-shift"    -> Adds a shift
+//opt=="-offset[]" -> Adds a constant offset to the shift
 Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, vector<string> opt)
 {
     for (unsigned i = 0; i < names.size(); i++)
@@ -183,7 +183,7 @@ Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar
                 size_t par1 = opt[i].find("[");
                 size_t par2 = opt[i].find("]");
                 string val  = opt[i].substr(par1 + 1, par2 - par1 - 1);
-                fpar = new RooFormulaVar(fname + "_shifted", ("@0+@1+" + val).c_str(), RooArgSet(*c[i], *par));
+                fpar = new RooFormulaVar(fname + "_shifted_and_offsetted", ("@0+@1+" + val).c_str(), RooArgSet(*c[i], *par));
             }
             else
                 fpar = new RooFormulaVar(fname + "_shifted", "@0+@1", RooArgSet(*c[i], *par));
