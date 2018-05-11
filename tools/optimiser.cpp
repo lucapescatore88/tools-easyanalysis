@@ -2,11 +2,9 @@
 
 
 /**
-  \class CutOptimiser.
-
-  Allows to opptimise any cut in an n-dimensional space is required.
-
-  */
+ * \class CutOptimiser.
+ * Allows to optimise any cut in an n-dimensional space.
+ **/
 
 TString subStrings(TString tmp, vector <TString> names, vector<double> values)
 {
