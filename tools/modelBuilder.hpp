@@ -217,7 +217,12 @@ protected:
             double max_mass, min_mass; // Max and min values of dataset range for mass variable
             sigDataSet->getRange(*myvar, min_mass, max_mass); // Get range of dataset in mass variable, has to be done after transformation
             myvar->setRange(min_mass, max_mass);
-            res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
+
+            if (opt.find("-mb") != string::npos)
+                res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
+            else
+                res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
+
             // Set range back to fit variable range
             myvar->setRange(min, max);
 
