@@ -249,7 +249,8 @@ protected:
                 TCanvas * c = new TCanvas();
                 RooPlot * keysplot = myvar->frame();
                 sigDataSet->plotOn(keysplot);
-                res_fitrange->plotOn(keysplot, NormRange("fit_range"));
+                if(res_fitrange) res_fitrange->plotOn(keysplot, NormRange("fit_range"));
+                else res->plotOn(keysplot);
                 keysplot->SetTitle(_name);
                 keysplot->Draw();
                 TString name_ = _name;
