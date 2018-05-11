@@ -143,6 +143,8 @@ protected:
             /* If var needs to be changed, here include original mass var name in vars
             */
             RooRealVar * tree_mass_var = NULL;
+            double max = myvar->getMax();
+            double min = myvar->getMin();
             if (opt.find("-var[") != string::npos)
             {
                 size_t pos = opt.find("-var[") + 4;
@@ -151,9 +153,10 @@ protected:
                     TString varname = (TString)opt.substr(pos + 1, posend - pos - 1);
                     if (varname != "1")
                     {
-                        tree_mass_var = new RooRealVar(varname, varname, 0.);
-                        vars->add(*tree_mass_var);
                         vars->remove(*myvar);
+                        tree_mass_var = myvar;
+                        myvar = new RooRealVar(varname, varname, 0., min, max);
+                        vars->add(*myvar);
                     }
                 }
             }
@@ -195,11 +198,6 @@ protected:
             \\ massname is the name in the tree
             \\ Need to add that one to the RooDataSet when making it
             */
-            double max_mass, min_mass; // Max and min values of dataset range for mass variable
-            // Get range of fit variable
-            double max = myvar->getMax();
-            double min = myvar->getMin();
-            // Used both in -var[] and plotting of RooKeys
 
             if ((opt.find("-var[") != string::npos) && (opt.find("-scale[") != string::npos))
             {
@@ -213,16 +211,17 @@ protected:
                     TString scale    = (TString)opt.substr(pos_scale + 1 , posend_scale - pos_scale - 1);
                     if (massname != "1")
                     {
-                        RooFormulaVar massfunc(myvar->GetName(), myvar->GetName(), "(" + massname + ")*" + scale, RooArgList(*tree_mass_var));
+                        RooFormulaVar massfunc(myvar->GetName(), myvar->GetName(), "(" + massname + ")*" + scale, RooArgList(*myvar));
                         sigDataSet->addColumn(massfunc);
                         // Code to do the RooKeysPdf over a longer range (first over fit range)
-                        res_fitrange = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
+                        //res_fitrange = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
 
                     }
                 }
             }
 
             // Set full range range for RooKeys
+            double max_mass, min_mass; // Max and min values of dataset range for mass variable
             sigDataSet->getRange(*myvar, min_mass, max_mass); // Get range of dataset in mass variable, has to be done after transformation
             myvar->setRange(min_mass, max_mass);
             res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
