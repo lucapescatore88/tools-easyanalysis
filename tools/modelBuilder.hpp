@@ -245,14 +245,11 @@ protected:
             if (opt.find("-print") != string::npos)
             {
                 myvar->setRange("fit_range", min, max); // Just for normalisation purposes now
+                myvar->setRange("full_range", min_mass, max_mass);
 
-                TCanvas * c = new TCanvas();
-                RooPlot * keysplot = myvar->frame();
-                sigDataSet->plotOn(keysplot);
-                if(res_fitrange) res_fitrange->plotOn(keysplot, NormRange("fit_range"));
-                else res->plotOn(keysplot);
-                keysplot->SetTitle(_name);
-                keysplot->Draw();
+                TCanvas * c = NULL;
+                RooPlot * keysplot = NULL;
+
                 TString name_ = _name;
                 name_.ReplaceAll("__noprint__", "");
                 name_.ReplaceAll(" ", "_");
@@ -263,10 +260,20 @@ protected:
                 name_.ReplaceAll("/", "_").ReplaceAll("+", "_").ReplaceAll("-", "_").ReplaceAll("*", "_");
                 name_.ReplaceAll(",", "_").ReplaceAll(".", "_");
                 name_.ReplaceAll("__", "_").ReplaceAll("_for", "__for");
-                c->Print("rooKeysModel_fitrange_plotandpdf" + name_ + ".pdf");
-                delete c;
-                delete keysplot;
 
+                if (res_fitrange)
+                {
+                    c = new TCanvas();
+                    keysplot = myvar->frame();
+                    sigDataSet->plotOn(keysplot);
+                    res_fitrange->plotOn(keysplot, NormRange("fit_range"));
+                    res->plotOn(keysplot);
+                    keysplot->SetTitle(_name);
+                    keysplot->Draw();
+                    c->Print("rooKeysPdf_compare" + name_ + ".pdf");
+                    delete c;
+                    delete keysplot;
+                }
 
                 c = new TCanvas();
                 keysplot = myvar->frame();
@@ -274,17 +281,7 @@ protected:
                 res->plotOn(keysplot, NormRange("fit_range"));
                 keysplot->SetTitle(_name);
                 keysplot->Draw();
-                name_ = _name;
-                name_.ReplaceAll("__noprint__", "");
-                name_.ReplaceAll(" ", "_");
-                name_.ReplaceAll("#", "_").ReplaceAll("^", "_");
-                name_.ReplaceAll("{", "_").ReplaceAll("}", "_");
-                name_.ReplaceAll("(", "_").ReplaceAll(")", "_");
-                name_.ReplaceAll(":", "_");
-                name_.ReplaceAll("/", "_").ReplaceAll("+", "_").ReplaceAll("-", "_").ReplaceAll("*", "_");
-                name_.ReplaceAll(",", "_").ReplaceAll(".", "_");
-                name_.ReplaceAll("__", "_").ReplaceAll("_for", "__for");
-                c->Print("rooKeysModel_fitrange_plot" + name_ + ".pdf");
+                c->Print("rooKeysPdf_" + name_ + ".pdf");
                 delete c;
                 delete keysplot;
 
@@ -293,22 +290,13 @@ protected:
                 c = new TCanvas();
                 keysplot = myvar->frame();
                 sigDataSet->plotOn(keysplot);
-                res->plotOn(keysplot);//,NormRange("full_range"));
+                res->plotOn(keysplot , NormRange("full_range"));
                 keysplot->SetTitle(_name);
                 keysplot->Draw();
-                name_ = _name;
-                name_.ReplaceAll("__noprint__", "");
-                name_.ReplaceAll(" ", "_");
-                name_.ReplaceAll("#", "_").ReplaceAll("^", "_");
-                name_.ReplaceAll("{", "_").ReplaceAll("}", "_");
-                name_.ReplaceAll("(", "_").ReplaceAll(")", "_");
-                name_.ReplaceAll(":", "_");
-                name_.ReplaceAll("/", "_").ReplaceAll("+", "_").ReplaceAll("-", "_").ReplaceAll("*", "_");
-                name_.ReplaceAll(",", "_").ReplaceAll(".", "_");
-                name_.ReplaceAll("__", "_").ReplaceAll("_for", "__for");
-                c->Print("rooKeysModel_" + name_ + ".pdf");
+                c->Print("rooKeysPdf_fullrange_" + name_ + ".pdf");
                 delete c;
                 delete keysplot;
+
                 myvar->setRange(min, max); // Set mass variable range back to the proper one
             }
         }
