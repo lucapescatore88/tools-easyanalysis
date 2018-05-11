@@ -140,9 +140,11 @@ protected:
             }
 
             RooDataSet * sigDataSet = NULL;
+
             /* If var needs to be changed, here include original mass var name in vars
             */
             RooRealVar * tree_mass_var = NULL;
+            RooFormulaVar * scale_var = NULL;
             double max = myvar->getMax();
             double min = myvar->getMin();
             if (opt.find("-var[") != string::npos)
@@ -157,6 +159,17 @@ protected:
                         tree_mass_var = myvar;
                         myvar = new RooRealVar(varname, varname, 0., min, max);
                         vars->add(*myvar);
+                    }
+                }
+
+                if (opt.find("-scale[") != string::npos)
+                {
+                    size_t pos_scale = opt.find("-scale[") + 6;
+                    size_t posend_scale = opt.find("]", pos_scale);
+                    if (pos != posend - 1 and pos_scale != posend_scale - 1) {
+                        TString massname = (TString)opt.substr(pos + 1 , posend - pos - 1);
+                        TString scale    = (TString)opt.substr(pos_scale + 1 , posend_scale - pos_scale - 1);
+                        if (massname != "1") scale_var = new RooFormulaVar(myvar->GetName(), myvar->GetName(), "(" + massname + ")*" + scale, RooArgList(*myvar));
                     }
                 }
             }
@@ -185,39 +198,19 @@ protected:
                 sigDataSet->reduce(treecut);
             }
 
+            if (scale_var)
+            {
+                sigDataSet->addColumn(*scale_var);
+                // Code to do the RooKeysPdf over a longer range (first over fit range) ???
+                //res_fitrange = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
+            }
+
             double rho = 1;
             if (opt.find("-rho") != string::npos)
             {
                 int pos = opt.find("-rho");
                 string rhostr = opt.substr(pos + 4, 20);
                 rho = ((TString)rhostr).Atof();
-            }
-
-            /* Here the RooDataSet is based on a tree
-            \\ myvar is the mass variable used, such as Lb_MM
-            \\ massname is the name in the tree
-            \\ Need to add that one to the RooDataSet when making it
-            */
-
-            if ((opt.find("-var[") != string::npos) && (opt.find("-scale[") != string::npos))
-            {
-                size_t pos = opt.find("-var[") + 4;
-                size_t posend = opt.find("]", pos);
-                size_t pos_scale = opt.find("-scale[") + 6;
-                size_t posend_scale = opt.find("]", pos_scale);
-
-                if (pos != posend - 1 and pos_scale != posend_scale - 1) {
-                    TString massname = (TString)opt.substr(pos + 1 , posend - pos - 1);
-                    TString scale    = (TString)opt.substr(pos_scale + 1 , posend_scale - pos_scale - 1);
-                    if (massname != "1")
-                    {
-                        RooFormulaVar massfunc(myvar->GetName(), myvar->GetName(), "(" + massname + ")*" + scale, RooArgList(*myvar));
-                        sigDataSet->addColumn(massfunc);
-                        // Code to do the RooKeysPdf over a longer range (first over fit range)
-                        //res_fitrange = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
-
-                    }
-                }
             }
 
             // Set full range range for RooKeys
@@ -455,7 +448,7 @@ protected:
 
 public:
 
-    //Constructors
+//Constructors
 
     ModelBuilder(TString _name, RooRealVar * _var, TString _title = ""):
         m_isvalid(false), m_doNegSig(false), m_doNegBkg(false), m_name(_name), m_title(_title),
@@ -488,7 +481,7 @@ public:
     }
 
 
-    //Methods
+//Methods
 
     /** \brief Builds the model:
      * Using RooAddPdf builds a model using all components in sig and background_compnents.
@@ -701,7 +694,7 @@ public:
      * */
     void SetBkgMode( bool mode ) { m_totBkgMode = mode; }
     void SetSig(RooAbsPdf * _sig) { m_sig = _sig; }
-    ///\brief Forces a model
+///\brief Forces a model
     void SetModel(RooAbsPdf * _model);
     void SetNSig(RooAbsReal * _nsig) { m_nsig = _nsig; }
     void SetBkg(RooAbsPdf * _bkg) { m_bkg = _bkg; }
@@ -713,33 +706,33 @@ public:
     RooAbsPdf * GetParamsGaussian(RooFitResult * fitRes);
     RooDataSet * GetParamsVariations(int nvariations = 10000, RooFitResult * fitRes = NULL);
 
-    ////\brief Return true if the model was correctly built and initialized
+////\brief Return true if the model was correctly built and initialized
     bool isValid() { return m_isvalid; }
-    //bool isExtended() { return extended; }
+//bool isExtended() { return extended; }
     TString GetName() { return m_name; }
-    ///\brief Return the variable to fit
+///\brief Return the variable to fit
     RooRealVar * GetVariable() { return m_var; }
-    ///\brief Returns the model pdf
+///\brief Returns the model pdf
     RooAbsPdf * GetModel() { return m_model; }
-    ///\brief Returns the signal pdf
+///\brief Returns the signal pdf
     RooAbsPdf * GetSig() { return m_sig; }
-    ///\brief Returns a pdf corresponding to the sum of all bkg PDFs
+///\brief Returns a pdf corresponding to the sum of all bkg PDFs
     RooAbsPdf * GetTotBkg() { return m_bkg; }
-    ///\brief Returns the number of bkg events integrating the bkg pdf in [min,max] (Returns nbkg * (int [min,max] of bkg) )
-    /// If "fitRes" is passed stores the error in "valerr"
+///\brief Returns the number of bkg events integrating the bkg pdf in [min,max] (Returns nbkg * (int [min,max] of bkg) )
+/// If "fitRes" is passed stores the error in "valerr"
     double GetNBkgVal(double min = 0, double max = 0, double * valerr = NULL, RooFitResult * fitRes = NULL);
-    ///\brief Returns the number of sig events integrating the sig pdf in [min,max] (Returns nsig * (int [min,max] of sig) )
-    /// If "fitRes" is passed stores the error in "valerr"
+///\brief Returns the number of sig events integrating the sig pdf in [min,max] (Returns nsig * (int [min,max] of sig) )
+/// If "fitRes" is passed stores the error in "valerr"
     double GetNSigVal(double min = 0, double max = 0, double * valerr = NULL, RooFitResult * fitRes = NULL);
-    ///\brief Return S/B integrating sig and bkg in [min,max]
+///\brief Return S/B integrating sig and bkg in [min,max]
     double GetSOverB(float min, float max, double * valerr = NULL, RooFitResult * fitRes = NULL);
-    ///\brief Return S/(S+B) integrating sig and bkg in [min,max]
+///\brief Return S/(S+B) integrating sig and bkg in [min,max]
     double GetSigFraction(float min, float max, double * valerr = NULL, RooFitResult * fitRes = NULL);
-    ///\brief Returns the full list of bkg PDFs
+///\brief Returns the full list of bkg PDFs
     vector<RooAbsPdf *> GetBkgComponents() { return m_bkg_components; }
-    ///\brief Prints to screen the composition e.g signal = NSIG / NTOT, bkg1 = NBKG1/NTOT, etc
+///\brief Prints to screen the composition e.g signal = NSIG / NTOT, bkg1 = NBKG1/NTOT, etc
     void PrintComposition(float min = 0., float max = 0., RooFitResult * fitRes = NULL);
-    ///\brief Returns the full list of bkg yields variables
+///\brief Returns the full list of bkg yields variables
     vector<RooAbsReal *> GetNBkgPtrs() { return m_bkg_fractions; }
 
     int GetBkgID( string name )
@@ -761,9 +754,9 @@ public:
         return getParams(m_bkg_components[id], RooArgSet(*m_var), vector<string>());
     }
 
-    ///\brief Returns the number of sig events in the full range. Same as GetNSigVal(0,0)
+///\brief Returns the number of sig events in the full range. Same as GetNSigVal(0,0)
     double GetSigVal(double * valerr = NULL, RooFitResult * fitRes = NULL);
-    ///\brief Returns the number of sig events in the full range. And can also return its asymmetric error
+///\brief Returns the number of sig events in the full range. And can also return its asymmetric error
     double GetSigVal(double * errHi, double * errLo);
     bool CheckModel() { return checkModel(m_model); };
     RooArgSet * GetParamsArgSet();
@@ -774,9 +767,9 @@ public:
     RooAbsReal * GetTotNBkg();
     RooAbsPdf * CalcTotBkg();
     RooAbsReal * GetNSigPtr() { return m_nsig; }
-    ///\brief Returns a Str2VarMap object containing all paramters only of the signal PDF
+///\brief Returns a Str2VarMap object containing all paramters only of the signal PDF
     Str2VarMap GetSigParams(string opt = "");
-    ///\brief Returns a Str2VarMap object containing all paramters of the entire model PDF, inclusing yields
+///\brief Returns a Str2VarMap object containing all paramters of the entire model PDF, inclusing yields
     Str2VarMap GetParams(string opt = "");
 
     static void SetPrintLevel(string mode) { m_pmode = mode; }
@@ -804,21 +797,21 @@ public:
                RooFitResult * fitRes = NULL, TString Ytitle = "", vector<RooRealVar *> myvar = vector<RooRealVar *>());
 
 
-    ///\brief Prints all the paramters to screen in RooFit format (opt="-nocost" skips constants)
+///\brief Prints all the paramters to screen in RooFit format (opt="-nocost" skips constants)
     void PrintParams(string opt = "") { printPars(GetParams("-orignames"), opt); }
-    ///\brief Prints the sgnal pdf paramters to screen in RooFit format (opt="-nocost" skips constants)
+///\brief Prints the sgnal pdf paramters to screen in RooFit format (opt="-nocost" skips constants)
     void PrintSigParams(string opt = "") { printPars(GetSigParams("-orignames"), opt); }
-    ///\brief Prints all the paramters to screen in latex table format (opt="-nocost" skips constants)
+///\brief Prints all the paramters to screen in latex table format (opt="-nocost" skips constants)
     void PrintParamsTable(string opt = "") { printPars(GetParams("-orignames"), "-latex" + opt); }
-    ///\brief Prints all sigal PDF paramters to screen in latex table format (opt="-nocost" skips constants)
+///\brief Prints all sigal PDF paramters to screen in latex table format (opt="-nocost" skips constants)
     void PrintSigParamsTable(string opt = "") { printPars(GetSigParams("-orignames"), "-latex" + opt); }
 
-    ///\brief Returns the value of S(x)/(S(x)+B(x)) for x = value. It corresponds to a naive S-weight.
+///\brief Returns the value of S(x)/(S(x)+B(x)) for x = value. It corresponds to a naive S-weight.
     float GetReducedSWeight(float value);
 
     RooWorkspace * SaveToRooWorkspace(string option);
 
-    /// \brief Modifies parameters of the signal PDF and stores modifying RooRealVars
+/// \brief Modifies parameters of the signal PDF and stores modifying RooRealVars
     void ModifySigParams(vector <string> parsToBeMod, vector<RooRealVar *> modPars, vector<string> modOpts, string opt = "")
     {
         if (m_pmode == "v") cout << endl << m_name << ": ModifySigParams " << parsToBeMod.size() << " " << opt << endl;
@@ -850,18 +843,18 @@ public:
 
         return;
     }
-    /// \brief Returns modifying RooRealVars of the signal PDF
+/// \brief Returns modifying RooRealVars of the signal PDF
     Str2VarMap GetModifyingSigParams() { return m_modSigPars; }
-    /// \brief Returns modifying RooRealVar of the signal PDF
+/// \brief Returns modifying RooRealVar of the signal PDF
     RooRealVar * GetModifyingSigParam(string name) { return (RooRealVar *) m_modSigPars[name]; }
-    /// \brief Prints modifying RooRealVars of the signal PDF
+/// \brief Prints modifying RooRealVars of the signal PDF
     void PrintModifyingSigParams(string opt = "") { printPars(m_modSigPars, opt); return; }
 
-    /// \brief Returns modified RooRealVars of the signal PDF
+/// \brief Returns modified RooRealVars of the signal PDF
     Str2VarMap GetModifiedSigParams() { return m_sigPars; }
-    /// \brief Returns modified RooRealVar of the signal PDF
+/// \brief Returns modified RooRealVar of the signal PDF
     RooRealVar * GetModifiedSigParam(string name) { return (RooRealVar *) m_sigPars[name]; }
-    /// \brief Prints modified RooRealVars of the signal PDF
+/// \brief Prints modified RooRealVars of the signal PDF
     void PrintModifiedSigParams(string opt = "") { printPars(m_sigPars, opt); return; }
 
 };
