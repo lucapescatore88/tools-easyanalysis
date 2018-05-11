@@ -201,7 +201,7 @@ protected:
             double min = myvar->getMin();
             // Used both in -var[] and plotting of RooKeys
 
-            if (opt.find("-var[") != string::npos)
+            if ((opt.find("-var[") != string::npos) && (opt.find("-scale[") != string::npos))
             {
                 size_t pos = opt.find("-var[") + 4;
                 size_t posend = opt.find("]", pos);
