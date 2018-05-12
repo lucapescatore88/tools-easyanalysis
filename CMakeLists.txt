@@ -1,47 +1,87 @@
-cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
+set(PROJECT easyanalysis)
+message(STATUS "Project " ${PROJECT})
 
+cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
+project(PROJECT VERSION 1.0)
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1)
 
-project(easyanalysis)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 
-set(TOOLSSYS $ENV{TOOLSSYS})
+if(NOT GSL_FOUND)
+    message(STATUS "Detecting GSL")
+    set(GSL_ROOT_DIR "$ENV{GSLSYS}")
+    find_package(GSL REQUIRED)
+    if(GSL_FOUND)
+        message(STATUS "GSL_INCLUDES  = " ${GSL_INCLUDE_DIRS})
+        message(STATUS "GSL_LIBRARIES = " ${GSL_LIBRARIES})
+        include_directories(${GSL_INCLUDE_DIRS})
+    else()
+        message(FATAL_ERROR "GSL found " ${GSL_FOUND})
+    endif()
+endif()
 
-set(ROOFIT_NAME roofit)
-set(TOOLS_NAME  tools)
+if(NOT ROOT_FOUND)
+    message(STATUS "Detecting ROOT")
+    find_package(ROOT REQUIRED Cling TreePlayer Tree Rint MathMore MathCore Postscript Matrix RIO Core Foam RooStats RooFit RooFitCore Gpad Graf3d Graf Hist Net TMVA XMLIO MLP)
+    if(ROOT_FOUND)
+        message(STATUS "ROOT_INCLUDES  = " ${ROOT_INCLUDE_DIRS})
+        message(STATUS "ROOT_LIBRARIES = " ${ROOT_LIBRARIES})
+        include_directories(${ROOT_INCLUDE_DIRS})
+        include(${ROOT_USE_FILE})
+    else()
+        message(FATAL_ERROR "ROOT found " ${ROOT_FOUND})
+    endif()
+endif()
 
-set(ROOFIT_PATH ${TOOLSSYS}/${ROOFIT_NAME})
-set(TOOLS_PATH  ${TOOLSSYS}/${TOOLS_NAME})
+#Declare function to generate dictionaries!
+function(GENERATE_DICTIONARY dictionary)
+    if(${ROOT_VERSION} LESS 6.0)
+        ROOT_GENERATE_DICTIONARY(${dictionary} ${ARGN})
+    else()
+        ROOT_GENERATE_DICTIONARY(${dictionary} MODULE ${dictionary} ${ARGN})
+    endif()
+endfunction()
+
+set(ROOFIT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/roofit)
+set(TOOLS_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/tools)
 
 set(ROOFIT_LINKDEF ${ROOFIT_PATH}/LinkDef.h)
 set(TOOLS_LINKDEF  ${TOOLS_PATH}/LinkDef.h)
 
-set(LIBRARY_OUTPUT_PATH ${TOOLSSYS}/lib)
-set(TOOLSLIB_PATH ${LIBRARY_OUTPUT_PATH})
+include_directories(${ROOFIT_PATH} ${TOOLS_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(GSLSYS $ENV{GSLSYS}/include)
+#Define headers and sources to compile for roofit and tools
+file(GLOB sources_roofit ${ROOFIT_PATH}/*.cpp)
+file(GLOB headers_roofit ${ROOFIT_PATH}/*.h)
+file(GLOB sources_tools  ${TOOLS_PATH}/*.cpp)
+file(GLOB headers_tools  ${TOOLS_PATH}/*.hpp)
 
-get_directory_property(HASPARENTSCOPE PARENT_DIRECTORY)
-if(HASPARENTSCOPE)
-    set(ROOFIT_NAME roofit PARENT_SCOPE)
-    set(TOOLS_NAME  tools  PARENT_SCOPE)
+#Remove from headers the linkdef file
+list(REMOVE_ITEM headers_roofit ${ROOFIT_PATH}/LinkDef.h)
+list(REMOVE_ITEM headers_tools  ${TOOLS_PATH}/LinkDef.h)
 
-    set(ROOFIT_PATH ${TOOLSSYS}/${ROOFIT_NAME} PARENT_SCOPE)
-    set(TOOLS_PATH  ${TOOLSSYS}/${TOOLS_NAME}  PARENT_SCOPE)
+#Generate the roofit dictionaries
+GENERATE_DICTIONARY(roofitDict ${headers_roofit} LINKDEF ${ROOFIT_PATH}/LinkDef.h)
+add_library(roofit-objlib OBJECT ${sources_roofit} roofitDict.cxx)
 
-    set(TOOLSLIB_PATH ${LIBRARY_OUTPUT_PATH} PARENT_SCOPE)
+#Generate the tools dictionaries
+GENERATE_DICTIONARY(toolsDict ${headers_tools} LINKDEF ${TOOLS_PATH}/LinkDef.h)
+add_library(tools-objlib OBJECT ${sources_tools} toolsDict.cxx)
+
+add_library(${PROJECT}-shared SHARED $<TARGET_OBJECTS:roofit-objlib> $<TARGET_OBJECTS:tools-objlib>)
+add_library(${PROJECT}-static STATIC $<TARGET_OBJECTS:roofit-objlib> $<TARGET_OBJECTS:tools-objlib>)
+
+target_link_libraries(${PROJECT}-shared PUBLIC ${ROOT_LIBRARIES} ${GSL_LIBRARIES})
+target_link_libraries(${PROJECT}-static PUBLIC ${ROOT_LIBRARIES} ${GSL_LIBRARIES})
+
+if (NOT ${ROOT_VERSION} VERSION_LESS "6.0.0")
+    install(FILES
+            ${CMAKE_BINARY_DIR}/lib${PROJECT}Dict_rdict.pcm
+            ${CMAKE_BINARY_DIR}/lib${PROJECT}Dict.rootmap
+            DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 endif()
 
-message(STATUS "CMaking ${PROJECT_NAME}")
-message(STATUS "Sources ${ROOFIT_PATH}")
-message(STATUS "Sources ${TOOLS_PATH}")
-message(STATUS "Library ${TOOLSLIB_PATH}")
-
-list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
-find_package(ROOT REQUIRED Cling TreePlayer Tree Rint MathMore MathCore Postscript Matrix RIO Core Foam RooStats RooFit RooFitCore Gpad Graf3d Graf Hist Net TMVA XMLIO MLP)
-include(${ROOT_USE_FILE})
-
-include_directories(${TOOLSSYS} ${TOOLS_PATH} ${ROOFIT_PATH} ${ROOT_INCLUDE_DIRS} ${GSLSYS})
-add_definitions(${ROOT_CXX_FLAGS})
-
-add_subdirectory(${ROOFIT_PATH})
-add_subdirectory(${TOOLS_PATH})
+install(TARGETS ${PROJECT}-shared ${PROJECT}-static
+		LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib
+		ARCHIVE DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib)

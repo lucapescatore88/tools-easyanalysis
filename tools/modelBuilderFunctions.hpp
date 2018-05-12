@@ -66,8 +66,8 @@
 #include "RooPlot.h"
 
 #include "generalFunctions.hpp"
-#include "treeReader.hpp"
 #include "roofit.hpp"
+#include "treeReader.hpp"
 
 using namespace std;
 using namespace RooFit;
@@ -78,7 +78,7 @@ using namespace RooFit;
 typedef std::map <string, RooAbsReal *> Str2VarMap;
 typedef std::map <string, RooAbsReal *>::iterator Str2VarMapItr;
 
-vector <Color_t> GetDefaultColors();
+vector <Color_t> getDefaultColors();
 
 /// \brief Returns the number of free patameters in a RooAbsPdf
 int getNFreePars(RooAbsPdf * pdf, RooArgSet vars);
@@ -111,8 +111,6 @@ RooRealVar * getParam(RooAbsPdf * pdf, string name, string opt = "");
 void getParam(RooFitResult *fRes, string name, double &par, double &parE, string type = "f");
 double getParVal(RooFitResult *fRes, string name, string type = "f");
 double getParErr(RooFitResult *fRes, string name, string type = "f");
-
-
 
 /** \brief Gets the list of parameters of a RooAbsPdf in Str2VarMap form
  * If any name is specified in pnames these names are used to make a selection of parameters. If "pnames" is empty all parameters are returned.
@@ -149,7 +147,6 @@ bool checkModel(RooAbsPdf * model);
   @param leg: A TLegend object to fill
  **/
 
-
 RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model = NULL, string opt = "",
                    unsigned bins = 50, vector<string> regStr = vector<string>(1, "PlotRange"), map<string, vector<double>> reg = map<string, vector<double>>(),
                    TString Xtitle = "", TString Ytitle = "", TLegend * leg = NULL, vector <Color_t> custom_colors = vector <Color_t>());
@@ -173,9 +170,10 @@ Str2VarMap eraseParameter(Str2VarMap * pars, vector<string> names);
  * <br> default       -> Scales the parameter by "c"
  * <br> opt=="-shift" -> Adds a shift by "c"
  */
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt = "-scale");
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt = "-scale");
-Str2VarMap ModifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt = "-scale");
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, vector<string> opt);
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt = "-scale");
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt = "-scale");
+Str2VarMap modifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt = "-scale");
 
 TPaveText * createParamBox(RooAbsPdf * pdf, RooRealVar * obs, string opt, RooFitResult * fitRes = NULL);
 
@@ -183,9 +181,8 @@ TPaveText * createParamBox(RooAbsPdf * pdf, RooRealVar * obs, string opt, RooFit
  * <br> opt == "-nocost"  ->  doesn't print constants
  * <br> opt == "-latex"   ->  prints the Title instead of Name of variables assuming latex format
  */
-void PrintPars(Str2VarMap pars, string opt = "");
+void printPars(Str2VarMap pars, string opt = "");
 
 TString getLegendLabel( TString title, string opt = "" );
-
 
 #endif

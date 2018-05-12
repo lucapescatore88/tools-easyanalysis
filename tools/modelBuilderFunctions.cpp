@@ -1,7 +1,7 @@
 #include "modelBuilderFunctions.hpp"
 
 
-vector <Color_t> GetDefaultColors()
+vector <Color_t> getDefaultColors()
 {
     vector <Color_t> default_colors;
     default_colors.push_back(kCyan + 1);
@@ -157,10 +157,10 @@ string isParInMap( string par, Str2VarMap myvars, string option )
 
 
 //Allows to modify a parameter (or more) in a RooFormulaVar
-//default       -> Scales the parameter by "c"
-//opt=="-shift" -> Adds a shift by "c"
-
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt)
+//default          -> Scales the parameter
+//opt=="-shift"    -> Adds a shift
+//opt=="-offset[]" -> Adds a constant offset to the shift
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, vector<string> opt)
 {
     for (unsigned i = 0; i < names.size(); i++)
     {
@@ -169,30 +169,47 @@ Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar
         if (!par) { cout << "Parameter " << names[i] << " not found!" << endl; continue; }
         TString fname = (TString)par->GetName() + "__" + c[i]->GetName();
         string fkey = parMapName;
-        if (opt.find("-n") != string::npos)
+        if (opt[i].find("-n") != string::npos)
         {
-            int posn = opt.find("-n");
-            int posdash = opt.find("-", posn + 2);
-            fname += ("_" + opt.substr(posn + 2, posdash));
+            int posn = opt[i].find("-n");
+            int posdash = opt[i].find("-", posn + 2);
+            fname += ("_" + opt[i].substr(posn + 2, posdash));
         }
         RooFormulaVar * fpar;
-        if (opt.find("-shift") != string::npos) fpar = new RooFormulaVar(fname + "_shifted", "@0+@1", RooArgSet(*c[i], *par));
+        if (opt[i].find("-shift") != string::npos)
+        {
+            if (opt[i].find("-offset") != string::npos)
+            {
+                size_t par1 = opt[i].find("[");
+                size_t par2 = opt[i].find("]");
+                string val  = opt[i].substr(par1 + 1, par2 - par1 - 1);
+                fpar = new RooFormulaVar(fname + "_shifted_and_offsetted", ("@0+@1+" + val).c_str(), RooArgSet(*c[i], *par));
+            }
+            else
+                fpar = new RooFormulaVar(fname + "_shifted", "@0+@1", RooArgSet(*c[i], *par));
+        }
         else fpar = new RooFormulaVar(fname + "_scaled", "@0*@1", RooArgSet(*c[i], *par));
         (*pars)[fkey] = fpar;
     }
     return *pars;
 }
 
-Str2VarMap ModifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt)
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar *> c, string opt)
 {
-    vector<RooRealVar *> vc(names.size(), c);
-    return ModifyPars(pars, names, vc, opt);
+    vector<string> vo(names.size(), opt);
+    return modifyPars(pars, names, c, vo);
 }
 
-Str2VarMap ModifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt)
+Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, RooRealVar * c, string opt)
+{
+    vector<RooRealVar *> vc(names.size(), c);
+    return modifyPars(pars, names, vc, opt);
+}
+
+Str2VarMap modifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt)
 {
     vector<string> names(1, name);
-    return ModifyPars(pars, names, c, opt);
+    return modifyPars(pars, names, c, opt);
 }
 
 
@@ -200,7 +217,7 @@ Str2VarMap ModifyPars(Str2VarMap * pars, string name, RooRealVar * c, string opt
 //opt == "-nocost"  ->  doesn't print constants
 //opt == "-latex"   ->  prints the Title instead of Name of variables assuming latex format
 
-void PrintPars(Str2VarMap pars, string opt)
+void printPars(Str2VarMap pars, string opt)
 {
     for (Str2VarMapItr iter = pars.begin(); iter != pars.end(); iter++)
     {
@@ -230,7 +247,7 @@ void PrintPars(Str2VarMap pars, string opt)
 void printParams(RooAbsPdf * pdf, RooArgSet obs, string opt)
 {
     Str2VarMap pars = getParamList(pdf, obs, opt + "-orignames");
-    PrintPars(pars, opt);
+    printPars(pars, opt);
 }
 
 
@@ -817,7 +834,3 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model, strin
 {
     return getFrame(var, data, model, opt, bins, vector<string>(1, "PlotRange"), map<string, vector<double>>(), Xtitle, Ytitle, leg, custom_colors);
 }
-
-
-
-

@@ -1,26 +1,49 @@
 before_script:
   - export REPOSYS=$PWD
 
-build_cmake:
+build_cmake_cc7:
+  image: gitlab-registry.cern.ch/olupton/cc7-ci-dockerfile
   tags:
     - cvmfs
+  artifacts:
+    paths:
+      - python/test.pdf
   script:
     - cd $REPOSYS
     - source ./scripts/setup.sh
     - mkdir -p build
     - cd build
     - cmake ..
-    - make -j 8
-    - cd -
-    - ls -lh lib/
+    - make -j8
+    - ls -lh
+    - cd ../python
+    - python test.py
 
-build_make:
+build_cmake_slc6:
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:slc6
+  tags:
+    - cvmfs
+  artifacts:
+    paths:
+      - python/test.pdf
+  script:
+    - cd $REPOSYS
+    - source ./scripts/setup.sh
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make -j8
+    - ls -lh
+    - cd ../python
+    - python test.py
+
+build_make_slc6:
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:slc6
   tags:
     - cvmfs
   script:
     - cd $REPOSYS
-    - source ./scripts/setup.sh
-    - make print
+    - source ./scripts/setup.sh old
     - make
-    - make shared
+    #- make shared
     - ls -lh lib/

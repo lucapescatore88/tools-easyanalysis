@@ -2,17 +2,10 @@
 
 shopt -s expand_aliases
 
-# LIBS
-export CVMFS=/cvmfs/lhcb.cern.ch
-export LCGSYS=$CVMFS/lib/lcg
-export ARCH=x86_64-slc6-gcc49-opt
+SWITCH="$1"
+PKG=`echo $SWITCH | awk '{ print toupper( $0 ) }'`
 
-if [ ! -d $LCGSYS ]; then
-    echo
-    echo "Cannot access $LCGSYS"
-    echo
-    return
-fi
+export LCG=/cvmfs/sft.cern.ch/lcg
 
 if [ ! -n "${LD_INCLUDE_PATH+x}" ]; then
     export LD_INCLUDE_PATH
@@ -26,12 +19,15 @@ fi
 if [ ! -n "${PYTHONPATH+x}" ]; then
     export PYTHONPATH
 fi
+if [ ! -n "${GLIMPSEPATH+x}" ]; then
+    export GLIMPSEPATH
+fi
 
 if [ ! -n "${TOOLSSYS+x}" ]; then
     export TOOLSSYS="$( cd . "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
     export LD_LIBRARY_PATH=$TOOLSSYS/roofit/dic:$LD_LIBRARY_PATH
-    export LD_LIBRARY_PATH=$TOOLSSYS/build/tools:$TOOLSSYS/build/roofit:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=$TOOLSSYS/build:$LD_LIBRARY_PATH
     export LD_LIBRARY_PATH=$TOOLSSYS/lib:$LD_LIBRARY_PATH
 
     export LD_INCLUDE_PATH=${TOOLSSYS}:$TOOLSSYS/tools:$TOOLSSYS/roofit:$LD_INCLUDE_PATH
@@ -40,32 +36,181 @@ if [ ! -n "${TOOLSSYS+x}" ]; then
 
     export PYTHONPATH=$TOOLSSYS/python:$PYTHONPATH
 
+    export GLIMPSEPATH="$GLIMPSEPATH $TOOLSSYS/tools $TOOLSSYS/roofit"
+
+    alias git_setup="source $TOOLSSYS/scripts/setup.sh"
+    alias git_glimpse="$TOOLSSYS/scripts/glimpse.csh"
+
+    alias cMake="$TOOLSSYS/scripts/make.sh"
+
     echo
     echo "Setup tools-easyanalysis"
     echo
     echo "Configuring TOOLSSYS to $TOOLSSYS"
     echo
 
-    source $TOOLSSYS/scripts/setup.sh cmake
-    source $TOOLSSYS/scripts/setup.sh gcc
-    source $TOOLSSYS/scripts/setup.sh python
-    source $TOOLSSYS/scripts/setup.sh gsl
-    source $TOOLSSYS/scripts/setup.sh root
+    if [ "$SWITCH" == "env" ]; then
+        source $TOOLSSYS/scripts/setup.sh arch
+        source $TOOLSSYS/scripts/setup.sh env
+        return
+    fi
+
+    if [ "$SWITCH" == "old" ]; then
+        source $TOOLSSYS/scripts/setup.sh old
+        source $TOOLSSYS/scripts/setup.sh cmake
+        source $TOOLSSYS/scripts/setup.sh gcc
+        source $TOOLSSYS/scripts/setup.sh python
+        source $TOOLSSYS/scripts/setup.sh pyanalysis
+        source $TOOLSSYS/scripts/setup.sh pytools
+        source $TOOLSSYS/scripts/setup.sh gsl
+        source $TOOLSSYS/scripts/setup.sh root
+    else
+        source $TOOLSSYS/scripts/setup.sh arch
+        if [ $ARCH != "Darwin" ]; then
+            source $TOOLSSYS/scripts/setup.sh lcg
+        fi
+    fi
 
     source $TOOLSSYS/scripts/setup.sh env
+    return
 fi
 
 # CASES
-case "$1" in
+case "$SWITCH" in
 
     env)
         echo
         echo "Configuring PATH              to $PATH"
         echo "Configuring LD_LIBRARY_PATH   to $LD_LIBRARY_PATH"
         echo "Configuring LD_INCLUDE_PATH   to $LD_INCLUDE_PATH"
+        if [ $ARCH == "Darwin" ]; then
+            echo "Configuring DYLD_LIBRARY_PATH to $DYLD_LIBRARY_PATH"
+        fi
         echo "Configuring ROOT_INCLUDE_PATH to $ROOT_INCLUDE_PATH"
         echo "Configuring PYTHONPATH        to $PYTHONPATH"
         echo
+
+        ;;
+
+    arch)
+        export ARCH=`uname`
+        if [ $ARCH == "Linux" ]; then
+            if [ `cat /etc/redhat-release | grep -ie "Scientific" | grep -ie "release 6" | wc -l` == 1 ]; then
+                export ARCH=x86_64-slc6-gcc62-opt
+            fi
+            if [ `cat /etc/redhat-release | grep -ie "CentOS" | grep -ie "release 7" | wc -l` == 1 ]; then
+                export ARCH=x86_64-centos7-gcc62-opt
+            fi
+        fi
+        if [ "$2" != "" ]; then
+            export ARCH=$2
+        fi
+
+        printf "Configuring %-10s to   %-1s \n" $PKG $ARCH
+
+        ;;
+
+    lcg)
+        SYS=$LCG/views
+        VER=LCG_92
+        if [ "$2" != "" ]; then
+            VER=LCG_$2
+        fi
+        export LCGSYS=$LCG
+        export LCGVER=$VER
+        #if [ `echo "$ARCH" | grep -ci "slc6"` == 1 ]; then
+        #    echo
+        #    echo "Please use centos (e.g. lxplus7.cern.ch)"
+        #    echo
+        #    export ARCH=""
+        #    return
+        #fi
+        if [ $ARCH == "Darwin" ]; then
+            return
+        fi
+        PKG="LCG"
+        VER=$VER/$ARCH
+        if [ `echo "$PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+            if [ -f $SYS/$VER/setup.sh ]; then
+                source $SYS/$VER/setup.sh
+
+                if [ `echo "$ARCH" | grep -ci "centos"` == 1 ]; then
+                    export CC=gcc
+                    export CXX=g++
+                fi
+
+                export PYTHONUSERBASE=$TOOLSSYS/python/local
+                #export PYTHONPATH=$PYTHONUSERBASE/lib/python2.7/site-packages:$PYTHONPATH
+
+                printf "Configuring %-10s from %-1s \n" $PKG $SYS/$LCGVER
+
+                source $TOOLSSYS/scripts/setup.sh lcgenv
+            else
+                echo
+                printf "%-10s not availalbe at %-1s \n" $PKG $SYS/$LCGVER
+                echo
+            fi
+        fi
+
+        ;;
+
+    lcgenv)
+        SYS=$LCGSYS/releases/lcgenv
+        VER=latest
+        if [ `echo "$PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
+            if [ -f $SYS/$VER/lcgenv ]; then
+                export LCGENVSYS=$SYS/$VER
+                export LCGENV_PATH=$LCGSYS/releases
+                export PATH=${LCGENVSYS}:$PATH
+
+                alias lcgpkg="source $TOOLSSYS/scripts/setup.sh lcgpkg"
+
+                printf "Configuring %-10s from %-1s \n" $PKG $SYS/$VER
+            else
+                echo
+                printf "%-10s not availalbe at %-1s \n" $PKG $SYS/$VER
+                echo
+            fi
+        fi
+
+        ;;
+
+    lcgpkg)
+        if [ "$2" == "" ]; then
+            echo
+            lcgenv -p $LCGVER $ARCH
+            echo
+        else
+            PKG=`echo $2 | awk '{ print toupper( $0 ) }'`
+            DUMMY=$TOOLSSYS/scripts/setup_lcg.sh
+            if [ -f $DUMMY ]; then
+                rm -rf $DUMMY
+            fi
+            lcgenv -p $LCGVER $ARCH $2 > $DUMMY
+            SRC=`grep -e "export PATH" $DUMMY | head -n 1 | awk '{ print $2 }' | sed s:'PATH='::g | sed s:'"'::g | sed s:"/$ARCH":" ": | awk '{ print $1 }'`
+            if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SRC"` == 0 ]; then
+                printf "Configuring %-10s from %-1s \n" $PKG $SRC
+                source $DUMMY
+            fi
+            rm -rf $DUMMY
+        fi
+
+        ;;
+
+    old)
+        export CVMFS=/cvmfs/lhcb.cern.ch
+        export LCGSYS=$CVMFS/lib/lcg
+        source $TOOLSSYS/scripts/setup.sh arch
+        if [ `echo "$ARCH" | grep -ci "slc6"` == 0 ]; then
+            echo
+            echo "Wrong platform, please use x86_64-slc6-gcc49-opt"
+            echo
+            export ARCH=""
+            return
+        fi
+        source $TOOLSSYS/scripts/setup.sh arch x86_64-slc6-gcc49-opt
+
+        printf "Configuring %-10s from %-1s \n" "LCG" $LCGSYS
 
         ;;
 
@@ -78,10 +223,10 @@ case "$1" in
                 export CMAKESYS=$SYS/$VER
                 export PATH=$CMAKESYS/bin:$PATH
 
-                echo "Configuring CMAKE      from $CMAKESYS"
+                printf "Configuring %-10s from %-1s \n" $PKG $SYS/$VER
             else
                 echo
-                echo "CMAKE $SYS/$VER not available"
+                printf "%-10s not availalbe at %-1s \n" $PKG $SYS/$VER
                 echo
             fi
         fi
@@ -97,10 +242,10 @@ case "$1" in
                 export GCCSYS=$SYS/$VER
                 source $GCCSYS/setup.sh $LCGSYS/external
 
-                echo "Configuring GCC        from $GCCSYS"
+                printf "Configuring %-10s from %-1s \n" $PKG $SYS/$VER
             else
                 echo
-                echo "GCC $SYS/$VER not available"
+                printf "%-10s not availalbe at %-1s \n" $PKG $SYS/$VER
                 echo
             fi
         fi
@@ -117,15 +262,12 @@ case "$1" in
                 export PATH=$PYTHONSYS/bin:$PATH
                 export LD_LIBRARY_PATH=$PYTHONSYS/lib:$LD_LIBRARY_PATH
                 #export PYTHONPATH=$PYTHONSYS/lib/python2.7:$PYTHONPATH
-		export PYTHONSTARTUP=$HOME/.pythonstartup.py
+                export PYTHONSTARTUP=$HOME/.pythonstartup.py
 
-                echo "Configuring PYTHON     from $PYTHONSYS"
-
-                source $TOOLSSYS/scripts/setup.sh pyanalysis
-                source $TOOLSSYS/scripts/setup.sh pytools
+                printf "Configuring %-10s from %-1s \n" $PKG $SYS/$VER
             else
                 echo
-                echo "PYTHON $SYS/$VER not available"
+                printf "%-10s not availalbe at %-1s \n" $PKG $SYS/$VER
                 echo
             fi
         fi
@@ -143,10 +285,10 @@ case "$1" in
                 export LD_LIBRARY_PATH=$PYANALYSISSYS/lib/python2.7/site-packages:$LD_LIBRARY_PATH
                 export PYTHONPATH=$PYANALYSISSYS/lib/python2.7/site-packages:$PYTHONPATH
 
-                echo "Configuring PYANALYSIS from $PYANALYSISSYS"
+                printf "Configuring %-10s from %-1s \n" $PKG $SYS/$VER
             else
                 echo
-                echo "PYANALYSIS $SYS/$VER not available"
+                printf "%-10s not availalbe at %-1s \n" $PKG $SYS/$VER
                 echo
             fi
         fi
@@ -164,10 +306,10 @@ case "$1" in
                 export LD_LIBRARY_PATH=$PYTOOLSSYS/lib/python2.7/site-packages:$LD_LIBRARY_PATH
                 export PYTHONPATH=$PYTOOLSSYS/lib/python2.7/site-packages:$PYTHONPATH
 
-                echo "Configuring PYTOOLS    from $PYTOOLSSYS"
+                printf "Configuring %-10s from %-1s \n" $PKG $SYS/$VER
             else
                 echo
-                echo "PYTOOLS $SYS/$VER not available"
+                printf "%-10s not availalbe at %-1s \n" $PKG $SYS/$VER
                 echo
             fi
         fi
@@ -181,13 +323,14 @@ case "$1" in
         if [ `echo "$LD_LIBRARY_PATH" | grep -ci "$SYS/$VER"` == 0 ]; then
             if [ -d $SYS/$VER ]; then
                 export GSLSYS=$SYS/$VER
+                export PATH=$GSLSYS/bin:$PATH
                 export LD_LIBRARY_PATH=$GSLSYS/lib:$LD_LIBRARY_PATH
                 export LD_INCLUDE_PATH=$GSLSYS/include:$LD_INCLUDE_PATH
 
-                echo "Configuring GSL        from $GSLSYS"
+                printf "Configuring %-10s from %-1s \n" $PKG $SYS/$VER
             else
                 echo
-                echo "GSL $SYS/$VER not available"
+                printf "%-10s not availalbe at %-1s \n" $PKG $SYS/$VER
                 echo
             fi
         fi
@@ -206,10 +349,10 @@ case "$1" in
                 export LD_INCLUDE_PATH=$ROOTSYS/include:$LD_INCLUDE_PATH
                 export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH
 
-                echo "Configuring ROOT       from $ROOTSYS"
+                printf "Configuring %-10s from %-1s \n" $PKG $SYS/$VER
             else
                 echo
-                echo "ROOT $SYS/$VER not available"
+                printf "%-10s not availalbe at %-1s \n" $PKG $SYS/$VER
                 echo
             fi
         fi

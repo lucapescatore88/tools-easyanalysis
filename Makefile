@@ -32,14 +32,16 @@ ROOFITLIBRM = $(LIBDIR)/lib$(ROOFIT).rootmap
 ROOTCINT   = rootcint
 ROOTCLING  = rootcling
 
-GSLDIR     = $(GSLSYS)
-INCFLAGS  += -I$(GSLDIR)/include
+GSLDIR     = $(shell gsl-config --prefix)
+GSLFLAGS   = $(shell gsl-config --cflags --libs)
+INCFLAGS   +=-I$(GSLDIR)/include
 
 ROOTFLAGS  = $(shell root-config --cflags --glibs)
+ROOTFLAGS  += -lTMVA -lRooFit -lRooStats -lMathMore
 ROOTINC    = $(shell root-config --incdir)
 
 CXX        = g++
-CXXFLAGS   = -g -fPIC -Wall -O2 -lTMVA -lRooFit -lRooStats -lMathMore $(ROOTFLAGS) $(INCFLAGS)
+CXXFLAGS   = -g -fPIC -Wall -O2 $(INCFLAGS) $(GSLFLAGS) $(ROOTFLAGS)
 
 MAKES      = $(ROOFITDIC) $(ROOFITDICO) $(ROOFITLIB) $(TOOLSOBJ) $(TOOLSLIB)
 #MAKES      = $(ROOFITDIC) $(ROOFITDICO) $(ROOFITLIB) $(TOOLSOBJ) $(TOOLSLIB) $(TOOLSLIBSO)

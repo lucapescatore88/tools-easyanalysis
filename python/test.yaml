@@ -2,8 +2,9 @@ name: 'test'
 title: 'test'
 units: 'MeV/c^{2}'
 
-datatree : 'DecayTuple'
-datafile : 'test.root'
+datahist : 'mass_histo'
+#datatree : 'DecayTuple'
+datafile : '$TOOLSSYS/python/test.root'
 
 var :
     name : 'B0_M'

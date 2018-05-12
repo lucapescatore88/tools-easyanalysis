@@ -36,33 +36,30 @@ RooDataSet * ModelBuilder::GetParamsVariations(int nvariations, RooFitResult * f
     fitRes->covarianceMatrix().Print();
     cout << "End matrix" << endl;
 
-    RooMultiVarGaussian * gauss = new RooMultiVarGaussian(
-        m_name + "_multivar_gauss", m_name + "_multivar_gauss",
-        *params, fitRes->covarianceMatrix());
+    RooMultiVarGaussian * gauss = new RooMultiVarGaussian(m_name + "_multivar_gauss", m_name + "_multivar_gauss", *params, fitRes->covarianceMatrix());
     gauss->Print();
     RooDataSet * variations = gauss->generate(*params, nvariations);
     return variations;
 }
 
-
 void ModelBuilder::AddGaussConstraint(TString name, double mean, double sigma)
 {
-    if(sigma <= 0) { cout << "Re sigma of the constraint must be >0, if you want it =0 the please set the parameter constant instead." << endl; }
-    if (!m_sig) { cout << "You have to set the signal model before setting constraints to it." << endl; return; }
+    if (sigma <= 0) { cout << m_name << ": *** WARNING *** The sigma of the constraint must be >0; if you want it =0 set the parameter constant instead!" << endl; }
+    if (!m_sig) { cout << m_name << ": *** WARNING *** You have to set the signal model before setting constraints to it!" << endl; return; }
     RooRealVar * par = getParam(m_sig, (string)name, "-cut");
-    if(!par) { cout << "Parameter " << name << " not found in signal pdf" << endl; return; }
+    if (!par) { cout << m_name << ": *** WARNING *** Parameter " << name << " not found in signal pdf!" << endl; return; }
     AddGaussConstraint(par, mean, sigma);
 }
 
 void ModelBuilder::AddGaussConstraint(TString pdf, TString name, double mean, double sigma)
 {
-    if(sigma <= 0) { cout << "Re sigma of the constraint must be >0, if you want it =0 the please set the parameter constant instead." << endl; }
-    
-    if(pdf == "sig") return AddGaussConstraint(name, mean, sigma);
+    if (sigma <= 0) { cout << "Re sigma of the constraint must be >0, if you want it =0 the please set the parameter constant instead." << endl; }
+
+    if (pdf == "sig") return AddGaussConstraint(name, mean, sigma);
     int id = GetBkgID((string)pdf);
     if (id < 0) { cout << "You have to '" << pdf << "' background component before setting constraints to it." << endl; return; }
     RooRealVar * par = getParam(m_bkg_components[id], (string)name, "-cut");
-    if(!par) { cout << "Parameter " << name << " not found in " << pdf << " pdf" << endl; return; }
+    if (!par) { cout << "Parameter " << name << " not found in " << pdf << " pdf" << endl; return; }
     AddGaussConstraint(par, mean, sigma);
 }
 
@@ -100,7 +97,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
     bool doExp = (optstr.find("-exp") != string::npos);
     if ( doExp ) AddBkgComponent("exp", "Exp", 1.e4, Str2VarMap(), "-ibegin");
     if ( m_totBkgMode ) m_bkg_fractions.clear();
-    
+
     for (unsigned i = 0; i < m_bkg_components.size(); i++)
     {
         bkgList->add(*(m_bkg_components[i]));
@@ -120,7 +117,7 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
 
     GetTotNBkg();
 
-    if (!m_sig) { cout << "WARNING: Signal not set!!" << endl; return NULL; }
+    if (!m_sig) { cout << m_name << ": *** WARNING *** Signal not set!" << endl; return NULL; }
     RooArgList pdfs(*m_sig), nevts(*m_nsig);
 
     if (!noBkg && !m_bkg_components.empty())
@@ -137,14 +134,12 @@ RooAbsPdf * ModelBuilder::Initialize(string optstr)
 
     if (m_pmode == "v" && m_model)
     {
-        cout << "\n" << m_name << ": Initialized Correctly! The model is:" << endl;
+        cout << endl << m_name << ": Initialized Correctly! The model is:" << endl;
         m_model->Print();
     }
     m_isvalid = true;
     return m_model;
 }
-
-
 
 
 /*
@@ -216,7 +211,7 @@ RooPlot * ModelBuilder::Print(TString title, TString Xtitle, string opt, RooAbsD
     if (!myvar) myvar = m_var;
 
     if (!isValid()) {
-        cout << "**** WARNING: Model is not valid, probably not initialised. *****" << endl;
+        cout << m_name << ": *** WARNING *** Model is not valid, probably not initialised!" << endl;
         return NULL;
     }
 
@@ -513,7 +508,7 @@ double ModelBuilder::GetSigVal(double * valerr, RooFitResult * fitRes)
 double ModelBuilder::GetSigVal(double * errHi, double * errLo)
 {
     string tnsig = typeid(m_nsig).name();
-    if (tnsig.find("Abs") != string::npos) cout << "WARNING: nsig is not a RooRealVar! Error will not make sense." << endl;
+    if (tnsig.find("Abs") != string::npos) cout << m_name << ": *** WARNING *** nsig is not a RooRealVar, error will not make sense!" << endl;
     *errHi = ((RooRealVar *)m_nsig)->getErrorHi();
     *errLo = ((RooRealVar *)m_nsig)->getErrorLo();
     return m_nsig->getVal();
@@ -655,5 +650,3 @@ RooWorkspace * ModelBuilder::SaveToRooWorkspace(string option)
 
     return ws;
 }
-
-

@@ -33,7 +33,7 @@ Double_t RooIpatia__low_x_LnBK(Double_t nu, Double_t x){
 }
 
 Double_t RooIpatia__BK(Double_t ni, Double_t x) {
-    Double_t nu = abs(ni);
+    Double_t nu = TMath::Abs(ni);
     if ( x < 1e-06 && nu > 0) return RooIpatia__low_x_BK(nu,x);
     if ( x < 1e-04 && nu > 0 && nu < 55) return RooIpatia__low_x_BK(nu,x);
     if ( x < 0.1 && nu >= 55) return RooIpatia__low_x_BK(nu,x);
@@ -43,7 +43,7 @@ Double_t RooIpatia__BK(Double_t ni, Double_t x) {
 }
 
 Double_t RooIpatia__LnBK(double ni, double x) {
-    Double_t nu = abs(ni);
+    Double_t nu = TMath::Abs(ni);
     if ( x < 1e-06 && nu > 0) return RooIpatia__low_x_LnBK(nu,x);
     if ( x < 1e-04 && nu > 0 && nu < 55) return RooIpatia__low_x_LnBK(nu,x);
     if ( x < 0.1 && nu >= 55) return RooIpatia__low_x_LnBK(nu,x);
@@ -63,7 +63,7 @@ Double_t RooIpatia__LnBK(double ni, double x) {
 //   Double_t no = pow(gamma/delta,l)/RooIpatia__BK(l,dg)*cons1;
 //   Double_t num = no*RooIpatia__BK(l-0.5,thing*alpha);
 //   Double_t den = pow(thing/alpha,0.5-l);
-//   Double_t cheat = exp(beta*d);//*(abs(beta) + 0.0001);
+//   Double_t cheat = exp(beta*d);//*(TMath::Abs(beta) + 0.0001);
 //  return  cheat*num/den ;
 // }
 
@@ -80,7 +80,7 @@ Double_t RooIpatia__LogEval(Double_t d, Double_t l, Double_t alpha, Double_t bet
       printf("%e\n", logno + beta*d +(0.5-l)*(log(alpha)-0.5*log(thing)) + RooIpatia__LnBK(l-0.5,alpha*sqrt(thing)));
       printf("%e\n", exp(logno + beta*d +(0.5-l)*(log(alpha)-0.5*log(thing)) + RooIpatia__LnBK(l-0.5,alpha*sqrt(thing))));
     */
-    return exp(logno + beta*d +(0.5-l)*(log(alpha)-0.5*log(thing)) + RooIpatia__LnBK(l-0.5,alpha*sqrt(thing)));// + log(abs(beta)+0.0001) );
+    return exp(logno + beta*d +(0.5-l)*(log(alpha)-0.5*log(thing)) + RooIpatia__LnBK(l-0.5,alpha*sqrt(thing)));// + log(TMath::Abs(beta)+0.0001) );
 
 }
 
@@ -96,8 +96,8 @@ Double_t RooIpatia__diff_eval(Double_t d, Double_t l, Double_t alpha, Double_t b
     Double_t alphasq = alpha*sqthing;
     Double_t no = pow(gamma/delta,l)/RooIpatia__BK(l,dg)*RooIpatia__sq2pi_inv;
     Double_t ns1 = 0.5-l;
-    //Double_t cheat = exp(beta*d);//*(abs(beta) + 1e-04);
-    //Double_t cheat = exp(beta*d);//*(abs(beta) + 0.0001);
+    //Double_t cheat = exp(beta*d);//*(TMath::Abs(beta) + 1e-04);
+    //Double_t cheat = exp(beta*d);//*(TMath::Abs(beta) + 0.0001);
 
     //no =  no*pow(alpha, ns1 )*pow(thing, 0.5*l - 5.0/4.0)*0.5*cheat;//exp(beta*d);
 
