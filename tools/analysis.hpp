@@ -85,15 +85,15 @@ class Analysis : public ModelBuilder {
     string m_unit;
     static string m_pmode;
     RooAbsReal * m_weight = NULL;
-    RooDataSet * m_data = NULL;
+    RooDataSet * m_dataSet = NULL;
+    TH1 * m_dataHist = NULL;
     RooFitResult * m_fitRes = NULL;
     double m_fitmin;
     double m_fitmax;
-    vector<RooRealVar*> m_datavars;
+    vector<RooRealVar*> m_dataVars;
 
     TreeReader * m_dataReader = NULL;
     TTree * m_reducedTree = NULL;
-    TH1 * m_dataHist = NULL;
 
     double m_scale;
 
@@ -104,11 +104,11 @@ public:
 
     Analysis(TString _name, TString _title, RooRealVar * _var, string _opt = "", string _w = "", TCut _cuts = ""):
         ModelBuilder(_name, _var, _title), m_cuts(_cuts), m_chi2(new double[2]), m_init(false), m_unit(""),
-        m_weight(NULL), m_data(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
+        m_weight(NULL), m_dataSet(NULL), m_fitRes(NULL), m_fitmin(0.), m_fitmax(0.),
         m_dataReader(NULL), m_reducedTree(NULL), m_dataHist(NULL), m_scale(1)
     {
         if (!m_var) SetVariable(new RooRealVar("x", "", 0));
-        m_datavars.push_back(m_var);
+        m_dataVars.push_back(m_var);
         if (_w != "") SetWeight((TString)_w);
     };
 
@@ -154,14 +154,14 @@ public:
     Analysis(TString _name, TString _title, RooDataSet * dd, RooRealVar * _var = NULL):
         Analysis(_name, _title, _var)
     {
-        m_data = (RooDataSet *) dd;
+        m_dataSet = (RooDataSet *) dd;
     };
 
     /// \brief Special constructor for single quick fit
     Analysis(TString _name, TString _title, RooDataSet * dd, RooRealVar * _var, RooAbsPdf * _sig, string _w = "", string _opt = ""):
         Analysis(_name, _title, _var, _opt, _w)
     {
-        m_data = (RooDataSet *) dd;
+        m_dataSet = (RooDataSet *) dd;
         if (_sig) { SetSignal(_sig); Initialize(""); }
     };
 
@@ -201,10 +201,10 @@ public:
     void CreateDataSet(string opt = "", TCut cuts = "");
     RooDataSet * GetDataSet(string opt = "")
     {
-        if (opt.find("-recalc") != string::npos || !m_data) CreateDataSet(opt);
-        return m_data;
+        if (opt.find("-recalc") != string::npos || !m_dataSet) CreateDataSet(opt);
+        return m_dataSet;
     }
-    void SetDataSet( RooDataSet * d ) { m_data = d; }
+    void SetDataSet( RooDataSet * d ) { m_dataSet = d; }
 
     void CreateDataHisto(double min = 0, double max = 0, int nbin = 50, TCut cuts = "", string weight = "", string opt = "", TH1 * htemplate = NULL);
     TH1 * GetDataHisto(string opt = "")
@@ -235,8 +235,8 @@ public:
      * */
     void AddVariable(RooRealVar * v)
     {
-        for (auto vv : m_datavars) if (vv->GetName() == v->GetName()) return;
-        m_datavars.push_back(v);
+        for (auto vv : m_dataVars) if (vv->GetName() == v->GetName()) return;
+        m_dataVars.push_back(v);
     }
     void AddVariable(TString vname)
     {
@@ -254,7 +254,7 @@ public:
 
     RooAbsReal * CreateLogL(RooCmdArg extended)
     {
-        if (m_model && m_data) return m_model->createNLL(*m_data, extended);
+        if (m_model && m_dataSet) return m_model->createNLL(*m_dataSet, extended);
         else return NULL;
     }
 
@@ -277,7 +277,7 @@ public:
     void Reset()
     {
         m_regions.clear(); ClearBkgList();
-        ResetVariable(); m_datavars.clear(); m_datavars.push_back(m_var);
+        ResetVariable(); m_dataVars.clear(); m_dataVars.push_back(m_var);
         m_chi2[0] = m_chi2[1] = -1; m_sig = NULL, m_bkg = NULL; m_init = false;
     }
 

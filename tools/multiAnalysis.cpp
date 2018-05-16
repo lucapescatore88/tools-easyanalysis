@@ -69,10 +69,11 @@ bool MultiAnalysis::Initialize(string opt)
     if (opt.find("-noinitmodel") != string::npos) nomodel = true;
     if (opt.find("-noinitdata") != string::npos) nodata = true;
 
-    if ( !nomodel ) m_combModel = new RooSimultaneous("combModel", "", *m_samples);
     map<string, RooDataSet*> mymap;
-
-    if (!nodata || !nomodel)
+    map<string, TH1*> myhmap;
+    if (!nomodel)
+    {
+        m_combModel = new RooSimultaneous("combModel", "", *m_samples);
         for (unsigned i = 0; i < m_categories.size(); i++)
         {
             if (opt.find("-initialize") != string::npos)
@@ -80,22 +81,32 @@ bool MultiAnalysis::Initialize(string opt)
                 if (!m_unbinned) m_ana[i]->SetBinnedFit(m_nBins);
                 m_ana[i]->Initialize(opt);
             }
-            if ( !m_ana[i]->isValid() ) { cout << m_name << ": *** WARNING Initialize *** " << m_ana[i]->GetName() << " is not initialized!" << endl; return false; }
-            mymap[(string)m_categories[i]] = (RooDataSet*)(m_ana[i]->GetDataSet(opt));
-            if ( !nomodel ) m_combModel->addPdf(*(m_ana[i]->GetModel()), m_categories[i]);
+            if (!m_ana[i]->isValid()) { cout << m_name << ": *** WARNING Initialize *** " << m_ana[i]->GetName() << " is not initialized!" << endl; return false; }
+            m_combModel->addPdf(*(m_ana[i]->GetModel()), m_categories[i]);
+            mymap[(string)m_categories[i]]  = (RooDataSet*)(m_ana[i]->GetDataSet(opt));
+            myhmap[(string)m_categories[i]] = (TH1*)(m_ana[i]->GetDataHisto(opt));
         }
+    }
 
-    if (!nodata) m_combData = new RooDataSet("combData", "combined datas", *m_vars, Index(*m_samples), Import(mymap));
+    if (!nodata)
+    {
+        if (m_pmode == "v") cout << endl << m_name << ": CreateCombData" << endl;
+        m_combData = new RooDataSet("combData", "combined datas", *m_vars, Index(*m_samples), Import(mymap));
+        m_combData->Print();
+        if (!m_unbinned)
+        {
+            if (m_pmode == "v") cout << endl << m_name << ": CreateCombHist" << endl;
+            m_combHist = new RooDataHist("combHisto", "combined histos", *m_vars, *m_combData);
+            //m_combData = new RooDataSet("combHisto", "combined histos", *m_vars, Index(*m_samples), Import(myhmap));
+            //m_combData->Print();
+        }
+    }
 
-    //if (!m_unbinned) m_combHist = m_combData->createHistogram("combHist", *m_vars, Binning(m_nBins, min, max)); HOT TO ???
-
-    if (m_pmode == "v") if (m_combData)  m_combData->Print();
     if (m_pmode == "v") if (m_combModel) m_combModel->Print();
-    if (m_pmode == "v") if (!m_unbinned) if (m_combHist) m_combHist->Print();
-    //if(m_pmode == "v") if(m_combModel) printParams(m_combModel, *m_vars);
-    //if(m_pmode == "v") if(m_combModel) printParams(m_combModel);
+    if (m_pmode == "v") if (m_combData)  m_combData->Print();
+    if (m_pmode == "v") if (m_combHist)  m_combHist->Print();
 
-    cout << m_name << ": MultiAna " << m_name << " initialized correctly" << endl;
+    cout << endl << m_name << ": MultiAna " << m_name << " initialized correctly" << endl;
 
     m_init = true;
     return m_init;
@@ -125,22 +136,24 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
     RooCmdArg hesse = Hesse(kTRUE);
     if (opt.find("-nohesse") != string::npos) hesse = Hesse(kFALSE);
 
-    if (!m_combModel || !m_combData) { cout << m_name << ": *** WARNING Fit *** Model or data not set!" << endl; return map < string, RooPlot * >(); }
+    if (!m_combModel || (!m_combData && !m_combHist)) { cout << m_name << ": *** WARNING Fit *** Model or data not set!" << endl; return map < string, RooPlot * >(); }
 
-    if (min == max) m_fitResult = m_combModel->fitTo(*m_combData, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
+    RooAbsData * mydata = m_combData;
+    if (!m_unbinned) mydata = m_combHist;
+
+    if (min == max) m_fitResult = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
     else
     {
         for (unsigned i = 0; i < m_categories.size(); i++)
             m_ana[i]->GetVariable()->setRange("FitRange", min, max);
-
-        m_fitResult = m_combModel->fitTo(*m_combData, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
+        m_fitResult = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
     }
 
     if (opt.find("-quiet") == string::npos)
         cout << m_name << " :  CovQual = " << m_fitResult->covQual() << ",   Status = " << m_fitResult->status() << ",   EDM = " << m_fitResult->edm() << endl;
 
     map < string, RooPlot * > plots;
-    if ( opt.find("-noplot") == string::npos )
+    if (opt.find("-noplot") == string::npos)
     {
         if (m_isToy) PlotCategories();
         else
@@ -192,18 +205,18 @@ void MultiAnalysis::EnlargeYieldRanges(double factor)
     RooArgSet * params = m_combModel->getParameters(RooDataSet());
     TIterator * it = params->createIterator();
     RooRealVar * arg;
-    while ( (arg = (RooRealVar*)it->Next()) )
+    while ((arg = (RooRealVar*)it->Next()))
     {
         string varname = (string)arg->GetName();
         if (varname.find("nsig") != string::npos ||
-                varname.find("nbkg") != string::npos )
+                varname.find("nbkg") != string::npos)
         {
             cout << "Scaling ..." << endl;
             double val = ((RooRealVar*)arg)->getVal();
             if (val < 0) ((RooRealVar*)arg)->setVal(0);
             double min = ((RooRealVar*)arg)->getMin();
             double max = ((RooRealVar*)arg)->getMax();
-            if ( varname.find("nbkg") != string::npos )
+            if (varname.find("nbkg") != string::npos)
                 ((RooRealVar*)arg)->setRange(0., max * factor);
             else ((RooRealVar*)arg)->setRange(min, max * factor);
             ((RooRealVar*)arg)->setVal(arg->getVal()*factor);
@@ -217,7 +230,7 @@ void MultiAnalysis::SetConstants(vector<RooDataSet *> input, int index)
     RooArgSet * params = m_combModel->getParameters(RooDataSet());
     TIterator * it = params->createIterator();
     RooRealVar * arg;
-    while ( (arg = (RooRealVar*)it->Next()) )
+    while ((arg = (RooRealVar*)it->Next()))
     {
         if (((string)arg->GetName()).find("sample") != string::npos) continue;
         if (!(arg->getAttribute("Constant"))) continue;
@@ -248,12 +261,12 @@ void MultiAnalysis::RandomizeInitialParams(string option)
     RooArgSet * params = m_combModel->getParameters(RooDataSet());
     TIterator * it = params->createIterator();
     RooRealVar * arg;
-    while ( (arg = (RooRealVar*)it->Next()) )
+    while ((arg = (RooRealVar*)it->Next()))
     {
         if (((string)arg->GetName()).find("sample") != string::npos) continue;
 
-        if (option.find("-free") != string::npos && arg->getAttribute("Constant") ) continue;
-        if (option.find("-cost") != string::npos && !(arg->getAttribute("Constant")) ) continue;
+        if (option.find("-free") != string::npos && arg->getAttribute("Constant")) continue;
+        if (option.find("-cost") != string::npos && !(arg->getAttribute("Constant"))) continue;
 
         double val = 0;
         double oldv = arg->getVal();
@@ -289,7 +302,7 @@ RooWorkspace * MultiAnalysis::SaveToRooWorkspace()
         {
         TIterator * it = m_ana[aa]->SaveToRooWorkspace()->componentIterator();
         TObject * arg;
-        while( (arg=(TObject *)it->Next()) ) ws->import(*arg);
+        while((arg=(TObject *)it->Next())) ws->import(*arg);
         }
         cout << endl;
         */
@@ -312,7 +325,7 @@ void MultiAnalysis::ImportModel(RooWorkspace * ws)
     if (m_pmode == "v") cout << endl << m_name << ": ImportModel" << endl << endl;
     TIterator * it = ws->componentIterator();
     TObject * arg;
-    while ( (arg = (TObject *)it->Next()) )
+    while ((arg = (TObject *)it->Next()))
     {
         string name = arg->GetName();
         if (name.find("combModel") != string::npos) {
@@ -415,7 +428,7 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
     {
         if (dovar != "") { if (m_ana[i]->GetVariable()->GetName() != dovar) continue; }
         else if (m_ana[i]->GetVariable()->GetName() != m_ana[0]->GetVariable()->GetName()) continue;
-        if ( printname != "" && ((string)m_categories[i]).find(printname) == string::npos ) continue;
+        if (printname != "" && ((string)m_categories[i]).find(printname) == string::npos) continue;
         k = i;
 
         print_cats.push_back((string)m_categories[i]);
@@ -466,7 +479,7 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
     for (size_t cc = 0; cc < print_cats.size(); cc++)
     {
         cut += "samples == samples::" + print_cats[cc];
-        if (cc != (print_cats.size() - 1) ) cut += " || ";
+        if (cc != (print_cats.size() - 1)) cut += " || ";
     }
 
     //m_combData->plotOn(pl,MarkerSize(1),Cut(cut));
@@ -505,7 +518,7 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
     //if(option.find("-stackbkg")==string::npos) counter++;
     if (option.find("-plottotbkg") != string::npos)
     {
-        sumtotbkgPdf->plotOn(pl, LineStyle(styles[counter]), LineColor(colors[counter]), Normalization( sumNtotbkg , RooAbsReal::NumEvent));
+        sumtotbkgPdf->plotOn(pl, LineStyle(styles[counter]), LineColor(colors[counter]), Normalization(sumNtotbkg , RooAbsReal::NumEvent));
         counter++;
     }
     if (option.find("-stack") != string::npos)
@@ -571,7 +584,7 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
     {
         double x1 = 0.05, x2 = 0.25, y1 = 0.80, y2 = 0.97;
         size_t pos = option.find("-lhcb[") + 6;
-        if ( pos != string::npos )
+        if (pos != string::npos)
         {
             string ss = option.substr(pos, string::npos);
             x1 = (TString(ss)).Atof();
@@ -610,7 +623,7 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
 
     pl->SetMinimum(0);
     pl->SetTitle("");
-    if (option.find("-noborder") != string::npos )
+    if (option.find("-noborder") != string::npos)
         leg->SetBorderSize(0);
     pl->addObject(leg);
 
@@ -667,11 +680,11 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
 
         yAxis->SetNdivisions(505);
         double old_size = yAxis->GetLabelSize();
-        yAxis->SetLabelSize( old_size * 2 );
-        yAxis->SetTitleSize( old_size * 2.3 );
+        yAxis->SetLabelSize(old_size * 2);
+        yAxis->SetTitleSize(old_size * 2.3);
         yAxis->SetTitleOffset(0.5);
         yAxis->SetTitle("Pulls");
-        xAxis->SetLabelSize( xAxis->GetLabelSize() / 0.33 );
+        xAxis->SetLabelSize(xAxis->GetLabelSize() / 0.33);
         if (option.find("-attach") != string::npos)
         {
             xAxis->SetTitle(Xtitle);
