@@ -209,7 +209,7 @@ public:
     void CreateDataHisto(double min = 0, double max = 0, int nbin = 50, TCut cuts = "", string weight = "", string opt = "", TH1 * htemplate = NULL);
     TH1 * GetDataHisto(string opt = "")
     {
-        if (opt.find("-recalc") != string::npos || !m_dataHist) CreateDataHisto();
+        if (opt.find("-recalc") != string::npos || !m_dataHist) CreateDataHisto(0, 0, m_nBins, "", "", opt);
         return m_dataHist;
     }
     void SetDataHisto( TH1 * h ) { m_dataHist = h; }

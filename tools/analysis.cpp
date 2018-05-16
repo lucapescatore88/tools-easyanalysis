@@ -257,6 +257,7 @@ void Analysis::CreateDataHisto(double min, double max, int nbin, TCut cuts, stri
 
     if (m_dataSet && (option.find("-usedataset") != string::npos))
     {
+        cout << "usedataset " << m_dataSet << endl;
         if (m_pmode == "v") m_dataSet->Print();
         m_dataHist = m_dataSet->createHistogram("hist_" + m_name, *m_var, Binning(nbin, min, max));
     }

@@ -87,22 +87,21 @@ bool MultiAnalysis::Initialize(string opt)
             myhmap[(string)m_categories[i]] = (TH1*)(m_ana[i]->GetDataHisto(opt));
         }
     }
+    if (m_pmode == "v") if (m_combModel) m_combModel->Print();
 
     if (!nodata)
     {
         if (m_pmode == "v") cout << endl << m_name << ": CreateCombData" << endl;
         m_combData = new RooDataSet("combData", "combined datas", *m_vars, Index(*m_samples), Import(mymap));
+        if (m_pmode == "v") if (m_combData) m_combData->Print();
         if (!m_unbinned)
         {
             if (m_pmode == "v") cout << endl << m_name << ": CreateCombHist" << endl;
             //m_combHist = new RooDataHist("combHisto", "combined histos", *m_vars, *m_combData);
             m_combHist = new RooDataHist("combHisto", "combined histos", *m_vars, Index(*m_samples), Import(myhmap));
+            if (m_pmode == "v") if (m_combHist) m_combHist->Print();
         }
     }
-
-    if (m_pmode == "v") if (m_combModel) m_combModel->Print();
-    if (m_pmode == "v") if (m_combData)  m_combData->Print();
-    if (m_pmode == "v") if (m_combHist)  m_combHist->Print();
 
     cout << endl << m_name << ": MultiAna " << m_name << " initialized correctly" << endl;
 
