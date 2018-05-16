@@ -97,6 +97,9 @@ class Analysis : public ModelBuilder {
 
     double m_scale;
 
+    bool m_unbinned = true;
+    int  m_nBins    = 100;
+
 public:
 
     Analysis(TString _name, TString _title, RooRealVar * _var, string _opt = "", string _w = "", TCut _cuts = ""):
@@ -181,6 +184,11 @@ public:
         //if(m_dataHist) delete m_dataHist;
     };
 
+    void SetBinnedFit(int _nBins) {
+        m_unbinned = false;
+        m_nBins    = _nBins;
+    }
+    int GetBins() { return m_nBins; }
 
     static string GetPrintLevel() { return m_pmode; }
     static void SetPrintLevel(string mode) { m_pmode = mode; ModelBuilder::SetPrintLevel(mode); TreeReader::SetPrintLevel(mode);  }
