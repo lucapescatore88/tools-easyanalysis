@@ -75,7 +75,11 @@ bool MultiAnalysis::Initialize(string opt)
     if (!nodata || !nomodel)
         for (unsigned i = 0; i < m_categories.size(); i++)
         {
-            if (opt.find("-initialize") != string::npos) m_ana[i]->Initialize(opt);
+            if (opt.find("-initialize") != string::npos)
+            {
+             if (!m_unbinned) m_ana[i]->SetBinnedFit(m_nBins)
+             m_ana[i]->Initialize(opt);
+            }
             if ( !m_ana[i]->isValid() ) { cout << m_name << ": *** WARNING Initialize *** " << m_ana[i]->GetName() << " is not initialized!" << endl; return false; }
             mymap[(string)m_categories[i]] = (RooDataSet*)(m_ana[i]->GetDataSet(opt));
             if ( !nomodel ) m_combModel->addPdf(*(m_ana[i]->GetModel()), m_categories[i]);
