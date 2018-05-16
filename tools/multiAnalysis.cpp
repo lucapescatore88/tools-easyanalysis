@@ -103,7 +103,7 @@ bool MultiAnalysis::Initialize(string opt)
         }
     }
 
-    cout << endl << m_name << ": MultiAna " << m_name << " initialized correctly" << endl;
+    cout << endl << m_name << ": MultiAnalysis " << m_name << " initialized correctly" << endl;
 
     m_init = true;
     return m_init;
