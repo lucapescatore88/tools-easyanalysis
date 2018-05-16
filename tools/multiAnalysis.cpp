@@ -77,18 +77,21 @@ bool MultiAnalysis::Initialize(string opt)
         {
             if (opt.find("-initialize") != string::npos)
             {
-             if (!m_unbinned) m_ana[i]->SetBinnedFit(m_nBins);
-             m_ana[i]->Initialize(opt);
+                if (!m_unbinned) m_ana[i]->SetBinnedFit(m_nBins);
+                m_ana[i]->Initialize(opt);
             }
             if ( !m_ana[i]->isValid() ) { cout << m_name << ": *** WARNING Initialize *** " << m_ana[i]->GetName() << " is not initialized!" << endl; return false; }
             mymap[(string)m_categories[i]] = (RooDataSet*)(m_ana[i]->GetDataSet(opt));
             if ( !nomodel ) m_combModel->addPdf(*(m_ana[i]->GetModel()), m_categories[i]);
         }
 
-    if ( !nodata ) m_combData = new RooDataSet("combData", "combined datas", *m_vars, Index(*m_samples), Import(mymap));
+    if (!nodata) m_combData = new RooDataSet("combData", "combined datas", *m_vars, Index(*m_samples), Import(mymap));
+
+    //if (!m_unbinned) m_combHist = m_combData->createHistogram("combHist", *m_vars, Binning(m_nBins, min, max)); HOT TO ???
 
     if (m_pmode == "v") if (m_combData)  m_combData->Print();
     if (m_pmode == "v") if (m_combModel) m_combModel->Print();
+    if (m_pmode == "v") if (!m_unbinned) if (m_combHist) m_combHist->Print();
     //if(m_pmode == "v") if(m_combModel) printParams(m_combModel, *m_vars);
     //if(m_pmode == "v") if(m_combModel) printParams(m_combModel);
 

@@ -58,6 +58,7 @@ class MultiAnalysis {
     vector< TString > m_categories;
     RooArgSet * m_vars = NULL;
     RooDataSet * m_combData = NULL;
+    TH1 * m_combHist = NULL;
     RooCategory * m_samples = NULL;
     RooSimultaneous * m_combModel = NULL;
     bool m_init;
