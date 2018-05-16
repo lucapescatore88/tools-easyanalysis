@@ -47,7 +47,7 @@ bool Analysis::Initialize(string option, double frac)
     {
         CreateReducedTree(option + "-cuttree", m_cuts, frac);
         CreateDataSet();
-        if (!m_unbinned) CreateDataHisto(m_var->getMin(), m_var->getMax(), m_nBins, "", GetWeight(), "-usedataset");
+        CreateDataHisto(m_var->getMin(), m_var->getMax(), m_nBins, "", GetWeight(), "-usedataset");
     }
 
     if (m_data) m_init = true;
@@ -351,7 +351,7 @@ void Analysis::SetUnits(string outUnit)//, double scalefactor)
 
 RooPlot * Analysis::Fit(string option, TCut extracuts)
 {
-    return Fit(100, true, option, extracuts);
+    return Fit(m_nBins, m_unbinned, option, extracuts);
 }
 
 RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extracuts)
@@ -363,10 +363,12 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         return NULL;
     }
 
+    if (!unbinned) SetBinnedFit(nbins);
+
     if (m_pmode == "v")
     {
         cout << endl << m_name << ": Fit ";
-        (unbinned) ? cout << "unbinned " : cout << "binned ";
+        (m_unbinned) ? cout << "unbinned " : cout << "binned " << nbins << " ";
         cout << option << endl;
     }
 
@@ -408,13 +410,13 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     if (m_pmode == "v") cout << endl << m_name << ": Fit " << m_var->getTitle() << " (" << nbins << "," << vmin << "," << vmax << ") " << option << endl;
 
     RooAbsData * mydata = m_data;
-    if (extracuts != "" )
+    if (extracuts != "")
     {
         CreateDataSet(option, extracuts);
         mydata = m_data;
     }
-    if (!unbinned) {
-        if ((nbins != m_nBins) || (extracuts != "" )) CreateDataHisto(vmin, vmax, nbins, extracuts, GetWeight(), option);
+    if (!m_unbinned) {
+        CreateDataHisto(vmin, vmax, nbins, extracuts, GetWeight(), option);
         mydata = new RooDataHist("data" + m_name, "", *m_var, m_dataHist);
     }
 

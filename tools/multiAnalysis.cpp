@@ -102,7 +102,13 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
     if (!m_init) Initialize(opt);
-    if (m_pmode == "v") cout << endl << m_name << ": Fit " << opt << endl;
+
+    if (m_pmode == "v")
+    {
+        cout << endl << m_name << ": Fit ";
+        (m_unbinned) ? cout << "unbinned " : cout << "binned " << nbins << " ";
+        cout << opt << endl;
+    }
 
     if (opt.find("-toy") != string::npos) m_isToy = true;
     RooCmdArg isExtended = Extended(kTRUE);
