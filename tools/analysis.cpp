@@ -47,6 +47,7 @@ bool Analysis::Initialize(string option, double frac)
     {
         CreateReducedTree(option + "-cuttree", m_cuts, frac);
         CreateDataSet();
+        if (!m_unbinned) CreateDataHisto(m_var->getMin(), m_var->getMax(), m_nBins, "", "", "-usedataset");
     }
 
     if (m_data) m_init = true;
