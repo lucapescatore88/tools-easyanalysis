@@ -47,7 +47,7 @@ bool Analysis::Initialize(string option, double frac)
     {
         CreateReducedTree(option + "-cuttree", m_cuts, frac);
         CreateDataSet();
-        if (!m_unbinned) CreateDataHisto(m_var->getMin(), m_var->getMax(), m_nBins, "", "", "-usedataset");
+        if (!m_unbinned) CreateDataHisto(m_var->getMin(), m_var->getMax(), m_nBins, "", GetWeight(), "-usedataset");
     }
 
     if (m_data) m_init = true;
@@ -413,7 +413,6 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         CreateDataSet(option, extracuts);
         mydata = m_data;
     }
-
     if (!unbinned) {
         if ((nbins != m_nBins) || (extracuts != "" )) CreateDataHisto(vmin, vmax, nbins, extracuts, GetWeight(), option);
         mydata = new RooDataHist("data" + m_name, "", *m_var, m_dataHist);

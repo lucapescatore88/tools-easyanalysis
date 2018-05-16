@@ -66,6 +66,9 @@ class MultiAnalysis {
     RooArgSet * m_constr = NULL;
     static string m_pmode;
 
+    bool m_unbinned = true;
+    int  m_nBins    = 100;
+
 public:
 
     MultiAnalysis( TString _name ):
@@ -84,6 +87,12 @@ public:
         delete m_samples;
         m_ana.clear();
     };
+
+    void SetBinnedFit(int _nBins) {
+        m_unbinned = false;
+        m_nBins    = _nBins;
+    }
+    int GetBins() { return m_nBins; }
 
     RooDataSet * GetCombData() { return m_combData; }
     void SetCombData(RooDataSet * data) { m_combData = data; };
