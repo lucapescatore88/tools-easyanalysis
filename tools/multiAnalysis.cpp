@@ -77,7 +77,7 @@ bool MultiAnalysis::Initialize(string opt)
         {
             if (opt.find("-initialize") != string::npos)
             {
-             if (!m_unbinned) m_ana[i]->SetBinnedFit(m_nBins)
+             if (!m_unbinned) m_ana[i]->SetBinnedFit(m_nBins);
              m_ana[i]->Initialize(opt);
             }
             if ( !m_ana[i]->isValid() ) { cout << m_name << ": *** WARNING Initialize *** " << m_ana[i]->GetName() << " is not initialized!" << endl; return false; }
@@ -98,11 +98,11 @@ bool MultiAnalysis::Initialize(string opt)
     return m_init;
 }
 
-map < string, RooPlot * > MultiAnalysis::SimultaneousFit(double min, double max, unsigned nbins, string opt)
+map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double min, double max)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
     if (!m_init) Initialize(opt);
-    if (m_pmode == "v") cout << endl << m_name << ": SimultaneousFit " << opt << endl;
+    if (m_pmode == "v") cout << endl << m_name << ": Fit " << opt << endl;
 
     if (opt.find("-toy") != string::npos) m_isToy = true;
     RooCmdArg isExtended = Extended(kTRUE);
@@ -116,7 +116,7 @@ map < string, RooPlot * > MultiAnalysis::SimultaneousFit(double min, double max,
     RooCmdArg hesse = Hesse(kTRUE);
     if (opt.find("-nohesse") != string::npos) hesse = Hesse(kFALSE);
 
-    if (!m_combModel || !m_combData) { cout << m_name << ": *** WARNING SimultaneousFit *** Model or data not set!" << endl; return map < string, RooPlot * >(); }
+    if (!m_combModel || !m_combData) { cout << m_name << ": *** WARNING Fit *** Model or data not set!" << endl; return map < string, RooPlot * >(); }
 
     if (min == max) m_fitResult = m_combModel->fitTo(*m_combData, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
     else

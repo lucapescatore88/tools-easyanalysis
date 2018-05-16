@@ -156,11 +156,7 @@ public:
      * @param print: Options -> same as Analysis::Fit()
      * \return Returns a map mapping categories names to plots with data and fit model.
      * */
-    map<string, RooPlot *> SimultaneousFit(double min = 0, double max = 0., unsigned nbins = 50, string print = "-range-log");
-    map<string, RooPlot *> SimultaneousFit(string print, unsigned nbins = 50)
-    {
-        return SimultaneousFit(0., 0., nbins, print);
-    }
+    map<string, RooPlot *> Fit(unsigned nbins = 50, string opt = "-range-log", double min = 0, double max = 0.);
 
     ///\brief Adds one category you must give an Analysis object containing data and model and a name
     void AddCategory(Analysis * ana, TString nameCat);
