@@ -138,16 +138,27 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
     RooAbsData * mydata = m_combData;
     if (!m_unbinned) mydata = m_combHist;
 
-    if (min == max) m_fitResult = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
+    time_t _tstart = time(NULL);
+    if (min == max) m_fitRes = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
     else
     {
         for (unsigned i = 0; i < m_categories.size(); i++)
             m_ana[i]->GetVariable()->setRange("FitRange", min, max);
-        m_fitResult = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
+        m_fitRes = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
     }
+    time_t _tstop = time(NULL);
 
-    if (opt.find("-quiet") == string::npos)
-        cout << m_name << " :  CovQual = " << m_fitResult->covQual() << ",   Status = " << m_fitResult->status() << ",   EDM = " << m_fitResult->edm() << endl;
+    if (m_pmode == "v") {
+        if (m_fitRes)
+        {
+            cout << endl << m_name;
+            cout << ":   CovQual = " << m_fitRes->covQual();
+            cout << ",   Status = "  << m_fitRes->status();
+            cout << ",   EDM = "     << m_fitRes->edm();
+            cout << ",   LogL = "    << m_fitRes->minNll() << endl;
+        }
+        cout << endl << m_name << ": Time = " << difftime(_tstop, _tstart) << "s" << endl << endl;
+    }
 
     map < string, RooPlot * > plots;
     if (opt.find("-noplot") == string::npos)
@@ -175,7 +186,7 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
         }
     }
 
-    for (auto a : m_ana) a->SetFitRes(m_fitResult);
+    for (auto a : m_ana) a->SetFitRes(m_fitRes);
 
     double logL = m_combModel->createNLL(*m_combData)->getVal();
     cout << endl << m_name << ": LogL = " << logL << endl;
@@ -183,7 +194,7 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
     if (opt.find("-corr") != string::npos)
     {
         TCanvas * c = new TCanvas();
-        TH2D * hCor = (TH2D*) m_fitResult->correlationHist();
+        TH2D * hCor = (TH2D*) m_fitRes->correlationHist();
         hCor->SetLabelSize(0.02, "xyz");
         hCor->Draw("colz");
         c->Print(m_name + "_corr.pdf");

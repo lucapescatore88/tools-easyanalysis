@@ -424,6 +424,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     if ((m_pmode != "v") || (option.find("-quiet") != string::npos))
         RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL);
 
+    time_t _tstart = time(NULL);
     if (mydata)
     {
         if (option.find("-constrainall") != string::npos)
@@ -446,16 +447,19 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
                 useMinos = Minos(kTRUE);
 
             m_fitRes = m_model->fitTo(*mydata, fitRange, isExtended, SumW2Error(true), isQuiet, Warnings(false), useMinos, Save(true), constraints);
+            time_t _tstop = time(NULL);
 
-            if (m_fitRes)
+            if (m_pmode == "v")
             {
-                if (m_pmode == "v") {
+                if (m_fitRes)
+                {
                     cout << endl << m_name;
                     cout << ":   CovQual = " << m_fitRes->covQual();
                     cout << ",   Status = "  << m_fitRes->status();
                     cout << ",   EDM = "     << m_fitRes->edm();
                     cout << ",   LogL = "    << m_fitRes->minNll() << endl;
                 }
+                cout << endl << m_name << ": Time = " << difftime(_tstop, _tstart) << "s" << endl << endl;
             }
         }
         else
@@ -522,6 +526,9 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
                 ++i;
             }
             while (refit && (m_fitRes == NULL || (m_fitRes->covQual() < 3 && TMath::Abs((m_fitRes->minNll() - minNll) / minNll) > 0.01)) ); // loop until converged or no improvement found
+            time_t _tstop = time(NULL);
+            if (m_pmode == "v") cout << endl << m_name << ": Time = " << difftime(_tstop, _tstart) << "s" << endl << endl;
+
             m.cleanup();
         }
     }

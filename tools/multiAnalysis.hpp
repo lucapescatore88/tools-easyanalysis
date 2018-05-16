@@ -63,7 +63,7 @@ class MultiAnalysis {
     RooDataHist * m_combHist = NULL;
     bool m_init;
     bool m_isToy;
-    RooFitResult * m_fitResult = NULL;
+    RooFitResult * m_fitRes = NULL;
     RooArgSet * m_constr = NULL;
     static string m_pmode;
 
@@ -73,7 +73,7 @@ class MultiAnalysis {
 public:
 
     MultiAnalysis( TString _name ):
-        m_name(_name), m_init(false), m_isToy(false), m_fitResult(NULL)
+        m_name(_name), m_init(false), m_isToy(false), m_fitRes(NULL)
     {
         m_samples = new RooCategory("samples", "samples");
         m_vars    = new RooArgSet("vars");
@@ -110,7 +110,7 @@ public:
     TString GetName() { return m_name; }
     void SetName(TString _name) { m_name = _name; }
 
-    RooFitResult * GetFitResult() { return m_fitResult; }
+    RooFitResult * GetFitResult() { return m_fitRes; }
     RooAbsReal * CreateLogL()
     {
         if (m_combModel && m_combData) return m_combModel->createNLL(*m_combData);
@@ -134,6 +134,8 @@ public:
 
     ///\brief Builds the combined PDF and data set
     bool Initialize(string opt = "");
+
+    bool isValid() { return m_init; }
 
     RooWorkspace * SaveToRooWorkspace();
 
