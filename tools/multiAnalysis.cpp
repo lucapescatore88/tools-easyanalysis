@@ -92,13 +92,11 @@ bool MultiAnalysis::Initialize(string opt)
     {
         if (m_pmode == "v") cout << endl << m_name << ": CreateCombData" << endl;
         m_combData = new RooDataSet("combData", "combined datas", *m_vars, Index(*m_samples), Import(mymap));
-        m_combData->Print();
         if (!m_unbinned)
         {
             if (m_pmode == "v") cout << endl << m_name << ": CreateCombHist" << endl;
-            m_combHist = new RooDataHist("combHisto", "combined histos", *m_vars, *m_combData);
-            //m_combData = new RooDataSet("combHisto", "combined histos", *m_vars, Index(*m_samples), Import(myhmap));
-            //m_combData->Print();
+            //m_combHist = new RooDataHist("combHisto", "combined histos", *m_vars, *m_combData);
+            m_combHist = new RooDataHist("combHisto", "combined histos", *m_vars, Index(*m_samples), Import(myhmap));
         }
     }
 
