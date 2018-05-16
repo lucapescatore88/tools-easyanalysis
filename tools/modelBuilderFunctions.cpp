@@ -238,7 +238,18 @@ void printPars(Str2VarMap pars, string opt)
             catch (string err) {}
             cout << "$\t\t \\\\" << endl;
         }
-        else { iter->second->Print(); }
+        //else { iter->second->Print(); }
+        else
+        {
+            if (iter->first.size() < 4)
+            {
+                cout << std::setw(5) << std::left << iter->first << " -- "; iter->second->Print();
+            }
+            else
+            {
+                cout << std::setw(30) << std::left << iter->first << " -- "; iter->second->Print();
+            }
+        }
     }
 }
 

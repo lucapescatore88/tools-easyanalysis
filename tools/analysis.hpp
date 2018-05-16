@@ -84,16 +84,16 @@ class Analysis : public ModelBuilder {
     bool m_init;
     string m_unit;
     static string m_pmode;
-    RooAbsReal * m_weight;
-    RooDataSet * m_data;
-    RooFitResult * m_fitRes;
+    RooAbsReal * m_weight = NULL;
+    RooDataSet * m_data = NULL;
+    RooFitResult * m_fitRes = NULL;
     double m_fitmin;
     double m_fitmax;
     vector<RooRealVar*> m_datavars;
 
-    TreeReader * m_dataReader;
-    TTree * m_reducedTree;
-    TH1 * m_dataHist;
+    TreeReader * m_dataReader = NULL;
+    TTree * m_reducedTree = NULL;
+    TH1 * m_dataHist = NULL;
 
     double m_scale;
 

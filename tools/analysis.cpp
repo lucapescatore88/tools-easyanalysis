@@ -170,14 +170,11 @@ TTree * Analysis::GetSingleTree(FUNC_PTR choose, TString namevar, bool reset)
         ULong64_t curEvtNumber = reducedReader->GetValue("eventNumber");
         UInt_t    curRunNumber = reducedReader->GetValue("runNumber");
 
-        bool changed = (curEvtNumber != lastEvtNumber || curRunNumber != lastRunNumber);
-        bool last = (i == (ntot - 1));
+        bool changed = (curEvtNumber != lastEvtNumber || curRunNumber != lastRunNumber || i == (ntot - 1));
 
-        if (changed || last)
+        if (changed)
         {
-            if(changed && last) { multiplicity = 1; isSingle = 1; singleTree->Fill(); }
-
-            if (!changed) entryn.push_back(i);
+            if (i == (ntot - 1)) entryn.push_back(i);
             multiplicity = entryn.size();
 
             Long64_t keep = 0;

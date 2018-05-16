@@ -56,14 +56,14 @@ class MultiAnalysis {
     TString m_name;
     vector< Analysis * > m_ana;
     vector< TString > m_categories;
-    RooArgSet * m_vars;
-    RooDataSet * m_combData;
-    RooCategory * m_samples;
-    RooSimultaneous * m_combModel;
+    RooArgSet * m_vars = NULL;
+    RooDataSet * m_combData = NULL;
+    RooCategory * m_samples = NULL;
+    RooSimultaneous * m_combModel = NULL;
     bool m_init;
     bool m_isToy;
-    RooFitResult * m_fitResult;
-    RooArgSet * m_constr;
+    RooFitResult * m_fitResult = NULL;
+    RooArgSet * m_constr = NULL;
     static string m_pmode;
 
 public:
