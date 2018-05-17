@@ -141,12 +141,12 @@ protected:
 
             RooDataSet * sigDataSet = NULL;
 
-            /* If var needs to be changed, here include original mass var name in vars
-            */
-            RooRealVar * tree_mass_var = NULL;
-            RooFormulaVar * scale_var = NULL;
             double max = myvar->getMax();
             double min = myvar->getMin();
+
+            RooRealVar * old_var = (RooRealVar*) myvar->Clone();
+            RooRealVar * new_var = NULL;
+            RooFormulaVar * scale_var = NULL;
             if (opt.find("-var[") != string::npos)
             {
                 size_t pos = opt.find("-var[") + 4;
@@ -155,21 +155,26 @@ protected:
                     TString varname = (TString)opt.substr(pos + 1, posend - pos - 1);
                     if (varname != "1")
                     {
+                        new_var = new RooRealVar(varname, varname, 0., min, max);
                         vars->remove(*myvar);
-                        tree_mass_var = myvar;
-                        myvar = new RooRealVar(varname, varname, 0., min, max);
+                        myvar = new_var;
                         vars->add(*myvar);
                     }
                 }
 
                 if (opt.find("-scale[") != string::npos)
                 {
-                    size_t pos_scale = opt.find("-scale[") + 6;
-                    size_t posend_scale = opt.find("]", pos_scale);
-                    if (pos != posend - 1 and pos_scale != posend_scale - 1) {
-                        TString massname = (TString)opt.substr(pos + 1 , posend - pos - 1);
-                        TString scale    = (TString)opt.substr(pos_scale + 1 , posend_scale - pos_scale - 1);
-                        if (massname != "1") scale_var = new RooFormulaVar(myvar->GetName(), myvar->GetName(), "(" + massname + ")*" + scale, RooArgList(*myvar));
+                    size_t pos = opt.find("-scale[") + 6;
+                    size_t posend = opt.find("]", pos);
+                    if (pos != posend - 1) {
+                        TString scale = (TString)opt.substr(pos + 1, posend - pos - 1);
+                        if (scale != "0")
+                        {
+                            vars->remove(*myvar);
+                            myvar = old_var;
+                            vars->add(*new_var);
+                            scale_var = new RooFormulaVar(myvar->GetName(), myvar->GetName(), (TString) new_var->GetName() + "*" + scale, RooArgList(*new_var));
+                        }
                     }
                 }
             }
@@ -189,6 +194,8 @@ protected:
             }
             else sigDataSet = new RooDataSet((TString)_name + "_DataSet_" + m_name, "", (TTree*)_base, *vars);
 
+            if (scale_var) sigDataSet->addColumn(*scale_var);
+
             if (opt.find("-c[") != string::npos)
             {
                 size_t pos = opt.find("-c[") + 3;
@@ -196,13 +203,6 @@ protected:
                 TString treecut = (TString)(opt.substr( pos, posend - pos));
                 sigDataSet->Print();
                 sigDataSet->reduce(treecut);
-            }
-
-            if (scale_var)
-            {
-                sigDataSet->addColumn(*scale_var);
-                // Code to do the RooKeysPdf over a longer range (first over fit range) ???
-                //res_fitrange = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
             }
 
             double rho = 1;
@@ -213,19 +213,10 @@ protected:
                 rho = ((TString)rhostr).Atof();
             }
 
-            // Set full range range for RooKeys
-            double max_mass, min_mass; // Max and min values of dataset range for mass variable
-            sigDataSet->getRange(*myvar, min_mass, max_mass); // Get range of dataset in mass variable, has to be done after transformation
-            myvar->setRange(min_mass, max_mass);
-
             if (opt.find("-mb") != string::npos)
                 res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::MirrorBoth, rho);
             else
                 res = new RooKeysPdf((TString)_name, _title, *myvar, *sigDataSet, RooKeysPdf::NoMirror, rho);
-
-            // Set range back to fit variable range
-            myvar->setRange(min, max);
-
 
             /*if(opt.find("-noshift") == string::npos)
             {
@@ -239,9 +230,6 @@ protected:
 
             if (opt.find("-print") != string::npos)
             {
-                myvar->setRange("fit_range", min, max); // Just for normalisation purposes now
-                myvar->setRange("full_range", min_mass, max_mass);
-
                 TCanvas * c = NULL;
                 RooPlot * keysplot = NULL;
 
@@ -256,21 +244,6 @@ protected:
                 name_.ReplaceAll(",", "_").ReplaceAll(".", "_");
                 name_.ReplaceAll("__", "_").ReplaceAll("_for", "__for");
 
-                if (res_fitrange)
-                {
-                    c = new TCanvas();
-                    keysplot = myvar->frame();
-                    sigDataSet->plotOn(keysplot);
-                    res_fitrange->plotOn(keysplot, NormRange("fit_range"));
-                    res->plotOn(keysplot);
-                    keysplot->SetTitle(_name);
-                    keysplot->SetXTitle(myvar->GetName());
-                    keysplot->Draw();
-                    c->Print("rooKeysPdf_compare" + name_ + ".pdf");
-                    delete c;
-                    delete keysplot;
-                }
-
                 c = new TCanvas();
                 keysplot = myvar->frame();
                 sigDataSet->plotOn(keysplot);
@@ -281,21 +254,6 @@ protected:
                 c->Print("rooKeysPdf_" + name_ + ".pdf");
                 delete c;
                 delete keysplot;
-
-                myvar->setRange(min_mass, max_mass);
-
-                c = new TCanvas();
-                keysplot = myvar->frame();
-                sigDataSet->plotOn(keysplot);
-                res->plotOn(keysplot , NormRange("full_range"));
-                keysplot->SetTitle(_name);
-                keysplot->SetXTitle(myvar->GetName());
-                keysplot->Draw();
-                c->Print("rooKeysPdf_fullrange_" + name_ + ".pdf");
-                delete c;
-                delete keysplot;
-
-                myvar->setRange(min, max); // Set mass variable range back to the proper one
             }
         }
         else if (t.find("TH1") != string::npos)
