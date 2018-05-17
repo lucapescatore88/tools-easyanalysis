@@ -93,7 +93,7 @@ protected:
         RooAbsPdf * res_fitrange = NULL; // For check of RooKeysPdf over fitRange
 
         if (_title == "") _title = _name;
-cout << endl << endl << endl;
+
         if (!myvar) myvar = m_var;
         if ((t.find("c") != string::npos && t.length() == 1) || t.find("TString") != string::npos)
         {
