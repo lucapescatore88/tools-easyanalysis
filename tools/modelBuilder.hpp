@@ -93,7 +93,7 @@ protected:
         RooAbsPdf * res_fitrange = NULL; // For check of RooKeysPdf over fitRange
 
         if (_title == "") _title = _name;
-
+cout << endl << endl << endl;
         if (!myvar) myvar = m_var;
         if ((t.find("c") != string::npos && t.length() == 1) || t.find("TString") != string::npos)
         {
@@ -144,6 +144,8 @@ protected:
             double max = myvar->getMax();
             double min = myvar->getMin();
 
+            double new_max, new_min;
+
             RooRealVar * old_var = (RooRealVar*) myvar->Clone();
             RooRealVar * new_var = NULL;
             RooFormulaVar * scale_var = NULL;
@@ -152,10 +154,12 @@ protected:
                 size_t pos = opt.find("-var[") + 4;
                 size_t posend = opt.find("]", pos);
                 if (pos != posend - 1) {
-                    TString varname = (TString)opt.substr(pos + 1, posend - pos - 1);
-                    if (varname != "1")
+                    TString new_varname = (TString)opt.substr(pos + 1, posend - pos - 1);
+                    if (new_varname != "1")
                     {
-                        new_var = new RooRealVar(varname, varname, 0., min, max);
+                        new_min = ((TTree*)_base)->GetMinimum(new_varname);
+                        new_max = ((TTree*)_base)->GetMaximum(new_varname);
+                        new_var = new RooRealVar(new_varname, new_varname, 0., min < new_min ? min : new_min, max > new_max ? max : new_max);
                         vars->remove(*myvar);
                         myvar = new_var;
                         vars->add(*myvar);
