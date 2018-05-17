@@ -56,20 +56,24 @@ class MultiAnalysis {
     TString m_name;
     vector< Analysis * > m_ana;
     vector< TString > m_categories;
-    RooArgSet * m_vars;
-    RooDataSet * m_combData;
-    RooCategory * m_samples;
-    RooSimultaneous * m_combModel;
+    RooCategory * m_samples = NULL;
+    RooArgSet * m_vars = NULL;
+    RooSimultaneous * m_combModel = NULL;
+    RooDataSet * m_combData = NULL;
+    RooDataHist * m_combHist = NULL;
     bool m_init;
     bool m_isToy;
-    RooFitResult * m_fitResult;
-    RooArgSet * m_constr;
+    RooFitResult * m_fitRes = NULL;
+    RooArgSet * m_constr = NULL;
     static string m_pmode;
+
+    bool m_unbinned = true;
+    int  m_nBins    = 100;
 
 public:
 
     MultiAnalysis( TString _name ):
-        m_name(_name), m_init(false), m_isToy(false), m_fitResult(NULL)
+        m_name(_name), m_init(false), m_isToy(false), m_fitRes(NULL)
     {
         m_samples = new RooCategory("samples", "samples");
         m_vars    = new RooArgSet("vars");
@@ -84,6 +88,12 @@ public:
         delete m_samples;
         m_ana.clear();
     };
+
+    void SetBinnedFit(int _nBins) {
+        m_unbinned = false;
+        m_nBins    = _nBins;
+    }
+    int GetBins() { return m_nBins; }
 
     RooDataSet * GetCombData() { return m_combData; }
     void SetCombData(RooDataSet * data) { m_combData = data; };
@@ -100,7 +110,7 @@ public:
     TString GetName() { return m_name; }
     void SetName(TString _name) { m_name = _name; }
 
-    RooFitResult * GetFitResult() { return m_fitResult; }
+    RooFitResult * GetFitResult() { return m_fitRes; }
     RooAbsReal * CreateLogL()
     {
         if (m_combModel && m_combData) return m_combModel->createNLL(*m_combData);
@@ -125,6 +135,8 @@ public:
     ///\brief Builds the combined PDF and data set
     bool Initialize(string opt = "");
 
+    bool isValid() { return m_init; }
+
     RooWorkspace * SaveToRooWorkspace();
 
     RooRealVar * GetPar(string name) { return getParam(m_combModel, name); }
@@ -147,11 +159,7 @@ public:
      * @param print: Options -> same as Analysis::Fit()
      * \return Returns a map mapping categories names to plots with data and fit model.
      * */
-    map<string, RooPlot *> SimultaneousFit(double min = 0, double max = 0., unsigned nbins = 50, string print = "-range-log");
-    map<string, RooPlot *> SimultaneousFit(string print, unsigned nbins = 50)
-    {
-        return SimultaneousFit(0., 0., nbins, print);
-    }
+    map<string, RooPlot *> Fit(unsigned nbins = 50, string opt = "-range-log", double min = 0, double max = 0.);
 
     ///\brief Adds one category you must give an Analysis object containing data and model and a name
     void AddCategory(Analysis * ana, TString nameCat);
