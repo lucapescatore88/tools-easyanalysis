@@ -12,16 +12,22 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
     size_t pos = parstr.find(par + "[");
     if (par == "a2os") pos = parstr.find("a2[");
 
+cout << "addPar: " << par << " " << parstr << " " << option << endl;
+
     string dist_name = "";
     size_t posname = option.find("-n");
     if (posname != string::npos)
         dist_name = option.substr(posname + 2, option.find("-", posname + 1) - posname + 2);
+
+cout << "addPar: dist_name = " << dist_name << endl;
 
     string parMapName = "";
     if (myvars.size() > 0)
     {
         if (par == "a2os") parMapName = isParInMap( "a2", myvars, dist_name );
         else parMapName = isParInMap( par, myvars, dist_name );
+
+cout << "addPar: parMapName = " << parMapName << endl;
 
         if (parMapName == "") cout << "addPar: *** WARNING *** " << par << " " << parstr << " " << option << endl;
     }
@@ -230,6 +236,10 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
     if (title == "") title = namepdf_;
 
     opt += "-n" + (string)var->GetName();
+
+    cout << endl << "stringToPdf: " << typepdf << " " << namepdf << " " << var->GetName() << " " << opt << " " << title << endl;
+    printPars(myvars);
+    cout << endl;
 
     Str2VarMap p = getPar(typepdf_, namepdf_, var, myvars, opt, title);
 

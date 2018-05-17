@@ -143,11 +143,15 @@ double getParErr(RooFitResult *fRes, string name, string type) {
 
 string isParInMap( string par, Str2VarMap myvars, string option )
 {
+cout << "isParInMap: " << par << " " << option << endl;
+
     string namepar = par.substr(0, par.find("_"));
+        cout << "namepar = " << namepar << endl;
     for (Str2VarMapItr iter = myvars.begin(); iter != myvars.end(); iter++)
     {
         size_t pos_ = iter->first.find("_");
         string namecurpar = iter->first.substr(0, pos_);
+        cout << "namecurpar = " << namecurpar << endl;
         if (namepar != namecurpar) continue;
         if ( option != "" && (iter->first).find(option) != string::npos ) return iter->first;
         else if (option == "") return iter->first;
