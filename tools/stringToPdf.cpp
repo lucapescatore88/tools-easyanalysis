@@ -14,18 +14,18 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
 
 cout << "addPar: " << par << " " << parstr << " " << option << endl;
 
-    string dist_name = "";
+    string vname = "";
     size_t posname = option.find("-n");
     if (posname != string::npos)
-        dist_name = option.substr(posname + 2, option.find("-", posname + 1) - posname + 2);
+        vname = option.substr(posname + 2, option.find("-", posname + 2) - (posname + 2) );
 
-cout << "addPar: dist_name = " << dist_name << endl;
+cout << "addPar: vname = " << vname << endl;
 
     string parMapName = "";
     if (myvars.size() > 0)
     {
-        if (par == "a2os") parMapName = isParInMap( "a2", myvars, dist_name );
-        else parMapName = isParInMap( par, myvars, dist_name );
+        if (par == "a2os") parMapName = isParInMap( "a2", myvars, vname );
+        else parMapName = isParInMap( par, myvars, vname );
 
 cout << "addPar: parMapName = " << parMapName << endl;
 
