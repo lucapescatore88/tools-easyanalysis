@@ -138,19 +138,19 @@ double getParErr(RooFitResult *fRes, string name, string type) {
 
 //Returns the complete name of the parameter "par" is in the "myvars" object
 //Return an empty string if it doesn't find it
-string isParInMap(string par, Str2VarMap myvars, string option)
+string isParInMap(string par, Str2VarMap myvars, string vname)
 {
     string namepar = par.substr(0, par.find("_"));
     for (Str2VarMapItr iter = myvars.begin(); iter != myvars.end(); iter++)
     {
         size_t pos_ = iter->first.find("_");
         string namecurpar = iter->first.substr(0, pos_);
-        if ((option != "") && ((iter->first).find(option) != string::npos) && (namepar.find(namecurpar + "_") != string::npos)) return iter->first;
+        if ((vname != "") && ((iter->first).find(vname) != string::npos) && (namepar.find(namecurpar + "_") != string::npos)) return iter->first;
         if (namepar == namecurpar) return iter->first;
         /*
         if (namepar != namecurpar) continue;
-        if (option != "" && (iter->first).find(option) != string::npos) return iter->first;
-        else if (option == "") return iter->first;
+        if (vname != "" && (iter->first).find(vname) != string::npos) return iter->first;
+        else if (vname == "") return iter->first;
         */
     }
     return (string) "";
