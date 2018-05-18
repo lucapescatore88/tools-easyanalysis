@@ -1,8 +1,8 @@
 import os
 import ROOT as r
 
-#r.gSystem.Load(os.path.expandvars('$TOOLSSYS/lib/libtools'))
-#r.gSystem.Load(os.path.expandvars('$TOOLSSYS/lib/libroofit'))
+#r.gSystem.Load(os.path.expandvars('$TOOLSSYS/lib/libtools.a'))
+#r.gSystem.Load(os.path.expandvars('$TOOLSSYS/lib/libroofit.a'))
 r.gSystem.Load(os.path.expandvars('$TOOLSSYS/build/libeasyanalysis-shared'))
 
 __importables__ = [
