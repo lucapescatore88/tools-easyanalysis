@@ -145,7 +145,7 @@ def create_analysis(config) :
 
     if cont['datafile'] != 'None' :
         if 'datatree' in cont.keys() :
-            a = ea.Analysis(cont['name'],cont['title'],cont['datatree'],cont['datafile'],v,cut)
+            a = ea.Analysis(cont['name'],cont['title'],cont['datatree'],cont['datafile'],cut,v)
         elif 'datahist' in cont.keys() :
             f = r.TFile(cont['datafile'])
             h = f.Get(cont['datahist'])
