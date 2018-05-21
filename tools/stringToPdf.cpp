@@ -12,17 +12,16 @@ RooRealVar * addPar(string par, string parstr, Str2VarMap stval_list, Str2VarMap
     size_t pos = parstr.find(par + "[");
     if (par == "a2os") pos = parstr.find("a2[");
 
-    string dist_name = "";
+    string vname = "";
     size_t posname = option.find("-n");
     if (posname != string::npos)
-        dist_name = option.substr(posname + 2, option.find("-", posname + 1) - posname + 2);
+        vname = option.substr(posname + 2, option.find("-", posname + 2) - (posname + 2));
 
     string parMapName = "";
     if (myvars.size() > 0)
     {
-        if (par == "a2os") parMapName = isParInMap( "a2", myvars, dist_name );
-        else parMapName = isParInMap( par, myvars, dist_name );
-
+        if (par == "a2os") parMapName = isParInMap("a2", myvars, vname);
+        else parMapName = isParInMap(par, myvars, vname);
         if (parMapName == "") cout << "addPar: *** WARNING *** " << par << " " << parstr << " " << option << endl;
     }
     if (parMapName != "") curpar = (RooRealVar *)myvars[parMapName];
@@ -191,7 +190,7 @@ Str2VarMap getPar(string typepdf_, TString namepdf_, RooRealVar * val, Str2VarMa
     if (endtype != string::npos) parstr = typepdf_.substr(endtype, string::npos);
     vector<string> pars = par_list[typepdf_.substr(0, endtype)];
 
-    for ( auto par : pars )
+    for (auto par : pars)
     {
         if (par == "a2os") parout["a2"] = addPar(par, parstr, stval_list, myvars, opt);
         else parout[par] = addPar(par, parstr, stval_list, myvars, opt);
@@ -230,6 +229,10 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
     if (title == "") title = namepdf_;
 
     opt += "-n" + (string)var->GetName();
+
+    cout << endl << "stringToPdf: " << typepdf << " " << namepdf << " " << var->GetName() << " " << opt << " " << title << endl;
+    printPars(myvars);
+    cout << endl;
 
     Str2VarMap p = getPar(typepdf_, namepdf_, var, myvars, opt, title);
 

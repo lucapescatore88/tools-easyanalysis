@@ -26,7 +26,7 @@ RooRealVar * getParam(RooAbsPdf * pdf, string name, string opt)
     RooArgSet * params = pdf->getParameters(RooDataSet());
     TIterator * it = params->createIterator();
     RooRealVar * arg;
-    while ( (arg = (RooRealVar*)it->Next()) )
+    while ((arg = (RooRealVar*)it->Next()))
     {
         string varname = (string)arg->GetName();
         if (opt == "-cut")
@@ -35,7 +35,7 @@ RooRealVar * getParam(RooAbsPdf * pdf, string name, string opt)
             varname = ((string)arg->GetName()).substr(0, _pos);
         }
 
-        if ( varname == name ) return arg;
+        if (varname == name) return arg;
     }
 
     return NULL;
@@ -49,7 +49,7 @@ Str2VarMap getParams(RooAbsPdf * pdf, RooArgSet obs, vector < string > pnames, s
     RooArgSet * params = pdf->getParameters(RooDataSet("v", "", obs));
     TIterator * it = params->createIterator();
     RooRealVar * arg;
-    while ( (arg = (RooRealVar*)it->Next()) )
+    while ((arg = (RooRealVar*)it->Next()))
     {
         string complete_name = arg->GetName();
         int _pos = complete_name.find("_");
@@ -136,23 +136,19 @@ double getParErr(RooFitResult *fRes, string name, string type) {
 }
 
 
-
-
 //Returns the complete name of the parameter "par" is in the "myvars" object
 //Return an empty string if it doesn't find it
-
-string isParInMap( string par, Str2VarMap myvars, string option )
+string isParInMap(string par, Str2VarMap myvars, string vname)
 {
     string namepar = par.substr(0, par.find("_"));
     for (Str2VarMapItr iter = myvars.begin(); iter != myvars.end(); iter++)
     {
-        size_t pos_ = iter->first.find("_");
-        string namecurpar = iter->first.substr(0, pos_);
-        if (namepar != namecurpar) continue;
-        if ( option != "" && (iter->first).find(option) != string::npos ) return iter->first;
-        else if (option == "") return iter->first;
+        size_t pos = iter->first.find("_");
+        bool haspar = (namepar.find(iter->first.substr(0, pos)) != string::npos);
+        if (vname != "" && ((iter->first).find(vname) != string::npos) && haspar) return iter->first; 
+        if (haspar) return iter->first;
     }
-    return (string)"";
+    return (string) "";
 }
 
 
@@ -164,7 +160,7 @@ Str2VarMap modifyPars(Str2VarMap * pars, vector<string> names, vector<RooRealVar
 {
     for (unsigned i = 0; i < names.size(); i++)
     {
-        string parMapName = isParInMap( names[i], *pars );
+        string parMapName = isParInMap(names[i], *pars);
         RooRealVar * par = (RooRealVar*)((*pars)[parMapName]);
         if (!par) { cout << "Parameter " << names[i] << " not found!" << endl; continue; }
         TString fname = (TString)par->GetName() + "__" + c[i]->GetName();
@@ -224,7 +220,7 @@ void printPars(Str2VarMap pars, string opt)
         double prec = 4;
         size_t precpos = opt.find("-prec");
         if (precpos != string::npos) prec = ((TString)opt.substr(precpos + 5, string::npos)).Atof();
-        if (opt.find("-nocost") != string::npos && (bool)iter->second->getAttribute("Constant") ) continue;
+        if (opt.find("-nocost") != string::npos && (bool)iter->second->getAttribute("Constant")) continue;
         if (opt.find("-latex") != string::npos)
         {
             cout << fixed << setprecision(prec) << "$" << iter->second->GetTitle() << "$ \t\t& $";
@@ -271,7 +267,7 @@ int getNFreePars(RooAbsPdf * pdf, RooArgSet vars)
     RooArgSet * params = pdf->getParameters(RooDataSet("v", "", vars));
     TIterator *it = params->createIterator();
     RooRealVar * arg;
-    while ( (arg = (RooRealVar*)it->Next()) )
+    while ((arg = (RooRealVar*)it->Next()))
         if (!arg->getAttribute("Constant") && ((string)arg->GetName()) != "samples")
             nfree++;
 
@@ -286,7 +282,7 @@ RooArgSet * gaussianConstraints(RooAbsPdf * pdf, RooArgSet vars)
     RooArgSet * params = pdf->getParameters(RooDataSet("v", "", vars));
     TIterator *it = params->createIterator();
     RooRealVar * arg;
-    while ( (arg = (RooRealVar*)it->Next()) )
+    while ((arg = (RooRealVar*)it->Next()))
     {
         if (!arg->getAttribute("Constant") && ((string)arg->GetName()) != "samples")
         {
@@ -309,11 +305,11 @@ bool checkModel(RooAbsPdf * model)
     RooArgSet * comps = model->getComponents();
     TIterator * it = comps->createIterator();
     RooAbsArg * arg;
-    while ( (arg = (RooAbsArg*)it->Next()) )
+    while ((arg = (RooAbsArg*)it->Next()))
     {
         TString legstyle = "l";
         string name = arg->GetName();
-        if ( find(names.begin(), names.end(), name) != names.end())
+        if (find(names.begin(), names.end(), name) != names.end())
         {
             model_ok = false;
             cout << "ATTENTION: Component " << name << " repeated" << endl;
@@ -324,10 +320,10 @@ bool checkModel(RooAbsPdf * model)
     RooArgSet * params = model->getParameters(RooDataSet());
     TIterator * itp = params->createIterator();
     RooRealVar * argp;
-    while ( (argp = (RooRealVar*)itp->Next()) )
+    while ((argp = (RooRealVar*)itp->Next()))
     {
         string pname = argp->GetName();
-        if ( find(pnames.begin(), pnames.end(), pname) != pnames.end())
+        if (find(pnames.begin(), pnames.end(), pname) != pnames.end())
         {
             model_ok = false;
             cout << "ATTENTION: Parameter " << pname << " repeated" << endl;
@@ -353,12 +349,12 @@ bool checkModel(RooAbsPdf * model)
 
 void fixParam(RooAbsPdf * pdf, RooRealVar * obs, string fix)
 {
-    return fixParam( pdf, new RooArgSet(*obs), pdf->getParameters(RooDataSet("dataset", "", *obs)), fix);
+    return fixParam(pdf, new RooArgSet(*obs), pdf->getParameters(RooDataSet("dataset", "", *obs)), fix);
 }
 
 void fixParam(RooAbsPdf * pdf, RooRealVar * obs, RooArgSet * set, string fix)
 {
-    return fixParam( pdf, new RooArgSet(*obs), set, fix);
+    return fixParam(pdf, new RooArgSet(*obs), set, fix);
 }
 
 void fixParam(RooAbsPdf * pdf, RooArgSet * obs, RooArgSet * set, string fix)
@@ -367,7 +363,7 @@ void fixParam(RooAbsPdf * pdf, RooArgSet * obs, RooArgSet * set, string fix)
     if (set->getSize() < 1) set = params;
     TIterator *it = params->createIterator();
     RooRealVar * arg1, * arg2;
-    while ( (arg1 = (RooRealVar*)it->Next()) )
+    while ((arg1 = (RooRealVar*)it->Next()))
     {
         TIterator *setit = set->createIterator();
         if (set->getSize() == 0)
@@ -376,7 +372,7 @@ void fixParam(RooAbsPdf * pdf, RooArgSet * obs, RooArgSet * set, string fix)
             else if (fix == "free") arg1->setConstant(false);
             continue;
         }
-        while ( (arg2 = (RooRealVar*)setit->Next()) )
+        while ((arg2 = (RooRealVar*)setit->Next()))
         {
             if (((string)arg1->GetName()) == "samples") continue;
             if ((TString)arg1->GetName() == (TString)arg2->GetName())
@@ -419,18 +415,18 @@ TPaveText * createParamBox(RooAbsPdf * pdf, RooRealVar * obs, string opt, RooFit
     RooArgSet * params = pdf->getParameters(RooDataSet("dataset", "", RooArgSet(*obs)));
     TIterator * it = params->createIterator();
     RooRealVar * arg;
-    while ( (arg = (RooRealVar*)it->Next()) )
+    while ((arg = (RooRealVar*)it->Next()))
     {
         string oname = arg->GetName();
         string otitle = arg->GetTitle();
         if (opt.find("-nocost") != string::npos
                 && arg->getAttribute("Constant")
-                && oname.find("_print") == string::npos ) continue;
+                && oname.find("_print") == string::npos) continue;
         if (opt.find("-vpar") != string::npos
                 && oname.find(((TString)obs->GetName()).ReplaceAll("__var__", "")) == string::npos
-                && oname.find("__for") != string::npos ) continue;
-        if (otitle.find("_hide_") != string::npos ) continue;
-        if (otitle.find("var_") != string::npos ) continue;
+                && oname.find("__for") != string::npos) continue;
+        if (otitle.find("_hide_") != string::npos) continue;
+        if (otitle.find("var_") != string::npos) continue;
 
         size_t pos_  = oname.find("_");
         size_t pos__ = oname.find("__", pos_ + 1);
@@ -442,7 +438,7 @@ TPaveText * createParamBox(RooAbsPdf * pdf, RooRealVar * obs, string opt, RooFit
         double error = arg->getError();
         if (fitRes) arg->getPropagatedError(*fitRes);
         int precision = 1;
-        while ( error > 1.e-6 && error < 0.1 )
+        while (error > 1.e-6 && error < 0.1)
         {
             error *= 10.;
             precision++;
@@ -477,7 +473,7 @@ RooArgSet * copyFreePars(RooAbsPdf * pdf, RooArgSet vars)
     RooArgSet * params = pdf->getParameters(RooDataSet("v", "", vars));
     TIterator * it = params->createIterator();
     RooRealVar * arg;
-    while ( (arg = (RooRealVar*)it->Next()) )
+    while ((arg = (RooRealVar*)it->Next()))
     {
         RooRealVar * vv = new RooRealVar(arg->GetName(), arg->GetName(), arg->getVal());
         if (!arg->getAttribute("Constant")) out->add(*vv);
@@ -504,14 +500,14 @@ Str2VarMap setConstant(Str2VarMap * pars, vector<string> names, string opt)
         bool found = false;
         for (unsigned i = 0; i < names.size(); i++)
         {
-            if ( ( names[i] == cname ) ||
-                    ( cname.find(names[i]) != string::npos && opt.find("contains") != string::npos ) )
+            if ((names[i] == cname) ||
+                    (cname.find(names[i]) != string::npos && opt.find("contains") != string::npos))
             { found = true; break; }
         }
         if (opt.find("except") != string::npos) found = !found;
         bool setconst = kTRUE;
         if (opt.find("-free") != string::npos) setconst = kFALSE;
-        if ( names.empty() || found ) ((RooRealVar*)iter->second)->setConstant(setconst);
+        if (names.empty() || found) ((RooRealVar*)iter->second)->setConstant(setconst);
     }
     return *pars;
 }
@@ -530,7 +526,7 @@ Str2VarMap eraseParameter(Str2VarMap * parlist, vector<string> names)
 }
 
 
-TString getLegendLabel( TString title, string opt )
+TString getLegendLabel(TString title, string opt)
 {
     TString leglabel = title.ReplaceAll("_print", "");
     //bool isbkg = leglabel.Contains("bkg_");
@@ -633,11 +629,11 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
     {
         size_t pos = opt.find("-category[");
         size_t posend = opt.find("]", pos);
-        category = opt.substr(pos + 10, posend - (pos + 10) - 1 );
+        category = opt.substr(pos + 10, posend - (pos + 10) - 1);
         cut = Cut("samples==samples::" + category);
     }
 
-    if ( data )
+    if (data)
     {
         frame->SetMarkerSize(1);
 
@@ -672,7 +668,7 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
     RooArgSet * stackedBkgs = NULL;
     if (opt.find("-stackbkg") != string::npos) stackedBkgs = new RooArgSet("stackedBkgs");
 
-    if ( model )
+    if (model)
     {
         //Plot total model
 
@@ -685,7 +681,7 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
         RooArgSet * comps = model->getComponents();
         TIterator * it = comps->createIterator();
         RooAbsArg * arg;
-        while ( (arg = (RooAbsArg*)it->Next()) )
+        while ((arg = (RooAbsArg*)it->Next()))
         {
             TString legstyle = "l";
             string name = arg->GetName();
@@ -696,12 +692,12 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
             if (opt.find("-printonly") == string::npos && name.find("_noprint") == string::npos)
             {
                 if (name.find("wrtsig") != string::npos) continue;
-                if ( noblind && name.find("totsig") != string::npos && opt.find("-nototsigplot") == string::npos)
+                if (noblind && name.find("totsig") != string::npos && opt.find("-nototsigplot") == string::npos)
                 {
                     model->plotOn(frame, Components(*arg), drawOptSig, LineColor(1), Name(arg->GetName()), range_model, norm_range, norm);
                     isplot = true;
                 }
-                else if ( noblind && name.find("sig") != string::npos && opt.find("-plotsigcomp") != string::npos )
+                else if (noblind && name.find("sig") != string::npos && opt.find("-plotsigcomp") != string::npos)
                 {
                     model->plotOn(frame, Components(*arg), drawOptSig,
                                   LineColor(colors[counter]), LineStyle(styles[counter]),
@@ -757,7 +753,7 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
                 TString myBkgName, myBkgTitle;
                 while ((arg = (RooAbsArg*)it->Next()))
                 {
-                    if ( count > bb ) break;
+                    if (count > bb) break;
                     count++;
                     curBkg.add(*arg);
                     myBkgName = arg->GetName();
@@ -773,14 +769,14 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
                                   LineColor(colors[counter]),
                                   Name(myBkgName),
                                   MoveToBack(), range_model //, norm_range
-                                 );
+                                );
                 else
                     model->plotOn(frame, Components(curBkg), DrawOption("L"),
                                   LineColor(colors[counter]),
                                   LineStyle(styles[counter]),
                                   Name(myBkgName),
                                   MoveToBack(), range_model, norm_range
-                                 );
+                                );
 
                 counter++;
 
