@@ -4,7 +4,6 @@
 vector <Color_t> getDefaultColors()
 {
     vector <Color_t> default_colors;
-    default_colors.push_back(kCyan + 1);
     default_colors.push_back(kRed + 1);
     default_colors.push_back(kGreen + 1);
     default_colors.push_back(kOrange);
@@ -14,6 +13,7 @@ vector <Color_t> getDefaultColors()
     default_colors.push_back(kGray + 2);
     default_colors.push_back(kGray + 3);
     default_colors.push_back(kOrange + 2);
+    default_colors.push_back(kCyan + 1);
 
     return default_colors;
 }

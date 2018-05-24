@@ -31,8 +31,8 @@ class RooIpatia2 : public RooAbsPdf {
     RooIpatia2(const RooIpatia2& other, const char* name=0) ;
     virtual TObject* clone(const char* newname) const { return new RooIpatia2(*this,newname); }
     inline virtual ~RooIpatia2() { }
-    Int_t getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* rangeName=0) const ;
-    Double_t analyticalIntegral(Int_t code, const char* rangeName=0) const ;
+    //Int_t getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* rangeName=0) const ;
+    //Double_t analyticalIntegral(Int_t code, const char* rangeName=0) const ;
 
  protected:
     RooRealProxy x ;

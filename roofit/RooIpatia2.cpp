@@ -222,8 +222,8 @@ Double_t RooIpatia2::evaluate() const
     //printf("result is %e\n",out);
     return out;
 } 
-
-Int_t RooIpatia2::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* /*rangeName*/) const  
+/*
+Int_t RooIpatia2::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* ) const  //rangeName
 { 
     // LIST HERE OVER WHICH VARIABLES ANALYTICAL INTEGRATION IS SUPPORTED, 
     // ASSIGN A NUMERIC CODE FOR EACH SUPPORTED (SET OF) PARAMETERS 
@@ -309,3 +309,4 @@ Double_t RooIpatia2::analyticalIntegral(Int_t code, const char* rangeName) const
     }
     return out;
 }
+*/

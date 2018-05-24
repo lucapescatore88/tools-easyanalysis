@@ -439,16 +439,36 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
         if (option.find("-fitto") != string::npos)
         {
             RooCmdArg constraints = ExternalConstraints(*m_constr);
+            RooCmdArg isQuiet     = PrintLevel(2);
+            if (option.find("-quiet") != string::npos) isQuiet = PrintLevel(-1);
+            RooCmdArg save        = Save();
+            RooCmdArg sumw2       = SumW2Error(kTRUE);
+            RooCmdArg useCPU      = NumCPU(ncpu);
+            //RooCmdArg useHesse        = Hesse(kTRUE);
+            //if (opt.find("-nohesse") != string::npos) useHesse = Hesse(kFALSE);
+            //RooCmdArg useInitialHesse = InitialHesse(kFALSE);
+            //if (opt.find("-initialhesse") != string::npos) useInitialHesse = InitialHesse(kTRUE);
+            RooCmdArg useMinos    = Minos(kFALSE);
+            if (option.find("-minos") != string::npos) useMinos = Minos(kTRUE);
+            RooCmdArg useTimer    = Timer(kTRUE);
+            RooCmdArg warnings    = Warnings(kFALSE);
 
-            RooCmdArg isQuiet = PrintLevel(2);
-            if (option.find("-quiet") != string::npos)
-                isQuiet = PrintLevel(-1);
+            RooLinkedList optList;
+            optList.Add((TObject *) & constraints);
+            optList.Add((TObject *) & fitRange);
+            optList.Add((TObject *) & isExtended);
+            optList.Add((TObject *) & isQuiet);
+            //optList.Add((TObject *) & save);
+            optList.Add((TObject *) & sumw2);
+            optList.Add((TObject *) & useCPU);
+            //optList.Add((TObject *) & useHesse);
+            //optList.Add((TObject *) & useInitialHesse);
+            optList.Add((TObject *) & useMinos);
+            optList.Add((TObject *) & useTimer);
+            optList.Add((TObject *) & warnings);
 
-            RooCmdArg useMinos = Minos(kFALSE);
-            if (option.find("-minos") != string::npos)
-                useMinos = Minos(kTRUE);
-
-            m_fitRes = m_model->fitTo(*mydata, fitRange, isExtended, SumW2Error(true), isQuiet, Warnings(false), useMinos, Save(true), constraints);
+            //m_fitRes = m_model->fitTo(*mydata, fitRange, isExtended, SumW2Error(true), isQuiet, Warnings(false), useMinos, Save(true), constraints);
+            m_fitRes = m_model->fitTo(*mydata, optList);
             time_t _tstop = time(NULL);
 
             if (m_pmode == "v")
