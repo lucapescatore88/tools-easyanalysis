@@ -321,13 +321,13 @@ protected:
             {
                 m_bkg_components.push_back(comp);
                 m_bkg_fractions.push_back(frac);
-                SetLastBkgColor(getDefaultColors()[m_bkg_components.size() - 1]);
+                SetLastBkgColor(getDefaultColors()[m_bkg_components.size()]);
             }
             else
             {
                 m_bkg_components.insert(m_bkg_components.begin(), comp);
                 m_bkg_fractions.insert(m_bkg_fractions.begin(), frac);
-                m_colors.insert(m_colors.begin(), getDefaultColors()[m_bkg_components.size() - 1]);
+                m_colors.insert(m_colors.begin(), getDefaultColors()[m_bkg_components.size()]);
             }
         }
 

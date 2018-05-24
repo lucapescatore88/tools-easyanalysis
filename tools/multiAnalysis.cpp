@@ -121,17 +121,40 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
         cout << opt << endl;
     }
 
-    if (opt.find("-toy") != string::npos) m_isToy = true;
-    RooCmdArg isExtended = Extended(kTRUE);
+    int ncpu = 1;
+    size_t poscpu = opt.find("-ncpu");
+    if (poscpu != string::npos) ncpu = atoi(opt.substr(poscpu + 5).c_str());
+    if (m_pmode == "v") cout << m_name << ": Using " << ncpu << " CPU(s)" << endl << endl;
+
+    RooCmdArg constraints     = ExternalConstraints(*m_constr);
+    RooCmdArg isExtended      = Extended(kTRUE);
     if (opt.find("-noextended") != string::npos) isExtended = Extended(kFALSE);
-    RooCmdArg isQuiet = PrintLevel(2);
+    RooCmdArg isQuiet         = PrintLevel(2);
     if (opt.find("-quiet") != string::npos) isQuiet = PrintLevel(-1);
-    RooCmdArg useMinos = Minos(kFALSE);
+    RooCmdArg save            = Save();
+    RooCmdArg sumw2           = SumW2Error(kTRUE);
+    RooCmdArg useCPU          = NumCPU(ncpu);
+    RooCmdArg useHesse        = Hesse(kTRUE);
+    if (opt.find("-nohesse") != string::npos) useHesse = Hesse(kFALSE);
+    RooCmdArg useInitialHesse = InitialHesse(kFALSE);
+    if (opt.find("-initialhesse") != string::npos) useInitialHesse = InitialHesse(kTRUE);
+    RooCmdArg useMinos        = Minos(kFALSE);
     if (opt.find("-minos") != string::npos) useMinos = Minos(kTRUE);
-    RooCmdArg initialHesse = InitialHesse(kFALSE);
-    if (opt.find("-initialhesse") != string::npos) initialHesse = InitialHesse(kTRUE);
-    RooCmdArg hesse = Hesse(kTRUE);
-    if (opt.find("-nohesse") != string::npos) hesse = Hesse(kFALSE);
+    RooCmdArg useTimer        = Timer(kTRUE);
+    RooCmdArg warnings        = Warnings(kFALSE);
+
+    RooLinkedList optList;
+    optList.Add((TObject *) & constraints);
+    optList.Add((TObject *) & isExtended);
+    optList.Add((TObject *) & isQuiet);
+    optList.Add((TObject *) & save);
+    optList.Add((TObject *) & sumw2);
+    optList.Add((TObject *) & useCPU);
+    optList.Add((TObject *) & useHesse);
+    optList.Add((TObject *) & useInitialHesse);
+    optList.Add((TObject *) & useMinos);
+    optList.Add((TObject *) & useTimer);
+    //optList.Add((TObject *) & warnings);
 
     if (!m_combModel || (!m_combData && !m_combHist)) { cout << m_name << ": *** WARNING Fit *** Model or data not set!" << endl; return map < string, RooPlot * >(); }
 
@@ -139,12 +162,14 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
     if (!m_unbinned) mydata = m_combHist;
 
     time_t _tstart = time(NULL);
-    if (min == max) m_fitRes = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
+    //if (min == max) m_fitRes = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
+    if (min == max) m_fitRes = m_combModel->fitTo(*mydata, optList);
     else
     {
         for (unsigned i = 0; i < m_categories.size(); i++)
             m_ana[i]->GetVariable()->setRange("FitRange", min, max);
-        m_fitRes = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
+        //m_fitRes = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
+        m_fitRes = m_combModel->fitTo(*mydata, optList);
     }
     time_t _tstop = time(NULL);
 
@@ -204,7 +229,6 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
 
     return plots;
 }
-
 
 void MultiAnalysis::EnlargeYieldRanges(double factor)
 {
@@ -298,9 +322,6 @@ void MultiAnalysis::RandomizeInitialParams(string option)
     cout << endl;
 }
 
-
-
-
 RooWorkspace * MultiAnalysis::SaveToRooWorkspace()
 {
     if (m_pmode == "v") cout << endl << m_name << ": SaveToRooWorkspace" << endl;
@@ -360,7 +381,6 @@ void MultiAnalysis::ImportData(RooWorkspace * ws)
     else m_init = true;
 }
 
-
 RooDataSet * MultiAnalysis::Generate(int nevts, string option)
 {
     transform(option.begin(), option.end(), option.begin(), ::tolower);
@@ -389,12 +409,10 @@ RooDataSet * MultiAnalysis::Generate(int nevts, string option)
 
 RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname, int nbins)
 {
-    if (m_pmode == "v") cout << m_name << ": PrintSum " << printname << " " << dovar << endl;
+    if (m_pmode == "v") cout << endl << m_name << ": PrintSum " << option << " " << dovar << " " << printname << " " << nbins << endl << endl;
+
 
     TCanvas * c = new TCanvas();
-    size_t posb = option.find("-nbins");
-    if (posb != string::npos)
-        nbins = ((TString) option.substr(posb + 6, string::npos)).Atof();
 
     if (!m_init && option.find("-noinit") == string::npos) Initialize();
 
@@ -478,6 +496,10 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
     RooAddPdf * sumPdf = new RooAddPdf("sumPdf", "", pdfs, fracs);
 
     TString Xtitle = pl->GetXaxis()->GetTitle();
+    size_t posX = option.find("-x");
+    if (posX != string::npos) Xtitle = option.substr(posX + 2, option.find("-", posX + 2) - posX - 2);
+    //if (m_unit != "") Xtitle += " [" + m_unit + "]";
+    if (Xtitle != "") pl->SetXTitle(((TString)Xtitle).ReplaceAll("__var__", ""));
 
     TString legstyle = "l";
     if (option.find("-fillbkg") != string::npos) legstyle = "f";
@@ -570,7 +592,6 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
         }
     }
     else {
-
         for (unsigned bb = 0; bb < bnames.size(); bb++)
         {
             string bname = bnames[bb];
@@ -635,25 +656,6 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
         leg->SetBorderSize(0);
     pl->addObject(leg);
 
-    pl->Draw();
-
-    c->Print("fit_" + (TString)printname + ".pdf");
-    if (option.find("-allformats") != string::npos)
-    {
-        c->Print("fit_" + (TString)printname + ".C");
-        c->Print("fit_" + (TString)printname + ".eps");
-        c->Print("fit_" + (TString)printname + ".png");
-    }
-
-    pl->SetMinimum(min);
-    c->SetLogy();
-    c->Print("fit_" + (TString)printname + "_log.pdf");
-    if (option.find("-allformats") != string::npos)
-    {
-        c->Print("fit_" + (TString)printname + "_log.C");
-        c->Print("fit_" + (TString)printname + "_log.eps");
-        c->Print("fit_" + (TString)printname + "_log.png");
-    }
 
     string data = "h_";
     data += slice->GetName();
@@ -693,9 +695,10 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
         yAxis->SetTitleOffset(0.5);
         yAxis->SetTitle("Pulls");
         xAxis->SetLabelSize(xAxis->GetLabelSize() / 0.33);
+
         if (option.find("-attach") != string::npos)
         {
-            xAxis->SetTitle(Xtitle);
+            if (Xtitle != "") xAxis->SetTitle(((TString)Xtitle).ReplaceAll("__var__", ""));
             xAxis->SetTitleSize(old_size * 3);
             xAxis->SetTitleOffset(0.9);
         }
@@ -730,26 +733,48 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
         }
 
         pl->Draw();
-
-        c->Print("fit_" + (TString)printname + "_fitAndRes.pdf");
+        c->Print((TString) printname + "_sum_fitAndRes.pdf");
         if (option.find("-allformats") != string::npos)
         {
-            c->Print("fit_" + (TString)printname + "_fitAndRes.C");
-            c->Print("fit_" + (TString)printname + "_fitAndRes.eps");
-            c->Print("fit_" + (TString)printname + "_fitAndRes.png");
+            c->Print((TString) printname + "_sum_fitAndRes.C");
+            c->Print((TString) printname + "_sum_fitAndRes.eps");
+            c->Print((TString) printname + "_sum_fitAndRes.png");
         }
 
-        pl->SetMinimum(min);
-        if (residuals && option.find("-andpulls") != string::npos)
+        if (option.find("-linlog") != string::npos)
+        {
+            pl->SetMinimum(min * 0.1);
             plotPad->SetLogy();
-        else
-            c->SetLogy();
-        c->Print("fit_" + (TString)printname + "_log_fitAndRes.pdf");
+            c->Print((TString) printname + "_sum_log_fitAndRes.pdf");
+            if (option.find("-allformats") != string::npos)
+            {
+                c->Print((TString) printname + "_sum_log_fitAndRes.C");
+                c->Print((TString) printname + "_sum_log_fitAndRes.eps");
+                c->Print((TString) printname + "_sum_log_fitAndRes.png");
+            }
+        }
+    }
+    else {
+        pl->Draw();
+        c->Print((TString) printname + "_sum.pdf");
         if (option.find("-allformats") != string::npos)
         {
-            c->Print("fit_" + (TString)printname + "_log_fitAndRes.C");
-            c->Print("fit_" + (TString)printname + "_log_fitAndRes.eps");
-            c->Print("fit_" + (TString)printname + "_log_fitAndRes.png");
+            c->Print((TString) printname + "_sum.C");
+            c->Print((TString) printname + "_sum.eps");
+            c->Print((TString) printname + "_sum.png");
+        }
+
+        if (option.find("-linlog") != string::npos)
+        {
+            pl->SetMinimum(min * 0.1);
+            c->SetLogy();
+            c->Print((TString) printname + "_sum_log.pdf");
+            if (option.find("-allformats") != string::npos)
+            {
+                c->Print((TString) printname + "_sum_log.C");
+                c->Print((TString) printname + "_sum_log.eps");
+                c->Print((TString) printname + "_sum_log.png");
+            }
         }
     }
 
