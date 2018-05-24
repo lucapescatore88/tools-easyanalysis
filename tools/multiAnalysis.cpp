@@ -131,7 +131,7 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
     if (opt.find("-noextended") != string::npos) isExtended = Extended(kFALSE);
     RooCmdArg isQuiet         = PrintLevel(2);
     if (opt.find("-quiet") != string::npos) isQuiet = PrintLevel(-1);
-    RooCmdArg save            = Save();
+    RooCmdArg save            = Save(kTRUE);
     RooCmdArg sumw2           = SumW2Error(kTRUE);
     RooCmdArg useCPU          = NumCPU(ncpu);
     RooCmdArg useHesse        = Hesse(kTRUE);
@@ -150,8 +150,8 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
     optList.Add((TObject *) & save);
     optList.Add((TObject *) & sumw2);
     optList.Add((TObject *) & useCPU);
-    optList.Add((TObject *) & useHesse);
-    optList.Add((TObject *) & useInitialHesse);
+    //optList.Add((TObject *) & useHesse);
+    //optList.Add((TObject *) & useInitialHesse);
     optList.Add((TObject *) & useMinos);
     optList.Add((TObject *) & useTimer);
     //optList.Add((TObject *) & warnings);
@@ -162,13 +162,11 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
     if (!m_unbinned) mydata = m_combHist;
 
     time_t _tstart = time(NULL);
-    //if (min == max) m_fitRes = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
     if (min == max) m_fitRes = m_combModel->fitTo(*mydata, optList);
     else
     {
         for (unsigned i = 0; i < m_categories.size(); i++)
             m_ana[i]->GetVariable()->setRange("FitRange", min, max);
-        //m_fitRes = m_combModel->fitTo(*mydata, Save(), isExtended, isQuiet, useMinos, ExternalConstraints(*m_constr), hesse, initialHesse);
         m_fitRes = m_combModel->fitTo(*mydata, optList);
     }
     time_t _tstop = time(NULL);
