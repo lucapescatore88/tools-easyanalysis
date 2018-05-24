@@ -144,7 +144,7 @@ string isParInMap(string par, Str2VarMap myvars, string vname)
     for (Str2VarMapItr iter = myvars.begin(); iter != myvars.end(); iter++)
     {
         size_t pos = iter->first.find("_");
-        bool haspar = (namepar.find(iter->first.substr(0, pos)) != string::npos);
+        bool haspar = (namepar == iter->first.substr(0, pos));
         if (vname != "" && ((iter->first).find(vname) != string::npos) && haspar) return iter->first; 
         if (haspar) return iter->first;
     }
