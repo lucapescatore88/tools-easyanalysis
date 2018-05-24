@@ -661,8 +661,8 @@ RooPlot * getFrame(RooRealVar * var, RooAbsData * data, RooAbsPdf * model,
         if (min == 1e9) min = 1;
     }
 
-    vector <Color_t> colors = { kCyan + 1, kRed + 1, kGreen + 1, kOrange, kMagenta + 1, kGray, kGray + 1, kGray + 2, kGray + 3 };
-    if (custom_colors.size() > 0) colors = custom_colors;
+    vector <Color_t> colors = getDefaultColors();
+    //if (custom_colors.size() > 0) colors = custom_colors;
     int styles[] = {3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10};
 
     RooArgSet * stackedBkgs = NULL;

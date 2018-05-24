@@ -378,7 +378,7 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
     int ncpu = 1;
     size_t poscpu = option.find("-ncpu");
     if (poscpu != string::npos) ncpu = atoi(option.substr(poscpu + 5).c_str());
-    if (m_pmode == "v") cout << m_name << ": Using " << ncpu << " CPU(s)" << endl;
+    if (m_pmode == "v") cout << m_name << ": Using " << ncpu << " CPU(s)" << endl << endl;
 
     RooCmdArg fitRange(RooCmdArg::none());
     double vmin = m_var->getMin();
