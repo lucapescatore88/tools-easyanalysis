@@ -91,6 +91,7 @@ class Analysis : public ModelBuilder {
     double m_fitmin;
     double m_fitmax;
     vector<RooRealVar*> m_dataVars;
+    vector<RooFormulaVar*> m_dataFormulas;
 
     TreeReader * m_dataReader = NULL;
     TTree * m_reducedTree = NULL;
@@ -233,6 +234,18 @@ public:
     /** \brief Adds a variable to the internal DataSet
      * An Analysis object can also be used to create RooDataSet objects to use then somewhere else. Therefore it comes usefull to have in the RooDataSet more than one variable. This can me added simpy by name (if it exists in the input tree).
      * */
+    void AddFormula(RooFormulaVar * v)
+    {
+        m_dataFormulas.push_back(v);
+    }
+    void AddFormula(TString title, TString formula, vector<TString> vars)
+    {
+        RooArgList vlist(title+"_variables");
+        for (auto vv : vars) vlist.add(RooRealVar(vv,vv,0));
+
+        m_dataFormulas.push_back(new RooFormulaVar(title,formula,vlist));
+    }
+
     void AddVariable(RooRealVar * v)
     {
         for (auto vv : m_dataVars) if (vv->GetName() == v->GetName()) return;
