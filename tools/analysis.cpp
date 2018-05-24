@@ -238,6 +238,9 @@ void Analysis::CreateDataSet(string option, TCut cuts)
     }
     else m_dataSet = new RooDataSet("data_" + m_name, "data" + m_name, varList, Import(*tmpTree));
 
+    for (auto vv : m_dataFormulas)   
+        m_dataSet->addColumn(*vv);
+
     if (m_pmode == "v") m_dataSet->Print();
 
     return;
