@@ -445,9 +445,9 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
             RooCmdArg sumw2       = SumW2Error(kTRUE);
             RooCmdArg useCPU      = NumCPU(ncpu);
             RooCmdArg useHesse        = Hesse(kTRUE);
-            if (opt.find("-nohesse") != string::npos) useHesse = Hesse(kFALSE);
+            if (option.find("-nohesse") != string::npos) useHesse = Hesse(kFALSE);
             RooCmdArg useInitialHesse = InitialHesse(kFALSE);
-            if (opt.find("-initialhesse") != string::npos) useInitialHesse = InitialHesse(kTRUE);
+            if (option.find("-initialhesse") != string::npos) useInitialHesse = InitialHesse(kTRUE);
             RooCmdArg useMinos    = Minos(kFALSE);
             if (option.find("-minos") != string::npos) useMinos = Minos(kTRUE);
             RooCmdArg useTimer    = Timer(kTRUE);
