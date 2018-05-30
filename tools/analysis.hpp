@@ -342,15 +342,14 @@ public:
       @param unbinned: true for unbinned fit
       @param print: Print options (includes also all options of ModelBuilder::Print() and GetFrame())
       <br>"-quiet"      -> shell output minimized
-      <br>"-sumW2err"   -> if weighted data errors shown reflect statistics of initial sample
+      <br>"-sumw2err"   -> if weighted data errors shown reflect statistics of initial sample
       <br>"-log"        -> logarithmic plot
       <br>"-pulls" or <br>"-ANDpulls" -> if data is inserted these add a pull histogram -pulls in other plot -ANDpulls under fit plot
-      <br>"-range"      -> plots only the fitted range, otherwise all available is plot
-      <br>"-noPlot"     -> doesn't print and only returns the frame
+      <br>"-noplot"     -> doesn't print and only returns the frame
       <br>"-minos"      -> Enables MINOS for asymmetric errors
       @param cuts: cuts to make before fitting
      **/
-    RooPlot * Fit(unsigned nbins = 50, bool unbinned = true, string print = "-range-log", TCut mycuts = "");
+    RooPlot * Fit(unsigned nbins = 50, bool unbinned = true, string print = "-log", TCut mycuts = "");
     RooPlot * Fit(string option, TCut extracuts = TCut(""));
 
     RooFitResult * GetFitRes() { return m_fitRes; }

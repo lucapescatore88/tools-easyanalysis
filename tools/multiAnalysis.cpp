@@ -109,7 +109,7 @@ bool MultiAnalysis::Initialize(string opt)
     return m_init;
 }
 
-map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double min, double max)
+map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt)
 {
     transform(opt.begin(), opt.end(), opt.begin(), ::tolower);
     if (!m_init) Initialize(opt);
@@ -127,12 +127,18 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
     if (m_pmode == "v") cout << m_name << ": Using " << ncpu << " CPU(s)" << endl << endl;
 
     RooCmdArg constraints     = ExternalConstraints(*m_constr);
+    //RooCmdArg fitRange        = Range("","","");
+    //for (unsigned i = 0; i < m_categories.size(); i++)
+    //    m_ana[i]->GetVariable()->getRange("FitRange", min, max);
     RooCmdArg isExtended      = Extended(kTRUE);
     if (opt.find("-noextended") != string::npos) isExtended = Extended(kFALSE);
     RooCmdArg isQuiet         = PrintLevel(2);
     if (opt.find("-quiet") != string::npos) isQuiet = PrintLevel(-1);
+    RooCmdArg offset          = Offset(kTRUE);
     RooCmdArg save            = Save(kTRUE);
-    RooCmdArg sumw2           = SumW2Error(kTRUE);
+    RooCmdArg splitRange      = SplitRange(kTRUE);
+    RooCmdArg sumw2           = SumW2Error(kFALSE);
+    if (opt.find("-sumw2err") != string::npos) sumw2 = SumW2Error(kTRUE);
     RooCmdArg useCPU          = NumCPU(ncpu);
     RooCmdArg useHesse        = Hesse(kTRUE);
     if (opt.find("-nohesse") != string::npos) useHesse = Hesse(kFALSE);
@@ -145,13 +151,16 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
 
     RooLinkedList optList;
     optList.Add((TObject *) & constraints);
+    //optList.Add((TObject *) & fitRange);
     optList.Add((TObject *) & isExtended);
     optList.Add((TObject *) & isQuiet);
+    optList.Add((TObject *) & offset);
     optList.Add((TObject *) & save);
+    optList.Add((TObject *) & splitRange);
     optList.Add((TObject *) & sumw2);
     optList.Add((TObject *) & useCPU);
-    //optList.Add((TObject *) & useHesse);
-    //optList.Add((TObject *) & useInitialHesse);
+    optList.Add((TObject *) & useHesse);
+    optList.Add((TObject *) & useInitialHesse);
     optList.Add((TObject *) & useMinos);
     optList.Add((TObject *) & useTimer);
     //optList.Add((TObject *) & warnings);
@@ -162,13 +171,7 @@ map < string, RooPlot * > MultiAnalysis::Fit(unsigned nbins, string opt, double 
     if (!m_unbinned) mydata = m_combHist;
 
     time_t _tstart = time(NULL);
-    if (min == max) m_fitRes = m_combModel->fitTo(*mydata, optList);
-    else
-    {
-        for (unsigned i = 0; i < m_categories.size(); i++)
-            m_ana[i]->GetVariable()->setRange("FitRange", min, max);
-        m_fitRes = m_combModel->fitTo(*mydata, optList);
-    }
+    m_fitRes = m_combModel->fitTo(*mydata, optList);
     time_t _tstop = time(NULL);
 
     if (m_pmode == "v") {
