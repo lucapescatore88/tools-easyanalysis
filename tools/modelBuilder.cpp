@@ -89,6 +89,7 @@ void ModelBuilder::AddMultiVarGaussConstraint(RooArgList & listOfVariables, TMat
         listOfMean.add(*cm);
     }
     RooMultiVarGaussian * constr = new RooMultiVarGaussian("constr_" + name, "constr_" + name, listOfVariables, listOfMean, covMatrix);
+    if (m_pmode == "v") cout << "Constraint: " << name << " " << listOfMean.getSize() << endl;
     AddConstraint(constr);
 }
 
