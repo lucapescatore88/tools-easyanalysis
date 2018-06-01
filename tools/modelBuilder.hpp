@@ -636,6 +636,7 @@ public:
     void AddGaussConstraint(TString pdf, TString name, double mean, double sigma);
     void AddGaussConstraint(TString name, double mean, double sigma);
     void AddGaussConstraint(RooRealVar * par, double mean = -1e9, double sigma = -1e9);
+    void AddMultiVarGaussConstraint(RooArgList & listOfVariables, TMatrixDSym covMatrix);
     RooArgSet * GetConstraints() { return m_constr; }
 
     void SetLastBkgColor(Color_t color)
