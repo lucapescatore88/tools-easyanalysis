@@ -816,12 +816,12 @@ TTree * Analysis::Generate(int nevt, string option)
         for (auto vv : m_vars) varList.add(*vv);
 
         /*
-        if(option.find("-useroofit")==string::npos)
+        if (option.find("-useroofit")==string::npos)
         {
             TTree * newTree = generate(&varList,m_model,nevt,option);
             newTree->SetName("gen_"+m_name);
             m_reducedTree = newTree;
-            if(option.find("-nodataset")==string::npos) GetDataSet("-recalc");
+            if (option.find("-nodataset")==string::npos) GetDataSet("-recalc");
             return m_reducedTree;
         }
         else
@@ -857,12 +857,12 @@ TTree * Analysis::Generate(double nsigevt, double nbkgevt, string option)
         for (auto vv : m_vars) varList.add(*vv);
 
         /*
-        if(option.find("-useroofit")==string::npos) {
+        if (option.find("-useroofit")==string::npos) {
 
             TTree * newTree = generate(&varList,m_sig,nsigevt,m_bkg,nbkgevt,option);
             newTree->SetName("gen_"+m_name);
             m_reducedTree = newTree;
-            if(option.find("-nodataset")==string::npos) GetDataSet("-recalc");
+            if (option.find("-nodataset")==string::npos) GetDataSet("-recalc");
             return m_reducedTree;
         }
         else

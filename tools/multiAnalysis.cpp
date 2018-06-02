@@ -546,7 +546,7 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
     if (m_ana[k]->GetColors().size() > 0) colors = m_ana[k]->GetColors();
     int styles[] = {3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7, 8, 9, 10};
     int counter = 0;
-    //if(option.find("-stackbkg")==string::npos) counter++;
+    //if (option.find("-stackbkg")==string::npos) counter++;
     if (option.find("-plottotbkg") != string::npos)
     {
         sumtotbkgPdf->plotOn(pl, LineStyle(styles[counter]), LineColor(colors[counter]), Normalization(sumNtotbkg , RooAbsReal::NumEvent));
@@ -788,12 +788,14 @@ void MultiAnalysis::AddGaussConstraint(RooRealVar * par, double mean, double sig
     if (mean == -1e9) mean = par->getVal();
     if (sigma == -1e9) sigma = par->getError();
     TString name = par->GetName();
-
-    RooRealVar *cm = new RooRealVar("cm_" + name, "mean_" + name, mean);
-    RooRealVar *cs = new RooRealVar("cs_" + name, "error_" + name, sigma);
+    RooRealVar *cm = new RooRealVar("mean_"  + name, "mean_"  + name, mean);
+    RooRealVar *cs = new RooRealVar("sigma_" + name, "sigma_" + name, sigma);
     RooGaussian *constr = new RooGaussian("constr_" + name, "constr_" + name, *par, *cm, *cs);
-    if (m_pmode == "v") cout << Form("Constraint: " + name + "%s -> gauss(%f,%f)", mean, sigma) << endl;
-
+    if (m_pmode == "v") {
+        cout << endl << m_name << ": AddGaussConstraint " << name << " " << Form("gauss(%f,%f)", mean, sigma) << endl;
+        constr->Print();
+        cout << endl;
+    }
     AddConstraint(constr);
 }
 
@@ -805,10 +807,14 @@ void MultiAnalysis::AddMultiVarGaussConstraint(RooArgList & listOfVariables, TMa
     RooRealVar *arg;
     while ((arg = (RooRealVar*) it->Next())) {
         name += (TString) "_" + arg->GetName();
-        RooRealVar *cm = new RooRealVar((TString) "cm_" + arg->GetName(), (TString) "mean_" + arg->GetName(), arg->getVal());
+        RooRealVar *cm = new RooRealVar((TString) "mean_" + arg->GetName(), (TString) "mean_" + arg->GetName(), arg->getVal());
         listOfMean.add(*cm);
     }
     RooMultiVarGaussian * constr = new RooMultiVarGaussian("constr_" + name, "constr_" + name, listOfVariables, listOfMean, covMatrix);
-    if (m_pmode == "v") cout << "Constraint: " << name << " " << listOfMean.getSize() << endl;
+    if (m_pmode == "v") {
+        cout << endl << m_name << ": AddMultiVarGaussConstraint " << name << " " << listOfMean.getSize() << endl;
+        constr->Print();
+        cout << endl;
+    }
     AddConstraint(constr);
 }
