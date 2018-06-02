@@ -35,6 +35,8 @@
 #include "RooSimultaneous.h"
 #include "RooCategory.h"
 #include "RooMsgService.h"
+#include "RooGaussian.h"
+#include "RooMultiVarGaussian.h"
 
 #include "analysis.hpp"
 #include "generalFunctions.hpp"
@@ -175,6 +177,11 @@ public:
     void SetConstants(vector<RooDataSet *> input, int index = 0);
 
     void PrintParams() { printParams(m_combModel); };
+
+    void AddGaussConstraint(RooRealVar * par, double mean = -1e9, double sigma = -1e9);
+    void AddMultiVarGaussConstraint(RooArgList & listOfVariables, TMatrixDSym covMatrix);
+    void AddConstraint(RooAbsReal * pdfconst) { m_constr->add(*pdfconst); }
+    RooArgSet * GetConstraints() { return m_constr; }
 
     /** \brief Allows to Set an unique signal for all categories
      *  See Analysis::SetSignal()

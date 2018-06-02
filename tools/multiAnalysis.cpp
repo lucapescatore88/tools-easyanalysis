@@ -782,3 +782,33 @@ RooPlot * MultiAnalysis::PrintSum(string option, TString dovar, string printname
     return pl;
 
 }
+
+void MultiAnalysis::AddGaussConstraint(RooRealVar * par, double mean, double sigma)
+{
+    if (mean == -1e9) mean = par->getVal();
+    if (sigma == -1e9) sigma = par->getError();
+    TString name = par->GetName();
+
+    RooRealVar *cm = new RooRealVar("cm_" + name, "mean_" + name, mean);
+    RooRealVar *cs = new RooRealVar("cs_" + name, "error_" + name, sigma);
+    RooGaussian *constr = new RooGaussian("constr_" + name, "constr_" + name, *par, *cm, *cs);
+    if (m_pmode == "v") cout << Form("Constraint: " + name + "%s -> gauss(%f,%f)", mean, sigma) << endl;
+
+    AddConstraint(constr);
+}
+
+void MultiAnalysis::AddMultiVarGaussConstraint(RooArgList & listOfVariables, TMatrixDSym covMatrix)
+{
+    TString name = TString("");
+    RooArgList listOfMean;
+    TIterator *it = listOfVariables.createIterator();
+    RooRealVar *arg;
+    while ((arg = (RooRealVar*) it->Next())) {
+        name += (TString) "_" + arg->GetName();
+        RooRealVar *cm = new RooRealVar((TString) "cm_" + arg->GetName(), (TString) "mean_" + arg->GetName(), arg->getVal());
+        listOfMean.add(*cm);
+    }
+    RooMultiVarGaussian * constr = new RooMultiVarGaussian("constr_" + name, "constr_" + name, listOfVariables, listOfMean, covMatrix);
+    if (m_pmode == "v") cout << "Constraint: " << name << " " << listOfMean.getSize() << endl;
+    AddConstraint(constr);
+}
