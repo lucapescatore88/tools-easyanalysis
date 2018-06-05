@@ -154,12 +154,11 @@ public:
     }
 
     /** \brief Fits the internal model to the internal dataset
-     * @param min,max: Limits the fit range to [min,max] (N.B.: works only if the fitted varible is only one)
      * @param nbins  : Sets the number of bins just for display if the fit is unbinned
-     * @param print: Options -> same as Analysis::Fit()
+     * @param opt    : Options -> same as Analysis::Fit()
      * \return Returns a map mapping categories names to plots with data and fit model.
      * */
-    map<string, RooPlot *> Fit(unsigned nbins = 50, string opt = "-range-log", double min = 0, double max = 0.);
+    map<string, RooPlot *> Fit(unsigned nbins = 50, string opt = "-log");
 
     ///\brief Adds one category you must give an Analysis object containing data and model and a name
     void AddCategory(Analysis * ana, TString nameCat);

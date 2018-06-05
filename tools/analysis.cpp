@@ -330,28 +330,6 @@ void Analysis::SetUnits(string outUnit)//, double scalefactor)
 }
 
 
-/*
-   Fits the "reducedTree" with the "m_model" which has to be previourly set and initialized.
-   One can set the fit range and number of bins for chi2. If not set the variable range is used.
-   @param min, max: fitting interval, if min => max all available is used
-   @param nbins: n of bins to use (if unbinned this does nothing)
-   @param unbinned: true for unbinned fit
-   @param print: Print options
-   "-fillSig"    -> signal is filled with color instead of dashed line
-   "-fillBkg"    -> bkg is filled with color instead of dashed line
-   "-noParams"   -> no params box produced
-   "-noCost"     -> no constant parameters shown in params box
-   "-nochi2"     -> no chi2 in params box
-   "-quiet"      -> shell output minimized
-   "-sumW2err"   -> if weighted data errors shown reflect statistics of initial sample
-   "-plotSigComp"-> prints signal components and not only total signal function
-   "-log"        -> logarithmic plot
-   "-pulls" or "-ANDpulls" -> if data is inserted these add a pull histogram -pulls in other plot -ANDpulls under fit plot
-   "-range"      -> plots only the fitted range, otherwise all available is plot
-   "-noPlot"     -> doesn't print and only returns the frame
-   @param cuts: cuts to make before fitting
-   */
-
 RooPlot * Analysis::Fit(string option, TCut extracuts)
 {
     return Fit(m_nBins, m_unbinned, option, extracuts);
@@ -438,34 +416,37 @@ RooPlot * Analysis::Fit(unsigned nbins, bool unbinned, string option, TCut extra
 
         if (option.find("-fitto") != string::npos)
         {
-            RooCmdArg constraints = ExternalConstraints(*m_constr);
-            RooCmdArg isQuiet     = PrintLevel(2);
+            RooCmdArg constraints     = ExternalConstraints(*m_constr);
+            RooCmdArg isQuiet         = PrintLevel(2);
             if (option.find("-quiet") != string::npos) isQuiet = PrintLevel(-1);
-            RooCmdArg save        = Save(kTRUE);
-            RooCmdArg sumw2       = SumW2Error(kTRUE);
-            RooCmdArg useCPU      = NumCPU(ncpu);
+            RooCmdArg offset          = Offset(kTRUE);
+            RooCmdArg save            = Save(kTRUE);
+            RooCmdArg sumw2           = SumW2Error(kFALSE);
+            if (option.find("-sumw2err") != string::npos) sumw2 = SumW2Error(kTRUE);
+            RooCmdArg useCPU          = NumCPU(ncpu);
             RooCmdArg useHesse        = Hesse(kTRUE);
             if (option.find("-nohesse") != string::npos) useHesse = Hesse(kFALSE);
             RooCmdArg useInitialHesse = InitialHesse(kFALSE);
             if (option.find("-initialhesse") != string::npos) useInitialHesse = InitialHesse(kTRUE);
-            RooCmdArg useMinos    = Minos(kFALSE);
+            RooCmdArg useMinos        = Minos(kFALSE);
             if (option.find("-minos") != string::npos) useMinos = Minos(kTRUE);
-            RooCmdArg useTimer    = Timer(kTRUE);
-            RooCmdArg warnings    = Warnings(kFALSE);
+            RooCmdArg useTimer        = Timer(kTRUE);
+            RooCmdArg warnings        = Warnings(kFALSE);
 
             RooLinkedList optList;
             optList.Add((TObject *) & constraints);
             optList.Add((TObject *) & fitRange);
             optList.Add((TObject *) & isExtended);
             optList.Add((TObject *) & isQuiet);
+            optList.Add((TObject *) & offset);
             optList.Add((TObject *) & save);
             optList.Add((TObject *) & sumw2);
             optList.Add((TObject *) & useCPU);
-            //optList.Add((TObject *) & useHesse);
-            //optList.Add((TObject *) & useInitialHesse);
+            optList.Add((TObject *) & useHesse);
+            optList.Add((TObject *) & useInitialHesse);
             optList.Add((TObject *) & useMinos);
             optList.Add((TObject *) & useTimer);
-            optList.Add((TObject *) & warnings);
+            //optList.Add((TObject *) & warnings);
 
             m_fitRes = m_model->fitTo(*mydata, optList);
             time_t _tstop = time(NULL);
