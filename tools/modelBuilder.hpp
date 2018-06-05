@@ -33,19 +33,19 @@ protected:
     TString m_name;
     TString m_title;
 
-    RooRealVar * m_var;
+    RooRealVar * m_var = NULL;
     vector<RooRealVar *> m_vars;
-    RooRealVar * m_tmpvar;
+    RooRealVar * m_tmpvar = NULL;
     vector<RooRealVar *> m_tmpvars;
 
-    RooAbsPdf * m_model;
-    RooAbsPdf * m_sig;
-    RooAbsPdf * m_bkg;
-    RooAbsReal * m_nsig;
-    RooAbsReal * m_nbkg;
+    RooAbsPdf * m_model = NULL;
+    RooAbsPdf * m_sig = NULL;
+    RooAbsPdf * m_bkg = NULL;
+    RooAbsReal * m_nsig = NULL;
+    RooAbsReal * m_nbkg = NULL;
     vector <RooAbsPdf *> m_bkg_components;
     vector <RooAbsReal *> m_bkg_fractions;
-    RooArgSet * m_constr;
+    RooArgSet * m_constr = NULL;
 
     Str2VarMap m_sigPars;
     Str2VarMap m_modSigPars;
@@ -636,6 +636,7 @@ public:
     void AddGaussConstraint(TString pdf, TString name, double mean, double sigma);
     void AddGaussConstraint(TString name, double mean, double sigma);
     void AddGaussConstraint(RooRealVar * par, double mean = -1e9, double sigma = -1e9);
+    void AddMultiVarGaussConstraint(RooArgList & listOfVariables, TMatrixDSym covMatrix);
     RooArgSet * GetConstraints() { return m_constr; }
 
     void SetLastBkgColor(Color_t color)

@@ -179,9 +179,9 @@ public:
 
     ~Analysis()
     {
-        //if(m_dataReader) delete m_dataReader;
-        //if(m_reducedTree) delete m_reducedTree;
-        //if(m_dataHist) delete m_dataHist;
+        //if (m_dataReader) delete m_dataReader;
+        //if (m_reducedTree) delete m_reducedTree;
+        //if (m_dataHist) delete m_dataHist;
     };
 
     void SetBinnedFit(int _nBins) {
