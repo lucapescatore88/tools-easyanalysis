@@ -349,7 +349,7 @@ public:
       <br>"-minos"      -> Enables MINOS for asymmetric errors
       @param cuts: cuts to make before fitting
      **/
-    RooPlot * Fit(unsigned nbins = 50, bool unbinned = true, string print = "-log", TCut mycuts = "");
+    RooPlot * Fit(unsigned nbins = 50, bool unbinned = true, string print = "-log", TCut mycuts = TCut(""));
     RooPlot * Fit(string option, TCut extracuts = TCut(""));
 
     RooFitResult * GetFitRes() { return m_fitRes; }
