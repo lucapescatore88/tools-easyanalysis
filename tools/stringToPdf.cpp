@@ -230,7 +230,11 @@ RooAbsPdf * stringToPdf(const char * typepdf, const char * namepdf, RooRealVar *
 
     opt += "-n" + (string)var->GetName();
 
-    cout << endl << "stringToPdf: " << typepdf << " " << namepdf << " " << var->GetName() << " " << opt << " " << title << endl;
+    cout << endl << "stringToPdf: " << endl;
+    cout << "Type: " << typepdf << endl;
+    cout << "Name: " << namepdf << endl;
+    cout << "Variable: " << var->GetName() << endl;
+    cout << "Options:  " << opt << " " << title << endl;
     printPars(myvars);
     cout << endl;
 
