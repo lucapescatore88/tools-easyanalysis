@@ -697,7 +697,7 @@ RooWorkspace * Analysis::SaveToRooWorkspace(string option)
     if (m_dataSet)
     {
         ws->import(*m_dataSet);
-        if (m_pmode == "v") cout << m_name << ": m_data = " << m_dataSet->GetName() << endl;
+        if (m_pmode == "v") cout << m_name << ": data = " << m_dataSet->GetName() << endl;
     }
 
     return ws;
@@ -714,40 +714,84 @@ void Analysis::ImportModel(RooWorkspace * ws)
     TObject * arg;
     while ( (arg = (TObject *) it->Next()) )
     {
-        string name = arg->GetName();
+        string name  = arg->GetName();
+        string title = arg->GetTitle();
 
-        if (name.find("m_model") != string::npos)
+        if (name.find("model") != string::npos)
+        {
             m_model = (RooAbsPdf*) arg;
-
+            if (m_pmode == "v") {
+                cout << m_name << ": model = " << name << endl;
+                printParams(m_model);
+                cout << endl;
+            }
+        }
         else if (name.find("totsig") != string::npos)
+        {
             m_sig = (RooAbsPdf*) arg;
+            if (m_pmode == "v") {
+                cout << m_name << ": totsig = " << name << endl;
+                printParams(m_sig);
+                cout << endl;
+            }
+        }
         else if (name.find("totbkg") != string::npos)
+        {
             m_bkg = (RooAbsPdf*) arg;
+            if (m_pmode == "v") {
+                cout << m_name << ": totbkg = " << name << endl;
+                printParams(m_bkg);
+                cout << endl;
+            }
+        }
         else if (name.find("nsig") != string::npos)
+        {
             m_nsig = (RooAbsReal*) arg;
+            if (m_pmode == "v") {
+                cout << m_name << ": nsig = " << name << endl;
+                m_nsig->Print();
+                cout << endl;
+            }
+        }
         else if (name.find("nbkg") != string::npos)
         {
             m_bkg_fractions.push_back((RooAbsReal*) arg);
+            string compname = (string)((TString)name).ReplaceAll("nbkg", "bkg");
+            if (m_pmode == "v") {
+                cout << m_name << ": nbkg = " << name << endl;
+                m_bkg_fractions.back()->Print();
+                cout << m_name << ":  bkg = " << compname << endl;
+            }
             TIterator * it2 = ws->componentIterator();
             TObject * arg2;
             while ( (arg2 = (TObject *) it2->Next()) )
             {
-                string compname = (string)((TString)name).ReplaceAll("nbkg", "bkg");
-                if ( ((string)(arg2->GetName())).find(compname) != string::npos )
+                if ( ((string)(arg2->GetName())).find(compname) != string::npos && ((string)(arg2->GetName())).find(name) == string::npos )
+                {
                     m_bkg_components.push_back( (RooAbsPdf*) arg2 );
+                    if (m_pmode == "v") m_bkg_components.back()->Print();
+                }
+            }
+            if (m_pmode == "v") cout << endl;
+        }
+        else if (name.find("var") != string::npos || title.find("var") != string::npos)
+        {
+            m_var = (RooRealVar*) arg;
+            if (m_pmode == "v") {
+                cout << m_name << ": var = " << name << endl;
+                m_var->Print();
+                cout << endl;
             }
         }
-        else if (name.find("var") != string::npos)
-            m_var = (RooRealVar*) arg;
     }
 
     m_init = true;
     ForceValid();
-    if (m_pmode == "v")
-    {
-        cout << m_name << ": PrintParams" << endl << endl;
-        ModelBuilder::PrintParams();
-    }
+    /*    if (m_pmode == "v")
+        {
+            cout << endl << m_name << ": PrintParams" << endl << endl;
+            ModelBuilder::PrintParams();
+        }*/
 
     return;
 }
@@ -785,13 +829,18 @@ void Analysis::ImportModel(RooWorkspace * wsSig, RooWorkspace * wsBkg)
 
 void Analysis::ImportData(RooWorkspace * ws)
 {
-    if (m_pmode == "v") cout << endl << m_name << ": ImportData" << endl;
+    if (m_pmode == "v") cout << endl << m_name << ": ImportData" << endl << endl;
 
     list<RooAbsData *> mylist = ws->allData();
     for (std::list<RooAbsData *>::iterator it = mylist.begin(); it != mylist.end(); ++it)
     {
         string name = (*it)->GetName();
         if (name.find("data_") != string::npos) m_dataSet = (RooDataSet*) (*it);
+        if (m_pmode == "v") {
+            cout << m_name << ": data = " << name << endl;
+            m_dataSet->Print();
+            cout << endl;
+        }
     }
 
     if (!m_dataSet) cout << m_name << ": *** WARNING ImportData *** Data not found in work space!" << endl;
