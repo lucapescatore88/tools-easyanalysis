@@ -648,28 +648,28 @@ RooWorkspace * ModelBuilder::SaveToRooWorkspace(string option)
 {
     RooWorkspace * ws = new RooWorkspace("ws_" + m_name);
     if (option != "") ws->SetName("ws_" + m_name + "_" + option);
-    if (m_pmode == "v") cout << endl << m_name << ": SaveToRooWorkspace" << endl;
+    if (m_pmode == "v") cout << endl << m_name << ": SaveToRooWorkspace " << option << endl;
 
 
     if (option == "")
         if (m_model)
         {
             ws->import(*m_model);
-            if (m_pmode == "v") cout << "m_model: " << m_model->GetName() << endl;
+            if (m_pmode == "v") cout << m_name << ": model = " << m_model->GetName() << endl;
         }
 
     if (option == "sig")
         if (m_sig)
         {
             ws->import(*m_sig);
-            if (m_pmode == "v") cout << "signal: " << m_sig->GetName() << endl;
+            if (m_pmode == "v") cout << m_name << ": signal = " << m_sig->GetName() << endl;
         }
 
     if (option == "bkg")
         if (m_bkg)
         {
             ws->import(*m_bkg);
-            if (m_pmode == "v") cout << "background: " << m_bkg->GetName() << endl;
+            if (m_pmode == "v") cout << m_name << ": background = " << m_bkg->GetName() << endl;
         }
 
     return ws;

@@ -339,12 +339,12 @@ RooWorkspace * MultiAnalysis::SaveToRooWorkspace()
     if (m_combModel)
     {
         ws->import(*m_combModel);
-        if (m_pmode == "v") cout << "combModel: " << m_combModel->GetName() << endl;
+        if (m_pmode == "v") cout <<  m_name << ": combModel = " << m_combModel->GetName() << endl;
     }
     if (m_combData)
     {
         ws->import(*m_combData);
-        if (m_pmode == "v") cout << "combData: " << m_combData->GetName() << endl;
+        if (m_pmode == "v") cout <<  m_name << ":  combData = " << m_combData->GetName() << endl;
     }
 
     return ws;
@@ -360,10 +360,14 @@ void MultiAnalysis::ImportModel(RooWorkspace * ws)
         string name = arg->GetName();
         if (name.find("combModel") != string::npos) {
             m_combModel = (RooSimultaneous*)arg;
-            printParams(m_combModel);
+            if (m_pmode == "v")
+            {
+                cout << m_name << ": combModel = " << name << endl;
+                printParams(m_combModel);
+                cout << endl;
+            }
         }
     }
-    cout << endl;
 }
 
 void MultiAnalysis::ImportData(RooWorkspace * ws)
@@ -374,8 +378,15 @@ void MultiAnalysis::ImportData(RooWorkspace * ws)
     for (std::list<RooAbsData *>::iterator it = mylist.begin(); it != mylist.end(); ++it)
     {
         string name = (*it)->GetName();
-        if (name.find("combData") != string::npos)
+        if (name.find("combData") != string::npos) {
             m_combData = (RooDataSet*)(*it);
+            if (m_pmode == "v")
+            {
+                cout << m_name << ": combData = " << name << endl;
+                m_combData->Print();
+                cout << endl;
+            }
+        }
     }
 
     if (!m_combData) cout << m_name << ": *** WARNING ImportData *** Data not found in work space!" << endl;
